@@ -2967,9 +2967,7 @@ function AIInsights({ plList, t, mobile }) {
     const winRate = ((wins.length / plList.length) * 100).toFixed(0);
 
     try {
-      const response = await fetch(
-        "https://corsproxy.io/?" +
-          encodeURIComponent("https://api.anthropic.com/v1/messages"),
+      const response = await fetch("/api/analyse", 
         {
           headers: {
             "Content-Type": "application/json",
