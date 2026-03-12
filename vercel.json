@@ -1,0 +1,10 @@
+{
+  "buildCommand": "npm install && npm run build",
+  "outputDirectory": "dist",
+  "framework": "vite"
+}
+```
+
+Also create a file called `.nvmrc` at the root with just:
+```
+18.17.0
