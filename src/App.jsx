@@ -1404,7 +1404,7 @@ function CSVModal({ onClose, on, t }) {
     gap: 8,
   }}
 >
-  <img src="/images/import" alt="folder" style={{ height: 32, width: 32 }} /> Choose File
+  <img src="/images/import.svg" alt="folder" style={{ height: 16, width: 16 }} /> Choose File
               <input type="file" accept=".csv,.txt,.tsv" style={{ display: "none" }} onChange={(e) => {
                 const file = e.target.files[0];
                 if (!file) return;
