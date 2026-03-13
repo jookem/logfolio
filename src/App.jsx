@@ -2618,7 +2618,7 @@ function DaySession({ plList, onAddTrade, t, mobile }) {
               color: t.text3,
               textTransform: "uppercase",
               letterSpacing: 2,
-              marginBottom: 50,
+              marginBottom: 20,
             }}
           >
             Running P&L
