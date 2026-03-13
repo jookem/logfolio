@@ -542,11 +542,11 @@ function PlanModal({ onClose, onSave, t }) {
 
   return (
     <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.75)", zIndex: 100, display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }}>
-      <div style={{ background: t.card, border: `1px solid ${t.border}`, borderRadius: 16, width: "100%", maxWidth: 520, maxHeight: "92vh", overflowY: "auto", padding: 24 }}>
+      <div style={{ background: t.card, border: `1px solid ${t.border}`, borderRadius: 16, width: "100%", maxWidth: 520, maxHeight: "92vh", overflowY: "auto", padding: 24 }}>I'm
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 22 }}>
           <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 16, fontWeight: 700, color: t.accent }}>
            <img
-  src="/src/import.svg"
+  src="/images/import.svg"
   alt="logo"
   style={{ height: 16, width: 16 }}
 />
@@ -1741,7 +1741,7 @@ function TradeDetail({ trade, onClose, onEdit, t }) {
             >
               ✏ Edit
             </button>
-            <button
+            <button on
               onClick={onClose}
               style={{
                 background: "none",
