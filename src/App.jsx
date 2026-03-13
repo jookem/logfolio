@@ -2918,6 +2918,7 @@ Provide 4-6 patterns. Be brutally honest but constructive.`,
         });
 
       const data = await response.json();
+      console.log("API response:", JSON.stringify(data));
       const text = data.content
         .filter((b) => b.type === "text")
         .map((b) => b.text)
