@@ -1741,7 +1741,7 @@ function TradeDetail({ trade, onClose, onEdit, t }) {
             >
               ✏ Edit
             </button>
-            <button on
+            <button
               onClick={onClose}
               style={{
                 background: "none",
