@@ -2685,7 +2685,7 @@ function DaySession({ plList, onAddTrade, t, mobile }) {
                     style={{
                       width: "100%",
                       height: `${(Math.abs(val) / max) * 46 + 10}px`,
-                      background: val >= 0 ? t.accent : t.danger,
+                      background: todayTrades[i].pl >= 0 ? t.accent : t.danger,
                       borderRadius: 3,
                       opacity: 0.8,
                     }}
