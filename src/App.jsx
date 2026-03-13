@@ -1183,8 +1183,25 @@ function CSVModal({ onClose, on, t }) {
         </div>
         <div style={{ marginBottom: 12 }}>
           <div style={{ display: "flex", gap: 10, marginBottom: 10 }}>
-            <label style={{ flex: 1, background: t.accent + "15", border: `1px solid ${t.accent}40`, color: t.accent, borderRadius: 8, padding: "10px 14px", cursor: "pointer", fontSize: 13, fontFamily: "'Space Mono',monospace", textAlign: "center", display: "block" }}>
-              <img src="/images/import.svg" alt="folder" style={{ height: 32, width: 32, marginRight: 6 }} /> Choose File Choose File
+            <label
+  style={{
+    flex: 1,
+    background: t.accent + "15",
+    border: `1px solid ${t.accent}40`,
+    color: t.accent,
+    borderRadius: 8,
+    padding: "10px 14px",
+    cursor: "pointer",
+    fontSize: 13,
+    fontFamily: "'Space Mono',monospace",
+    textAlign: "center",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+  }}
+>
+  <img src="/images/folder.svg" alt="folder" style={{ height: 32, width: 32 }} /> Choose File
               <input type="file" accept=".csv,.txt,.tsv" style={{ display: "none" }} onChange={(e) => {
                 const file = e.target.files[0];
                 if (!file) return;
