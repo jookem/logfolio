@@ -546,9 +546,9 @@ function PlanModal({ onClose, onSave, t }) {
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 22 }}>
           <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 16, fontWeight: 700, color: t.accent }}>
            <img
-  src="/logo.png"
+  src="/src/import.svg"
   alt="logo"
-  style={{ height: 28, width: 28 }}
+  style={{ height: 16, width: 16 }}
 />
 Plan Trade
           </div>
