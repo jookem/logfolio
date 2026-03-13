@@ -547,7 +547,7 @@ function PlanModal({ onClose, onSave, t }) {
           <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 16, fontWeight: 700, color: t.accent }}>
            <img
   src="/images/import.svg"
-  alt="logo"
+  alt="import"
   style={{ height: 16, width: 16 }}
 />
 Plan Trade
@@ -3812,7 +3812,7 @@ const paginated = filtered
     fontFamily: "'Space Mono',monospace",
   }}
 >
-   <img src="images/plan.svg" alt="plan" style={{ height: 16, width: 16 }} />
+   <img src="/images/plan.svg" alt="plan" style={{ height: 16, width: 16 }} />
   PLAN
 </button>
             </div>
