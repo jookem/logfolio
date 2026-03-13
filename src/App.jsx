@@ -545,7 +545,10 @@ function PlanModal({ onClose, onSave, t }) {
       <div style={{ background: t.card, border: `1px solid ${t.border}`, borderRadius: 16, width: "100%", maxWidth: 520, maxHeight: "92vh", overflowY: "auto", padding: 24 }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 22 }}>
           <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 16, fontWeight: 700, color: t.accent }}>
-            📋 Plan Trade
+             <img
+          src="images/logo.png"
+          alt="logo"
+          style={{ height: 28, width: 28 }} Plan Trade
           </div>
           <button onClick={onClose} style={{ background: "none", border: "none", color: t.text3, fontSize: 20, cursor: "pointer" }}>✕</button>
         </div>
@@ -1399,7 +1402,7 @@ function CSVModal({ onClose, on, t }) {
     gap: 8,
   }}
 >
-  <img src="/images/import.svg" alt="folder" style={{ height: 32, width: 32 }} /> Choose File
+  <img src="/images/import" alt="folder" style={{ height: 32, width: 32 }} /> Choose File
               <input type="file" accept=".csv,.txt,.tsv" style={{ display: "none" }} onChange={(e) => {
                 const file = e.target.files[0];
                 if (!file) return;
@@ -2257,7 +2260,7 @@ function CalendarView({ plList, t, mobile }) {
               gap: 8,
             }}
           >
-            <img src="/images/calendar.svg" alt="calendar" style={{ height: 28, width: 28 }} />
+            <img src="/images/calendar" alt="calendar" style={{ height: 28, width: 28 }} />
             <div
               style={{
                 fontFamily: "'Space Mono', monospace",
@@ -3780,10 +3783,7 @@ const paginated = filtered
     fontFamily: "'Space Mono',monospace",
   }}
 >
-   <img
-          src="images/plan.png"
-          alt="logo"
-          style={{ height: 28, width: 28 }} PLAN
+   <img src="images/plan.png" alt="logo" style={{ height: 28, width: 28 }} PLAN
 </button>
             </div>
             {menuOpen && (
