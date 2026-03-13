@@ -28,6 +28,21 @@ function calcPL(trade) {
   }, 0);
 }
 
+function calcR(trade) {
+  if (!trade.stopLoss || !trade.entryPrice) return null;
+  const risk = Math.abs(trade.entryPrice - trade.stopLoss);
+  if (risk === 0) return null;
+  if (trade.type === "stock") {
+    const pl = (trade.exitPrice - trade.entryPrice) * (trade.direction === "long" ? 1 : -1);
+    return pl / risk;
+  }
+  return null;
+}
+
+function fmtR(r) {
+  if (r === null || r === undefined) return null;
+  return `${r >= 0 ? "+" : ""}${r.toFixed(2)}R`;
+}
 const STRATEGIES = [
   "Breakout",
   "Pullback",
@@ -43,10 +58,10 @@ const STRATEGIES = [
   "Covered Call",
   "Cash Secured Put",
   "Butterfly",
-  "Calendar Spread",
+  "endar Spread",
 ];
 const EMOTIONS = [
-  "Calm",
+  "m",
   "Confident",
   "Anxious",
   "FOMO",
@@ -455,7 +470,190 @@ function EquityCurve({ trades, t }) {
     </svg>
   );
 }
+function PlanModal({ onClose, onSave, t }) {
+  const [form, setForm] = useState({
+    date: todayStr(),
+    ticker: "",
+    type: "stock",
+    strategy: "Breakout",
+    direction: "long",
+    entryPrice: "",
+    stopLoss: "",
+    takeProfit: "",
+    notes: "",
+    tags: [],
+  });
+  const [tagInput, setTagInput] = useState("");
+  const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
 
+  const plannedR = form.entryPrice && form.stopLoss && form.takeProfit
+    ? ((+form.takeProfit - +form.entryPrice) * (form.direction === "long" ? 1 : -1)) /
+      Math.abs(+form.entryPrice - +form.stopLoss)
+    : null;
+
+  const riskAmount = form.entryPrice && form.stopLoss
+    ? Math.abs(+form.entryPrice - +form.stopLoss)
+    : null;
+
+  const addTag = (tag) => {
+    const c = tag.trim();
+    if (c && !(form.tags || []).includes(c)) set("tags", [...(form.tags || []), c]);
+    setTagInput("");
+  };
+  const removeTag = (tag) => set("tags", (form.tags || []).filter((tg) => tg !== tag));
+
+  const save = () => {
+    if (!form.ticker || !form.entryPrice || !form.stopLoss) return;
+    onSave({
+      ...form,
+      ticker: form.ticker.toUpperCase(),
+      id: Date.now(),
+      entryPrice: +form.entryPrice,
+      stopLoss: +form.stopLoss,
+      takeProfit: form.takeProfit ? +form.takeProfit : null,
+      plannedR: plannedR,
+      status: "planned",
+      tags: form.tags || [],
+      legs: [],
+    });
+  };
+
+  const inp = {
+    background: t.input,
+    border: `1px solid ${t.inputBorder}`,
+    borderRadius: 8,
+    color: t.text,
+    padding: "10px 14px",
+    fontSize: 14,
+    width: "100%",
+    boxSizing: "border-box",
+    fontFamily: "inherit",
+    outline: "none",
+  };
+  const lbl = {
+    fontSize: 11,
+    color: t.text3,
+    textTransform: "uppercase",
+    letterSpacing: 1.5,
+    marginBottom: 6,
+    display: "block",
+    fontFamily: "'Space Mono', monospace",
+  };
+
+  return (
+    <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.75)", zIndex: 100, display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }}>
+      <div style={{ background: t.card, border: `1px solid ${t.border}`, borderRadius: 16, width: "100%", maxWidth: 520, maxHeight: "92vh", overflowY: "auto", padding: 24 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 22 }}>
+          <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 16, fontWeight: 700, color: t.accent }}>
+            📋 Plan Trade
+          </div>
+          <button onClick={onClose} style={{ background: "none", border: "none", color: t.text3, fontSize: 20, cursor: "pointer" }}>✕</button>
+        </div>
+
+        {/* Live R preview */}
+        {plannedR !== null && (
+          <div style={{
+            background: plannedR >= 2 ? t.accent + "15" : t.danger + "15",
+            border: `1px solid ${plannedR >= 2 ? t.accent : t.danger}30`,
+            borderRadius: 10,
+            padding: "12px 16px",
+            marginBottom: 16,
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}>
+            <div>
+              <div style={{ fontSize: 10, color: t.text3, fontFamily: "'Space Mono',monospace", textTransform: "uppercase", letterSpacing: 1.5, marginBottom: 3 }}>Planned R</div>
+              <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 22, fontWeight: 700, color: plannedR >= 2 ? t.accent : t.danger }}>
+                +{plannedR.toFixed(2)}R
+              </div>
+            </div>
+            <div style={{ textAlign: "right" }}>
+              <div style={{ fontSize: 10, color: t.text3, fontFamily: "'Space Mono',monospace", textTransform: "uppercase", letterSpacing: 1.5, marginBottom: 3 }}>Risk per Share</div>
+              <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 16, color: t.danger }}>${riskAmount?.toFixed(2)}</div>
+            </div>
+          </div>
+        )}
+
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 12 }}>
+          <div>
+            <label style={lbl}>Ticker</label>
+            <input style={inp} value={form.ticker} onChange={(e) => set("ticker", e.target.value.toUpperCase())} placeholder="AAPL" />
+          </div>
+          <div>
+            <label style={lbl}>Date</label>
+            <input style={inp} type="date" value={form.date} onChange={(e) => set("date", e.target.value)} />
+          </div>
+          <div>
+            <label style={lbl}>Type</label>
+            <select style={inp} value={form.type} onChange={(e) => set("type", e.target.value)}>
+              <option value="stock">Stock</option>
+              <option value="options">Options</option>
+            </select>
+          </div>
+          <div>
+            <label style={lbl}>Strategy</label>
+            <select style={inp} value={form.strategy} onChange={(e) => set("strategy", e.target.value)}>
+              {(form.type === "stock"
+                ? ["Breakout", "Pullback", "Reversal", "Scalp"]
+                : ["Long Call", "Long Put", "Bull Call Spread", "Bear Put Spread", "Iron Condor", "Straddle", "Strangle", "Covered Call", "Cash Secured Put", "Butterfly", "Calendar Spread"]
+              ).map((s) => <option key={s}>{s}</option>)}
+            </select>
+          </div>
+          <div>
+            <label style={lbl}>Direction</label>
+            <select style={inp} value={form.direction} onChange={(e) => set("direction", e.target.value)}>
+              <option value="long">Long</option>
+              <option value="short">Short</option>
+            </select>
+          </div>
+          <div>
+            <label style={lbl}>Entry Price</label>
+            <input style={inp} type="number" value={form.entryPrice} onChange={(e) => set("entryPrice", e.target.value)} placeholder="190.00" />
+          </div>
+          <div>
+            <label style={lbl}>Stop Loss ⚠</label>
+            <input style={{ ...inp, borderColor: form.stopLoss ? t.danger + "80" : t.inputBorder }} type="number" value={form.stopLoss} onChange={(e) => set("stopLoss", e.target.value)} placeholder="185.00" />
+          </div>
+          <div>
+            <label style={lbl}>Take Profit 🎯</label>
+            <input style={{ ...inp, borderColor: form.takeProfit ? t.accent + "80" : t.inputBorder }} type="number" value={form.takeProfit} onChange={(e) => set("takeProfit", e.target.value)} placeholder="200.00" />
+          </div>
+        </div>
+
+        <div style={{ marginBottom: 12 }}>
+          <label style={lbl}>Tags</label>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 8 }}>
+            {(form.tags || []).map((tg) => <Tag key={tg} label={tg} t={t} onRemove={() => removeTag(tg)} />)}
+          </div>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+            {SUGGESTED_TAGS.filter((s) => !(form.tags || []).includes(s)).map((s) => (
+              <span key={s} onClick={() => addTag(s)} style={{ background: t.tagBg, color: t.text3, borderRadius: 6, padding: "3px 8px", fontSize: 11, cursor: "pointer", fontFamily: "'Space Mono', monospace" }}>
+                + {s}
+              </span>
+            ))}
+          </div>
+        </div>
+
+        <div style={{ marginBottom: 20 }}>
+          <label style={lbl}>Trade Thesis</label>
+          <textarea style={{ ...inp, height: 80, resize: "none" }} value={form.notes} onChange={(e) => set("notes", e.target.value)} placeholder="Why are you taking this trade? What's your edge?" />
+        </div>
+
+        <div style={{ display: "flex", gap: 10 }}>
+          <button onClick={onClose} style={{ flex: 1, background: "none", border: `1px solid ${t.border}`, color: t.text3, borderRadius: 8, padding: 12, cursor: "pointer", fontSize: 14 }}>Cancel</button>
+          <button onClick={save} disabled={!form.ticker || !form.entryPrice || !form.stopLoss} style={{
+            flex: 2, background: (!form.ticker || !form.entryPrice || !form.stopLoss) ? t.card2 : t.accent,
+            border: "none", color: (!form.ticker || !form.entryPrice || !form.stopLoss) ? t.text3 : "#000",
+            borderRadius: 8, padding: 12, cursor: "pointer", fontSize: 14, fontWeight: 700, fontFamily: "'Space Mono', monospace",
+          }}>
+            Save Plan
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
 function TradeFormModal({ initial, onClose, onSave, t }) {
   const blank = {
     date: todayStr(),
@@ -1284,6 +1482,11 @@ function TradeRow({ trade, onClick, onEdit, onDelete, t, mobile }) {
             >
               {pl >= 0 ? "+" : ""}
               {fmt(pl)}
+               {trade.r !== null && trade.r !== undefined && (
+    <div style={{ fontSize: 10, color: trade.r >= 0 ? t.accent : t.danger, opacity: 0.8 }}>
+      {fmtR(trade.r)}
+    </div>
+  )}
             </span>
           </div>
           <div
@@ -1563,8 +1766,11 @@ function TradeDetail({ trade, onClose, onEdit, t }) {
             ["Entry", fmt(trade.entryPrice)],
             ["Exit", fmt(trade.exitPrice)],
             ["Shares", trade.shares],
-            ["Direction", trade.direction],
-          ].map(([k, v]) => (
+            ["Direction", trade.direction],...(trade.stopLoss ? [["Stop Loss", fmt(trade.stopLoss)]] : []),
+  ...(trade.takeProfit ? [["Take Profit", fmt(trade.takeProfit)]] : []),
+  ...(trade.plannedR != null ? [["Planned R", `+${trade.plannedR?.toFixed(2)}R`]] : []),
+  ...(trade.r != null ? [["R-Multiple", fmtR(trade.r)]] : []),
+].map(([k, v]) => (
             <div
               key={k}
               style={{
@@ -3261,6 +3467,7 @@ const [perPage, setPerPage] = useState(30);
 const [page, setPage] = useState(1);
   const [toast, setToast] = useState(null);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [showPlan, setShowPlan] = useState(false);
   const mobile = useIsMobile();
   const T = tk(isDark);
 
@@ -3288,6 +3495,11 @@ const [page, setPage] = useState(1);
     setSelected(trade);
     showToast("✓ Trade updated", T.accent);
   };
+  const savePlan = (plan) => {
+  setTrades((p) => [...p, plan]);
+  setShowPlan(false);
+  showToast("📋 Trade plan saved", T.accent);
+};
   const deleteTrade = (id) => {
     if (window.confirm("Delete this trade?")) {
       setTrades((p) => p.filter((tr) => tr.id !== id));
@@ -3314,6 +3526,10 @@ const importTrades = (incoming) => {
     () => trades.map((t) => ({ ...t, pl: calcPL(t) })),
     [trades]
   );
+  const plList = useMemo(
+  () => trades.map((t) => ({ ...t, pl: calcPL(t), r: calcR(t) })),
+  [trades]
+);
   const allTags = useMemo(
     () => [...new Set(plList.flatMap((t) => t.tags || []))],
     [plList]
@@ -3374,7 +3590,10 @@ const importTrades = (incoming) => {
       .map(([m, cost]) => ({ mistake: m, cost }))
       .sort((a, b) => a.cost - b.cost);
   }, [plList]);
-
+const avgR = useMemo(() => {
+  const withR = plList.filter(t => t.r !== null && t.r !== undefined);
+  return withR.length ? withR.reduce((s, t) => s + t.r, 0) / withR.length : null;
+}, [plList]);
   const filtered = useMemo(() => {
   const q = search.toLowerCase().trim();
   return plList.filter((t) =>
@@ -3551,6 +3770,22 @@ const paginated = filtered
               >
                 + ADD
               </button>
+              <button
+  onClick={() => setShowPlan(true)}
+  style={{
+    background: T.surface,
+    border: `1px solid ${T.accent}40`,
+    color: T.accent,
+    borderRadius: 8,
+    padding: "7px 16px",
+    cursor: "pointer",
+    fontSize: 12,
+    fontWeight: 700,
+    fontFamily: "'Space Mono',monospace",
+  }}
+>
+  📋 PLAN
+</button>
             </div>
             {menuOpen && (
               <div
@@ -3811,6 +4046,15 @@ const paginated = filtered
                 t={T}
               />
             </div>
+            {avgR !== null && (
+  <StatCard
+    label="Avg R"
+    value={fmtR(avgR)}
+    sub="per closed trade"
+    color={avgR >= 0 ? T.accent : T.danger}
+    t={T}
+  />
+)}
             <div
               style={{
                 display: "grid",
@@ -4593,6 +4837,13 @@ const paginated = filtered
           t={T}
         />
       )}
+      {showPlan && (
+  <PlanModal
+    onClose={() => setShowPlan(false)}
+    onSave={savePlan}
+    t={T}
+  />
+)}
     </div>
   );
 }
