@@ -4453,88 +4453,48 @@ const paginated = filtered
                 gap: 16,
               }}
             >
-              <div
-                style={{
-                  background: T.surface,
-                  border: `1px solid ${T.border}`,
-                  borderRadius: 12,
-                  padding: "16px 18px",
-                }}
-              >
-                <div
-                  style={{
-                    fontFamily: "'Space Mono',monospace",
-                    fontSize: 10,
-                    color: T.text3,
-                    textTransform: "uppercase",
-                    letterSpacing: 2,
-                    marginBottom: 16,
-                  }}
-                >
-                  Strategy Performance
-                </div>
-                {(() => {
-  const maxStratPL = Math.max(...stratStats.map(s => Math.abs(s.pl)), 1);
-  return stratStats.map((s) => (
-    <div key={s.strategy} style={{ marginBottom: 14 }}>
-      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 3 }}>
-        <span style={{ fontSize: 13, color: T.text2 }}>{s.strategy}</span>
-        <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
-          <span style={{ fontSize: 10, color: T.text3, fontFamily: "monospace" }}>
-            {(s.winRate * 100).toFixed(0)}%WR
-          </span>
-          <span style={{ fontFamily: "'Space Mono',monospace", fontSize: 12, color: s.pl >= 0 ? T.accent : T.danger }}>
-            {s.pl >= 0 ? "+" : ""}{fmt(s.pl)}
-          </span>
+             <div
+  style={{
+    background: T.surface,
+    border: `1px solid ${T.border}`,
+    borderRadius: 12,
+    padding: "16px 18px",
+  }}
+>
+  <div
+    style={{
+      fontFamily: "'Space Mono',monospace",
+      fontSize: 10,
+      color: T.text3,
+      textTransform: "uppercase",
+      letterSpacing: 2,
+      marginBottom: 16,
+    }}
+  >
+    Strategy Performance
+  </div>
+  {(() => {
+    const maxStratPL = Math.max(...stratStats.map(s => Math.abs(s.pl)), 1);
+    return stratStats.map((s) => (
+      <div key={s.strategy} style={{ marginBottom: 14 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 3 }}>
+          <span style={{ fontSize: 13, color: T.text2 }}>{s.strategy}</span>
+          <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
+            <span style={{ fontSize: 10, color: T.text3, fontFamily: "monospace" }}>
+              {(s.winRate * 100).toFixed(0)}%WR
+            </span>
+            <span style={{ fontFamily: "'Space Mono',monospace", fontSize: 12, color: s.pl >= 0 ? T.accent : T.danger }}>
+              {s.pl >= 0 ? "+" : ""}{fmt(s.pl)}
+            </span>
+          </div>
         </div>
+        <MiniBar value={s.pl} max={maxStratPL} t={T} />
       </div>
-      <MiniBar value={s.pl} max={maxStratPL} t={T} />
-    </div>
-  ));
-})()}
-                    <div
-                      style={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        marginBottom: 3,
-                      }}
-                    >
-                      <span style={{ fontSize: 13, color: T.text2 }}>
-                        {s.strategy}
-                      </span>
-                      <div
-                        style={{
-                          display: "flex",
-                          gap: 12,
-                          alignItems: "center",
-                        }}
-                      >
-                        <span
-                          style={{
-                            fontSize: 10,
-                            color: T.text3,
-                            fontFamily: "monospace",
-                          }}
-                        >
-                          {(s.winRate * 100).toFixed(0)}%WR
-                        </span>
-                        <span
-                          style={{
-                            fontFamily: "'Space Mono',monospace",
-                            fontSize: 12,
-                            color: s.pl >= 0 ? T.accent : T.danger,
-                          }}
-                        >
-                          {s.pl >= 0 ? "+" : ""}
-                          {fmt(s.pl)}
-                        </span>
-                      </div>
-                    </div>
-                    <MiniBar value={s.pl} max={maxPL} t={T} />
-                  </div>
-                ))}
-              </div>
-              <div
+    ));
+  })()}
+</div>
+ 
+             <div
                 style={{
                   background: T.surface,
                   border: `1px solid ${T.border}`,
