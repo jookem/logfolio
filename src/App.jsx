@@ -1232,7 +1232,7 @@ function TradeRow({ trade, onClick, onEdit, onDelete, t, mobile }) {
     <div
       style={{
         padding: "12px 16px",
-        borderBottom: `1px solid ${t.border}`,
+        borderTop: `1px solid ${t.border}`,
         cursor: "pointer",
       }}
       onMouseEnter={(e) => (e.currentTarget.style.background = t.hoverBg)}
