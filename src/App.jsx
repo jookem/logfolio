@@ -2915,8 +2915,7 @@ Provide 4-6 patterns. Be brutally honest but constructive.`,
               },
             ],
           }),
-        }
-      );
+        });
 
       const data = await response.json();
       const text = data.content
