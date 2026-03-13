@@ -3785,7 +3785,8 @@ const paginated = filtered
     fontFamily: "'Space Mono',monospace",
   }}
 >
-   <img src="images/plan.png" alt="plan" style={{ height: 28, width: 28 }} PLAN
+   <img src="images/plan.png" alt="plan" style={{ height: 28, width: 28 }} />
+  PLAN
 </button>
             </div>
             {menuOpen && (
