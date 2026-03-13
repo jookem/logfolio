@@ -1184,7 +1184,7 @@ function CSVModal({ onClose, onImport, t }) {
         <div style={{ marginBottom: 12 }}>
           <div style={{ display: "flex", gap: 10, marginBottom: 10 }}>
             <label style={{ flex: 1, background: t.accent + "15", border: `1px solid ${t.accent}40`, color: t.accent, borderRadius: 8, padding: "10px 14px", cursor: "pointer", fontSize: 13, fontFamily: "'Space Mono',monospace", textAlign: "center", display: "block" }}>
-              📂 Choose File
+              <img src="/images/import.svg" alt="folder" style={{ height: 18, width: 18, marginRight: 6 }} /> Choose File Choose File
               <input type="file" accept=".csv,.txt,.tsv" style={{ display: "none" }} onChange={(e) => {
                 const file = e.target.files[0];
                 if (!file) return;
@@ -2034,7 +2034,7 @@ function CalendarView({ plList, t, mobile }) {
               gap: 8,
             }}
           >
-            <div style={{ fontSize: 28 }}>📅</div>
+            <img src="/images/calendar.svg" alt="calendar" style={{ height: 28, width: 28 }} />
             <div
               style={{
                 fontFamily: "'Space Mono', monospace",
