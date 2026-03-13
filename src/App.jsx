@@ -4425,7 +4425,7 @@ const paginated = filtered
                   Strategy Performance
                 </div>
                 {stratStats.map((s) => (
-                  <div key={s.strategy} style={{ marginBottom: 400 }}>
+                  <div key={s.strategy} style={{ marginBottom: 14 }}>
                     <div
                       style={{
                         display: "flex",
