@@ -4017,6 +4017,25 @@ const paginated = filtered
               >
                 + ADD
               </button>
+              <button
+  onClick={() => setShowPlan(true)}
+  style={{
+    background: T.surface,
+    border: `1px solid ${T.accent}40`,
+    color: T.accent,
+    borderRadius: 8,
+    padding: "7px 16px",
+    cursor: "pointer",
+    fontSize: 12,
+    fontWeight: 700,
+    fontFamily: "'Space Mono',monospace",
+    display: "flex",
+    alignItems: "center",
+    gap: 6,
+  }}
+>
+  <img src="/images/plan.svg" alt="plan" style={{ height: 16, width: 16 }} /> PLAN
+</button>
             </div>
           </>
         )}
