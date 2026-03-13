@@ -3701,7 +3701,7 @@ const paginated = filtered
             letterSpacing: 2,
           }}
         >
-          LOG FOLIO
+          LOG-FOLIO
         </div>
         {mobile ? (
           <>
@@ -3780,7 +3780,10 @@ const paginated = filtered
     fontFamily: "'Space Mono',monospace",
   }}
 >
-  📋 PLAN
+   <img
+          src="images/plan.png"
+          alt="logo"
+          style={{ height: 28, width: 28 }} PLAN
 </button>
             </div>
             {menuOpen && (
