@@ -1209,7 +1209,7 @@ function TradeFormModal({ initial, onClose, onSave, t }) {
   );
 }
 
-function CSVModal({ onClose, on, t }) {
+function CSVModal({ onClose, onImport, t }) {
   const [csv, setCsv] = useState("");
   const [preview, setPreview] = useState([]);
   const [error, setError] = useState("");
