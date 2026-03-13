@@ -545,10 +545,12 @@ function PlanModal({ onClose, onSave, t }) {
       <div style={{ background: t.card, border: `1px solid ${t.border}`, borderRadius: 16, width: "100%", maxWidth: 520, maxHeight: "92vh", overflowY: "auto", padding: 24 }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 22 }}>
           <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 16, fontWeight: 700, color: t.accent }}>
-             <img
-          src="images/logo.png"
-          alt="logo"
-          style={{ height: 28, width: 28 }} Plan Trade
+           <img
+  src="/logo.png"
+  alt="logo"
+  style={{ height: 28, width: 28 }}
+/>
+Plan Trade
           </div>
           <button onClick={onClose} style={{ background: "none", border: "none", color: t.text3, fontSize: 20, cursor: "pointer" }}>✕</button>
         </div>
@@ -3783,7 +3785,7 @@ const paginated = filtered
     fontFamily: "'Space Mono',monospace",
   }}
 >
-   <img src="images/plan.png" alt="logo" style={{ height: 28, width: 28 }} PLAN
+   <img src="images/plan.png" alt="plan" style={{ height: 28, width: 28 }} PLAN
 </button>
             </div>
             {menuOpen && (
