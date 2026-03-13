@@ -2410,18 +2410,45 @@ function CalendarView({ plList, t, mobile }) {
 function QuoteOfDay({ t }) {
   const [quote, setQuote] = useState(null);
 
-  const FALLBACK_QUOTES = [
-    { content: "The stock market is a device for transferring money from the impatient to the patient.", author: "Warren Buffett" },
-    { content: "Risk comes from not knowing what you're doing.", author: "Warren Buffett" },
-    { content: "The goal of a successful trader is to make the best trades. Money is secondary.", author: "Alexander Elder" },
-    { content: "In trading, the impossible happens about twice a year.", author: "Henri M. Cauvin" },
-    { content: "Discipline is the bridge between goals and accomplishment.", author: "Jim Rohn" },
-    { content: "The secret to being successful from a trading perspective is to have an indefatigable and an undying and unquenchable thirst for information.", author: "Paul Tudor Jones" },
-    { content: "It's not whether you're right or wrong, but how much money you make when you're right and how much you lose when you're wrong.", author: "George Soros" },
-    { content: "The most important thing is to have a method for staying with your winners and cutting your losers.", author: "Michael Covel" },
-    { content: "Success is not final, failure is not fatal: it is the courage to continue that counts.", author: "Winston Churchill" },
-    { content: "Plan your trade and trade your plan.", author: "Unknown" },
-  ];
+ const FALLBACK_QUOTES = [
+  { content: "The stock market is a device for transferring money from the impatient to the patient.", author: "Warren Buffett" },
+  { content: "Risk comes from not knowing what you're doing.", author: "Warren Buffett" },
+  { content: "The goal of a successful trader is to make the best trades. Money is secondary.", author: "Alexander Elder" },
+  { content: "In trading, the impossible happens about twice a year.", author: "Henri M. Cauvin" },
+  { content: "Discipline is the bridge between goals and accomplishment.", author: "Jim Rohn" },
+  { content: "The secret to being successful from a trading perspective is to have an indefatigable and an undying and unquenchable thirst for information.", author: "Paul Tudor Jones" },
+  { content: "It's not whether you're right or wrong, but how much money you make when you're right and how much you lose when you're wrong.", author: "George Soros" },
+  { content: "The most important thing is to have a method for staying with your winners and cutting your losers.", author: "Michael Covel" },
+  { content: "Success is not final, failure is not fatal: it is the courage to continue that counts.", author: "Winston Churchill" },
+  { content: "Plan your trade and trade your plan.", author: "Unknown" },
+  { content: "The four most dangerous words in investing are: 'This time it's different.'", author: "Sir John Templeton" },
+  { content: "The trend is your friend until the end when it bends.", author: "Ed Seykota" },
+  { content: "Win or lose, everybody gets what they want out of the market.", author: "Ed Seykota" },
+  { content: "Markets can remain irrational longer than you can remain solvent.", author: "John Maynard Keynes" },
+  { content: "The market is a device for transferring money from the active to the patient.", author: "Warren Buffett" },
+  { content: "Cut your losses quickly and let your winners run.", author: "David Ricardo" },
+  { content: "Amateurs think about how much money they can make. Professionals think about how much money they could lose.", author: "Jack Schwager" },
+  { content: "The hard work in trading comes in the preparation. The actual process of trading should be effortless.", author: "Jack Schwager" },
+  { content: "You don’t need to be a rocket scientist. Investing is not a game where the guy with the 160 IQ beats the guy with the 130 IQ.", author: "Warren Buffett" },
+  { content: "Price is what you pay. Value is what you get.", author: "Warren Buffett" },
+  { content: "The elements of good trading are: cutting losses, cutting losses, and cutting losses.", author: "Ed Seykota" },
+  { content: "The market pays you to be disciplined.", author: "Unknown" },
+  { content: "A good trader has no ego. You have to swallow your pride and get out of the losses.", author: "Tom Baldwin" },
+  { content: "The key to trading success is emotional discipline.", author: "Alexander Elder" },
+  { content: "Opportunities come infrequently. When it rains gold, put out the bucket, not the thimble.", author: "Warren Buffett" },
+  { content: "The market can stay irrational longer than you can stay solvent.", author: "John Maynard Keynes" },
+  { content: "Cut your losses short and let your winners run.", author: "David Ricardo" },
+  { content: "Wide diversification is only required when investors do not understand what they are doing.", author: "Warren Buffett" },
+  { content: "The individual investor should act consistently as an investor and not as a speculator.", author: "Benjamin Graham" },
+  { content: "In the short run, the market is a voting machine, but in the long run, it is a weighing machine.", author: "Benjamin Graham" },
+  { content: "Markets are constantly in a state of uncertainty and flux and money is made by discounting the obvious and betting on the unexpected.", author: "George Soros" },
+  { content: "Losers average losers.", author: "Paul Tudor Jones" },
+  { content: "Don't focus on making money; focus on protecting what you have.", author: "Paul Tudor Jones" },
+  { content: "A trader who is not disciplined is a trader who will not last.", author: "Mark Douglas" },
+  { content: "The consistency you seek is in your mind, not in the markets.", author: "Mark Douglas" },
+  { content: "Every battle is won before it is fought.", author: "Sun Tzu" },
+  { content: "He who knows when he can fight and when he cannot will be victorious.", author: "Sun Tzu" }
+];
 
   useEffect(() => {
     const today = todayStr();
