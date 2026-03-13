@@ -3523,10 +3523,6 @@ const importTrades = (incoming) => {
   };
 
   const plList = useMemo(
-    () => trades.map((t) => ({ ...t, pl: calcPL(t) })),
-    [trades]
-  );
-  const plList = useMemo(
   () => trades.map((t) => ({ ...t, pl: calcPL(t), r: calcR(t) })),
   [trades]
 );
@@ -4044,9 +4040,8 @@ const paginated = filtered
                 }
                 sub="wins/losses"
                 t={T}
-              />
-            </div>
-            {avgR !== null && (
+              />          
+              {avgR !== null && (
   <StatCard
     label="Avg R"
     value={fmtR(avgR)}
@@ -4055,6 +4050,8 @@ const paginated = filtered
     t={T}
   />
 )}
+            </div>
+  
             <div
               style={{
                 display: "grid",
@@ -4368,7 +4365,7 @@ const paginated = filtered
             <div
               style={{
                 display: "grid",
-                gridTemplateColumns: mobile ? "1fr" : "repeat(4,1fr)",
+                gridTemplateColumns: mobile ? "1fr" : "repeat(5,1fr)",
                 gap: 12,
                 marginBottom: 20,
               }}
