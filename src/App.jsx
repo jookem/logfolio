@@ -2863,15 +2863,12 @@ function AIInsights({ plList, t, mobile }) {
     const winRate = ((wins.length / plList.length) * 100).toFixed(0);
 
     try {
-      const response = await fetch("/api/analyse", 
-        {
-          headers: {
-            "Content-Type": "application/json",
-            "x-api-key":
-              "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",
-            "anthropic-version": "2023-06-01",
-          },
-          body: JSON.stringify({
+const response = await fetch("/api/analyse", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+  },
+  body: JSON.stringify({
             model: "claude-sonnet-4-20250514",
             max_tokens: 1000,
             messages: [
