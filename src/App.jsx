@@ -3371,9 +3371,9 @@ export default function TradingJournal() {
   const nav = [
     ["today", "Today"],
     ["dashboard", "Dashboard"],
+    ["weekly", "Weekly"],
     ["calendar", "Calendar"],
     ["trades", "Trades"],
-    ["weekly", "Weekly"],
     ["analytics", "Analytics"],
     ["ai", "AI Insights"],
   ];
