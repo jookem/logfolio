@@ -2362,7 +2362,68 @@ function CalendarView({ plList, t, mobile }) {
     </div>
   );
 }
+function QuoteOfDay({ t }) {
+  const [quote, setQuote] = useState(null);
 
+  const FALLBACK_QUOTES = [
+    { content: "The stock market is a device for transferring money from the impatient to the patient.", author: "Warren Buffett" },
+    { content: "Risk comes from not knowing what you're doing.", author: "Warren Buffett" },
+    { content: "The goal of a successful trader is to make the best trades. Money is secondary.", author: "Alexander Elder" },
+    { content: "In trading, the impossible happens about twice a year.", author: "Henri M. Cauvin" },
+    { content: "Discipline is the bridge between goals and accomplishment.", author: "Jim Rohn" },
+    { content: "The secret to being successful from a trading perspective is to have an indefatigable and an undying and unquenchable thirst for information.", author: "Paul Tudor Jones" },
+    { content: "It's not whether you're right or wrong, but how much money you make when you're right and how much you lose when you're wrong.", author: "George Soros" },
+    { content: "The most important thing is to have a method for staying with your winners and cutting your losers.", author: "Michael Covel" },
+    { content: "Success is not final, failure is not fatal: it is the courage to continue that counts.", author: "Winston Churchill" },
+    { content: "Plan your trade and trade your plan.", author: "Unknown" },
+  ];
+
+  useEffect(() => {
+    const today = todayStr();
+    const cached = localStorage.getItem("quote_cache");
+    if (cached) {
+      const { date, data } = JSON.parse(cached);
+      if (date === today) { setQuote(data); return; }
+    }
+    fetch("https://api.quotable.io/random?tags=success|inspirational|wisdom&maxLength=180")
+      .then(r => r.json())
+      .then(data => {
+        const q = { content: data.content, author: data.author };
+        localStorage.setItem("quote_cache", JSON.stringify({ date: today, data: q }));
+        setQuote(q);
+      })
+      .catch(() => {
+        const idx = new Date().getDate() % FALLBACK_QUOTES.length;
+        setQuote(FALLBACK_QUOTES[idx]);
+      });
+  }, []);
+
+  if (!quote) return null;
+
+  return (
+    <div style={{
+      background: t.surface,
+      border: `1px solid ${t.border}`,
+      borderRadius: 12,
+      padding: "16px 20px",
+      marginBottom: 24,
+      position: "relative",
+    }}>
+      <div style={{
+        fontSize: 10, color: t.accent, fontFamily: "'Space Mono',monospace",
+        textTransform: "uppercase", letterSpacing: 2, marginBottom: 8,
+      }}>
+        Quote of the Day
+      </div>
+      <div style={{ fontSize: 14, color: t.text2, lineHeight: 1.6, fontStyle: "italic", marginBottom: 8 }}>
+        "{quote.content}"
+      </div>
+      <div style={{ fontSize: 11, color: t.text3, fontFamily: "'Space Mono',monospace" }}>
+        — {quote.author}
+      </div>
+    </div>
+  );
+}
 function DaySession({ plList, onAddTrade, t, mobile }) {
   const today = todayStr();
   const todayTrades = plList.filter((tr) => tr.date === today);
@@ -2381,6 +2442,7 @@ function DaySession({ plList, onAddTrade, t, mobile }) {
   });
   return (
     <div>
+      <QuoteOfDay t={t} />
       <div
         style={{
           display: "flex",
