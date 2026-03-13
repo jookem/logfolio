@@ -3255,10 +3255,13 @@ export default function TradingJournal() {
   const [editTrade, setEditTrade] = useState(null);
   const [selected, setSelected] = useState(null);
   const [filter, setFilter] = useState({
-    type: "all",
-    strategy: "all",
-    tag: "all",
-  });
+  type: "all",
+  strategy: "all",
+  tag: "all",
+});
+const [search, setSearch] = useState("");
+const [perPage, setPerPage] = useState(30);
+const [page, setPage] = useState(1);
   const [toast, setToast] = useState(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const mobile = useIsMobile();
@@ -3295,11 +3298,12 @@ export default function TradingJournal() {
       showToast("Trade deleted", T.danger);
     }
   };
-  const importTrades = (incoming) => {
-    setTrades((p) => [...p, ...incoming]);
-    setShowCSV(false);
-    showToast(`✓ Imported ${incoming.length} trades`, T.accent);
-  };
+const importTrades = (incoming) => {
+  setTrades((p) => [...p, ...incoming]);
+  setShowCSV(false);
+  setPage(1);
+  showToast(`✓ Imported ${incoming.length} trades`, T.accent);
+};
   const clearAll = () => {
     if (window.confirm("Clear all trades?")) {
       setTrades([]);
@@ -3374,16 +3378,27 @@ export default function TradingJournal() {
       .sort((a, b) => a.cost - b.cost);
   }, [plList]);
 
-  const filtered = useMemo(
-    () =>
-      plList.filter(
-        (t) =>
-          (filter.type === "all" || t.type === filter.type) &&
-          (filter.strategy === "all" || t.strategy === filter.strategy) &&
-          (filter.tag === "all" || (t.tags || []).includes(filter.tag))
-      ),
-    [plList, filter]
+  const filtered = useMemo(() => {
+  const q = search.toLowerCase().trim();
+  return plList.filter((t) =>
+    (filter.type === "all" || t.type === filter.type) &&
+    (filter.strategy === "all" || t.strategy === filter.strategy) &&
+    (filter.tag === "all" || (t.tags || []).includes(filter.tag)) &&
+    (!q || [
+      t.ticker,
+      t.strategy,
+      t.emotion,
+      t.mistake,
+      t.notes,
+      ...(t.tags || []),
+    ].some((f) => (f || "").toLowerCase().includes(q)))
   );
+}, [plList, filter, search]);
+
+const totalPages = Math.ceil(filtered.length / perPage);
+const paginated = filtered
+  .sort((a, b) => new Date(b.date) - new Date(a.date))
+  .slice((page - 1) * perPage, page * perPage);
   const maxPL = Math.max(...plList.map((t) => Math.abs(t.pl)), 1);
   const nav = [
     ["today", "Today"],
@@ -3922,118 +3937,185 @@ export default function TradingJournal() {
           <CalendarView plList={plList} t={T} mobile={mobile} />
         )}
 
-        {tab === "trades" && (
-          <div>
-            {selected ? (
-              <TradeDetail
-                trade={selected}
-                onClose={() => setSelected(null)}
-                onEdit={() => {
-                  setEditTrade(selected);
-                  setSelected(null);
-                }}
-                t={T}
-              />
-            ) : (
-              <div>
-                <div
-                  style={{
-                    display: "grid",
-                    gridTemplateColumns: mobile
-                      ? "1fr 1fr"
-                      : "1fr 1fr 1fr auto",
-                    gap: 10,
-                    marginBottom: 16,
-                  }}
-                >
-                  <select
-                    style={sel}
-                    value={filter.type}
-                    onChange={(e) =>
-                      setFilter((f) => ({ ...f, type: e.target.value }))
-                    }
-                  >
-                    <option value="all">All Types</option>
-                    <option value="stock">Stock</option>
-                    <option value="options">Options</option>
-                  </select>
-                  <select
-                    style={sel}
-                    value={filter.strategy}
-                    onChange={(e) =>
-                      setFilter((f) => ({ ...f, strategy: e.target.value }))
-                    }
-                  >
-                    <option value="all">All Strategies</option>
-                    {[...new Set(trades.map((t) => t.strategy))].map((s) => (
-                      <option key={s}>{s}</option>
-                    ))}
-                  </select>
-                  <select
-                    style={sel}
-                    value={filter.tag}
-                    onChange={(e) =>
-                      setFilter((f) => ({ ...f, tag: e.target.value }))
-                    }
-                  >
-                    <option value="all">All Tags</option>
-                    {allTags.map((tg) => (
-                      <option key={tg}>{tg}</option>
-                    ))}
-                  </select>
-                  {!mobile && (
-                    <div
-                      style={{
-                        fontFamily: "'Space Mono',monospace",
-                        fontSize: 11,
-                        color: T.text3,
-                        display: "flex",
-                        alignItems: "center",
-                        whiteSpace: "nowrap",
-                      }}
-                    >
-                      {filtered.length} trades
-                    </div>
-                  )}
-                </div>
-                <div
-                  style={{
-                    background: T.surface,
-                    border: `1px solid ${T.border}`,
-                    borderRadius: 12,
-                  }}
-                >
-                  {[...filtered]
-                    .sort((a, b) => new Date(b.date) - new Date(a.date))
-                    .map((tr) => (
-                      <TradeRow
-                        key={tr.id}
-                        trade={tr}
-                        onClick={() => setSelected(tr)}
-                        onEdit={() => setEditTrade(tr)}
-                        onDelete={() => deleteTrade(tr.id)}
-                        t={T}
-                        mobile={mobile}
-                      />
-                    ))}
-                  {!filtered.length && (
-                    <div
-                      style={{
-                        padding: 40,
-                        textAlign: "center",
-                        color: T.text4,
-                        fontFamily: "'Space Mono',monospace",
-                        fontSize: 12,
-                      }}
-                    >
-                      No trades found
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
+{tab === "trades" && (
+  <div>
+    {selected ? (
+      <TradeDetail
+        trade={selected}
+        onClose={() => setSelected(null)}
+        onEdit={() => {
+          setEditTrade(selected);
+          setSelected(null);
+        }}
+        t={T}
+      />
+    ) : (
+      <div>
+        <div style={{ marginBottom: 12 }}>
+          <input
+            style={{
+              background: T.input,
+              border: `1px solid ${T.inputBorder}`,
+              borderRadius: 8,
+              color: T.text,
+              padding: "9px 14px",
+              fontSize: 13,
+              width: "100%",
+              boxSizing: "border-box",
+              fontFamily: "inherit",
+              outline: "none",
+            }}
+            value={search}
+            onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+            placeholder="Search ticker, strategy, tags, notes..."
+          />
+        </div>
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: mobile ? "1fr 1fr" : "1fr 1fr 1fr auto auto",
+            gap: 10,
+            marginBottom: 16,
+          }}
+        >
+          <select
+            style={sel}
+            value={filter.type}
+            onChange={(e) => { setFilter((f) => ({ ...f, type: e.target.value })); setPage(1); }}
+          >
+            <option value="all">All Types</option>
+            <option value="stock">Stock</option>
+            <option value="options">Options</option>
+          </select>
+          <select
+            style={sel}
+            value={filter.strategy}
+            onChange={(e) => { setFilter((f) => ({ ...f, strategy: e.target.value })); setPage(1); }}
+          >
+            <option value="all">All Strategies</option>
+            {[...new Set(trades.map((t) => t.strategy))].map((s) => (
+              <option key={s}>{s}</option>
+            ))}
+          </select>
+          <select
+            style={sel}
+            value={filter.tag}
+            onChange={(e) => { setFilter((f) => ({ ...f, tag: e.target.value })); setPage(1); }}
+          >
+            <option value="all">All Tags</option>
+            {allTags.map((tg) => (
+              <option key={tg}>{tg}</option>
+            ))}
+          </select>
+          <select
+            style={{ ...sel, width: mobile ? "100%" : "auto" }}
+            value={perPage}
+            onChange={(e) => { setPerPage(Number(e.target.value)); setPage(1); }}
+          >
+            {[10, 25, 50, 100].map((n) => (
+              <option key={n} value={n}>{n} / page</option>
+            ))}
+          </select>
+          {!mobile && (
+            <div
+              style={{
+                fontFamily: "'Space Mono',monospace",
+                fontSize: 11,
+                color: T.text3,
+                display: "flex",
+                alignItems: "center",
+                whiteSpace: "nowrap",
+              }}
+            >
+              {filtered.length} trades
+            </div>
+          )}
+        </div>
+        <div
+          style={{
+            background: T.surface,
+            border: `1px solid ${T.border}`,
+            borderRadius: 12,
+          }}
+        >
+          {paginated.map((tr) => (
+            <TradeRow
+              key={tr.id}
+              trade={tr}
+              onClick={() => setSelected(tr)}
+              onEdit={() => setEditTrade(tr)}
+              onDelete={() => deleteTrade(tr.id)}
+              t={T}
+              mobile={mobile}
+            />
+          ))}
+          {!paginated.length && (
+            <div
+              style={{
+                padding: 40,
+                textAlign: "center",
+                color: T.text4,
+                fontFamily: "'Space Mono',monospace",
+                fontSize: 12,
+              }}
+            >
+              No trades found
+            </div>
+          )}
+        </div>
+        {totalPages > 1 && (
+          <div style={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            gap: 8,
+            marginTop: 16,
+          }}>
+            <button
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              disabled={page === 1}
+              style={{
+                background: T.card2,
+                border: `1px solid ${T.border}`,
+                color: T.text2,
+                borderRadius: 7,
+                padding: "6px 12px",
+                cursor: page === 1 ? "not-allowed" : "pointer",
+                opacity: page === 1 ? 0.4 : 1,
+                fontSize: 13,
+              }}
+            >
+              ‹ Prev
+            </button>
+            <span style={{
+              fontFamily: "'Space Mono',monospace",
+              fontSize: 11,
+              color: T.text3,
+            }}>
+              {page} / {totalPages}
+            </span>
+            <button
+              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+              disabled={page === totalPages}
+              style={{
+                background: T.card2,
+                border: `1px solid ${T.border}`,
+                color: T.text2,
+                borderRadius: 7,
+                padding: "6px 12px",
+                cursor: page === totalPages ? "not-allowed" : "pointer",
+                opacity: page === totalPages ? 0.4 : 1,
+                fontSize: 13,
+              }}
+            >
+              Next ›
+            </button>
           </div>
         )}
+      </div>
+    )}
+  </div>
+)}
 
         {tab === "weekly" && (
           <WeeklyReview plList={plList} t={T} mobile={mobile} />
