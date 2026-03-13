@@ -1345,7 +1345,7 @@ function CSVModal({ onClose, on, t }) {
               strategy: "Breakout",
               emotion: "Calm",
               mistake: "None",
-              notes: `ed from ${broker}`,
+              notes: `Imported from ${broker}`,
               tags: [],
               legs: [],
             });
@@ -1353,7 +1353,7 @@ function CSVModal({ onClose, on, t }) {
         });
       });
 
-      if (trades.length === 0) { setError("No completed trades found. Only closed trades will ."); return; }
+      if (trades.length === 0) { setError("No completed trades found. Only closed trades will be imported."); return; }
       trades.sort((a, b) => new Date(b.date) - new Date(a.date));
       setPreview(trades);
     } catch (e) {
