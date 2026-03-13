@@ -1006,7 +1006,7 @@ function TradeFormModal({ initial, onClose, onSave, t }) {
   );
 }
 
-function CSVModal({ onClose, onImport, t }) {
+function CSVModal({ onClose, on, t }) {
   const [csv, setCsv] = useState("");
   const [preview, setPreview] = useState([]);
   const [error, setError] = useState("");
@@ -1142,7 +1142,7 @@ function CSVModal({ onClose, onImport, t }) {
               strategy: "Breakout",
               emotion: "Calm",
               mistake: "None",
-              notes: `Imported from ${broker}`,
+              notes: `ed from ${broker}`,
               tags: [],
               legs: [],
             });
@@ -1150,7 +1150,7 @@ function CSVModal({ onClose, onImport, t }) {
         });
       });
 
-      if (trades.length === 0) { setError("No completed trades found. Only closed trades will import."); return; }
+      if (trades.length === 0) { setError("No completed trades found. Only closed trades will ."); return; }
       trades.sort((a, b) => new Date(b.date) - new Date(a.date));
       setPreview(trades);
     } catch (e) {
@@ -1184,7 +1184,7 @@ function CSVModal({ onClose, onImport, t }) {
         <div style={{ marginBottom: 12 }}>
           <div style={{ display: "flex", gap: 10, marginBottom: 10 }}>
             <label style={{ flex: 1, background: t.accent + "15", border: `1px solid ${t.accent}40`, color: t.accent, borderRadius: 8, padding: "10px 14px", cursor: "pointer", fontSize: 13, fontFamily: "'Space Mono',monospace", textAlign: "center", display: "block" }}>
-              <img src="/images/import.svg" alt="folder" style={{ height: 18, width: 18, marginRight: 6 }} /> Choose File Choose File
+              <img src="/images/import.svg" alt="folder" style={{ height: 32, width: 32, marginRight: 6 }} /> Choose File Choose File
               <input type="file" accept=".csv,.txt,.tsv" style={{ display: "none" }} onChange={(e) => {
                 const file = e.target.files[0];
                 if (!file) return;
