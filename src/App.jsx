@@ -61,7 +61,7 @@ const STRATEGIES = [
   "endar Spread",
 ];
 const EMOTIONS = [
-  "m",
+  "None",
   "Confident",
   "Anxious",
   "FOMO",
