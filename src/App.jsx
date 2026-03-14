@@ -4112,7 +4112,7 @@ const paginated = filtered
             </div>
             {menuOpen && (
               <div
-                style={{{
+                style={{
                   position: "fixed",
                   top: 54,
                   left: 0,
