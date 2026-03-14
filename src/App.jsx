@@ -3963,6 +3963,7 @@ const paginated = filtered
         color: T.text,
         fontFamily: "'DM Sans','Segoe UI',sans-serif",
         transition: "background 0.2s,color 0.2s",
+        position: "relative",
       }}
     >
       <link
