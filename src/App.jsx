@@ -2736,7 +2736,7 @@ function QuoteOfDay({ t }) {
   { content: "A trader who is not disciplined is a trader who will not last.", author: "Mark Douglas" },
   { content: "The consistency you seek is in your mind, not in the markets.", author: "Mark Douglas" },
   { content: "Every battle is won before it is fought.", author: "Sun Tzu" },
-  { content: "He who knows when he can fight and when he cannot will be victorious.", author: "Sun Tzu" }
+  { content: "He who knows when he can fight and when he cannot will be victorious.", author: "Sun Tzu" },
   { content: "The biggest risk is not taking any risk.", author: "Mark Zuckerberg" },
   { content: "In investing, what is comfortable is rarely profitable.", author: "Robert Arnott" },
   { content: "The stock market is filled with individuals who know the price of everything, but the value of nothing.", author: "Philip Fisher" },
