@@ -638,7 +638,7 @@ function PlanModal({ onClose, onSave, t }) {
   );
 
   return (
-    <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.75)", zIndex: 100, display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }}>
+    <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.75)", zIndex: 100, display: "flex", alignItems: "center", justifyContent: "center", padding: 16, minHeight: "100vh" }}>
       <div style={{ background: t.card, border: `1px solid ${t.border}`, borderRadius: 16, width: "100%", maxWidth: 540, maxHeight: "93vh", overflowY: "auto", padding: 24 }}>
 
         {/* Header */}
@@ -1663,7 +1663,7 @@ function CSVModal({ onClose, onImport, t }) {
     outline: "none",
   };
   return (
-    <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.75)", zIndex: 100, display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }}>
+    <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.75)", zIndex: 100, display: "flex", alignItems: "center", justifyContent: "center", padding: 16, minHeight: "100vh" }}>
       <div style={{ background: t.card, border: `1px solid ${t.border}`, borderRadius: 16, width: "100%", maxWidth: 600, maxHeight: "92vh", overflowY: "auto", padding: 24 }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 18 }}>
           <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 16, fontWeight: 700, color: t.accent }}>CSV Import</div>
@@ -4101,7 +4101,11 @@ const paginated = filtered
                   fontFamily: "'Space Mono',monospace",
   }}
 >
-  ICON
+  <img src="/images/plan.svg" alt="plan" style={{ 
+  height: 16, 
+  width: 16,
+  filter: isDark ? "brightness(0) invert(1)" : "invert(27%) sepia(89%) saturate(400%) hue-rotate(116deg) brightness(96%) contrast(101%)"
+}} />
   PLAN
 </button>
             </div>
