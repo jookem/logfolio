@@ -546,9 +546,9 @@ function PlanModal({ onClose, onSave, t }) {
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 22 }}>
           <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 16, fontWeight: 700, color: t.accent }}>
            <img
-  src="/images/import.svg"
-  alt="import"
-  style={{ height: 16, width: 16 }}
+  src="/images/folder.svg"
+  alt="plan"
+  style={{ height: 18, width: 18 }}
 />
 Plan Trade
           </div>
@@ -1404,7 +1404,7 @@ function CSVModal({ onClose, onImport, t }) {
     gap: 8,
   }}
 >
-  <img src="/images/import.svg" alt="folder" style={{ height: 16, width: 16 }} /> Choose File
+  <img src="/images/import.svg" alt="import" style={{ height: 16, width: 16 }} /> Choose File
               <input type="file" accept=".csv,.txt,.tsv" style={{ display: "none" }} onChange={(e) => {
                 const file = e.target.files[0];
                 if (!file) return;
