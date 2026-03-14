@@ -470,30 +470,82 @@ function EquityCurve({ trades, t }) {
     </svg>
   );
 }
+// REPLACE the entire PlanModal function with this:
+
 function PlanModal({ onClose, onSave, t }) {
+  const OPTION_STRATEGIES = {
+    "Long Call":        { stockLabel: "Underlying Stock (optional)", showStock: true, legs: [{ position: "buy", type: "call" }], writeLocked: true },
+    "Long Put":         { stockLabel: "Underlying Stock (optional)", showStock: true, legs: [{ position: "buy", type: "put" }], writeLocked: true },
+    "Covered Call":     { stockLabel: "Stock Purchase", showStock: true, stockRequired: true, legs: [{ position: "sell", type: "call" }], writeLocked: true },
+    "Cash Secured Put": { stockLabel: "Cash Secured (Collateral)", showStock: true, legs: [{ position: "sell", type: "put" }], writeLocked: true },
+    "Naked Call":       { stockLabel: "Underlying Stock (optional)", showStock: true, legs: [{ position: "sell", type: "call" }], writeLocked: true },
+    "Naked Put":        { stockLabel: "Underlying Stock (optional)", showStock: true, legs: [{ position: "sell", type: "put" }], writeLocked: true },
+  };
+
+  const OPTION_STRATEGY_NAMES = Object.keys(OPTION_STRATEGIES);
+  const STOCK_STRATEGIES = ["Breakout", "Pullback", "Reversal", "Scalp"];
+
+  const blankLeg = (pos = "buy", type = "call") => ({
+    position: pos, type, strike: "", expiration: "", entryPremium: "", contracts: 1, iv: "",
+  });
+
   const [form, setForm] = useState({
     date: todayStr(),
     ticker: "",
     type: "stock",
     strategy: "Breakout",
     direction: "long",
-    entryPrice: "",
+    // stock section
+    stockDirection: "buy",
+    currentPrice: "",
+    purchasePrice: "",
+    numShares: "",
+    // options
+    legs: [blankLeg()],
+    // plan fields
     stopLoss: "",
     takeProfit: "",
     notes: "",
     tags: [],
   });
+
   const [tagInput, setTagInput] = useState("");
   const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
 
-  const plannedR = form.entryPrice && form.stopLoss && form.takeProfit
-    ? ((+form.takeProfit - +form.entryPrice) * (form.direction === "long" ? 1 : -1)) /
-      Math.abs(+form.entryPrice - +form.stopLoss)
-    : null;
+  const setLeg = (i, k, v) =>
+    setForm((f) => {
+      const legs = [...f.legs];
+      legs[i] = { ...legs[i], [k]: v };
+      return { ...f, legs };
+    });
 
-  const riskAmount = form.entryPrice && form.stopLoss
-    ? Math.abs(+form.entryPrice - +form.stopLoss)
-    : null;
+  // When strategy changes, sync legs to template
+  const handleStrategyChange = (strat) => {
+    set("strategy", strat);
+    if (OPTION_STRATEGIES[strat]) {
+      const template = OPTION_STRATEGIES[strat].legs;
+      setForm((f) => ({
+        ...f,
+        strategy: strat,
+        legs: template.map((tpl) => ({ ...blankLeg(tpl.position, tpl.type) })),
+      }));
+    }
+  };
+
+  const handleTypeChange = (type) => {
+    set("type", type);
+    if (type === "options") {
+      handleStrategyChange("Long Call");
+    } else {
+      set("strategy", "Breakout");
+    }
+  };
+
+  const addLeg = () =>
+    setForm((f) => ({ ...f, legs: [...f.legs, blankLeg()] }));
+
+  const removeLeg = (i) =>
+    setForm((f) => ({ ...f, legs: f.legs.filter((_, idx) => idx !== i) }));
 
   const addTag = (tag) => {
     const c = tag.trim();
@@ -502,21 +554,53 @@ function PlanModal({ onClose, onSave, t }) {
   };
   const removeTag = (tag) => set("tags", (form.tags || []).filter((tg) => tg !== tag));
 
+  const optConfig = form.type === "options" ? OPTION_STRATEGIES[form.strategy] : null;
+  const isMultiLeg = form.type === "options" && !optConfig?.writeLocked;
+
+  // R calculation (stock only)
+  const plannedR =
+    form.type === "stock" && form.purchasePrice && form.stopLoss && form.takeProfit
+      ? ((+form.takeProfit - +form.purchasePrice) * (form.stockDirection === "buy" ? 1 : -1)) /
+        Math.abs(+form.purchasePrice - +form.stopLoss)
+      : null;
+
   const save = () => {
-    if (!form.ticker || !form.entryPrice || !form.stopLoss) return;
-    onSave({
+    if (!form.ticker) return;
+    const base = {
       ...form,
       ticker: form.ticker.toUpperCase(),
       id: Date.now(),
-      entryPrice: +form.entryPrice,
-      stopLoss: +form.stopLoss,
-      takeProfit: form.takeProfit ? +form.takeProfit : null,
-      plannedR: plannedR,
       status: "planned",
       tags: form.tags || [],
-      legs: [],
-    });
+    };
+    if (form.type === "stock") {
+      base.entryPrice = +form.purchasePrice;
+      base.stopLoss = form.stopLoss ? +form.stopLoss : null;
+      base.takeProfit = form.takeProfit ? +form.takeProfit : null;
+      base.shares = +form.numShares;
+      base.direction = form.stockDirection === "buy" ? "long" : "short";
+      base.plannedR = plannedR;
+      base.legs = [];
+    } else {
+      base.direction = "long";
+      base.legs = form.legs.map((l) => ({
+        ...l,
+        strike: +l.strike,
+        entryPremium: +l.entryPremium,
+        exitPremium: "",
+        contracts: +l.contracts,
+      }));
+      base.entryPrice = +form.currentPrice || 0;
+      base.shares = +form.numShares || 0;
+    }
+    onSave(base);
   };
+
+  const canSave = form.ticker && (
+    form.type === "stock"
+      ? form.purchasePrice
+      : form.legs.every((l) => l.strike && l.entryPremium && l.expiration)
+  );
 
   const inp = {
     background: t.input,
@@ -539,50 +623,36 @@ function PlanModal({ onClose, onSave, t }) {
     display: "block",
     fontFamily: "'Space Mono', monospace",
   };
+  const sectionHeader = (title) => (
+    <div style={{
+      fontFamily: "'Space Mono', monospace",
+      fontSize: 10,
+      color: t.accent,
+      textTransform: "uppercase",
+      letterSpacing: 2,
+      marginBottom: 10,
+      marginTop: 18,
+      paddingBottom: 6,
+      borderBottom: `1px solid ${t.border}`,
+    }}>{title}</div>
+  );
 
   return (
     <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.75)", zIndex: 100, display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }}>
-      <div style={{ background: t.card, border: `1px solid ${t.border}`, borderRadius: 16, width: "100%", maxWidth: 520, maxHeight: "92vh", overflowY: "auto", padding: 24 }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 22 }}>
+      <div style={{ background: t.card, border: `1px solid ${t.border}`, borderRadius: 16, width: "100%", maxWidth: 540, maxHeight: "93vh", overflowY: "auto", padding: 24 }}>
+
+        {/* Header */}
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
           <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 16, fontWeight: 700, color: t.accent }}>
-           <img
-  src="/images/plan.svg"
-  alt="plan"
-  style={{ height: 18, width: 18 }}
-/>
-Plan A Trade
+            📋 Plan A Trade
           </div>
           <button onClick={onClose} style={{ background: "none", border: "none", color: t.text3, fontSize: 20, cursor: "pointer" }}>✕</button>
         </div>
 
-        {/* Live R preview */}
-        {plannedR !== null && (
-          <div style={{
-            background: plannedR >= 2 ? t.accent + "15" : t.danger + "15",
-            border: `1px solid ${plannedR >= 2 ? t.accent : t.danger}30`,
-            borderRadius: 10,
-            padding: "12px 16px",
-            marginBottom: 16,
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-          }}>
-            <div>
-              <div style={{ fontSize: 10, color: t.text3, fontFamily: "'Space Mono',monospace", textTransform: "uppercase", letterSpacing: 1.5, marginBottom: 3 }}>Planned R</div>
-              <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 22, fontWeight: 700, color: plannedR >= 2 ? t.accent : t.danger }}>
-                +{plannedR.toFixed(2)}R
-              </div>
-            </div>
-            <div style={{ textAlign: "right" }}>
-              <div style={{ fontSize: 10, color: t.text3, fontFamily: "'Space Mono',monospace", textTransform: "uppercase", letterSpacing: 1.5, marginBottom: 3 }}>Risk per Share</div>
-              <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 16, color: t.danger }}>${riskAmount?.toFixed(2)}</div>
-            </div>
-          </div>
-        )}
-
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 12 }}>
+        {/* ── Ticker / Date / Type / Strategy ── */}
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
           <div>
-            <label style={lbl}>Ticker</label>
+            <label style={lbl}>Ticker Symbol</label>
             <input style={inp} value={form.ticker} onChange={(e) => set("ticker", e.target.value.toUpperCase())} placeholder="AAPL" />
           </div>
           <div>
@@ -591,40 +661,254 @@ Plan A Trade
           </div>
           <div>
             <label style={lbl}>Type</label>
-            <select style={inp} value={form.type} onChange={(e) => set("type", e.target.value)}>
+            <select style={inp} value={form.type} onChange={(e) => handleTypeChange(e.target.value)}>
               <option value="stock">Stock</option>
               <option value="options">Options</option>
             </select>
           </div>
           <div>
             <label style={lbl}>Strategy</label>
-            <select style={inp} value={form.strategy} onChange={(e) => set("strategy", e.target.value)}>
-              {(form.type === "stock"
-                ? ["Breakout", "Pullback", "Reversal", "Scalp"]
-                : ["Long Call", "Long Put", "Bull Call Spread", "Bear Put Spread", "Iron Condor", "Straddle", "Strangle", "Covered Call", "Cash Secured Put", "Butterfly", "Calendar Spread"]
-              ).map((s) => <option key={s}>{s}</option>)}
+            <select style={inp} value={form.strategy} onChange={(e) => handleStrategyChange(e.target.value)}>
+              {(form.type === "stock" ? STOCK_STRATEGIES : OPTION_STRATEGY_NAMES).map((s) => (
+                <option key={s}>{s}</option>
+              ))}
             </select>
-          </div>
-          <div>
-            <label style={lbl}>Direction</label>
-            <select style={inp} value={form.direction} onChange={(e) => set("direction", e.target.value)}>
-              <option value="long">Long</option>
-              <option value="short">Short</option>
-            </select>
-          </div>
-          <div>
-            <label style={lbl}>Entry Price</label>
-            <input style={inp} type="number" value={form.entryPrice} onChange={(e) => set("entryPrice", e.target.value)} placeholder="190.00" />
-          </div>
-          <div>
-            <label style={lbl}>Stop Loss ⚠</label>
-            <input style={{ ...inp, borderColor: form.stopLoss ? t.danger + "80" : t.inputBorder }} type="number" value={form.stopLoss} onChange={(e) => set("stopLoss", e.target.value)} placeholder="185.00" />
-          </div>
-          <div>
-            <label style={lbl}>Take Profit 🎯</label>
-            <input style={{ ...inp, borderColor: form.takeProfit ? t.accent + "80" : t.inputBorder }} type="number" value={form.takeProfit} onChange={(e) => set("takeProfit", e.target.value)} placeholder="200.00" />
           </div>
         </div>
+
+        {/* ══ STOCK SECTION ══ */}
+        {sectionHeader(form.type === "options" ? (optConfig?.stockLabel || "Underlying Stock") : "Stock Details")}
+
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+          {/* Current price — always shown */}
+          <div>
+            <label style={lbl}>Current Price *</label>
+            <div style={{ position: "relative" }}>
+              <span style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: t.text3, fontSize: 14 }}>$</span>
+              <input style={{ ...inp, paddingLeft: 26 }} type="number" value={form.currentPrice}
+                onChange={(e) => set("currentPrice", e.target.value)} placeholder="190.00" />
+            </div>
+          </div>
+
+          {/* Buy / Short toggle — for stock type or covered call */}
+          {(form.type === "stock" || optConfig?.stockRequired) && (
+            <div>
+              <label style={lbl}>Buy or Short</label>
+              <select style={inp} value={form.stockDirection} onChange={(e) => set("stockDirection", e.target.value)}>
+                <option value="buy">Buy</option>
+                <option value="short">Short</option>
+              </select>
+            </div>
+          )}
+
+          {/* Purchase Price */}
+          <div>
+            <label style={lbl}>{form.type === "options" ? "Purchase Price" : "Entry Price"} *</label>
+            <div style={{ position: "relative" }}>
+              <span style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: t.text3, fontSize: 14 }}>$</span>
+              <input style={{ ...inp, paddingLeft: 26 }} type="number" value={form.purchasePrice}
+                onChange={(e) => set("purchasePrice", e.target.value)} placeholder="190.00" />
+            </div>
+          </div>
+
+          {/* Num Shares */}
+          <div>
+            <label style={lbl}>Num. Shares</label>
+            <input style={inp} type="number" value={form.numShares}
+              onChange={(e) => set("numShares", e.target.value)} placeholder="100" />
+          </div>
+
+          {/* Cost display (read-only) */}
+          {form.purchasePrice && form.numShares && (
+            <div style={{ gridColumn: "span 2" }}>
+              <div style={{
+                background: t.card2, border: `1px solid ${t.border}`, borderRadius: 8,
+                padding: "10px 14px", display: "flex", justifyContent: "space-between", alignItems: "center",
+              }}>
+                <span style={{ fontSize: 11, color: t.text3, fontFamily: "'Space Mono', monospace", textTransform: "uppercase", letterSpacing: 1.5 }}>Cost</span>
+                <span style={{ fontFamily: "'Space Mono', monospace", fontSize: 15, color: t.text }}>
+                  ${(+form.purchasePrice * +form.numShares).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                </span>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* ══ OPTION SECTION ══ */}
+        {form.type === "options" && (
+          <>
+            {sectionHeader("Option")}
+
+            {/* Header row for multi-leg */}
+            {form.legs.length > 1 && (
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+                <span style={{ fontSize: 11, color: t.text3, fontFamily: "'Space Mono', monospace" }}>LEGS</span>
+                <button onClick={addLeg} style={{
+                  background: t.accent + "20", border: `1px solid ${t.accent}40`,
+                  color: t.accent, borderRadius: 6, padding: "4px 12px", fontSize: 12, cursor: "pointer",
+                }}>+ Add Leg</button>
+              </div>
+            )}
+
+            {form.legs.map((leg, i) => (
+              <div key={i} style={{
+                background: t.card2, border: `1px solid ${t.border}`,
+                borderRadius: 10, padding: 14, marginBottom: 10,
+              }}>
+                {form.legs.length > 1 && (
+                  <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 10 }}>
+                    <span style={{ fontSize: 11, color: t.accent, fontFamily: "'Space Mono', monospace" }}>Leg {i + 1}</span>
+                    <button onClick={() => removeLeg(i)} style={{ background: "none", border: "none", color: t.danger, cursor: "pointer", fontSize: 12 }}>Remove</button>
+                  </div>
+                )}
+
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+                  {/* Buy / Write */}
+                  <div>
+                    <label style={lbl}>Buy or Write</label>
+                    <select style={inp} value={leg.position}
+                      disabled={optConfig?.writeLocked}
+                      onChange={(e) => setLeg(i, "position", e.target.value)}>
+                      <option value="buy">Buy</option>
+                      <option value="sell">Write</option>
+                    </select>
+                  </div>
+
+                  {/* Call / Put */}
+                  <div>
+                    <label style={lbl}>Call or Put</label>
+                    <select style={inp} value={leg.type}
+                      disabled={optConfig?.writeLocked}
+                      onChange={(e) => setLeg(i, "type", e.target.value)}>
+                      <option value="call">Call</option>
+                      <option value="put">Put</option>
+                    </select>
+                  </div>
+
+                  {/* Strike */}
+                  <div>
+                    <label style={lbl}>Strike Price *</label>
+                    <div style={{ position: "relative" }}>
+                      <span style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: t.text3, fontSize: 14 }}>$</span>
+                      <input style={{ ...inp, paddingLeft: 26 }} type="number"
+                        value={leg.strike} onChange={(e) => setLeg(i, "strike", e.target.value)} placeholder="200" />
+                    </div>
+                  </div>
+
+                  {/* Expiry */}
+                  <div>
+                    <label style={lbl}>Expiry *</label>
+                    <input style={inp} type="date" value={leg.expiration}
+                      onChange={(e) => setLeg(i, "expiration", e.target.value)} />
+                  </div>
+
+                  {/* Price per option */}
+                  <div>
+                    <label style={lbl}>Price per Option *</label>
+                    <div style={{ position: "relative" }}>
+                      <span style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: t.text3, fontSize: 14 }}>$</span>
+                      <input style={{ ...inp, paddingLeft: 26 }} type="number"
+                        value={leg.entryPremium} onChange={(e) => setLeg(i, "entryPremium", e.target.value)} placeholder="4.20" />
+                    </div>
+                  </div>
+
+                  {/* Contracts */}
+                  <div>
+                    <label style={lbl}>Contracts</label>
+                    <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                      <input style={{ ...inp, flex: 1 }} type="number"
+                        value={leg.contracts} onChange={(e) => setLeg(i, "contracts", e.target.value)} placeholder="1" />
+                      <span style={{ fontSize: 12, color: t.text3, whiteSpace: "nowrap" }}>× 100</span>
+                    </div>
+                  </div>
+
+                  {/* IV */}
+                  <div>
+                    <label style={lbl}>IV (Implied Vol.) %</label>
+                    <input style={inp} type="number"
+                      value={leg.iv} onChange={(e) => setLeg(i, "iv", e.target.value)} placeholder="30" />
+                  </div>
+
+                  {/* Total cost */}
+                  {leg.entryPremium && leg.contracts && (
+                    <div style={{ display: "flex", alignItems: "flex-end" }}>
+                      <div style={{
+                        background: t.surface, border: `1px solid ${t.border}`, borderRadius: 8,
+                        padding: "10px 14px", width: "100%", display: "flex", justifyContent: "space-between",
+                      }}>
+                        <span style={{ fontSize: 11, color: t.text3, fontFamily: "'Space Mono', monospace", textTransform: "uppercase" }}>Total Cost</span>
+                        <span style={{ fontFamily: "'Space Mono', monospace", fontSize: 14, color: t.text }}>
+                          ${(+leg.entryPremium * +leg.contracts * 100).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        </span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            ))}
+
+            {/* Multi-leg add button for unlocked strategies */}
+            {!optConfig?.writeLocked && (
+              <button onClick={addLeg} style={{
+                width: "100%", background: t.accent + "15", border: `1px dashed ${t.accent}40`,
+                color: t.accent, borderRadius: 8, padding: "10px", cursor: "pointer",
+                fontSize: 13, fontFamily: "'Space Mono', monospace", marginBottom: 4,
+              }}>+ Add Leg</button>
+            )}
+          </>
+        )}
+
+        {/* ══ PLAN SECTION (stock only) ══ */}
+        {form.type === "stock" && (
+          <>
+            {sectionHeader("Risk Plan")}
+
+            {/* Live R preview */}
+            {plannedR !== null && (
+              <div style={{
+                background: plannedR >= 2 ? t.accent + "15" : t.danger + "15",
+                border: `1px solid ${plannedR >= 2 ? t.accent : t.danger}30`,
+                borderRadius: 10, padding: "12px 16px", marginBottom: 14,
+                display: "flex", justifyContent: "space-between", alignItems: "center",
+              }}>
+                <div>
+                  <div style={{ fontSize: 10, color: t.text3, fontFamily: "'Space Mono',monospace", textTransform: "uppercase", letterSpacing: 1.5, marginBottom: 3 }}>Planned R</div>
+                  <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 22, fontWeight: 700, color: plannedR >= 2 ? t.accent : t.danger }}>
+                    +{plannedR.toFixed(2)}R
+                  </div>
+                </div>
+                <div style={{ textAlign: "right" }}>
+                  <div style={{ fontSize: 10, color: t.text3, fontFamily: "'Space Mono',monospace", textTransform: "uppercase", letterSpacing: 1.5, marginBottom: 3 }}>Risk/Share</div>
+                  <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 16, color: t.danger }}>
+                    ${Math.abs(+form.purchasePrice - +form.stopLoss).toFixed(2)}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+              <div>
+                <label style={lbl}>Stop Loss ⚠</label>
+                <div style={{ position: "relative" }}>
+                  <span style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: t.text3, fontSize: 14 }}>$</span>
+                  <input style={{ ...inp, paddingLeft: 26, borderColor: form.stopLoss ? t.danger + "80" : t.inputBorder }}
+                    type="number" value={form.stopLoss} onChange={(e) => set("stopLoss", e.target.value)} placeholder="185.00" />
+                </div>
+              </div>
+              <div>
+                <label style={lbl}>Take Profit 🎯</label>
+                <div style={{ position: "relative" }}>
+                  <span style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: t.text3, fontSize: 14 }}>$</span>
+                  <input style={{ ...inp, paddingLeft: 26, borderColor: form.takeProfit ? t.accent + "80" : t.inputBorder }}
+                    type="number" value={form.takeProfit} onChange={(e) => set("takeProfit", e.target.value)} placeholder="200.00" />
+                </div>
+              </div>
+            </div>
+          </>
+        )}
+
+        {/* ══ TAGS + THESIS ══ */}
+        {sectionHeader("Notes")}
 
         <div style={{ marginBottom: 12 }}>
           <label style={lbl}>Tags</label>
@@ -642,18 +926,19 @@ Plan A Trade
 
         <div style={{ marginBottom: 20 }}>
           <label style={lbl}>Trade Thesis</label>
-          <textarea style={{ ...inp, height: 80, resize: "none" }} value={form.notes} onChange={(e) => set("notes", e.target.value)} placeholder="Why are you taking this trade? What's your edge?" />
+          <textarea style={{ ...inp, height: 76, resize: "none" }} value={form.notes}
+            onChange={(e) => set("notes", e.target.value)} placeholder="Why are you taking this trade? What's your edge?" />
         </div>
 
+        {/* Footer buttons */}
         <div style={{ display: "flex", gap: 10 }}>
           <button onClick={onClose} style={{ flex: 1, background: "none", border: `1px solid ${t.border}`, color: t.text3, borderRadius: 8, padding: 12, cursor: "pointer", fontSize: 14 }}>Cancel</button>
-          <button onClick={save} disabled={!form.ticker || !form.entryPrice || !form.stopLoss} style={{
-            flex: 2, background: (!form.ticker || !form.entryPrice || !form.stopLoss) ? t.card2 : t.accent,
-            border: "none", color: (!form.ticker || !form.entryPrice || !form.stopLoss) ? t.text3 : "#000",
-            borderRadius: 8, padding: 12, cursor: "pointer", fontSize: 14, fontWeight: 700, fontFamily: "'Space Mono', monospace",
-          }}>
-            Save Plan
-          </button>
+          <button onClick={save} disabled={!canSave} style={{
+            flex: 2, background: canSave ? t.accent : t.card2,
+            border: "none", color: canSave ? "#000" : t.text3,
+            borderRadius: 8, padding: 12, cursor: canSave ? "pointer" : "not-allowed",
+            fontSize: 14, fontWeight: 700, fontFamily: "'Space Mono', monospace",
+          }}>Save Plan</button>
         </div>
       </div>
     </div>
