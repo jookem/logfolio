@@ -546,11 +546,11 @@ function PlanModal({ onClose, onSave, t }) {
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 22 }}>
           <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 16, fontWeight: 700, color: t.accent }}>
            <img
-  src="/images/folder.svg"
+  src="/images/plan.svg"
   alt="plan"
   style={{ height: 18, width: 18 }}
 />
-Plan Trade
+Plan A Trade
           </div>
           <button onClick={onClose} style={{ background: "none", border: "none", color: t.text3, fontSize: 20, cursor: "pointer" }}>✕</button>
         </div>
@@ -3801,15 +3801,15 @@ const paginated = filtered
               <button
   onClick={() => setShowPlan(true)}
   style={{
-    background: T.surface,
-    border: `1px solid ${T.accent}40`,
-    color: T.accent,
-    borderRadius: 8,
-    padding: "7px 16px",
-    cursor: "pointer",
-    fontSize: 12,
-    fontWeight: 700,
-    fontFamily: "'Space Mono',monospace",
+                  background: T.accent,
+                  border: "none",
+                  color: "#000",
+                  borderRadius: 7,
+                  padding: "6px 13px",
+                  cursor: "pointer",
+                  fontSize: 12,
+                  fontWeight: 700,
+                  fontFamily: "'Space Mono',monospace",
   }}
 >
    <img src="/images/plan.svg" alt="plan" style={{ height: 16, width: 16 }} />
