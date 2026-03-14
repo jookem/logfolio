@@ -2262,7 +2262,7 @@ function CalendarView({ plList, t, mobile }) {
               gap: 8,
             }}
           >
-            <img src="/images/calendar" alt="calendar" style={{ height: 28, width: 28 }} />
+            <img src="/images/calendar.svg" alt="calendar" style={{ height: 28, width: 28 }} />
             <div
               style={{
                 fontFamily: "'Space Mono', monospace",
