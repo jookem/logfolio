@@ -1059,7 +1059,7 @@ function TradeFormModal({ initial, onClose, onSave, t }) {
   return (
     <div
       style={{
-        position: "absolute",
+        position: "fixed",
         inset: 0,
         background: "rgba(0,0,0,0.75)",
         zIndex: 100,
@@ -4112,17 +4112,15 @@ const paginated = filtered
             </div>
             {menuOpen && (
               <div
-                style={{position: "absolute", 
-                        top: 0, 
-                        left: 0, 
-                        right: 0, 
-                        minHeight: "100%", 
-                        background: "rgba(0,0,0,0.75)", 
-                        zIndex: 100, 
-                        display: "flex", 
-                        alignItems: "flex-start", 
-                        justifyContent: "center", 
-                        padding: 16,
+                style={{{
+                  position: "fixed",
+                  top: 54,
+                  left: 0,
+                  right: 0,
+                  background: T.navBg,
+                  borderBottom: `1px solid ${T.navBorder}`,
+                  zIndex: 49,
+                  padding: "8px 0",
                 }}
               >
                 {nav.map(([id, label]) => (
