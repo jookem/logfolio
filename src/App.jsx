@@ -471,6 +471,112 @@ function EquityCurve({ trades, t }) {
   );
 }
 // REPLACE the entire function with this:
+function ScreenshotUpload({ value = [], onChange, t }) {
+  const fileInputRef = useRef(null);
+  const [lightbox, setLightbox] = useState(null);
+
+  const handleFiles = (files) => {
+    const newImages = [];
+    let processed = 0;
+    Array.from(files).forEach((file) => {
+      if (!file.type.startsWith("image/")) return;
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        newImages.push({ id: Date.now() + Math.random(), src: e.target.result, name: file.name });
+        processed++;
+        if (processed === Array.from(files).filter(f => f.type.startsWith("image/")).length) {
+          onChange([...value, ...newImages]);
+        }
+      };
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const removeImage = (id) => onChange(value.filter((img) => img.id !== id));
+
+  return (
+    <div style={{ background: t.card2, border: `1px solid ${t.border}`, borderRadius: 10, padding: "12px 14px" }}>
+      <div style={{ fontSize: 11, color: t.text3, fontFamily: "'Space Mono', monospace", textTransform: "uppercase", letterSpacing: 1.5, marginBottom: 10 }}>
+        Chart Screenshots
+      </div>
+
+      {/* Upload button */}
+      <div
+        onClick={() => fileInputRef.current?.click()}
+        onDragOver={(e) => e.preventDefault()}
+        onDrop={(e) => { e.preventDefault(); handleFiles(e.dataTransfer.files); }}
+        style={{
+          border: `1px dashed ${t.accent}40`, borderRadius: 8,
+          padding: "14px", textAlign: "center", cursor: "pointer",
+          background: t.accent + "08", marginBottom: value.length > 0 ? 10 : 0,
+        }}
+      >
+        <div style={{ fontSize: 20, marginBottom: 4 }}>📸</div>
+        <div style={{ fontSize: 12, color: t.accent, fontFamily: "'Space Mono', monospace" }}>
+          Click or drag & drop charts
+        </div>
+        <div style={{ fontSize: 11, color: t.text3, marginTop: 2 }}>PNG, JPG, WebP supported</div>
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          multiple
+          style={{ display: "none" }}
+          onChange={(e) => handleFiles(e.target.files)}
+        />
+      </div>
+
+      {/* Thumbnails */}
+      {value.length > 0 && (
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 6 }}>
+          {value.map((img) => (
+            <div key={img.id} style={{ position: "relative", borderRadius: 6, overflow: "hidden", aspectRatio: "16/9", background: t.border }}>
+              <img
+                src={img.src}
+                alt={img.name}
+                onClick={() => setLightbox(img.src)}
+                style={{ width: "100%", height: "100%", objectFit: "cover", cursor: "pointer" }}
+              />
+              <button
+                onClick={(e) => { e.stopPropagation(); removeImage(img.id); }}
+                style={{
+                  position: "absolute", top: 3, right: 3,
+                  background: "rgba(0,0,0,0.7)", border: "none",
+                  color: "#fff", borderRadius: "50%", width: 18, height: 18,
+                  cursor: "pointer", fontSize: 11, display: "flex",
+                  alignItems: "center", justifyContent: "center", lineHeight: 1,
+                }}
+              >×</button>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Lightbox */}
+      {lightbox && (
+        <div
+          onClick={() => setLightbox(null)}
+          style={{
+            position: "fixed", inset: 0, background: "rgba(0,0,0,0.92)",
+            zIndex: 999, display: "flex", alignItems: "center", justifyContent: "center",
+            padding: 20,
+          }}
+        >
+          <img src={lightbox} alt="chart" style={{ maxWidth: "100%", maxHeight: "90vh", borderRadius: 8, objectFit: "contain" }} />
+          <button
+            onClick={() => setLightbox(null)}
+            style={{
+              position: "absolute", top: 20, right: 20,
+              background: "rgba(255,255,255,0.1)", border: "none",
+              color: "#fff", borderRadius: "50%", width: 36, height: 36,
+              cursor: "pointer", fontSize: 18,
+            }}
+          >✕</button>
+        </div>
+      )}
+    </div>
+  );
+}
 function VoiceNote({ value, onChange, t }) {
   const [recording, setRecording] = useState(false);
   const [mediaRecorder, setMediaRecorder] = useState(null);
@@ -1265,8 +1371,11 @@ const base = {
         </div>
 {/* ══ TAGS + THESIS ══ */}
         {sectionHeader("Notes")}
-        <div style={{ marginBottom: 12 }}>
+          <div style={{ marginBottom: 12 }}>
           <VoiceNote value={form.voiceNote} onChange={(v) => set("voiceNote", v)} t={t} />
+        </div>
+        <div style={{ marginBottom: 12 }}>
+          <ScreenshotUpload value={form.screenshots || []} onChange={(v) => set("screenshots", v)} t={t} />
         </div>
 
         <div style={{ marginBottom: 12 }}>
@@ -1819,9 +1928,14 @@ function TradeFormModal({ initial, onClose, onSave, onCSVImport, t }) {
             )}
           </div>
         </div>
-          <div style={{ marginBottom: 12 }}>
+        <div style={{ marginBottom: 12 }}>
           <VoiceNote value={form.voiceNote} onChange={(v) => set("voiceNote", v)} t={t} />
         </div>
+        <div style={{ marginBottom: 12 }}>
+          <ScreenshotUpload value={form.screenshots || []} onChange={(v) => set("screenshots", v)} t={t} />
+        </div>
+        <div style={{ marginBottom: 20 }}>
+          <label style={lbl}>Notes</label>
         <div style={{ marginBottom: 20 }}>
           <label style={lbl}>Notes</label>
           <textarea
@@ -2227,9 +2341,17 @@ function TradeRow({ trade, onClick, onEdit, onDelete, t, mobile }) {
                 flexWrap: "wrap",
               }}
             >
-              {trade.tags.map((tg) => (
-                <Tag key={tg} label={tg} t={t} />
+              {trade.tags?.length > 0 && (
+            <div style={{ display: "flex", gap: 4, marginTop: 5, flexWrap: "wrap" }}>
+              {trade.tags.map((tg) => (<Tag key={tg} label={tg} t={t} />))}
+            </div>
+          )}
+          {trade.screenshots?.length > 0 && (
+            <div style={{ display: "flex", gap: 4, marginTop: 5 }}>
+              {trade.screenshots.slice(0, 3).map((img) => (
+                <img key={img.id} src={img.src} alt="chart" style={{ height: 32, width: 48, objectFit: "cover", borderRadius: 4, border: `1px solid ${t.border}` }} />
               ))}
+              {trade.screenshots.length > 3 && <span style={{ fontSize: 10, color: t.text3, alignSelf: "center" }}>+{trade.screenshots.length - 3}</span>}
             </div>
           )}
         </div>
@@ -2621,6 +2743,22 @@ function TradeDetail({ trade, onClose, onEdit, t }) {
           </div>
         </div>
       </div>
+      {trade.screenshots?.length > 0 && (
+        <div style={{ marginBottom: 10 }}>
+          <div style={{ fontSize: 10, color: t.text3, marginBottom: 8, textTransform: "uppercase", letterSpacing: 1.5 }}>Chart Screenshots</div>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 6 }}>
+            {trade.screenshots.map((img) => (
+              <img
+                key={img.id}
+                src={img.src}
+                alt="chart"
+                onClick={() => window.open(img.src, "_blank")}
+                style={{ width: "100%", aspectRatio: "16/9", objectFit: "cover", borderRadius: 6, cursor: "pointer", border: `1px solid ${t.border}` }}
+              />
+            ))}
+          </div>
+        </div>
+      )}
 {trade.voiceNote && (
         <div style={{ background: t.card2, borderRadius: 8, padding: "12px 14px", marginBottom: 10 }}>
           <div style={{ fontSize: 10, color: t.text3, marginBottom: 8, textTransform: "uppercase", letterSpacing: 1.5 }}>Voice Note</div>
