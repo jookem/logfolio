@@ -3564,7 +3564,14 @@ function DaySession({ plList, plans, onAddTrade, t, mobile, isDark }) {
               fontFamily: "'Space Mono', monospace",
             }}
           >
-            + Log Trade
+            <img
+  src="/images/log.svg"
+  alt="log"
+  style={{
+    height: 16,
+    width: 16
+  }}
+/> LOG
           </button>
         </div>
         {todayTrades.length === 0 ? (
