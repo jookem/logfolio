@@ -488,6 +488,64 @@ function PlanModal({ onClose, onSave, t, isDark }) {
   const blankLeg = (pos = "buy", type = "call") => ({
     position: pos, type, strike: "", expiration: "", entryPremium: "", contracts: 1, iv: "",
   });
+  const [tickerLoading, setTickerLoading] = useState(false);
+const [chainLoading, setChainLoading] = useState(false);
+const [expiryDates, setExpiryDates] = useState([]);
+const [strikes, setStrikes] = useState([]);
+const POLY_KEY = "rU7M1eNvqo7OLQiLGZe5GPGCjb_dXsgU";
+
+const fetchStockPrice = async (ticker) => {
+  if (!ticker || ticker.length < 1) return;
+  setTickerLoading(true);
+  try {
+    const res = await fetch(`https://api.polygon.io/v2/last/trade/${ticker}?apiKey=${POLY_KEY}`);
+    const data = await res.json();
+    if (data.results?.p) {
+      set("currentPrice", data.results.p.toFixed(2));
+      set("purchasePrice", data.results.p.toFixed(2));
+    }
+  } catch {}
+  setTickerLoading(false);
+};
+
+const fetchExpiryDates = async (ticker) => {
+  if (!ticker) return;
+  setChainLoading(true);
+  setExpiryDates([]);
+  setStrikes([]);
+  try {
+    const res = await fetch(`https://api.polygon.io/v3/reference/options/contracts?underlying_ticker=${ticker}&limit=250&sort=expiration_date&apiKey=${POLY_KEY}`);
+    const data = await res.json();
+    if (data.results?.length) {
+      const dates = [...new Set(data.results.map(c => c.expiration_date))].sort();
+      setExpiryDates(dates);
+    }
+  } catch {}
+  setChainLoading(false);
+};
+
+const fetchStrikes = async (ticker, expiry, optionType) => {
+  if (!ticker || !expiry) return;
+  try {
+    const contractType = optionType === "call" ? "call" : "put";
+    const res = await fetch(`https://api.polygon.io/v3/reference/options/contracts?underlying_ticker=${ticker}&expiration_date=${expiry}&contract_type=${contractType}&limit=250&sort=strike_price&apiKey=${POLY_KEY}`);
+    const data = await res.json();
+    if (data.results?.length) {
+      setStrikes(data.results.map(c => ({ strike: c.strike_price, ticker: c.ticker })));
+    }
+  } catch {}
+};
+
+const fetchPremium = async (optionTicker, legIndex) => {
+  if (!optionTicker) return;
+  try {
+    const res = await fetch(`https://api.polygon.io/v2/last/trade/${optionTicker}?apiKey=${POLY_KEY}`);
+    const data = await res.json();
+    if (data.results?.p) {
+      setLeg(legIndex, "entryPremium", data.results.p.toFixed(2));
+    }
+  } catch {}
+};
 
   const [form, setForm] = useState({
     date: todayStr(),
@@ -655,10 +713,30 @@ function PlanModal({ onClose, onSave, t, isDark }) {
 
         {/* ── Ticker / Date / Type / Strategy ── */}
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-          <div>
-            <label style={lbl}>Ticker Symbol</label>
-            <input style={inp} value={form.ticker} onChange={(e) => set("ticker", e.target.value.toUpperCase())} placeholder="AAPL" />
-          </div>
+    <div>
+  <label style={lbl}>Ticker Symbol</label>
+  <div style={{ position: "relative" }}>
+    <input
+      style={{ ...inp, paddingRight: tickerLoading ? 36 : 14 }}
+      value={form.ticker}
+      onChange={(e) => {
+        const val = e.target.value.toUpperCase();
+        set("ticker", val);
+      }}
+      onBlur={(e) => {
+        const val = e.target.value.toUpperCase();
+        if (val.length >= 1) {
+          fetchStockPrice(val);
+          if (form.type === "options") fetchExpiryDates(val);
+        }
+      }}
+      placeholder="SPY"
+    />
+    {tickerLoading && (
+      <span style={{ position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)", fontSize: 11, color: t.text3 }}>...</span>
+    )}
+  </div>
+</div>
           <div>
             <label style={lbl}>Date</label>
             <input style={inp} type="date" value={form.date} onChange={(e) => set("date", e.target.value)} />
@@ -754,103 +832,134 @@ function PlanModal({ onClose, onSave, t, isDark }) {
               </div>
             )}
 
-            {form.legs.map((leg, i) => (
-              <div key={i} style={{
-                background: t.card2, border: `1px solid ${t.border}`,
-                borderRadius: 10, padding: 14, marginBottom: 10,
-              }}>
-                {form.legs.length > 1 && (
-                  <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 10 }}>
-                    <span style={{ fontSize: 11, color: t.accent, fontFamily: "'Space Mono', monospace" }}>Leg {i + 1}</span>
-                    <button onClick={() => removeLeg(i)} style={{ background: "none", border: "none", color: t.danger, cursor: "pointer", fontSize: 12 }}>Remove</button>
-                  </div>
-                )}
+ {form.legs.map((leg, i) => (
+  <div key={i} style={{
+    background: t.card2, border: `1px solid ${t.border}`,
+    borderRadius: 10, padding: 14, marginBottom: 10,
+  }}>
+    {form.legs.length > 1 && (
+      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 10 }}>
+        <span style={{ fontSize: 11, color: t.accent, fontFamily: "'Space Mono', monospace" }}>Leg {i + 1}</span>
+        <button onClick={() => removeLeg(i)} style={{ background: "none", border: "none", color: t.danger, cursor: "pointer", fontSize: 12 }}>Remove</button>
+      </div>
+    )}
 
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
-                  {/* Buy / Write */}
-                  <div>
-                    <label style={lbl}>Buy or Write</label>
-                    <select style={inp} value={leg.position}
-                      disabled={optConfig?.writeLocked}
-                      onChange={(e) => setLeg(i, "position", e.target.value)}>
-                      <option value="buy">Buy</option>
-                      <option value="sell">Write</option>
-                    </select>
-                  </div>
+    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+      {/* Buy / Write */}
+      <div>
+        <label style={lbl}>Buy or Write</label>
+        <select style={inp} value={leg.position}
+          onChange={(e) => {
+            setLeg(i, "position", e.target.value);
+            if (form.ticker && leg.expiration) fetchStrikes(form.ticker, leg.expiration, leg.type);
+          }}>
+          <option value="buy">Buy</option>
+          <option value="sell">Write</option>
+        </select>
+      </div>
 
-                  {/* Call / Put */}
-                  <div>
-                    <label style={lbl}>Call or Put</label>
-                    <select style={inp} value={leg.type}
-                      disabled={optConfig?.writeLocked}
-                      onChange={(e) => setLeg(i, "type", e.target.value)}>
-                      <option value="call">Call</option>
-                      <option value="put">Put</option>
-                    </select>
-                  </div>
+      {/* Call / Put */}
+      <div>
+        <label style={lbl}>Call or Put</label>
+        <select style={inp} value={leg.type}
+          onChange={(e) => {
+            setLeg(i, "type", e.target.value);
+            if (form.ticker && leg.expiration) fetchStrikes(form.ticker, leg.expiration, e.target.value);
+          }}>
+          <option value="call">Call</option>
+          <option value="put">Put</option>
+        </select>
+      </div>
 
-                  {/* Strike */}
-                  <div>
-                    <label style={lbl}>Strike Price *</label>
-                    <div style={{ position: "relative" }}>
-                      <span style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: t.text3, fontSize: 14 }}>$</span>
-                      <input style={{ ...inp, paddingLeft: 26 }} type="number"
-                        value={leg.strike} onChange={(e) => setLeg(i, "strike", e.target.value)} placeholder="200" />
-                    </div>
-                  </div>
+      {/* Expiry — dropdown from chain */}
+      <div>
+        <label style={lbl}>Expiry *</label>
+        {expiryDates.length > 0 ? (
+          <select style={inp} value={leg.expiration}
+            onChange={(e) => {
+              setLeg(i, "expiration", e.target.value);
+              fetchStrikes(form.ticker, e.target.value, leg.type);
+            }}>
+            <option value="">Select expiry</option>
+            {expiryDates.map(d => <option key={d} value={d}>{d}</option>)}
+          </select>
+        ) : (
+          <input style={inp} type="date" value={leg.expiration}
+            onChange={(e) => {
+              setLeg(i, "expiration", e.target.value);
+              if (form.ticker) fetchStrikes(form.ticker, e.target.value, leg.type);
+            }} />
+        )}
+      </div>
 
-                  {/* Expiry */}
-                  <div>
-                    <label style={lbl}>Expiry *</label>
-                    <input style={inp} type="date" value={leg.expiration}
-                      onChange={(e) => setLeg(i, "expiration", e.target.value)} />
-                  </div>
-
-                  {/* Price per option */}
-                  <div>
-                    <label style={lbl}>Price per Option *</label>
-                    <div style={{ position: "relative" }}>
-                      <span style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: t.text3, fontSize: 14 }}>$</span>
-                      <input style={{ ...inp, paddingLeft: 26 }} type="number"
-                        value={leg.entryPremium} onChange={(e) => setLeg(i, "entryPremium", e.target.value)} placeholder="4.20" />
-                    </div>
-                  </div>
-
-                  {/* Contracts */}
-                  <div>
-                    <label style={lbl}>Contracts</label>
-                    <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                      <input style={{ ...inp, flex: 1 }} type="number"
-                        value={leg.contracts} onChange={(e) => setLeg(i, "contracts", e.target.value)} placeholder="1" />
-                      <span style={{ fontSize: 12, color: t.text3, whiteSpace: "nowrap" }}>× 100</span>
-                    </div>
-                  </div>
-
-                  {/* IV */}
-                  <div>
-                    <label style={lbl}>IV (Implied Vol.) %</label>
-                    <input style={inp} type="number"
-                      value={leg.iv} onChange={(e) => setLeg(i, "iv", e.target.value)} placeholder="30" />
-                  </div>
-
-                  {/* Total cost */}
-                  {leg.entryPremium && leg.contracts && (
-                    <div style={{ display: "flex", alignItems: "flex-end" }}>
-                      <div style={{
-                        background: t.surface, border: `1px solid ${t.border}`, borderRadius: 8,
-                        padding: "10px 14px", width: "100%", display: "flex", justifyContent: "space-between",
-                      }}>
-                        <span style={{ fontSize: 11, color: t.text3, fontFamily: "'Space Mono', monospace", textTransform: "uppercase" }}>Total Cost</span>
-                        <span style={{ fontFamily: "'Space Mono', monospace", fontSize: 14, color: t.text }}>
-                          ${(+leg.entryPremium * +leg.contracts * 100).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                        </span>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
+      {/* Strike — dropdown from chain */}
+      <div>
+        <label style={lbl}>Strike Price *</label>
+        {strikes.length > 0 ? (
+          <select style={inp} value={leg.strike}
+            onChange={(e) => {
+              const selected = strikes.find(s => String(s.strike) === e.target.value);
+              setLeg(i, "strike", e.target.value);
+              if (selected?.ticker) fetchPremium(selected.ticker, i);
+            }}>
+            <option value="">Select strike</option>
+            {strikes.map(s => (
+              <option key={s.strike} value={s.strike}>${s.strike}</option>
             ))}
+          </select>
+        ) : (
+          <div style={{ position: "relative" }}>
+            <span style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: t.text3, fontSize: 14 }}>$</span>
+            <input style={{ ...inp, paddingLeft: 26 }} type="number"
+              value={leg.strike} onChange={(e) => setLeg(i, "strike", e.target.value)} placeholder="200" />
+          </div>
+        )}
+      </div>
 
+      {/* Price per option — auto-filled */}
+      <div>
+        <label style={lbl}>Price per Option *</label>
+        <div style={{ position: "relative" }}>
+          <span style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: t.text3, fontSize: 14 }}>$</span>
+          <input style={{ ...inp, paddingLeft: 26 }} type="number"
+            value={leg.entryPremium} onChange={(e) => setLeg(i, "entryPremium", e.target.value)} placeholder="4.20" />
+        </div>
+      </div>
+
+      {/* Contracts */}
+      <div>
+        <label style={lbl}>Contracts</label>
+        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+          <input style={{ ...inp, flex: 1 }} type="number"
+            value={leg.contracts} onChange={(e) => setLeg(i, "contracts", e.target.value)} placeholder="1" />
+          <span style={{ fontSize: 12, color: t.text3, whiteSpace: "nowrap" }}>× 100</span>
+        </div>
+      </div>
+
+      {/* IV */}
+      <div>
+        <label style={lbl}>IV (Implied Vol.) %</label>
+        <input style={inp} type="number"
+          value={leg.iv} onChange={(e) => setLeg(i, "iv", e.target.value)} placeholder="30" />
+      </div>
+
+      {/* Total cost */}
+      {leg.entryPremium && leg.contracts && (
+        <div style={{ display: "flex", alignItems: "flex-end" }}>
+          <div style={{
+            background: t.surface, border: `1px solid ${t.border}`, borderRadius: 8,
+            padding: "10px 14px", width: "100%", display: "flex", justifyContent: "space-between",
+          }}>
+            <span style={{ fontSize: 11, color: t.text3, fontFamily: "'Space Mono', monospace", textTransform: "uppercase" }}>Total Cost</span>
+            <span style={{ fontFamily: "'Space Mono', monospace", fontSize: 14, color: t.text }}>
+              ${(+leg.entryPremium * +leg.contracts * 100).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            </span>
+          </div>
+        </div>
+      )}
+    </div>
+  </div>
+))}
             {/* Multi-leg add button for unlocked strategies */}
             {!optConfig?.writeLocked && (
               <button onClick={addLeg} style={{
@@ -935,6 +1044,12 @@ function PlanModal({ onClose, onSave, t, isDark }) {
         </div>
 
         {/* Footer buttons */}
+        <div style={{
+  fontSize: 10, color: t.text3, fontFamily: "'Space Mono', monospace",
+  textAlign: "center", marginBottom: 14, letterSpacing: 1,
+}}>
+  ⏱ Market data is delayed 15 minutes · Powered by Polygon.io
+</div>
         <div style={{ display: "flex", gap: 10 }}>
           <button onClick={onClose} style={{ flex: 1, background: "none", border: `1px solid ${t.border}`, color: t.text3, borderRadius: 8, padding: 12, cursor: "pointer", fontSize: 14 }}>Cancel</button>
           <button onClick={save} disabled={!canSave} style={{
