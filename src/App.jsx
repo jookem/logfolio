@@ -2244,107 +2244,31 @@ function TradeRow({ trade, onClick, onEdit, onDelete, t, mobile }) {
   const pl = calcPL(trade);
   return (
     <div
-      style={{
-        padding: "12px 16px",
-        borderTop: `1px solid ${t.border}`,
-        cursor: "pointer",
-      }}
+      style={{ padding: "12px 16px", borderTop: `1px solid ${t.border}`, cursor: "pointer" }}
       onMouseEnter={(e) => (e.currentTarget.style.background = t.hoverBg)}
       onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
     >
       {mobile ? (
         <div onClick={onClick}>
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              marginBottom: 4,
-            }}
-          >
-            <span
-              style={{
-                fontFamily: "'Space Mono', monospace",
-                fontSize: 15,
-                fontWeight: 700,
-                color: t.text,
-              }}
-            >
+          <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
+            <span style={{ fontFamily: "'Space Mono', monospace", fontSize: 15, fontWeight: 700, color: t.text }}>
               {trade.ticker}
             </span>
-            <span
-              style={{
-                fontFamily: "'Space Mono', monospace",
-                fontSize: 15,
-                fontWeight: 700,
-                color: pl >= 0 ? t.accent : t.danger,
-              }}
-            >
-              {pl >= 0 ? "+" : ""}
-              {fmt(pl)}
-               {trade.r !== null && trade.r !== undefined && (
-    <div style={{ fontSize: 10, color: trade.r >= 0 ? t.accent : t.danger, opacity: 0.8 }}>
-      {fmtR(trade.r)}
-    </div>
-  )}
+            <span style={{ fontFamily: "'Space Mono', monospace", fontSize: 15, fontWeight: 700, color: pl >= 0 ? t.accent : t.danger }}>
+              {pl >= 0 ? "+" : ""}{fmt(pl)}
+              {trade.r !== null && trade.r !== undefined && (
+                <div style={{ fontSize: 10, color: trade.r >= 0 ? t.accent : t.danger, opacity: 0.8 }}>{fmtR(trade.r)}</div>
+              )}
             </span>
           </div>
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-            }}
-          >
-            <span style={{ fontSize: 12, color: t.text3 }}>
-              {trade.strategy} · {fmtDate(trade.date)}
-            </span>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <span style={{ fontSize: 12, color: t.text3 }}>{trade.strategy} · {fmtDate(trade.date)}</span>
             <div style={{ display: "flex", gap: 6 }}>
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onEdit();
-                }}
-                style={{
-                  background: "none",
-                  border: `1px solid ${t.border}`,
-                  color: t.text3,
-                  borderRadius: 5,
-                  padding: "2px 8px",
-                  cursor: "pointer",
-                  fontSize: 11,
-                }}
-              >
-                Edit
-              </button>
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onDelete();
-                }}
-                style={{
-                  background: "none",
-                  border: `1px solid ${t.danger}40`,
-                  color: t.danger,
-                  borderRadius: 5,
-                  padding: "2px 8px",
-                  cursor: "pointer",
-                  fontSize: 11,
-                }}
-              >
-                Del
-              </button>
+              <button onClick={(e) => { e.stopPropagation(); onEdit(); }} style={{ background: "none", border: `1px solid ${t.border}`, color: t.text3, borderRadius: 5, padding: "2px 8px", cursor: "pointer", fontSize: 11 }}>Edit</button>
+              <button onClick={(e) => { e.stopPropagation(); onDelete(); }} style={{ background: "none", border: `1px solid ${t.danger}40`, color: t.danger, borderRadius: 5, padding: "2px 8px", cursor: "pointer", fontSize: 11 }}>Del</button>
             </div>
           </div>
           {trade.tags?.length > 0 && (
-            <div
-              style={{
-                display: "flex",
-                gap: 4,
-                marginTop: 5,
-                flexWrap: "wrap",
-              }}
-            >
-{trade.tags?.length > 0 && (
             <div style={{ display: "flex", gap: 4, marginTop: 5, flexWrap: "wrap" }}>
               {trade.tags.map((tg) => (<Tag key={tg} label={tg} t={t} />))}
             </div>
@@ -2358,110 +2282,33 @@ function TradeRow({ trade, onClick, onEdit, onDelete, t, mobile }) {
             </div>
           )}
         </div>
-        </div>
       ) : (
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "85px 70px 1fr auto 90px",
-            gap: 10,
-            alignItems: "center",
-          }}
-        >
-          <span
-            onClick={onClick}
-            style={{
-              fontFamily: "'Space Mono', monospace",
-              fontSize: 11,
-              color: t.text3,
-            }}
-          >
-            {fmtDate(trade.date)}
-          </span>
-          <span
-            onClick={onClick}
-            style={{
-              fontFamily: "'Space Mono', monospace",
-              fontSize: 14,
-              fontWeight: 700,
-              color: t.text,
-            }}
-          >
-            {trade.ticker}
-          </span>
+        <div style={{ display: "grid", gridTemplateColumns: "85px 70px 1fr auto 90px", gap: 10, alignItems: "center" }}>
+          <span onClick={onClick} style={{ fontFamily: "'Space Mono', monospace", fontSize: 11, color: t.text3 }}>{fmtDate(trade.date)}</span>
+          <span onClick={onClick} style={{ fontFamily: "'Space Mono', monospace", fontSize: 14, fontWeight: 700, color: t.text }}>{trade.ticker}</span>
           <span onClick={onClick} style={{ fontSize: 13, color: t.text3 }}>
             {trade.strategy}
             {trade.tags?.length > 0 && (
-              <span
-                style={{
-                  marginLeft: 6,
-                  fontSize: 10,
-                  color: t.accent,
-                  background: t.accent + "15",
-                  borderRadius: 4,
-                  padding: "1px 6px",
-                }}
-              >
-                {trade.tags[0]}
-                {trade.tags.length > 1 ? ` +${trade.tags.length - 1}` : ""}
+              <span style={{ marginLeft: 6, fontSize: 10, color: t.accent, background: t.accent + "15", borderRadius: 4, padding: "1px 6px" }}>
+                {trade.tags[0]}{trade.tags.length > 1 ? ` +${trade.tags.length - 1}` : ""}
               </span>
+            )}
+            {trade.screenshots?.length > 0 && (
+              <span style={{ marginLeft: 6, fontSize: 10, color: t.text3 }}>📸 {trade.screenshots.length}</span>
             )}
           </span>
           <div style={{ display: "flex", gap: 6 }}>
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                onEdit();
-              }}
-              style={{
-                background: "none",
-                border: `1px solid ${t.border}`,
-                color: t.text3,
-                borderRadius: 6,
-                padding: "3px 8px",
-                cursor: "pointer",
-                fontSize: 11,
-              }}
-            >
-              Edit
-            </button>
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                onDelete();
-              }}
-              style={{
-                background: "none",
-                border: `1px solid ${t.danger}40`,
-                color: t.danger,
-                borderRadius: 6,
-                padding: "3px 8px",
-                cursor: "pointer",
-                fontSize: 11,
-              }}
-            >
-              Del
-            </button>
+            <button onClick={(e) => { e.stopPropagation(); onEdit(); }} style={{ background: "none", border: `1px solid ${t.border}`, color: t.text3, borderRadius: 6, padding: "3px 8px", cursor: "pointer", fontSize: 11 }}>Edit</button>
+            <button onClick={(e) => { e.stopPropagation(); onDelete(); }} style={{ background: "none", border: `1px solid ${t.danger}40`, color: t.danger, borderRadius: 6, padding: "3px 8px", cursor: "pointer", fontSize: 11 }}>Del</button>
           </div>
-          <span
-            onClick={onClick}
-            style={{
-              fontFamily: "'Space Mono', monospace",
-              fontSize: 13,
-              fontWeight: 700,
-              color: pl >= 0 ? t.accent : t.danger,
-              textAlign: "right",
-            }}
-          >
-            {pl >= 0 ? "+" : ""}
-            {fmt(pl)}
+          <span onClick={onClick} style={{ fontFamily: "'Space Mono', monospace", fontSize: 13, fontWeight: 700, color: pl >= 0 ? t.accent : t.danger, textAlign: "right" }}>
+            {pl >= 0 ? "+" : ""}{fmt(pl)}
           </span>
         </div>
       )}
     </div>
   );
 }
-
 function TradeDetail({ trade, onClose, onEdit, t }) {
   const pl = calcPL(trade);
   return (
