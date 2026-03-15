@@ -1097,7 +1097,7 @@ function TradeFormModal({ initial, onClose, onSave, t }) {
               color: t.accent,
             }}
           >
-            {form.id ? "✏ Edit Trade" : "+ New Trade"}
+            {form.id ? "✏ Edit Trade" : "+ Log A Trade"}
           </div>
           <button
             onClick={onClose}
