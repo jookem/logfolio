@@ -647,7 +647,7 @@ function PlanModal({ onClose, onSave, t, isDark }) {
 <img src="/images/plan.svg" alt="plan" style={{ 
   height: 16, 
   width: 16,
-  filter: isDark ? "brightness(0) invert(1) sepia(1) saturate(2) hue-rotate(100deg)" : "invert(27%) sepia(89%) saturate(400%) hue-rotate(116deg) brightness(96%) contrast(101%)
+  filter: isDark ? "brightness(0) invert(1) sepia(1) saturate(2) hue-rotate(100deg)" : "invert(27%) sepia(89%) saturate(400%) hue-rotate(116deg) brightness(96%) contrast(101%)"
 }} /> Plan A Trade
           </div>
           <button onClick={onClose} style={{ background: "none", border: "none", color: t.text3, fontSize: 20, cursor: "pointer" }}>✕</button>
