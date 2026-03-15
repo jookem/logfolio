@@ -737,20 +737,16 @@ const fetchPremium = async (optionTicker, legIndex, underlyingTicker) => {
 
         {/* ── Ticker / Date / Type / Strategy ── */}
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-    <div>
+<div>
   <label style={lbl}>Ticker Symbol</label>
   <div style={{ position: "relative" }}>
     <input
       style={{ ...inp, paddingRight: tickerLoading ? 36 : 14 }}
       value={form.ticker}
       onChange={(e) => {
-              const selected = strikes.find(s => String(s.strike) === e.target.value);
-              setLeg(i, "strike", e.target.value);
-              if (selected?.ticker) {
-                const currentTicker = form.ticker;
-                fetchPremium(selected.ticker, i, currentTicker);
-              }
-            }}>
+        const val = e.target.value.toUpperCase();
+        set("ticker", val);
+      }}
       onBlur={(e) => {
         const val = e.target.value.toUpperCase();
         if (val.length >= 1) {
@@ -758,12 +754,12 @@ const fetchPremium = async (optionTicker, legIndex, underlyingTicker) => {
           if (form.type === "options") fetchExpiryDates(val);
         }
       }}
-      placeholder="SPY"
+      placeholder="AAPL"
     />
     {tickerLoading && (
       <span style={{ position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)", fontSize: 11, color: t.text3 }}>...</span>
     )}
-      </div>
+  </div>
 </div>
           <div>
             <label style={lbl}>Date</label>
