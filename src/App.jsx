@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 
 const fmt = (n) =>
   new Intl.NumberFormat("en-US", {
@@ -470,8 +470,102 @@ function EquityCurve({ trades, t }) {
     </svg>
   );
 }
-// REPLACE the entire PlanModal function with this:
+// REPLACE the entire function with this:
+function VoiceNote({ value, onChange, t }) {
+  const [recording, setRecording] = useState(false);
+  const [mediaRecorder, setMediaRecorder] = useState(null);
+  const [audioUrl, setAudioUrl] = useState(value || null);
+  const chunksRef = useRef([]);
 
+  const startRecording = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mr = new MediaRecorder(stream);
+      chunksRef.current = [];
+      mr.ondataavailable = (e) => chunksRef.current.push(e.data);
+      mr.onstop = () => {
+        const blob = new Blob(chunksRef.current, { type: "audio/webm" });
+        const url = URL.createObjectURL(blob);
+        setAudioUrl(url);
+        const reader = new FileReader();
+        reader.onload = () => onChange(reader.result);
+        reader.readAsDataURL(blob);
+        stream.getTracks().forEach(t => t.stop());
+      };
+      mr.start();
+      setMediaRecorder(mr);
+      setRecording(true);
+    } catch {
+      alert("Microphone access denied.");
+    }
+  };
+
+  const stopRecording = () => {
+    mediaRecorder?.stop();
+    setRecording(false);
+  };
+
+  const clearRecording = () => {
+    setAudioUrl(null);
+    onChange(null);
+  };
+
+  return (
+    <div style={{
+      background: t.card2, border: `1px solid ${t.border}`,
+      borderRadius: 10, padding: "12px 14px",
+    }}>
+      <div style={{
+        fontSize: 11, color: t.text3, fontFamily: "'Space Mono', monospace",
+        textTransform: "uppercase", letterSpacing: 1.5, marginBottom: 10,
+      }}>Voice Note</div>
+
+      {!audioUrl ? (
+        <button
+          onClick={recording ? stopRecording : startRecording}
+          style={{
+            width: "100%",
+            background: recording ? t.danger + "20" : t.accent + "15",
+            border: `1px solid ${recording ? t.danger : t.accent}40`,
+            color: recording ? t.danger : t.accent,
+            borderRadius: 8, padding: "10px 14px", cursor: "pointer",
+            fontSize: 13, fontFamily: "'Space Mono', monospace",
+            display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+          }}
+        >
+          {recording ? (
+            <>
+              <span style={{
+                width: 8, height: 8, borderRadius: "50%",
+                background: t.danger, display: "inline-block",
+                animation: "pulse 1s infinite",
+              }} />
+              Stop Recording
+            </>
+          ) : (
+            <>🎙 Record Voice Note</>
+          )}
+        </button>
+      ) : (
+        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+          <audio controls src={audioUrl} style={{ width: "100%", height: 36 }} />
+          <button
+            onClick={clearRecording}
+            style={{
+              background: "none", border: `1px solid ${t.danger}40`,
+              color: t.danger, borderRadius: 7, padding: "6px 12px",
+              cursor: "pointer", fontSize: 12, fontFamily: "'Space Mono', monospace",
+            }}
+          >
+            × Delete Recording
+          </button>
+        </div>
+      )}
+
+      <style>{`@keyframes pulse { 0%,100% { opacity:1 } 50% { opacity:0.3 } }`}</style>
+    </div>
+  );
+}
 function PlanModal({ onClose, onSave, t, isDark }) {
   const OPTION_STRATEGIES = {
     "Long Call":        { stockLabel: "Underlying Stock (optional)", showStock: true, legs: [{ position: "buy", type: "call" }], writeLocked: true },
@@ -1169,8 +1263,11 @@ const base = {
             cursor: "pointer", fontSize: 13, whiteSpace: "nowrap",
           }}>+ Add</button>
         </div>
-        {/* ══ TAGS + THESIS ══ */}
+{/* ══ TAGS + THESIS ══ */}
         {sectionHeader("Notes")}
+        <div style={{ marginBottom: 12 }}>
+          <VoiceNote value={form.voiceNote} onChange={(v) => set("voiceNote", v)} t={t} />
+        </div>
 
         <div style={{ marginBottom: 12 }}>
           <label style={lbl}>Tags</label>
@@ -1721,6 +1818,9 @@ function TradeFormModal({ initial, onClose, onSave, onCSVImport, t }) {
               )
             )}
           </div>
+        </div>
+          <div style={{ marginBottom: 12 }}>
+          <VoiceNote value={form.voiceNote} onChange={(v) => set("voiceNote", v)} t={t} />
         </div>
         <div style={{ marginBottom: 20 }}>
           <label style={lbl}>Notes</label>
@@ -2521,6 +2621,12 @@ function TradeDetail({ trade, onClose, onEdit, t }) {
           </div>
         </div>
       </div>
+{trade.voiceNote && (
+        <div style={{ background: t.card2, borderRadius: 8, padding: "12px 14px", marginBottom: 10 }}>
+          <div style={{ fontSize: 10, color: t.text3, marginBottom: 8, textTransform: "uppercase", letterSpacing: 1.5 }}>Voice Note</div>
+          <audio controls src={trade.voiceNote} style={{ width: "100%", height: 36 }} />
+        </div>
+      )}
       {trade.notes && (
         <div
           style={{ background: t.card2, borderRadius: 8, padding: "12px 14px" }}
