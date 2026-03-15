@@ -1199,7 +1199,8 @@ const base = {
 }}>
   ⏱ Market data is delayed 15 minutes · Powered by Polygon.io
 </div>
-        <div style={{ display: "flex", gap: 10 }}>
+       <div style={{ display: "flex", gap: 10 }}>
+          <button onClick={onClose} style={{ flex: 1, background: "none", border: `1px solid ${t.border}`, color: t.text3, borderRadius: 8, padding: 12, cursor: "pointer", fontSize: 14 }}>Cancel</button>
             <button onClick={() => {
             if (!allChecked && canSave) {
               if (!window.confirm(`${checklist.length - checkedCount} checklist item(s) incomplete. Save anyway?`)) return;
