@@ -649,7 +649,14 @@ function VoiceNote({ value, onChange, t }) {
               Stop Recording
             </>
           ) : (
-            <>🎙 Record Voice Note</>
+            <><img
+  src="/images/rec.svg"
+  alt="log"
+  style={{
+    height: 16,
+    width: 16
+  }}
+/> Record Voice Note</>
           )}
         </button>
       ) : (
