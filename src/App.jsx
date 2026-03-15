@@ -4672,7 +4672,7 @@ const paginated = filtered
   style={{
     height: 16,
     width: 16,
-    filter: "brightness(0) saturate(100%) drop-shadow(0 0 0 currentColor)"
+    filter: "brightness(0) invert(1) sepia(1) saturate(1000%) hue-rotate(90deg)"
   }}
 /> PLAN
 </button>            
@@ -4873,7 +4873,7 @@ const paginated = filtered
   style={{
     height: 16,
     width: 16,
-    filter: "brightness(0) saturate(100%) drop-shadow(0 0 0 currentColor)"
+    filter: "brightness(0) invert(1) sepia(1) saturate(1000%) hue-rotate(90deg)"
   }}
 /> PLAN
 </button>
