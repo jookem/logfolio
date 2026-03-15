@@ -4659,7 +4659,15 @@ const paginated = filtered
     gap: 6,
   }}
 >
-    <img src="/images/plan.svg" alt="plan" style={{    height: 16,    width: 16,   filter: isDark ? "none" : "brightness(0) saturate(100%) invert(52%) sepia(73%) saturate(400%) hue-rotate(130deg) brightness(90%) contrast(101%)" }} /> PLAN
+    <img
+  src="/images/plan.svg"
+  alt="plan"
+  style={{
+    height: 16,
+    width: 16,
+    filter: isDark ? "none" : "brightness(0)"
+  }}
+/> PLAN
 </button>            
 </div>
             {menuOpen && (
@@ -4845,7 +4853,15 @@ const paginated = filtered
     gap: 6,
   }}
 >
-  <img src="/images/plan.svg" alt="plan" style={{    height: 16,    width: 16,   filter: isDark ? "none" : "brightness(0) saturate(100%) invert(52%) sepia(73%) saturate(400%) hue-rotate(130deg) brightness(90%) contrast(101%)" }} /> PLAN
+  <img
+  src="/images/plan.svg"
+  alt="plan"
+  style={{
+    height: 16,
+    width: 16,
+    filter: isDark ? "none" : "brightness(0)"
+  }}
+/> PLAN
 </button>
             </div>
           </>
