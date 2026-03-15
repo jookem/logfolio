@@ -4361,7 +4361,7 @@ const paginated = filtered
                   fontFamily: "'Space Mono', monospace",
                 }}
               >
-                ⚙ SETTINGS
+                <img src="/images/settings.svg" alt="settings" style={{ height: 16, width: 16, filter: isDark ? "brightness(0) invert(1)" : "brightness(0)" }} /> SETTINGS
               </button>
               <button
                 onClick={() => setShowAdd(true)}
@@ -4538,7 +4538,7 @@ const paginated = filtered
                   fontFamily: "'Space Mono', monospace",
                 }}
               >
-                ⚙ SETTINGS
+                <img src="/images/settings.svg" alt="settings" style={{ height: 16, width: 16, filter: isDark ? "brightness(0) invert(1)" : "brightness(0)" }} /> SETTINGS
               </button>
              
              
