@@ -3270,19 +3270,6 @@ function DaySession({ plList, plans, onAddTrade, t, mobile, isDark }) {
     hour: "2-digit",
     minute: "2-digit",
   });
-function updateClock() {
-  const now = new Date();
-  const timeStr = now.toLocaleTimeString("en-US", {
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit"
-  });
-
-  document.getElementById("clock").textContent = timeStr;
-}
-
-updateClock();              // run once immediately
-setInterval(updateClock, 1000); // update every second
   const dayName = now.toLocaleDateString("en-US", {
     weekday: "long",
     month: "long",
