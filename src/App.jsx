@@ -472,12 +472,12 @@ function EquityCurve({ trades, t }) {
 }
 // REPLACE the entire function with this:
 function ScreenshotUpload({ value = [], onChange, t }) {
-  const fileInputRef = useRef(null);
-  const [lightbox, setLightbox] = useState(null);
+const fileInputRef = useRef(null);
+const [lightbox, setLightbox] = useState(null);
 
-  const handleFiles = (files) => {
-    const newImages = [];
-    let processed = 0;
+const handleFiles = (files) => {
+const newImages = [];
+let processed = 0;
     Array.from(files).forEach((file) => {
       if (!file.type.startsWith("image/")) return;
       const reader = new FileReader();
@@ -1996,9 +1996,12 @@ function TradeFormModal({ initial, onClose, onSave, onCSVImport, t }) {
           </button>
         </div>
       </div>
+     </div>
+      )}
     </div>
   );
 }
+
 
 function CSVModal({ onClose, onImport, t }) {
   const [csv, setCsv] = useState("");
