@@ -2358,7 +2358,6 @@ function TradeRow({ trade, onClick, onEdit, onDelete, t, mobile }) {
             </div>
           )}
         </div>
-      </div>
       ) : (
         <div
           style={{
