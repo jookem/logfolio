@@ -763,7 +763,6 @@ const fetchPremium = async (optionTicker, legIndex, underlyingTicker) => {
     {tickerLoading && (
       <span style={{ position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)", fontSize: 11, color: t.text3 }}>...</span>
     )}
-  </div>
 </div>
           <div>
             <label style={lbl}>Date</label>
@@ -923,6 +922,7 @@ const fetchPremium = async (optionTicker, legIndex, underlyingTicker) => {
           </div>
         )}
       </div>
+      
       {/* Strike — dropdown from chain */}
       <div>
         <label style={lbl}>Strike Price *</label>
