@@ -547,9 +547,11 @@ const fetchStrikes = async (ticker, expiry, optionType) => {
 const fetchPremium = async (optionTicker, legIndex, underlyingTicker) => {
   if (!optionTicker) return;
   const ticker = underlyingTicker || form.ticker;
+  console.log("fetchPremium called:", optionTicker, ticker);
   try {
     const res = await fetch(`https://api.polygon.io/v3/snapshot/options/${ticker}/${optionTicker}?apiKey=${POLY_KEY}`);
     const data = await res.json();
+    console.log("Polygon snapshot response:", JSON.stringify(data));
     const result = data.results;
     if (!result) return;
 
@@ -560,6 +562,7 @@ const fetchPremium = async (optionTicker, legIndex, underlyingTicker) => {
       result.last_trade?.price ||
       null;
 
+    console.log("Premium value:", premium);
     if (premium) setLeg(legIndex, "entryPremium", premium.toFixed(2));
 
     const iv =
@@ -567,9 +570,12 @@ const fetchPremium = async (optionTicker, legIndex, underlyingTicker) => {
       result.implied_volatility ||
       null;
 
+    console.log("IV value:", iv);
     if (iv) setLeg(legIndex, "iv", (iv * 100).toFixed(1));
 
-  } catch {}
+  } catch (e) {
+    console.log("fetchPremium error:", e.message);
+  }
 };
   const [form, setForm] = useState({
     date: todayStr(),
