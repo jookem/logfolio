@@ -3169,7 +3169,7 @@ function QuoteOfDay({ t }) {
     </div>
   );
 }
-function DaySession({ plList, plans, onAddTrade, t, mobile }) {
+function DaySession({ plList, plans, onAddTrade, t, mobile, isDark }) {
   const today = todayStr();
   const todayTrades = plList.filter((tr) => tr.date === today);
   const sessionPL = todayTrades.reduce((s, tr) => s + tr.pl, 0);
@@ -4765,6 +4765,7 @@ const paginated = filtered
             onAddTrade={() => setShowAdd(true)}
             t={T}
             mobile={mobile}
+            isDark={isDark}
           />
         )}
 
