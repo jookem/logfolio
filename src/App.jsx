@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect, useRef } from "reactLO
+import { useState, useMemo, useEffect, useRef } from "react"
 
 const fmt = (n) =>
   new Intl.NumberFormat("en-US", {
