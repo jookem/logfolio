@@ -4309,7 +4309,7 @@ const paginated = filtered
         }}
       >
         <img
-          src="images/logo.png"
+          src="images/logfolio.svg"
           alt="logo"
           style={{ height: 28, width: 28 }}
         />
