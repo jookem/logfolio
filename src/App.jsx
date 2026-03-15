@@ -1575,6 +1575,13 @@ function TradeFormModal({ initial, onClose, onSave, onCSVImport, t }) {
               color: t.accent,
             }}
           >
+            <img src="/images/log.svg" alt="log" style={{ 
+  height: 20, 
+  width: 20,
+  verticalAlign: "middle",
+  marginBottom: 2,
+  filter: isDark ? "none" : "brightness(0) saturate(100%) invert(52%) sepia(73%) saturate(400%) hue-rotate(130deg) brightness(90%) contrast(101%)"
+}} />
            {form.id ? "Edit Trade" : "+ Log A Trade"}
           </div>
           <button
