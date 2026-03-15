@@ -2349,7 +2349,7 @@ function TradeRow({ trade, onClick, onEdit, onDelete, t, mobile }) {
               {trade.tags.map((tg) => (<Tag key={tg} label={tg} t={t} />))}
             </div>
           )}
-          {trade.screenshots?.length > 0 && (
+{trade.screenshots?.length > 0 && (
             <div style={{ display: "flex", gap: 4, marginTop: 5 }}>
               {trade.screenshots.slice(0, 3).map((img) => (
                 <img key={img.id} src={img.src} alt="chart" style={{ height: 32, width: 48, objectFit: "cover", borderRadius: 4, border: `1px solid ${t.border}` }} />
@@ -2358,6 +2358,7 @@ function TradeRow({ trade, onClick, onEdit, onDelete, t, mobile }) {
             </div>
           )}
         </div>
+      </div>
       ) : (
         <div
           style={{
