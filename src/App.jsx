@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect, useRef } from "react";
+import { useState, useMemo, useEffect, useRef } from "reactLO
 
 const fmt = (n) =>
   new Intl.NumberFormat("en-US", {
@@ -1934,8 +1934,6 @@ function TradeFormModal({ initial, onClose, onSave, onCSVImport, t }) {
         <div style={{ marginBottom: 12 }}>
           <ScreenshotUpload value={form.screenshots || []} onChange={(v) => set("screenshots", v)} t={t} />
         </div>
-        <div style={{ marginBottom: 20 }}>
-          <label style={lbl}>Notes</label>
         <div style={{ marginBottom: 20 }}>
           <label style={lbl}>Notes</label>
           <textarea
