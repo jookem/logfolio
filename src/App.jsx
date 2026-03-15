@@ -4209,7 +4209,7 @@ const paginated = filtered
         href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap"
         rel="stylesheet"
       />
-      <style>{`* { margin: 0; padding: 0; box-sizing: border-box; } body { background: ${T.bg}; }`}</style>
+      <style>{`   * { margin: 0; padding: 0; box-sizing: border-box; }   body { background: ${T.bg}; }   input[type="date"]::-webkit-calendar-picker-indicator {     filter: ${isDark ? "invert(1)" : "none"};     cursor: pointer;   } `}</style>
 
       {toast && (
         <div
