@@ -1573,12 +1573,9 @@ function TradeFormModal({ initial, onClose, onSave, onCSVImport, t }) {
               fontSize: 16,
               fontWeight: 700,
               color: t.accent,
-              display: "flex",
-              alignItems: "center",
-              gap: 6,
             }}
           >
-           {form.id ? "Edit Trade" : "Log A Trade"}
+           {form.id ? "Edit Trade" : "+ Log A Trade"}
           </div>
           <button
             onClick={onClose}
