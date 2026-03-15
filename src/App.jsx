@@ -544,13 +544,13 @@ const fetchStrikes = async (ticker, expiry, optionType) => {
   } catch {}
 };
 
-const fetchPremium = async (optionTicker, legIndex) => {
+const fetchPremium = async (optionTicker, legIndex, underlyingTicker) => {
   if (!optionTicker) return;
+  const ticker = underlyingTicker || form.ticker;
   try {
     const [tradeRes, detailRes] = await Promise.all([
       fetch(`https://api.polygon.io/v2/last/trade/${optionTicker}?apiKey=${POLY_KEY}`),
-      fetch(`https://api.polygon.io/v3/snapshot/options/${form.ticker}/${optionTicker}?apiKey=${POLY_KEY}`)
-    ]);
+      fetch(`https://api.polygon.io/v3/snapshot/options/${ticker}/${optionTicker}?apiKey=${POLY_KEY}`)    ]);
     const tradeData = await tradeRes.json();
     const detailData = await detailRes.json();
 
@@ -744,9 +744,13 @@ const fetchPremium = async (optionTicker, legIndex) => {
       style={{ ...inp, paddingRight: tickerLoading ? 36 : 14 }}
       value={form.ticker}
       onChange={(e) => {
-        const val = e.target.value.toUpperCase();
-        set("ticker", val);
-      }}
+              const selected = strikes.find(s => String(s.strike) === e.target.value);
+              setLeg(i, "strike", e.target.value);
+              if (selected?.ticker) {
+                const currentTicker = form.ticker;
+                fetchPremium(selected.ticker, i, currentTicker);
+              }
+            }}>
       onBlur={(e) => {
         const val = e.target.value.toUpperCase();
         if (val.length >= 1) {
@@ -895,27 +899,30 @@ const fetchPremium = async (optionTicker, legIndex) => {
         </select>
       </div>
 
-      {/* Expiry — dropdown from chain */}
+{/* Expiry — calendar input */}
       <div>
         <label style={lbl}>Expiry *</label>
-        {expiryDates.length > 0 ? (
-          <select style={inp} value={leg.expiration}
-            onChange={(e) => {
-              setLeg(i, "expiration", e.target.value);
-              fetchStrikes(form.ticker, e.target.value, leg.type);
-            }}>
-            <option value="">Select expiry</option>
-            {expiryDates.map(d => <option key={d} value={d}>{d}</option>)}
-          </select>
-        ) : (
-          <input style={inp} type="date" value={leg.expiration}
-            onChange={(e) => {
-              setLeg(i, "expiration", e.target.value);
-              if (form.ticker) fetchStrikes(form.ticker, e.target.value, leg.type);
-            }} />
+        <input
+          style={{
+            ...inp,
+            borderColor: leg.expiration && expiryDates.length > 0 && !expiryDates.includes(leg.expiration)
+              ? t.danger + "80"
+              : t.inputBorder,
+          }}
+          type="date"
+          value={leg.expiration}
+          min={todayStr()}
+          onChange={(e) => {
+            setLeg(i, "expiration", e.target.value);
+            if (form.ticker) fetchStrikes(form.ticker, e.target.value, leg.type);
+          }}
+        />
+        {leg.expiration && expiryDates.length > 0 && !expiryDates.includes(leg.expiration) && (
+          <div style={{ fontSize: 10, color: t.danger, marginTop: 4, fontFamily: "'Space Mono', monospace" }}>
+            No contracts found for this date
+          </div>
         )}
       </div>
-
       {/* Strike — dropdown from chain */}
       <div>
         <label style={lbl}>Strike Price *</label>
