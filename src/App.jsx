@@ -733,8 +733,8 @@ const fetchPremium = async (optionTicker, legIndex, underlyingTicker) => {
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
           <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 16, fontWeight: 700, color: t.accent }}>
 <img src="/images/plan.svg" alt="plan" style={{ 
-  height: 16, 
-  width: 16,
+  height: 18, 
+  width: 18,
   filter: isDark ? "brightness(0) invert(1) sepia(1) saturate(2) hue-rotate(100deg)" : "invert(27%) sepia(89%) saturate(400%) hue-rotate(116deg) brightness(96%) contrast(101%)"
 }} /> Plan A Trade
           </div>
