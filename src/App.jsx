@@ -1237,7 +1237,7 @@ const base = {
           </>
         )}
 
-        {/* ══ PLAN SECTION (stock only) ══ */}
+        {/* ══  SECTION (stock only) ══ */}
         {form.type === "stock" && (
           <>
             {sectionHeader("Risk Plan")}
@@ -4666,14 +4666,17 @@ const paginated = filtered
     gap: 6,
   }}
 >
-      <img
-    src="/images/plan.svg"
-    alt="plan"
-    style={{
-      height: 16,
-      width: 16
-    }}
-  /> PLAN
+     <img
+  src="/images/plan.svg"
+  alt="plan"
+  style={{
+    height: 16,
+    width: 16,
+    filter:  isDark
+  ? "brightness(0) invert(1) sepia(1) saturate(5) hue-rotate(160deg)"
+  : "brightness(0) sepia(1) saturate(5) hue-rotate(160deg)"
+  }}
+/> PLAN
 </button>            
 </div>
             {menuOpen && (
@@ -4871,7 +4874,11 @@ const paginated = filtered
     alt="plan"
     style={{
       height: 16,
-      width: 16
+      width: 16,
+      filter: isDark
+  ? "brightness(0) invert(1) sepia(1) saturate(5) hue-rotate(160deg)"
+  : "brightness(0) sepia(1) saturate(5) hue-rotate(160deg)"
+      
     }}
   /> PLAN
 </button>
