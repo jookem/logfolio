@@ -1627,6 +1627,22 @@ function TradeFormModal({ initial, onClose, onSave, t }) {
             Cancel
           </button>
           <button
+            onClick={onCSVImport}
+            style={{
+              flex: 1,
+              background: t.surface,
+              border: `1px solid ${t.border}`,
+              color: t.text2,
+              borderRadius: 8,
+              padding: 12,
+              cursor: "pointer",
+              fontSize: 14,
+              fontFamily: "'Space Mono', monospace",
+            }}
+          >
+            CSV
+          </button>
+          <button
             onClick={save}
             style={{
               flex: 2,
@@ -4296,28 +4312,20 @@ const paginated = filtered
               >
                 ☰
               </button>
-              <button
-                onClick={() => setIsDark((d) => !d)}
+             <button
+                onClick={() => setShowSettings(true)}
                 style={{
                   background: T.surface,
                   border: `1px solid ${T.border}`,
+                  color: T.text2,
                   borderRadius: 8,
-                  padding: "5px",
+                  padding: "6px 14px",
                   cursor: "pointer",
-                  width: 34,
-                  height: 34,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
+                  fontSize: 12,
+                  fontFamily: "'Space Mono', monospace",
                 }}
               >
-                <img
-                  src={
-                    isDark ? "/images/light-mode.svg" : "/images/dark-mode.svg"
-                  }
-                  alt="theme"
-                  style={{ width: 20, height: 20 }}
-                />
+                ⚙ Settings
               </button>
               <button
                 onClick={() => setShowAdd(true)}
@@ -4481,64 +4489,23 @@ const paginated = filtered
                 alignItems: "center",
               }}
             >
-              <button
-                onClick={() => setIsDark((d) => !d)}
-                style={{
-                  background: T.surface,
-                  border: `1px solid ${T.border}`,
-                  borderRadius: 8,
-                  padding: "5px",
-                  cursor: "pointer",
-                  width: 34,
-                  height: 34,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                <object
-                  data={
-                    isDark ? "/images/light-mode.svg" : "/images/dark-mode.svg"
-                  }
-                  type="image/svg+xml"
-                  style={{
-                    width: 20,
-                    height: 20,
-                    pointerEvents: "none",
-                    filter: isDark
-                      ? "brightness(0) invert(1)"
-                      : "brightness(0) invert(0.4)",
-                  }}
-                />
-              </button>
-              <button
-                onClick={() => setShowCSV(true)}
+             <button
+                onClick={() => setShowSettings(true)}
                 style={{
                   background: T.surface,
                   border: `1px solid ${T.border}`,
                   color: T.text2,
                   borderRadius: 8,
-                  padding: "6px 11px",
+                  padding: "6px 14px",
                   cursor: "pointer",
                   fontSize: 12,
+                  fontFamily: "'Space Mono', monospace",
                 }}
               >
-                CSV
+                ⚙ Settings
               </button>
-              <button
-                onClick={clearAll}
-                style={{
-                  background: "none",
-                  border: `1px solid ${T.border}`,
-                  color: T.text3,
-                  borderRadius: 8,
-                  padding: "6px 10px",
-                  cursor: "pointer",
-                  fontSize: 12,
-                }}
-              >
-                Clear
-              </button>
+             
+             
               <button
                 onClick={() => setShowAdd(true)}
                 style={{
