@@ -1099,7 +1099,7 @@ const fetchPremium = async (optionTicker, legIndex, underlyingTicker) => {
     </div>
   );
 }
-function TradeFormModal({ initial, onClose, onSave, t }) {
+function TradeFormModal({ initial, onClose, onSave, onCSVImport, t }) {
   const blank = {
     date: todayStr(),
     ticker: "",
@@ -5383,9 +5383,11 @@ const paginated = filtered
       </div>
 
       {showAdd && (
+{showAdd && (
         <TradeFormModal
           onClose={() => setShowAdd(false)}
           onSave={addTrade}
+          onCSVImport={() => { setShowAdd(false); setShowCSV(true); }}
           t={T}
         />
       )}
@@ -5394,6 +5396,7 @@ const paginated = filtered
           initial={editTrade}
           onClose={() => setEditTrade(null)}
           onSave={saveTrade}
+          onCSVImport={() => { setEditTrade(null); setShowCSV(true); }}
           t={T}
         />
       )}
