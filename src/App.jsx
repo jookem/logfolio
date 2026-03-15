@@ -3269,6 +3269,7 @@ function DaySession({ plList, plans, onAddTrade, t, mobile, isDark }) {
   const timeStr = now.toLocaleTimeString("en-US", {
     hour: "2-digit",
     minute: "2-digit",
+    second: "2-digit"
   });
   const dayName = now.toLocaleDateString("en-US", {
     weekday: "long",
