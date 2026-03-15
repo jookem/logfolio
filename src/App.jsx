@@ -3168,7 +3168,7 @@ function QuoteOfDay({ t }) {
     </div>
   );
 }
-function DaySession({ plList, onAddTrade, t, mobile }) {
+function DaySession({ plList, plans, onAddTrade, t, mobile }) {
   const today = todayStr();
   const todayTrades = plList.filter((tr) => tr.date === today);
   const sessionPL = todayTrades.reduce((s, tr) => s + tr.pl, 0);
@@ -3187,6 +3187,57 @@ function DaySession({ plList, onAddTrade, t, mobile }) {
   return (
     <div>
       <QuoteOfDay t={t} />
+      {plans?.length > 0 && (
+  <div style={{
+    background: t.surface, border: `1px solid ${t.border}`,
+    borderRadius: 12, overflow: "hidden", marginBottom: 24,
+  }}>
+    <div style={{
+      padding: "13px 16px", borderBottom: `1px solid ${t.border}`,
+      fontFamily: "'Space Mono', monospace", fontSize: 10,
+      color: t.accent, textTransform: "uppercase", letterSpacing: 2,
+    }}>
+      📋 Trade Plans ({plans.length})
+    </div>
+    {plans.map((plan) => (
+      <div key={plan.id} style={{
+        display: "flex", justifyContent: "space-between", alignItems: "center",
+        padding: "12px 16px", borderBottom: `1px solid ${t.border}`,
+      }}>
+        <div>
+          <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 14, fontWeight: 700, color: t.text, marginBottom: 3 }}>
+            {plan.ticker}
+          </div>
+          <div style={{ fontSize: 12, color: t.text3 }}>
+            {plan.strategy} · {plan.type === "options" ? `${plan.legs?.length}L options` : `${plan.numShares || plan.shares || "—"} shares`}
+          </div>
+          {plan.checklist && (
+            <div style={{ fontSize: 11, color: plan.checklistComplete ? t.accent : "#f59e0b", marginTop: 3, fontFamily: "'Space Mono', monospace" }}>
+              {plan.checklistComplete ? "✓ Checklist complete" : `⚠ ${plan.checklist.filter(c => c.checked).length}/${plan.checklist.length} checked`}
+            </div>
+          )}
+        </div>
+        <div style={{ textAlign: "right" }}>
+          {plan.type === "stock" && plan.purchasePrice && (
+            <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 13, color: t.text3 }}>
+              @ ${(+plan.purchasePrice).toFixed(2)}
+            </div>
+          )}
+          {plan.plannedR && (
+            <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 13, color: t.accent }}>
+              +{plan.plannedR.toFixed(2)}R
+            </div>
+          )}
+          {plan.stopLoss && (
+            <div style={{ fontSize: 11, color: t.danger, marginTop: 2 }}>
+              SL ${plan.stopLoss}
+            </div>
+          )}
+        </div>
+      </div>
+    ))}
+  </div>
+)}
       <div
         style={{
           display: "flex",
@@ -4707,8 +4758,9 @@ const paginated = filtered
       <div style={{ padding: mobile ? 14 : 28 }}>
         {tab === "ai" && <AIInsights plList={plList} t={T} mobile={mobile} />}
         {tab === "today" && (
-          <DaySession
+<DaySession
             plList={plList}
+            plans={trades.filter(t => t.status === "planned")}
             onAddTrade={() => setShowAdd(true)}
             t={T}
             mobile={mobile}
