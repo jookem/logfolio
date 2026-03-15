@@ -514,16 +514,24 @@ const fetchExpiryDates = async (ticker) => {
   setExpiryDates([]);
   setStrikes([]);
   try {
-    const res = await fetch(`https://api.polygon.io/v3/reference/options/contracts?underlying_ticker=${ticker}&limit=250&sort=expiration_date&apiKey=${POLY_KEY}`);
-    const data = await res.json();
-    if (data.results?.length) {
-      const dates = [...new Set(data.results.map(c => c.expiration_date))].sort();
-      setExpiryDates(dates);
+    let allDates = [];
+    let url = `https://api.polygon.io/v3/reference/options/contracts?underlying_ticker=${ticker}&contract_type=call&limit=1000&sort=expiration_date&order=asc&apiKey=${POLY_KEY}`;
+    while (url) {
+      const res = await fetch(url);
+      const data = await res.json();
+      if (data.results?.length) {
+        const dates = data.results.map(c => c.expiration_date);
+        allDates = [...allDates, ...dates];
+      }
+      url = data.next_url ? `${data.next_url}&apiKey=${POLY_KEY}` : null;
+      if (allDates.length > 2000) break;
     }
+    const uniqueDates = [...new Set(allDates)].sort();
+    setExpiryDates(uniqueDates);
   } catch {}
   setChainLoading(false);
 };
-
+  
 const fetchStrikes = async (ticker, expiry, optionType) => {
   if (!ticker || !expiry) return;
   try {
@@ -539,14 +547,30 @@ const fetchStrikes = async (ticker, expiry, optionType) => {
 const fetchPremium = async (optionTicker, legIndex) => {
   if (!optionTicker) return;
   try {
-    const res = await fetch(`https://api.polygon.io/v2/last/trade/${optionTicker}?apiKey=${POLY_KEY}`);
-    const data = await res.json();
-    if (data.results?.p) {
-      setLeg(legIndex, "entryPremium", data.results.p.toFixed(2));
+    const [tradeRes, detailRes] = await Promise.all([
+      fetch(`https://api.polygon.io/v2/last/trade/${optionTicker}?apiKey=${POLY_KEY}`),
+      fetch(`https://api.polygon.io/v3/snapshot/options/${form.ticker}/${optionTicker}?apiKey=${POLY_KEY}`)
+    ]);
+    const tradeData = await tradeRes.json();
+    const detailData = await detailRes.json();
+
+    if (tradeData.results?.p) {
+      setLeg(legIndex, "entryPremium", tradeData.results.p.toFixed(2));
+    } else if (detailData.results?.day?.close) {
+      setLeg(legIndex, "entryPremium", detailData.results.day.close.toFixed(2));
+    } else if (detailData.results?.last_quote?.midpoint) {
+      setLeg(legIndex, "entryPremium", detailData.results.last_quote.midpoint.toFixed(2));
+    }
+
+    if (detailData.results?.greeks?.implied_volatility) {
+      const ivPct = (detailData.results.greeks.implied_volatility * 100).toFixed(1);
+      setLeg(legIndex, "iv", ivPct);
+    } else if (detailData.results?.implied_volatility) {
+      const ivPct = (detailData.results.implied_volatility * 100).toFixed(1);
+      setLeg(legIndex, "iv", ivPct);
     }
   } catch {}
 };
-
   const [form, setForm] = useState({
     date: todayStr(),
     ticker: "",
