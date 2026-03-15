@@ -3197,7 +3197,7 @@ function DaySession({ plList, plans, onAddTrade, t, mobile }) {
       fontFamily: "'Space Mono', monospace", fontSize: 10,
       color: t.accent, textTransform: "uppercase", letterSpacing: 2,
     }}>
-      📋 Trade Plans ({plans.length})
+      <img src="/images/plan.svg" alt="plan" style={{    height: 12,    width: 12,   filter: isDark ? "none" : "brightness(0) saturate(100%) invert(52%) sepia(73%) saturate(400%) hue-rotate(130deg) brightness(90%) contrast(101%)" }} /> Trade Plans ({plans.length})
     </div>
     {plans.map((plan) => (
       <div key={plan.id} style={{
