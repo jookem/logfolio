@@ -5382,7 +5382,6 @@ const paginated = filtered
         )}
       </div>
 
-      {showAdd && (
 {showAdd && (
         <TradeFormModal
           onClose={() => setShowAdd(false)}
