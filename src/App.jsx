@@ -4672,7 +4672,9 @@ const paginated = filtered
   style={{
     height: 16,
     width: 16,
-    filter: "brightness(0) invert(1) sepia(1) saturate(1000%) hue-rotate(90deg)"
+    filter: isDark
+      ? "brightness(0) saturate(100%) invert(82%) sepia(79%) saturate(748%) hue-rotate(86deg) brightness(102%) contrast(103%)"
+      : "brightness(0) saturate(100%) invert(52%) sepia(73%) saturate(400%) hue-rotate(130deg) brightness(90%) contrast(101%)"
   }}
 /> PLAN
 </button>            
@@ -4873,7 +4875,9 @@ const paginated = filtered
   style={{
     height: 16,
     width: 16,
-    filter: "brightness(0) invert(1) sepia(1) saturate(1000%) hue-rotate(90deg)"
+    filter: isDark
+      ? "brightness(0) saturate(100%) invert(82%) sepia(79%) saturate(748%) hue-rotate(86deg) brightness(102%) contrast(103%)"
+      : "brightness(0) saturate(100%) invert(52%) sepia(73%) saturate(400%) hue-rotate(130deg) brightness(90%) contrast(101%)"
   }}
 /> PLAN
 </button>
