@@ -3211,9 +3211,9 @@ function DaySession({ plList, plans, onAddTrade, t, mobile }) {
           <div style={{ fontSize: 12, color: t.text3 }}>
             {plan.strategy} · {plan.type === "options" ? `${plan.legs?.length}L options` : `${plan.numShares || plan.shares || "—"} shares`}
           </div>
-          {plan.checklist && (
+         {plan.checklist?.length > 0 && (
             <div style={{ fontSize: 11, color: plan.checklistComplete ? t.accent : "#f59e0b", marginTop: 3, fontFamily: "'Space Mono', monospace" }}>
-              {plan.checklistComplete ? "✓ Checklist complete" : `⚠ ${plan.checklist.filter(c => c.checked).length}/${plan.checklist.length} checked`}
+              {plan.checklistComplete ? "✓ Checklist complete" : `⚠ ${(plan.checklist || []).filter(c => c.checked).length}/${plan.checklist.length} checked`}
             </div>
           )}
         </div>
