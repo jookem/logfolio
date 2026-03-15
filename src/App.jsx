@@ -4652,29 +4652,27 @@ const paginated = filtered
               </button>
               <button
   onClick={() => setShowPlan(true)}
-  style={{    background: T.surface,
-    border: `1px solid ${T.accent}40`,
-    color: T.accent,
-    borderRadius: 7,
-    padding: "6px 13px",
-    cursor: "pointer",
-    fontSize: 12,
-    fontWeight: 700,
-    fontFamily: "'Space Mono',monospace",
-    display: "flex",
-    alignItems: "center",
-    gap: 6,
-  }}
+                style={{
+                  background: T.accent,
+                  border: "none",
+                  color: "#000",
+                  borderRadius: 8,
+                  padding: "7px 16px",
+                  cursor: "pointer",
+                  fontSize: 12,
+                  fontWeight: 700,
+                  fontFamily: "'Space Mono',monospace",
+                  display: "flex",
+                  alignItems: "center",
+                  gap:6,
+                }}
 >
 <img
   src="/images/plan.svg"
   alt="plan"
   style={{
     height: 16,
-    width: 16,
-    filter: isDark
-      ? "brightness(0) saturate(100%) invert(82%) sepia(79%) saturate(748%) hue-rotate(86deg) brightness(102%) contrast(103%)"
-      : "brightness(0) saturate(100%) invert(52%) sepia(73%) saturate(400%) hue-rotate(130deg) brightness(90%) contrast(101%)"
+    width: 16
   }}
 /> PLAN
 </button>            
@@ -4854,19 +4852,20 @@ const paginated = filtered
               </button>
               <button
   onClick={() => setShowPlan(true)}
-  style={{
-    background: T.surface,
-    border: `1px solid ${T.accent}40`,
-    color: T.accent,
-    borderRadius: 7,
-    padding: "6px 13px",
-    cursor: "pointer",
-    fontSize: 12,
-    fontWeight: 700,
-    fontFamily: "'Space Mono',monospace",
-    display: "flex",
-    alignItems: "center",
-    gap: 6,
+                 style={{
+                  background: T.accent,
+                  border: "none",
+                  color: "#000",
+                  borderRadius: 8,
+                  padding: "7px 16px",
+                  cursor: "pointer",
+                  fontSize: 12,
+                  fontWeight: 700,
+                  fontFamily: "'Space Mono',monospace",
+                  display: "flex",
+                  alignItems: "center",
+                  gap:6,
+                }}
   }}
 >
 <img
@@ -4874,10 +4873,7 @@ const paginated = filtered
   alt="plan"
   style={{
     height: 16,
-    width: 16,
-    filter: isDark
-      ? "brightness(0) saturate(100%) invert(82%) sepia(79%) saturate(748%) hue-rotate(86deg) brightness(102%) contrast(103%)"
-      : "brightness(0) saturate(100%) invert(52%) sepia(73%) saturate(400%) hue-rotate(130deg) brightness(90%) contrast(101%)"
+    width: 16
   }}
 /> PLAN
 </button>
