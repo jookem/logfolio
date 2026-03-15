@@ -548,27 +548,27 @@ const fetchPremium = async (optionTicker, legIndex, underlyingTicker) => {
   if (!optionTicker) return;
   const ticker = underlyingTicker || form.ticker;
   try {
-    const [tradeRes, detailRes] = await Promise.all([
-      fetch(`https://api.polygon.io/v2/last/trade/${optionTicker}?apiKey=${POLY_KEY}`),
-      fetch(`https://api.polygon.io/v3/snapshot/options/${ticker}/${optionTicker}?apiKey=${POLY_KEY}`)    ]);
-    const tradeData = await tradeRes.json();
-    const detailData = await detailRes.json();
+    const res = await fetch(`https://api.polygon.io/v3/snapshot/options/${ticker}/${optionTicker}?apiKey=${POLY_KEY}`);
+    const data = await res.json();
+    const result = data.results;
+    if (!result) return;
 
-    if (tradeData.results?.p) {
-      setLeg(legIndex, "entryPremium", tradeData.results.p.toFixed(2));
-    } else if (detailData.results?.day?.close) {
-      setLeg(legIndex, "entryPremium", detailData.results.day.close.toFixed(2));
-    } else if (detailData.results?.last_quote?.midpoint) {
-      setLeg(legIndex, "entryPremium", detailData.results.last_quote.midpoint.toFixed(2));
-    }
+    const premium =
+      result.last_quote?.midpoint ||
+      ((result.last_quote?.bid + result.last_quote?.ask) / 2) ||
+      result.day?.close ||
+      result.last_trade?.price ||
+      null;
 
-    if (detailData.results?.greeks?.implied_volatility) {
-      const ivPct = (detailData.results.greeks.implied_volatility * 100).toFixed(1);
-      setLeg(legIndex, "iv", ivPct);
-    } else if (detailData.results?.implied_volatility) {
-      const ivPct = (detailData.results.implied_volatility * 100).toFixed(1);
-      setLeg(legIndex, "iv", ivPct);
-    }
+    if (premium) setLeg(legIndex, "entryPremium", premium.toFixed(2));
+
+    const iv =
+      result.greeks?.implied_volatility ||
+      result.implied_volatility ||
+      null;
+
+    if (iv) setLeg(legIndex, "iv", (iv * 100).toFixed(1));
+
   } catch {}
 };
   const [form, setForm] = useState({
