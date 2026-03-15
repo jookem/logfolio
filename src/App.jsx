@@ -1578,7 +1578,7 @@ function TradeFormModal({ initial, onClose, onSave, onCSVImport, t }) {
               gap: 6,
             }}
           >
-            {form.id ? "✏ Edit Trade" : "<img src="/images/log.svg" alt="log" style={{    height: 16,    width: 16,   filter: isDark ? "none" : "brightness(0) saturate(100%) invert(52%) sepia(73%) saturate(400%) hue-rotate(130deg) brightness(90%) contrast(101%)" }} />  Log A Trade"}
+            {form.id ? "✏ Edit Trade" : <img src="/images/log.svg" alt="log" style={{    height: 32,    width: 32,   filter: isDark ? "none" : "brightness(0) saturate(100%) invert(52%) sepia(73%) saturate(400%) hue-rotate(130deg) brightness(90%) contrast(101%)" }} />"Log A Trade"}
           </div>
           <button
             onClick={onClose}
