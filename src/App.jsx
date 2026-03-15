@@ -4033,6 +4033,73 @@ Provide 4-6 patterns. Be brutally honest but constructive.`,
     </div>
   );
 }
+function SettingsModal({ onClose, isDark, setIsDark, onClear, t }) {
+  return (
+    <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.75)", zIndex: 100, display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }}>
+      <div style={{ background: t.card, border: `1px solid ${t.border}`, borderRadius: 16, width: "100%", maxWidth: 380, padding: 24 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
+          <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 16, fontWeight: 700, color: t.accent }}>Settings</div>
+          <button onClick={onClose} style={{ background: "none", border: "none", color: t.text3, fontSize: 20, cursor: "pointer" }}>✕</button>
+        </div>
+
+        {/* Theme */}
+        <div style={{ background: t.surface, border: `1px solid ${t.border}`, borderRadius: 12, padding: "14px 16px", marginBottom: 12 }}>
+          <div style={{ fontSize: 11, color: t.text3, fontFamily: "'Space Mono', monospace", textTransform: "uppercase", letterSpacing: 1.5, marginBottom: 12 }}>Appearance</div>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <span style={{ fontSize: 14, color: t.text }}>Theme</span>
+            <div style={{ display: "flex", gap: 8 }}>
+              <button
+                onClick={() => setIsDark(false)}
+                style={{
+                  background: !isDark ? t.accent : t.card2,
+                  border: `1px solid ${!isDark ? t.accent : t.border}`,
+                  color: !isDark ? "#000" : t.text3,
+                  borderRadius: 7, padding: "6px 14px", cursor: "pointer",
+                  fontSize: 12, fontFamily: "'Space Mono', monospace", fontWeight: !isDark ? 700 : 400,
+                }}
+              >
+                Light
+              </button>
+              <button
+                onClick={() => setIsDark(true)}
+                style={{
+                  background: isDark ? t.accent : t.card2,
+                  border: `1px solid ${isDark ? t.accent : t.border}`,
+                  color: isDark ? "#000" : t.text3,
+                  borderRadius: 7, padding: "6px 14px", cursor: "pointer",
+                  fontSize: 12, fontFamily: "'Space Mono', monospace", fontWeight: isDark ? 700 : 400,
+                }}
+              >
+                Dark
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Data */}
+        <div style={{ background: t.surface, border: `1px solid ${t.border}`, borderRadius: 12, padding: "14px 16px" }}>
+          <div style={{ fontSize: 11, color: t.text3, fontFamily: "'Space Mono', monospace", textTransform: "uppercase", letterSpacing: 1.5, marginBottom: 12 }}>Data</div>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <div>
+              <div style={{ fontSize: 14, color: t.text }}>Clear All Trades</div>
+              <div style={{ fontSize: 11, color: t.text3, marginTop: 2 }}>Permanently delete all trade data</div>
+            </div>
+            <button
+              onClick={() => { onClear(); onClose(); }}
+              style={{
+                background: t.danger + "15", border: `1px solid ${t.danger}40`,
+                color: t.danger, borderRadius: 7, padding: "6px 14px",
+                cursor: "pointer", fontSize: 12, fontFamily: "'Space Mono', monospace",
+              }}
+            >
+              Clear
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
 export default function TradingJournal() {
   const [trades, setTrades] = useState(() => loadTrades() ?? SEED_TRADES);
   const [isDark, setIsDark] = useState(() => loadTheme() === "dark");
@@ -4325,7 +4392,7 @@ const paginated = filtered
                   fontFamily: "'Space Mono', monospace",
                 }}
               >
-                ⚙ Settings
+                ⚙ SETTINGS
               </button>
               <button
                 onClick={() => setShowAdd(true)}
@@ -4502,7 +4569,7 @@ const paginated = filtered
                   fontFamily: "'Space Mono', monospace",
                 }}
               >
-                ⚙ Settings
+                ⚙ SETTINGS
               </button>
              
              
