@@ -654,12 +654,14 @@ const fetchPremium = async (optionTicker, legIndex, underlyingTicker) => {
 
   const save = () => {
     if (!form.ticker) return;
-    const base = {
+const base = {
       ...form,
       ticker: form.ticker.toUpperCase(),
       id: Date.now(),
       status: "planned",
       tags: form.tags || [],
+      checklist: checklist,
+      checklistComplete: allChecked,
     };
     if (form.type === "stock") {
       base.entryPrice = +form.purchasePrice;
@@ -1055,7 +1057,90 @@ const fetchPremium = async (optionTicker, legIndex, underlyingTicker) => {
             </div>
           </>
         )}
+{/* ══ PRE-TRADE CHECKLIST ══ */}
+        {sectionHeader("Pre-Trade Checklist")}
 
+        {/* Progress bar */}
+        <div style={{ marginBottom: 14 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
+            <span style={{ fontSize: 11, color: t.text3, fontFamily: "'Space Mono', monospace" }}>
+              {checkedCount}/{checklist.length} completed
+            </span>
+            {allChecked && (
+              <span style={{ fontSize: 11, color: t.accent, fontFamily: "'Space Mono', monospace" }}>✓ Ready to trade</span>
+            )}
+            {!allChecked && checkedCount > 0 && (
+              <span style={{ fontSize: 11, color: "#f59e0b", fontFamily: "'Space Mono', monospace" }}>⚠ {checklist.length - checkedCount} remaining</span>
+            )}
+          </div>
+          <div style={{ height: 4, background: t.border2, borderRadius: 2 }}>
+            <div style={{
+              height: "100%",
+              width: `${(checkedCount / checklist.length) * 100}%`,
+              background: allChecked ? t.accent : "#f59e0b",
+              borderRadius: 2,
+              transition: "width 0.3s ease",
+            }} />
+          </div>
+        </div>
+
+        {/* Checklist items */}
+        <div style={{ display: "flex", flexDirection: "column", gap: 6, marginBottom: 12 }}>
+          {checklist.map((item, i) => (
+            <div key={i} style={{
+              display: "flex", alignItems: "center", gap: 10,
+              background: item.checked ? t.accent + "10" : t.card2,
+              border: `1px solid ${item.checked ? t.accent + "40" : t.border}`,
+              borderRadius: 8, padding: "10px 12px",
+              cursor: "pointer", transition: "all 0.15s",
+            }}
+              onClick={() => toggleCheck(i)}
+            >
+              <div style={{
+                width: 18, height: 18, borderRadius: 4, flexShrink: 0,
+                border: `2px solid ${item.checked ? t.accent : t.text4}`,
+                background: item.checked ? t.accent : "transparent",
+                display: "flex", alignItems: "center", justifyContent: "center",
+              }}>
+                {item.checked && (
+                  <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+                    <path d="M1.5 5L4 7.5L8.5 2.5" stroke="#000" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                )}
+              </div>
+              <span style={{
+                fontSize: 13, flex: 1,
+                color: item.checked ? t.accent : t.text2,
+                textDecoration: item.checked ? "line-through" : "none",
+                opacity: item.checked ? 0.7 : 1,
+              }}>
+                {item.label}
+              </span>
+              {item.custom && (
+                <button onClick={(e) => { e.stopPropagation(); removeCheckItem(i); }}
+                  style={{ background: "none", border: "none", color: t.danger, cursor: "pointer", fontSize: 14, padding: 0, lineHeight: 1 }}>
+                  ×
+                </button>
+              )}
+            </div>
+          ))}
+        </div>
+
+        {/* Add custom item */}
+        <div style={{ display: "flex", gap: 8, marginBottom: 4 }}>
+          <input
+            style={{ ...inp, flex: 1 }}
+            value={newCheckItem}
+            onChange={(e) => setNewCheckItem(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && addCheckItem()}
+            placeholder="Add custom checklist item..."
+          />
+          <button onClick={addCheckItem} style={{
+            background: t.accent + "20", border: `1px solid ${t.accent}40`,
+            color: t.accent, borderRadius: 8, padding: "0 14px",
+            cursor: "pointer", fontSize: 13, whiteSpace: "nowrap",
+          }}>+ Add</button>
+        </div>
         {/* ══ TAGS + THESIS ══ */}
         {sectionHeader("Notes")}
 
@@ -1087,13 +1172,17 @@ const fetchPremium = async (optionTicker, legIndex, underlyingTicker) => {
   ⏱ Market data is delayed 15 minutes · Powered by Polygon.io
 </div>
         <div style={{ display: "flex", gap: 10 }}>
-          <button onClick={onClose} style={{ flex: 1, background: "none", border: `1px solid ${t.border}`, color: t.text3, borderRadius: 8, padding: 12, cursor: "pointer", fontSize: 14 }}>Cancel</button>
-          <button onClick={save} disabled={!canSave} style={{
-            flex: 2, background: canSave ? t.accent : t.card2,
+            <button onClick={() => {
+            if (!allChecked && canSave) {
+              if (!window.confirm(`${checklist.length - checkedCount} checklist item(s) incomplete. Save anyway?`)) return;
+            }
+            save();
+          }} disabled={!canSave} style={{
+            flex: 2, background: canSave ? (allChecked ? t.accent : "#f59e0b") : t.card2,
             border: "none", color: canSave ? "#000" : t.text3,
             borderRadius: 8, padding: 12, cursor: canSave ? "pointer" : "not-allowed",
             fontSize: 14, fontWeight: 700, fontFamily: "'Space Mono', monospace",
-          }}>Save Plan</button>
+          }}>{allChecked ? "Save Plan ✓" : "Save Plan ⚠"}</button>
         </div>
       </div>
     </div>
@@ -1126,6 +1215,37 @@ function TradeFormModal({ initial, onClose, onSave, onCSVImport, t }) {
     ],
   };
   const [form, setForm] = useState(initial || blank);
+  const DEFAULT_CHECKLIST = [
+  "Checked trend direction",
+  "Checked support/resistance",
+  "Set stop loss",
+  "Checked news/earnings",
+  "Sized position correctly",
+  "Checked risk/reward ratio",
+  "Confirmed entry signal",
+  "Checked market conditions",
+];
+
+const [checklist, setChecklist] = useState(
+  DEFAULT_CHECKLIST.map((item) => ({ label: item, checked: false, custom: false }))
+);
+const [newCheckItem, setNewCheckItem] = useState("");
+
+const toggleCheck = (i) =>
+  setChecklist((c) => c.map((item, idx) => idx === i ? { ...item, checked: !item.checked } : item));
+
+const addCheckItem = () => {
+  const val = newCheckItem.trim();
+  if (!val) return;
+  setChecklist((c) => [...c, { label: val, checked: false, custom: true }]);
+  setNewCheckItem("");
+};
+
+const removeCheckItem = (i) =>
+  setChecklist((c) => c.filter((_, idx) => idx !== i));
+
+const allChecked = checklist.every((item) => item.checked);
+const checkedCount = checklist.filter((item) => item.checked).length;
   const [tagInput, setTagInput] = useState("");
   const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
   const setLeg = (i, k, v) =>
