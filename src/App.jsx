@@ -4536,9 +4536,12 @@ const paginated = filtered
                   cursor: "pointer",
                   fontSize: 12,
                   fontFamily: "'Space Mono', monospace",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 6,
                 }}
               >
-                <img src="/images/settings.svg" alt="settings" style={{ height: 16, width: 16, display: "block", display: "block", filter: isDark ? "brightness(0) invert(1)" : "brightness(0)" }} /> SETTINGS
+                <img src="/images/settings.svg" alt="settings" style={{ height: 16, width: 16, filter: isDark ? "brightness(0) invert(1)" : "brightness(0)" }} /> SETTINGS
               </button>
              
              
