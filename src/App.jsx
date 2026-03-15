@@ -4636,6 +4636,8 @@ const paginated = filtered
                   fontSize: 12,
                   fontWeight: 700,
                   fontFamily: "'Space Mono',monospace",
+                  alignItems: "center",
+                  gap: 6,
                 }}
               >
                 <img src="/images/log.svg" alt="log" style={{    height: 16,    width: 16,   filter: isDark ? "none" : "brightness(0) saturate(100%) invert(52%) sepia(73%) saturate(400%) hue-rotate(130deg) brightness(90%) contrast(101%)" }} /> LOG
@@ -4818,9 +4820,11 @@ const paginated = filtered
                   fontSize: 12,
                   fontWeight: 700,
                   fontFamily: "'Space Mono',monospace",
+                  alignItems: "center",
+                  gap:6,
                 }}
               >
-                + LOG
+                <img src="/images/plan.svg" alt="log" style={{    height: 16,    width: 16,   filter: isDark ? "none" : "brightness(0) saturate(100%) invert(52%) sepia(73%) saturate(400%) hue-rotate(130deg) brightness(90%) contrast(101%)" }} /> LOG
               </button>
               <button
   onClick={() => setShowPlan(true)}
