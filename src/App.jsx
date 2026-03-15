@@ -4259,8 +4259,10 @@ const importTrades = (incoming) => {
     }
   };
 
-  const plList = useMemo(
-  () => trades.map((t) => ({ ...t, pl: calcPL(t), r: calcR(t) })),
+const plList = useMemo(
+  () => trades
+    .filter((t) => t.status !== "planned")
+    .map((t) => ({ ...t, pl: calcPL(t), r: calcR(t) })),
   [trades]
 );
   const allTags = useMemo(
