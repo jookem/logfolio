@@ -4628,7 +4628,7 @@ const paginated = filtered
                   fontSize: 16,
                 }}
               >
-                ☰
+                 <img src="/images/menu.svg" alt="settings" style={{ height: 16, width: 16, filter: isDark ? "brightness(0) invert(1)" : "brightness(0)" }} />
               </button>
              <button
                 onClick={() => setShowSettings(true)}
