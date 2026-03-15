@@ -498,11 +498,11 @@ const fetchStockPrice = async (ticker) => {
   if (!ticker || ticker.length < 1) return;
   setTickerLoading(true);
   try {
-    const res = await fetch(`https://api.polygon.io/v2/last/trade/${ticker}?apiKey=${POLY_KEY}`);
+    const res = await fetch(`https://api.polygon.io/v2/aggs/ticker/${ticker}/prev?adjusted=true&apiKey=${POLY_KEY}`);
     const data = await res.json();
-    if (data.results?.p) {
-      set("currentPrice", data.results.p.toFixed(2));
-      set("purchasePrice", data.results.p.toFixed(2));
+    if (data.results?.[0]?.c) {
+      set("currentPrice", data.results[0].c.toFixed(2));
+      set("purchasePrice", data.results[0].c.toFixed(2));
     }
   } catch {}
   setTickerLoading(false);
