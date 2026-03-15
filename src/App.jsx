@@ -472,7 +472,7 @@ function EquityCurve({ trades, t }) {
 }
 // REPLACE the entire PlanModal function with this:
 
-function PlanModal({ onClose, onSave, t }) {
+function PlanModal({ onClose, onSave, t, isDark }) {
   const OPTION_STRATEGIES = {
     "Long Call":        { stockLabel: "Underlying Stock (optional)", showStock: true, legs: [{ position: "buy", type: "call" }], writeLocked: true },
     "Long Put":         { stockLabel: "Underlying Stock (optional)", showStock: true, legs: [{ position: "buy", type: "put" }], writeLocked: true },
@@ -644,10 +644,10 @@ function PlanModal({ onClose, onSave, t }) {
         {/* Header */}
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
           <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 16, fontWeight: 700, color: t.accent }}>
-            <img src="/images/plan.svg" alt="plan" style={{ 
+<img src="/images/plan.svg" alt="plan" style={{ 
   height: 16, 
   width: 16,
-  filter: "brightness(0) invert(1)"
+  filter: isDark ? "brightness(0) invert(1) sepia(1) saturate(2) hue-rotate(100deg)" : "invert(27%) sepia(89%) saturate(400%) hue-rotate(116deg) brightness(96%) contrast(101%)
 }} /> Plan A Trade
           </div>
           <button onClick={onClose} style={{ background: "none", border: "none", color: t.text3, fontSize: 20, cursor: "pointer" }}>✕</button>
@@ -4182,7 +4182,7 @@ const paginated = filtered
                   fontFamily: "'Space Mono',monospace",
                 }}
               >
-                + ADD
+                + LOG
               </button>
               <button
   onClick={() => setShowPlan(true)}
@@ -4405,7 +4405,7 @@ const paginated = filtered
                   fontFamily: "'Space Mono',monospace",
                 }}
               >
-                + ADD
+                + LOG
               </button>
               <button
   onClick={() => setShowPlan(true)}
@@ -4413,8 +4413,8 @@ const paginated = filtered
     background: T.surface,
     border: `1px solid ${T.accent}40`,
     color: T.accent,
-    borderRadius: 8,
-    padding: "7px 16px",
+    borderRadius: 7,
+    padding: "6px 13px",
     cursor: "pointer",
     fontSize: 12,
     fontWeight: 700,
@@ -4424,7 +4424,7 @@ const paginated = filtered
     gap: 6,
   }}
 >
-  <img src="/images/plan.svg" alt="plan" style={{    height: 16,    width: 16,   filter: isDark ? "brightness(0) invert(1)" : "invert(27%) sepia(89%) saturate(400%) hue-rotate(116deg) brightness(96%) contrast(101%)" }} /> PLAN
+  <img src="/images/plan.svg" alt="plan" style={{    height: 16,    width: 16,   filter: isDark ? "brightness(0) invert(1) sepia(1) saturate(2) hue-rotate(100deg)" : "invert(27%) sepia(89%) saturate(400%) hue-rotate(116deg) brightness(96%) contrast(101%)" }} /> PLAN
 </button>
             </div>
           </>
@@ -5258,6 +5258,7 @@ const paginated = filtered
     onClose={() => setShowPlan(false)}
     onSave={savePlan}
     t={T}
+    isDark={isDark}
   />
 )}
     </div>
