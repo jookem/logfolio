@@ -4666,15 +4666,15 @@ const paginated = filtered
     gap: 6,
   }}
 >
-     <img
+    <img
   src="/images/plan.svg"
   alt="plan"
   style={{
     height: 16,
     width: 16,
-    filter:  isDark
-  ? "brightness(0) invert(1) sepia(1) saturate(5) hue-rotate(160deg)"
-  : "brightness(0) sepia(1) saturate(5) hue-rotate(160deg)"
+    filter: isDark
+      ? "brightness(0) invert(1)"
+      : "brightness(0)"
   }}
 /> PLAN
 </button>            
@@ -4870,17 +4870,16 @@ const paginated = filtered
   }}
 >
   <img
-    src="/images/plan.svg"
-    alt="plan"
-    style={{
-      height: 16,
-      width: 16,
-      filter: isDark
-  ? "brightness(0) invert(1) sepia(1) saturate(5) hue-rotate(160deg)"
-  : "brightness(0) sepia(1) saturate(5) hue-rotate(160deg)"
-      
-    }}
-  /> PLAN
+  src="/images/plan.svg"
+  alt="plan"
+  style={{
+    height: 16,
+    width: 16,
+    filter: isDark
+      ? "brightness(0) invert(1)"
+      : "brightness(0)"
+  }}
+/> PLAN
 </button>
             </div>
           </>
