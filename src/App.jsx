@@ -577,30 +577,58 @@ const fetchPremium = async (optionTicker, legIndex, underlyingTicker) => {
     console.log("fetchPremium error:", e.message);
   }
 };
-  const [form, setForm] = useState({
+const [form, setForm] = useState({
     date: todayStr(),
     ticker: "",
     type: "stock",
     strategy: "Breakout",
     direction: "long",
-    // stock section
     stockDirection: "buy",
     currentPrice: "",
     purchasePrice: "",
     numShares: "",
-    // options
     legs: [blankLeg()],
-    // plan fields
     stopLoss: "",
     takeProfit: "",
     notes: "",
     tags: [],
   });
 
-  const [tagInput, setTagInput] = useState("");
-  const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
+const DEFAULT_CHECKLIST = [
+    "Checked trend direction",
+    "Checked support/resistance",
+    "Set stop loss",
+    "Checked news/earnings",
+    "Sized position correctly",
+    "Checked risk/reward ratio",
+    "Confirmed entry signal",
+    "Checked market conditions",
+  ];
 
-  const setLeg = (i, k, v) =>
+const [checklist, setChecklist] = useState(
+    DEFAULT_CHECKLIST.map((item) => ({ label: item, checked: false, custom: false }))
+  );
+const [newCheckItem, setNewCheckItem] = useState("");
+
+const toggleCheck = (i) =>
+    setChecklist((c) => c.map((item, idx) => idx === i ? { ...item, checked: !item.checked } : item));
+
+const addCheckItem = () => {
+    const val = newCheckItem.trim();
+    if (!val) return;
+    setChecklist((c) => [...c, { label: val, checked: false, custom: true }]);
+    setNewCheckItem("");
+  };
+
+const removeCheckItem = (i) =>
+    setChecklist((c) => c.filter((_, idx) => idx !== i));
+
+const allChecked = checklist.every((item) => item.checked);
+const checkedCount = checklist.filter((item) => item.checked).length;
+const [tagInput, setTagInput] = useState("");
+const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
+
+const setLeg = (i, k, v) =>
     setForm((f) => {
       const legs = [...f.legs];
       legs[i] = { ...legs[i], [k]: v };
@@ -1215,37 +1243,6 @@ function TradeFormModal({ initial, onClose, onSave, onCSVImport, t }) {
     ],
   };
   const [form, setForm] = useState(initial || blank);
-  const DEFAULT_CHECKLIST = [
-  "Checked trend direction",
-  "Checked support/resistance",
-  "Set stop loss",
-  "Checked news/earnings",
-  "Sized position correctly",
-  "Checked risk/reward ratio",
-  "Confirmed entry signal",
-  "Checked market conditions",
-];
-
-const [checklist, setChecklist] = useState(
-  DEFAULT_CHECKLIST.map((item) => ({ label: item, checked: false, custom: false }))
-);
-const [newCheckItem, setNewCheckItem] = useState("");
-
-const toggleCheck = (i) =>
-  setChecklist((c) => c.map((item, idx) => idx === i ? { ...item, checked: !item.checked } : item));
-
-const addCheckItem = () => {
-  const val = newCheckItem.trim();
-  if (!val) return;
-  setChecklist((c) => [...c, { label: val, checked: false, custom: true }]);
-  setNewCheckItem("");
-};
-
-const removeCheckItem = (i) =>
-  setChecklist((c) => c.filter((_, idx) => idx !== i));
-
-const allChecked = checklist.every((item) => item.checked);
-const checkedCount = checklist.filter((item) => item.checked).length;
   const [tagInput, setTagInput] = useState("");
   const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
   const setLeg = (i, k, v) =>
