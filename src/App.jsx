@@ -4866,8 +4866,8 @@ const paginated = filtered
                   alignItems: "center",
                   gap:6,
                 }}
-  }}
->
+               >
+
 <img
   src="/images/plan.svg"
   alt="plan"
