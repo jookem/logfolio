@@ -1992,12 +1992,10 @@ function TradeFormModal({ initial, onClose, onSave, onCSVImport, t }) {
           >
             Save Trade
           </button>
-        </div>
-      </div>
-     </div>
-      )}
     </div>
-    );
+    </div>
+    </div>
+  );
 }
 
 function CSVModal({ onClose, onImport, t }) {
