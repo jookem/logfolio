@@ -511,7 +511,14 @@ let processed = 0;
           background: t.accent + "08", marginBottom: value.length > 0 ? 10 : 0,
         }}
       >
-        <div style={{ fontSize: 20, marginBottom: 4 }}>📸</div>
+        <div style={{ fontSize: 20, marginBottom: 4 }}><img
+  src="/images/screenshot.svg"
+  alt="screen-shot"
+  style={{
+    height: 16,
+    width: 16
+  }}
+/></div>
         <div style={{ fontSize: 12, color: t.accent, fontFamily: "'Space Mono', monospace" }}>
           Click or drag & drop charts
         </div>
@@ -651,7 +658,7 @@ function VoiceNote({ value, onChange, t }) {
           ) : (
             <><img
   src="/images/rec.svg"
-  alt="log"
+  alt="voice"
   style={{
     height: 16,
     width: 16
