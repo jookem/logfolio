@@ -1997,9 +1997,8 @@ function TradeFormModal({ initial, onClose, onSave, onCSVImport, t }) {
      </div>
       )}
     </div>
-  );
+    );
 }
-
 
 function CSVModal({ onClose, onImport, t }) {
   const [csv, setCsv] = useState("");
