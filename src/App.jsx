@@ -435,7 +435,7 @@ function EquityCurve({ trades, t }) {
     .map((_, i) => `${i === 0 ? "M" : "L"} ${xs[i]},${ys[i]}`)
     .join(" ");
   return (
-    
+      <svg
       viewBox={`0 0 ${W} ${H}`}
       style={{ width: "100%", height: 90 }}
       preserveAspectRatio="none"
