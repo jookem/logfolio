@@ -3267,11 +3267,21 @@ function DaySession({ plList, plans, onAddTrade, t, mobile, isDark }) {
   const sessionPL = todayTrades.reduce((s, tr) => s + tr.pl, 0);
   const wins = todayTrades.filter((tr) => tr.pl > 0).length;
   const losses = todayTrades.filter((tr) => tr.pl < 0).length;
-  const now = new Date();
-  const timeStr = now.toLocaleTimeString("en-US", {
-    hour: "2-digit",
-    minute: "2-digit",
-  });
+  const [now, setNow] = useState(new Date());
+
+useEffect(() => {
+  const timer = setInterval(() => {
+    setNow(new Date());
+  }, 1000);
+
+  return () => clearInterval(timer);
+}, []);
+
+const timeStr = now.toLocaleTimeString("en-US", {
+  hour: "2-digit",
+  minute: "2-digit",
+  second: "2-digit",
+});
   const dayName = now.toLocaleDateString("en-US", {
     weekday: "long",
     month: "long",
