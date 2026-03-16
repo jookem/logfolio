@@ -3227,16 +3227,9 @@ function QuoteOfDay({ t }) {
   { content: "The market is the ultimate teacher. Pay attention to its lessons.", author: "Unknown" },
 ];
 
- useEffect(() => {
+useEffect(() => {
   const idx = new Date().getDate() % FALLBACK_QUOTES.length;
-  const q = FALLBACK_QUOTES[idx];
-
-  localStorage.setItem(
-    "quote_cache",
-    JSON.stringify({ date: today, data: q })
-  );
-
-  setQuote(q);
+  setQuote(FALLBACK_QUOTES[idx]);
 }, []);
 
 if (!quote) return null;
