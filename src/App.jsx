@@ -3227,37 +3227,31 @@ function QuoteOfDay({ t }) {
   { content: "The market is the ultimate teacher. Pay attention to its lessons.", author: "Unknown" },
 ];
 
-  useEffect(() => {
-    const today = todayStr();
-    const cached = localStorage.getItem("quote_cache");
-    if (cached) {
-      const { date, data } = JSON.parse(cached);
-      if (date === today) { setQuote(data); return; }
-    }
-    fetch("https://api.quotable.io/random?tags=success|inspirational|wisdom&maxLength=180")
-      .then(r => r.json())
-      .then(data => {
-        const q = { content: data.content, author: data.author };
-        localStorage.setItem("quote_cache", JSON.stringify({ date: today, data: q }));
-        setQuote(q);
-      })
-      .catch(() => {
-        const idx = new Date().getDate() % FALLBACK_QUOTES.length;
-        setQuote(FALLBACK_QUOTES[idx]);
-      });
-  }, []);
+ useEffect(() => {
+  const idx = new Date().getDate() % FALLBACK_QUOTES.length;
+  const q = FALLBACK_QUOTES[idx];
 
-  if (!quote) return null;
+  localStorage.setItem(
+    "quote_cache",
+    JSON.stringify({ date: today, data: q })
+  );
 
-  return (
-    <div style={{
+  setQuote(q);
+}, []);
+
+if (!quote) return null;
+
+return (
+  <div
+    style={{
       background: t.surface,
       border: `1px solid ${t.border}`,
       borderRadius: 12,
       padding: "16px 20px",
       marginBottom: 24,
       position: "relative",
-    }}>
+    }}
+  >
       <div style={{
         fontSize: 10, color: t.accent, fontFamily: "'Space Mono',monospace",
         textTransform: "uppercase", letterSpacing: 2, marginBottom: 8,
