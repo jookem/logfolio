@@ -4739,52 +4739,7 @@ const paginated = filtered
                     {label}
                   </button>
                 ))}
-                <div
-                  style={{
-                    padding: "12px 20px",
-                    display: "flex",
-                    gap: 10,
-                    borderTop: `1px solid ${T.border}`,
-                    marginTop: 4,
-                  }}
-                >
-                  <button
-                    onClick={() => {
-                      setShowCSV(true);
-                      setMenuOpen(false);
-                    }}
-                    style={{
-                      background: T.surface,
-                      border: `1px solid ${T.border}`,
-                      color: T.text2,
-                      borderRadius: 7,
-                      padding: "7px 14px",
-                      cursor: "pointer",
-                      fontSize: 13,
-                      flex: 1,
-                    }}
-                  >
-                    CSV Import
-                  </button>
-                  <button
-                    onClick={() => {
-                      clearAll();
-                      setMenuOpen(false);
-                    }}
-                    style={{
-                      background: "none",
-                      border: `1px solid ${T.border}`,
-                      color: T.text3,
-                      borderRadius: 7,
-                      padding: "7px 14px",
-                      cursor: "pointer",
-                      fontSize: 13,
-                      flex: 1,
-                    }}
-                  >
-                    Clear All
-                  </button>
-                </div>
+
               </div>
             )}
           </>
