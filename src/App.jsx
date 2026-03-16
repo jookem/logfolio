@@ -58,7 +58,7 @@ const STRATEGIES = [
   "Covered Call",
   "Cash Secured Put",
   "Butterfly",
-  "endar Spread",
+  "Calendar Spread",
 ];
 const EMOTIONS = [
   "None",
@@ -1589,7 +1589,7 @@ function TradeFormModal({ initial, onClose, onSave, onCSVImport, t }) {
               color: t.accent,
             }}
           >
-           {form.id ? "Edit Trade" : "+ Log A Trade"}
+           {form.id ? "- Edit Trade" : "+ Log A Trade"}
           </div>
           <button
             onClick={onClose}
