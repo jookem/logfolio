@@ -515,8 +515,8 @@ let processed = 0;
   src="/images/screenshot.svg"
   alt="screen-shot"
   style={{
-    height: 16,
-    width: 16
+    height: 20,
+    width: 20
   }}
 /></div>
         <div style={{ fontSize: 12, color: t.accent, fontFamily: "'Space Mono', monospace" }}>
