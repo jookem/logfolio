@@ -3228,7 +3228,8 @@ function QuoteOfDay({ t }) {
 ];
 
 useEffect(() => {
-  const idx = new Date().getDate() % FALLBACK_QUOTES.length;
+  const idx =
+  Math.floor(Date.now() / 86400000) % FALLBACK_QUOTES.length;
   setQuote(FALLBACK_QUOTES[idx]);
 }, []);
 
