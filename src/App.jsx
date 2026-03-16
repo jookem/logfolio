@@ -976,13 +976,18 @@ const base = {
         {/* Header */}
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
           <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 16, fontWeight: 700, color: t.accent }}>
-<img src="/images/plan.svg" alt="plan" style={{ 
-  height: 20, 
-  width: 20,
-  verticalAlign: "middle",
-  marginBottom: 2,
-  filter: isDark ? "none" : "brightness(0) saturate(100%) invert(52%) sepia(73%) saturate(400%) hue-rotate(130deg) brightness(90%) contrast(101%)"
-}} /> Plan A Trade
+<svg
+  width="1em"
+  height="1em"
+  viewBox="0 0 24 24"
+  fill="none"
+>
+  <path d="M6 15.8L7.14286 17L10 14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M6 8.8L7.14286 10L10 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M13 9L18 9" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+  <path d="M13 16L18 16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+  <path d="M22 12C22 16.714 22 19.0711 20.5355 20.5355C19.0711 22 16.714 22 12 22C7.28595 22 4.92893 22 3.46447 20.5355C2 19.0711 2 16.714 2 12C2 7.28595 2 4.92893 3.46447 3.46447C4.92893 2 7.28595 2 12 2C16.714 2 19.0711 2 20.5355 3.46447C21.5093 4.43821 21.8356 5.80655 21.9449 8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+</svg> Plan A Trade
           </div>
           <button onClick={onClose} style={{ background: "none", border: "none", color: t.text3, fontSize: 20, cursor: "pointer" }}>✕</button>
         </div>
@@ -3577,8 +3582,8 @@ const timeStr = now.toLocaleTimeString("en-US", {
             }}
           >
             <svg
-  width="24"
-  height="24"
+  width="1em"
+  height="1em"
   viewBox="0 0 24 24"
   fill="none"
 >
@@ -4688,14 +4693,19 @@ const paginated = filtered
                   gap:6,
                 }}
 >
-<img
-  src="/images/plan.svg"
-  alt="plan"
-  style={{
-    height: 16,
-    width: 16
-  }}
-/> PLAN
+<svg
+  width="1em"
+  height="1em"
+  viewBox="0 0 24 24"
+  fill="none"
+>
+  <path d="M6 15.8L7.14286 17L10 14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M6 8.8L7.14286 10L10 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M13 9L18 9" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+  <path d="M13 16L18 16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+  <path d="M22 12C22 16.714 22 19.0711 20.5355 20.5355C19.0711 22 16.714 22 12 22C7.28595 22 4.92893 22 3.46447 20.5355C2 19.0711 2 16.714 2 12C2 7.28595 2 4.92893 3.46447 3.46447C4.92893 2 7.28595 2 12 2C16.714 2 19.0711 2 20.5355 3.46447C21.5093 4.43821 21.8356 5.80655 21.9449 8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+  
+</svg> PLAN
 </button>            
 </div>
             {menuOpen && (
@@ -4818,8 +4828,8 @@ const paginated = filtered
                 }}
               >
                 <svg
-  width="24"
-  height="24"
+  width="1em"
+  height="1em"
   viewBox="0 0 24 24"
   fill="none"
 >
@@ -4845,14 +4855,19 @@ const paginated = filtered
                 }}
                >
 
-<img
-  src="/images/plan.svg"
-  alt="plan"
-  style={{
-    height: 16,
-    width: 16
-  }}
-/> PLAN
+<svg
+  width="1em"
+  height="1em"
+  viewBox="0 0 24 24"
+  fill="none"
+>
+  <path d="M6 15.8L7.14286 17L10 14" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M6 8.8L7.14286 10L10 7" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M13 9L18 9" stroke="#000000" stroke-width="2" stroke-linecap="round"/>
+  <path d="M13 16L18 16" stroke="#000000" stroke-width="2" stroke-linecap="round"/>
+  <path d="M22 12C22 16.714 22 19.0711 20.5355 20.5355C19.0711 22 16.714 22 12 22C7.28595 22 4.92893 22 3.46447 20.5355C2 19.0711 2 16.714 2 12C2 7.28595 2 4.92893 3.46447 3.46447C4.92893 2 7.28595 2 12 2C16.714 2 19.0711 2 20.5355 3.46447C21.5093 4.43821 21.8356 5.80655 21.9449 8" stroke="#000000" stroke-width="2" stroke-linecap="round"/>
+  
+</svg> PLAN
 </button>
             </div>
           </>
