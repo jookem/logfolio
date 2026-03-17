@@ -1464,7 +1464,7 @@ const base = {
     </div>
   );
 }
-function TradeFormModal({ initial, onClose, onSave, onCSVImport, t }) {
+function TradeFormModal({ initial, onClose, onSave, onCSVImport, t, editLabel }) {
   const blank = {
     date: todayStr(),
     ticker: "",
@@ -1628,7 +1628,7 @@ function TradeFormModal({ initial, onClose, onSave, onCSVImport, t }) {
           style={{ display: "block" }}>
 <path d="M21.2799 6.40005L11.7399 15.94C10.7899 16.89 7.96987 17.33 7.33987 16.7C6.70987 16.07 7.13987 13.25 8.08987 12.3L17.6399 2.75002C17.8754 2.49308 18.1605 2.28654 18.4781 2.14284C18.7956 1.99914 19.139 1.92124 19.4875 1.9139C19.8359 1.90657 20.1823 1.96991 20.5056 2.10012C20.8289 2.23033 21.1225 2.42473 21.3686 2.67153C21.6147 2.91833 21.8083 3.21243 21.9376 3.53609C22.0669 3.85976 22.1294 4.20626 22.1211 4.55471C22.1128 4.90316 22.0339 5.24635 21.8894 5.5635C21.7448 5.88065 21.5375 6.16524 21.2799 6.40005V6.40005Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" stroke-linejoin="round"/>
 <path d="M11 4H6C4.93913 4 3.92178 4.42142 3.17163 5.17157C2.42149 5.92172 2 6.93913 2 8V18C2 19.0609 2.42149 20.0783 3.17163 20.8284C3.92178 21.5786 4.93913 22 6 22H17C19.21 22 20 20.2 20 18V13" stroke="currentColor" strokeWidth="2" strokeLinecap="round" stroke-linejoin="round"/>
-</svg> Edit Trade
+</svg> {editLabel || "Edit Trade"}
   </>
 ) : (
   <>
@@ -2310,11 +2310,12 @@ function CSVModal({ onClose, onImport, t }) {
   );
 }
 
-function TradeRow({ trade, onClick, onEdit, onDelete, t, mobile }) {
+function TradeRow({ trade, onClick, onEdit, onDelete, t, mobile, isFirst }) {
   const pl = calcPL(trade);
+  const plDisplay = isNaN(pl) ? null : pl;
   return (
     <div
-      style={{ padding: "12px 16px", borderTop: `1px solid ${t.border}`, cursor: "pointer" }}
+      style={{ padding: "12px 16px", borderTop: isFirst ? "none" : `1px solid ${t.border}`, cursor: "pointer" }}
       onMouseEnter={(e) => (e.currentTarget.style.background = t.hoverBg)}
       onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
     >
@@ -2324,8 +2325,8 @@ function TradeRow({ trade, onClick, onEdit, onDelete, t, mobile }) {
             <span style={{ fontFamily: "'Space Mono', monospace", fontSize: 15, fontWeight: 700, color: t.text }}>
               {trade.ticker}
             </span>
-            <span style={{ fontFamily: "'Space Mono', monospace", fontSize: 15, fontWeight: 700, color: pl >= 0 ? t.accent : t.danger }}>
-              {pl >= 0 ? "+" : ""}{fmt(pl)}
+            <span style={{ fontFamily: "'Space Mono', monospace", fontSize: 15, fontWeight: 700, color: plDisplay == null ? t.text3 : plDisplay >= 0 ? t.accent : t.danger }}>
+              {plDisplay == null ? "—" : `${plDisplay >= 0 ? "+" : ""}${fmt(plDisplay)}`}
               {trade.r !== null && trade.r !== undefined && (
                 <div style={{ fontSize: 10, color: trade.r >= 0 ? t.accent : t.danger, opacity: 0.8 }}>{fmtR(trade.r)}</div>
               )}
@@ -2371,8 +2372,8 @@ function TradeRow({ trade, onClick, onEdit, onDelete, t, mobile }) {
             <button onClick={(e) => { e.stopPropagation(); onEdit(); }} style={{ background: "none", border: `1px solid ${t.border}`, color: t.text3, borderRadius: 6, padding: "3px 8px", cursor: "pointer", fontSize: 11 }}>Edit</button>
             <button onClick={(e) => { e.stopPropagation(); onDelete(); }} style={{ background: "none", border: `1px solid ${t.danger}40`, color: t.danger, borderRadius: 6, padding: "3px 8px", cursor: "pointer", fontSize: 11 }}>Del</button>
           </div>
-          <span onClick={onClick} style={{ fontFamily: "'Space Mono', monospace", fontSize: 13, fontWeight: 700, color: pl >= 0 ? t.accent : t.danger, textAlign: "right" }}>
-            {pl >= 0 ? "+" : ""}{fmt(pl)}
+          <span onClick={onClick} style={{ fontFamily: "'Space Mono', monospace", fontSize: 13, fontWeight: 700, color: plDisplay == null ? t.text3 : plDisplay >= 0 ? t.accent : t.danger, textAlign: "right" }}>
+            {plDisplay == null ? "—" : `${plDisplay >= 0 ? "+" : ""}${fmt(plDisplay)}`}
           </span>
         </div>
       )}
@@ -5287,10 +5288,11 @@ style={{ display: "block" }}>
             borderRadius: 12,
           }}
         >
-          {paginated.map((tr) => (
+          {paginated.map((tr, i) => (
             <TradeRow
               key={tr.id}
               trade={tr}
+              isFirst={i === 0}
               onClick={() => setSelected(tr)}
               onEdit={() => setEditTrade(tr)}
               onDelete={() => deleteTrade(tr.id)}
@@ -5450,7 +5452,7 @@ style={{ display: "block" }}>
             fontFamily: "'Space Mono',monospace", fontSize: 10,
             color: T.text3, textTransform: "uppercase", letterSpacing: 2,
           }}>
-            Trade Plans ({filteredPlans.length})
+            Trade Plans
           </div>
           {paginatedPlans.length === 0 ? (
             <div style={{ padding: 48, textAlign: "center", color: T.text4, fontFamily: "'Space Mono',monospace", fontSize: 12 }}>
@@ -5944,6 +5946,7 @@ style={{ display: "block" }}>
           onSave={saveTrade}
           onCSVImport={() => { setEditTrade(null); setShowCSV(true); }}
           t={T}
+          editLabel={editTrade.status === "planned" ? "Edit Plan" : undefined}
         />
       )}
       {showCSV && (
