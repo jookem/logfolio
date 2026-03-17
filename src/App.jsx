@@ -1430,17 +1430,20 @@ const base = {
         </div>
 {/* ══ TAGS + THESIS ══ */}
         {sectionHeader("Notes")}
-          <div style={{ marginBottom: 12 }}>
-          <VoiceNote value={form.voiceNote} onChange={(v) => set("voiceNote", v)} t={t} />
-        </div>
-        <div style={{ marginBottom: 12 }}>
-          <ScreenshotUpload value={form.screenshots || []} onChange={(v) => set("screenshots", v)} t={t} />
-        </div>
-
         <div style={{ marginBottom: 12 }}>
           <label style={lbl}>Tags</label>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 8 }}>
             {(form.tags || []).map((tg) => <Tag key={tg} label={tg} t={t} onRemove={() => removeTag(tg)} />)}
+          </div>
+          <div style={{ display: "flex", gap: 8, marginBottom: 8 }}>
+            <input
+              style={{ ...inp, flex: 1 }}
+              value={tagInput}
+              onChange={(e) => setTagInput(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && addTag(tagInput)}
+              placeholder="Type tag + Enter"
+            />
+            <button onClick={() => addTag(tagInput)} style={{ background: t.accent + "20", border: `1px solid ${t.accent}40`, color: t.accent, borderRadius: 8, padding: "0 14px", cursor: "pointer", fontSize: 13 }}>Add</button>
           </div>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
             {SUGGESTED_TAGS.filter((s) => !(form.tags || []).includes(s)).map((s) => (
@@ -1449,6 +1452,12 @@ const base = {
               </span>
             ))}
           </div>
+        </div>
+        <div style={{ marginBottom: 12 }}>
+          <VoiceNote value={form.voiceNote} onChange={(v) => set("voiceNote", v)} t={t} />
+        </div>
+        <div style={{ marginBottom: 12 }}>
+          <ScreenshotUpload value={form.screenshots || []} onChange={(v) => set("screenshots", v)} t={t} />
         </div>
 
         <div style={{ marginBottom: 20 }}>
@@ -1924,37 +1933,58 @@ function TradeFormModal({ initial, onClose, onSave, onCSVImport, t, editLabel })
             ))}
           </div>
         )}
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "1fr 1fr",
-            gap: 12,
-            marginBottom: 12,
-          }}
-        >
-          <div>
-            <label style={lbl}>Emotion</label>
-            <select
-              style={inp}
-              value={form.emotion}
-              onChange={(e) => set("emotion", e.target.value)}
-            >
-              {EMOTIONS.map((e) => (
-                <option key={e}>{e}</option>
-              ))}
-            </select>
+        <div style={{ marginBottom: 12 }}>
+          <label style={lbl}>Emotion</label>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 4 }}>
+            {EMOTIONS.filter((e) => e !== "None").map((e) => {
+              const active = form.emotion === e;
+              return (
+                <span
+                  key={e}
+                  onClick={() => set("emotion", active ? "None" : e)}
+                  style={{
+                    background: active ? t.accent + "30" : t.tagBg,
+                    color: active ? t.accent : t.text3,
+                    border: `1px solid ${active ? t.accent : "transparent"}`,
+                    borderRadius: 6,
+                    padding: "4px 10px",
+                    fontSize: 12,
+                    cursor: "pointer",
+                    fontFamily: "'Space Mono', monospace",
+                    userSelect: "none",
+                  }}
+                >
+                  {e}
+                </span>
+              );
+            })}
           </div>
-          <div>
-            <label style={lbl}>Mistake</label>
-            <select
-              style={inp}
-              value={form.mistake}
-              onChange={(e) => set("mistake", e.target.value)}
-            >
-              {MISTAKES.map((m) => (
-                <option key={m}>{m}</option>
-              ))}
-            </select>
+        </div>
+        <div style={{ marginBottom: 12 }}>
+          <label style={lbl}>Mistake</label>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 4 }}>
+            {MISTAKES.filter((m) => m !== "None").map((m) => {
+              const active = form.mistake === m;
+              return (
+                <span
+                  key={m}
+                  onClick={() => set("mistake", active ? "None" : m)}
+                  style={{
+                    background: active ? t.accent + "30" : t.tagBg,
+                    color: active ? t.accent : t.text3,
+                    border: `1px solid ${active ? t.accent : "transparent"}`,
+                    borderRadius: 6,
+                    padding: "4px 10px",
+                    fontSize: 12,
+                    cursor: "pointer",
+                    fontFamily: "'Space Mono', monospace",
+                    userSelect: "none",
+                  }}
+                >
+                  {m}
+                </span>
+              );
+            })}
           </div>
         </div>
         <div style={{ marginBottom: 12 }}>
@@ -4495,7 +4525,7 @@ function SettingsModal({ onClose, isDark, setIsDark, onClear, t, onSignOut, isPr
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
             <div>
               <div style={{ fontSize: 14, color: t.text }}>Plan</div>
-              <div style={{ fontSize: 11, color: isPro ? t.accent : t.text3, marginTop: 2 }}>{isPro ? "Pro — $15/month" : "Free — 20 trade limit"}</div>
+              <div style={{ fontSize: 11, color: isPro ? t.accent : t.text3, marginTop: 2 }}>{isPro ? "Pro — $15/month" : "Free — 5 trades/month"}</div>
             </div>
             {isPro
               ? <button onClick={onManageBilling} style={{ background: "none", border: `1px solid ${t.border}`, color: t.text3, borderRadius: 7, padding: "6px 14px", cursor: "pointer", fontSize: 12, fontFamily: "'Space Mono', monospace" }}>Manage</button>
@@ -4664,7 +4694,9 @@ const [page, setPage] = useState(1);
     if (url) window.location.href = url;
   };
 
-  const freeTierFull = !isPro && trades.filter(t => t.status !== "planned").length >= 20;
+  const currentMonth = new Date().toISOString().slice(0, 7);
+  const freeTierFull = !isPro && trades.filter(t => t.status !== "planned" && t.date?.startsWith(currentMonth)).length >= 5;
+  const freeTierPlanFull = !isPro && trades.filter(t => t.status === "planned" && t.date?.startsWith(currentMonth)).length >= 5;
 
   const deleteTrade = async (id) => {
     if (window.confirm("Delete this trade?")) {
@@ -4675,10 +4707,17 @@ const [page, setPage] = useState(1);
     }
   };
 const importTrades = (incoming) => {
-  setTrades((p) => [...p, ...incoming]);
+  const month = new Date().toISOString().slice(0, 7);
+  const thisMonthLogs = trades.filter(t => t.status !== "planned" && t.date?.startsWith(month)).length;
+  const toImport = isPro ? incoming : incoming.slice(0, Math.max(0, 5 - thisMonthLogs));
+  if (toImport.length === 0) { handleUpgrade(); return; }
+  setTrades((p) => [...p, ...toImport]);
   setShowCSV(false);
   setPage(1);
-  showToast(`✓ Imported ${incoming.length} trades`, T.accent);
+  if (!isPro && toImport.length < incoming.length)
+    showToast(`Imported ${toImport.length}/${incoming.length} — free limit reached`, T.accent, "log");
+  else
+    showToast(`Imported ${toImport.length} trades`, T.accent, "log");
 };
   const clearAll = () => {
     if (window.confirm("Clear all trades?")) {
@@ -5004,7 +5043,7 @@ const paginated = filtered
 </svg> LOG
               </button>
               <button
-  onClick={() => setShowPlan(true)}
+  onClick={() => freeTierPlanFull ? handleUpgrade() : setShowPlan(true)}
                 style={{
                   background: T.accent,
                   border: "none",
@@ -5170,7 +5209,7 @@ style={{ display: "block" }}>
 </svg> LOG
               </button>
               <button
-  onClick={() => setShowPlan(true)}
+  onClick={() => freeTierPlanFull ? handleUpgrade() : setShowPlan(true)}
                  style={{
                   background: T.accent,
                   border: "none",
@@ -5216,7 +5255,7 @@ style={{ display: "block" }}>
             plList={plList}
             plans={trades.filter(t => t.status === "planned")}
             onAddTrade={() => setShowAdd(true)}
-            onAddPlan={() => setShowPlan(true)}
+            onAddPlan={() => freeTierPlanFull ? handleUpgrade() : setShowPlan(true)}
             t={T}
             mobile={mobile}
             isDark={isDark}
