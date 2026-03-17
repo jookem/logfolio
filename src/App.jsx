@@ -3650,6 +3650,8 @@ const timeStr = now.toLocaleTimeString("en-US", {
               fontSize: 12,
               fontWeight: 700,
               fontFamily: "'Space Mono', monospace",
+              alignItems: "center",
+              gap: 6,
             }}
           >
             <svg
