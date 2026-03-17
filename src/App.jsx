@@ -4609,15 +4609,6 @@ const [page, setPage] = useState(1);
     } catch {}
   }, [isDark]);
 
-  if (authLoading || (user && !tradesLoaded)) {
-    return (
-      <div style={{ minHeight: "100vh", background: isDark ? "#000" : "#f4f5f7", display: "flex", alignItems: "center", justifyContent: "center" }}>
-        <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 13, color: "#666" }}>Loading...</div>
-      </div>
-    );
-  }
-
-  if (!user) return <AuthScreen isDark={isDark} />;
 
   const showToast = (msg, color) => {
     setToast({ msg, color });
@@ -4817,6 +4808,16 @@ const paginated = filtered
     outline: "none",
     width: "100%",
   };
+
+  if (authLoading || (user && !tradesLoaded)) {
+    return (
+      <div style={{ minHeight: "100vh", background: isDark ? "#000" : "#f4f5f7", display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 13, color: "#666" }}>Loading...</div>
+      </div>
+    );
+  }
+
+  if (!user) return <AuthScreen isDark={isDark} />;
 
   return (
     <div
