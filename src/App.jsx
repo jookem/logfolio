@@ -996,8 +996,8 @@ const base = {
   );
 
   return (
-    <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.75)", zIndex: 100, display: "flex", alignItems: "center", justifyContent: "center", padding: 16, minHeight: "100vh" }}>
-      <div style={{ background: t.card, border: `1px solid ${t.border}`, borderRadius: 16, width: "100%", maxWidth: 540, maxHeight: "93vh", overflowY: "auto", padding: 24 }}>
+    <div className="backdrop-enter" style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.75)", zIndex: 100, display: "flex", alignItems: "center", justifyContent: "center", padding: 16, minHeight: "100vh" }}>
+      <div className="modal-enter" style={{ background: t.card, border: `1px solid ${t.border}`, borderRadius: 16, width: "100%", maxWidth: 540, maxHeight: "93vh", overflowY: "auto", padding: 24 }}>
 
        {/* Header */}
 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
@@ -1601,6 +1601,7 @@ function TradeFormModal({ initial, onClose, onSave, onCSVImport, t, editLabel })
   };
   return (
     <div
+      className="backdrop-enter"
       style={{
         position: "fixed",
         top: 0,
@@ -1616,6 +1617,7 @@ function TradeFormModal({ initial, onClose, onSave, onCSVImport, t, editLabel })
       }}
     >
       <div
+        className="modal-enter"
         style={{
           background: t.card,
           border: `1px solid ${t.border}`,
@@ -4491,8 +4493,8 @@ Provide 4-6 patterns. Be brutally honest but constructive.`,
 }
 function SettingsModal({ onClose, isDark, setIsDark, onClear, t, onSignOut, isPro, onUpgrade, onManageBilling }) {
   return (
-    <div style={{ position: "fixed", top: 0, left: 0, right: 0, minHeight: "100%", background: "rgba(0,0,0,0.75)", zIndex: 100, display: "flex", alignItems: "flex-start", justifyContent: "center", padding: 16 }}>
-      <div style={{ background: t.card, border: `1px solid ${t.border}`, borderRadius: 16, width: "100%", maxWidth: 380, padding: 24, marginTop: 60 }}>
+    <div className="backdrop-enter" style={{ position: "fixed", top: 0, left: 0, right: 0, minHeight: "100%", background: "rgba(0,0,0,0.75)", zIndex: 100, display: "flex", alignItems: "flex-start", justifyContent: "center", padding: 16 }}>
+      <div className="modal-enter" style={{ background: t.card, border: `1px solid ${t.border}`, borderRadius: 16, width: "100%", maxWidth: 380, padding: 24, marginTop: 60 }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
           <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 16, fontWeight: 700, color: t.accent, display: "flex", alignItems: "center", gap: 6}}>
             <svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" style={{ display: "block" }}>
@@ -4656,7 +4658,7 @@ const [page, setPage] = useState(1);
     setTimeout(() => setToast(null), 2200);
   };
   const addTrade = async (trade) => {
-    if (freeTierFull) { showToast("Free tier limit reached — upgrade to Pro", "#ff4d6d"); return; }
+    if (freeTierFull) { showToast("Free tier limit reached — upgrade to Pro", "#ff4d6d", "warning"); return; }
     setTrades((p) => [...p, trade]);
     setShowAdd(false);
     showToast("Trade saved", T.accent, "log");
@@ -4670,7 +4672,7 @@ const [page, setPage] = useState(1);
     if (user) await supabase.from("trades").upsert({ id: trade.id, user_id: user.id, data: trade });
   };
   const savePlan = async (plan) => {
-    if (freeTierPlanFull) { showToast("Free tier limit reached — upgrade to Pro", "#ff4d6d"); return; }
+    if (freeTierPlanFull) { showToast("Free tier limit reached — upgrade to Pro", "#ff4d6d", "warning"); return; }
     setTrades((p) => [...p, plan]);
     setShowPlan(false);
     showToast("Trade plan saved", T.accent, "log");
@@ -4706,7 +4708,7 @@ const [page, setPage] = useState(1);
     if (window.confirm("Delete this trade?")) {
       setTrades((p) => p.filter((tr) => tr.id !== id));
       if (selected?.id === id) setSelected(null);
-      showToast("Trade deleted", T.danger);
+      showToast("Trade deleted", T.danger, "delete");
       if (user) await supabase.from("trades").delete().eq("id", id).eq("user_id", user.id);
     }
   };
@@ -4728,7 +4730,7 @@ const importTrades = (incoming) => {
       setTrades([]);
       setSelected(null);
       localStorage.removeItem(STORAGE_KEY);
-      showToast("All trades cleared", T.danger);
+      showToast("All trades cleared", T.danger, "delete");
     }
   };
 
@@ -4890,14 +4892,16 @@ const paginated = filtered
 
       {toast && (
         <div
+          className="toast-enter"
           style={{
             position: "fixed",
             bottom: 20,
             right: 16,
             left: mobile ? 16 : "auto",
             zIndex: 300,
-            background: toast.color + "20",
-            border: `1px solid ${toast.color}50`,
+            background: T.card,
+            border: `1px solid ${toast.color}60`,
+            borderLeft: `3px solid ${toast.color}`,
             borderRadius: 10,
             padding: "11px 16px",
             fontFamily: "'Space Mono',monospace",
@@ -4907,6 +4911,8 @@ const paginated = filtered
             alignItems: "center",
             justifyContent: mobile ? "center" : "flex-start",
             gap: 8,
+            boxShadow: "0 4px 20px rgba(0,0,0,0.25)",
+            minWidth: 200,
           }}
         >
           {toast.icon === "log" && (
@@ -4922,6 +4928,17 @@ const paginated = filtered
               <path d="M13 9L18 9" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
               <path d="M13 16L18 16" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
               <path d="M22 12C22 16.714 22 19.0711 20.5355 20.5355C19.0711 22 16.714 22 12 22C7.28595 22 4.92893 22 3.46447 20.5355C2 19.0711 2 16.714 2 12C2 7.28595 2 4.92893 3.46447 3.46447C4.92893 2 7.28595 2 12 2C16.714 2 19.0711 2 20.5355 3.46447C21.5093 4.43821 21.8356 5.80655 21.9449 8" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+            </svg>
+          )}
+          {toast.icon === "delete" && (
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+              <path d="M3 6H5H21" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M8 6V4C8 3.44772 8.44772 3 9 3H15C15.5523 3 16 3.44772 16 4V6M19 6L18.1245 19.1327C18.0544 20.1846 17.1818 21 16.1275 21H7.8725C6.81818 21 5.94558 20.1846 5.87549 19.1327L5 6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          )}
+          {toast.icon === "warning" && (
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+              <path d="M12 9V13M12 17H12.01M10.29 3.86L1.82 18C1.64 18.32 1.55 18.68 1.56 19.04C1.57 19.4 1.68 19.75 1.88 20.06C2.08 20.37 2.36 20.62 2.69 20.79C3.02 20.96 3.39 21.04 3.76 21H20.24C20.61 21.04 20.98 20.96 21.31 20.79C21.64 20.62 21.92 20.37 22.12 20.06C22.32 19.75 22.43 19.4 22.44 19.04C22.45 18.68 22.36 18.32 22.18 18L13.71 3.86C13.52 3.56 13.26 3.31 12.95 3.13C12.64 2.96 12.29 2.87 11.94 2.87C11.59 2.87 11.24 2.96 10.93 3.13C10.62 3.31 10.36 3.56 10.17 3.86H10.29Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
           )}
           {toast.msg}
@@ -5249,7 +5266,7 @@ style={{ display: "block" }}>
         )}
       </div>
 
-      <div style={{ padding: mobile ? 14 : 28 }}>
+      <div key={tab} className="tab-enter" style={{ padding: mobile ? 14 : 28 }}>
         {tab === "ai" && (isPro
           ? <AIInsights plList={plList} t={T} mobile={mobile} />
           : <UpgradePrompt t={T} onUpgrade={handleUpgrade} feature="AI Insights" />

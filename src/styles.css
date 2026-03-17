@@ -1,2 +1,43 @@
 *, *::before, *::after { box-sizing: border-box; }
 body { margin: 0; padding: 0; }
+
+@keyframes toastIn {
+  from { transform: translateY(16px); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+
+@keyframes toastOut {
+  from { transform: translateY(0);    opacity: 1; }
+  to   { transform: translateY(16px); opacity: 0; }
+}
+
+.toast-enter {
+  animation: toastIn 0.22s ease forwards;
+}
+
+@keyframes modalIn {
+  from { transform: scale(0.96) translateY(8px); opacity: 0; }
+  to   { transform: scale(1)    translateY(0);   opacity: 1; }
+}
+
+.modal-enter {
+  animation: modalIn 0.2s ease forwards;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.backdrop-enter {
+  animation: fadeIn 0.18s ease forwards;
+}
+
+@keyframes tabFade {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.tab-enter {
+  animation: tabFade 0.18s ease forwards;
+}
