@@ -2327,7 +2327,7 @@ function CSVModal({ onClose, onImport, t }) {
   );
 }
 
-function TradeRow({ trade, onClick, onEdit, onDelete, t, mobile, isFirst }) {
+function TradeRow({ trade, onClick, onEdit, onDelete, t, mobile, isFirst, editLabel }) {
   const pl = calcPL(trade);
   const plDisplay = isNaN(pl) ? null : pl;
   return (
@@ -2352,7 +2352,7 @@ function TradeRow({ trade, onClick, onEdit, onDelete, t, mobile, isFirst }) {
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
             <span style={{ fontSize: 12, color: t.text3 }}>{trade.strategy} · {fmtDate(trade.date)}</span>
             <div style={{ display: "flex", gap: 6 }}>
-              <button onClick={(e) => { e.stopPropagation(); onEdit(); }} style={{ background: "none", border: `1px solid ${t.border}`, color: t.text3, borderRadius: 5, padding: "2px 8px", cursor: "pointer", fontSize: 11 }}>Edit</button>
+              <button onClick={(e) => { e.stopPropagation(); onEdit(); }} style={{ background: "none", border: `1px solid ${t.border}`, color: t.text3, borderRadius: 5, padding: "2px 8px", cursor: "pointer", fontSize: 11 }}>{editLabel || "Edit"}</button>
               <button onClick={(e) => { e.stopPropagation(); onDelete(); }} style={{ background: "none", border: `1px solid ${t.danger}40`, color: t.danger, borderRadius: 5, padding: "2px 8px", cursor: "pointer", fontSize: 11 }}>Del</button>
             </div>
           </div>
@@ -2386,7 +2386,7 @@ function TradeRow({ trade, onClick, onEdit, onDelete, t, mobile, isFirst }) {
             )}
           </span>
           <div style={{ display: "flex", gap: 6 }}>
-            <button onClick={(e) => { e.stopPropagation(); onEdit(); }} style={{ background: "none", border: `1px solid ${t.border}`, color: t.text3, borderRadius: 6, padding: "3px 8px", cursor: "pointer", fontSize: 11 }}>Edit</button>
+            <button onClick={(e) => { e.stopPropagation(); onEdit(); }} style={{ background: "none", border: `1px solid ${t.border}`, color: t.text3, borderRadius: 6, padding: "3px 8px", cursor: "pointer", fontSize: 11 }}>{editLabel || "Edit"}</button>
             <button onClick={(e) => { e.stopPropagation(); onDelete(); }} style={{ background: "none", border: `1px solid ${t.danger}40`, color: t.danger, borderRadius: 6, padding: "3px 8px", cursor: "pointer", fontSize: 11 }}>Del</button>
           </div>
           <span onClick={onClick} style={{ fontFamily: "'Space Mono', monospace", fontSize: 13, fontWeight: 700, color: plDisplay == null ? t.text3 : plDisplay >= 0 ? t.accent : t.danger, textAlign: "right" }}>
@@ -5493,22 +5493,17 @@ style={{ display: "block" }}>
           )}
         </div>
         <div style={{ background: T.surface, border: `1px solid ${T.border}`, borderRadius: 12 }}>
-          <div style={{
-            padding: "13px 16px", borderBottom: `1px solid ${T.border}`,
-            fontFamily: "'Space Mono',monospace", fontSize: 10,
-            color: T.text3, textTransform: "uppercase", letterSpacing: 2,
-          }}>
-            Trade Plans
-          </div>
           {paginatedPlans.length === 0 ? (
             <div style={{ padding: 48, textAlign: "center", color: T.text4, fontFamily: "'Space Mono',monospace", fontSize: 12 }}>
               No trade plans found
             </div>
           ) : (
-            paginatedPlans.map((plan) => (
+            paginatedPlans.map((plan, i) => (
               <TradeRow
                 key={plan.id}
                 trade={plan}
+                isFirst={i === 0}
+                editLabel="Edit Plan"
                 onClick={() => setSelectedPlan(plan)}
                 onEdit={() => setEditTrade(plan)}
                 onDelete={() => deleteTrade(plan.id)}
