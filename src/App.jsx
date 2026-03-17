@@ -4163,6 +4163,8 @@ Provide 4-6 patterns. Be brutally honest but constructive.`,
 
       const data = await response.json();
       console.log("API response:", JSON.stringify(data));
+      if (data.error) throw new Error(data.error.message || JSON.stringify(data.error));
+      if (!data.content) throw new Error("Empty response from API");
       const text = data.content
         .filter((b) => b.type === "text")
         .map((b) => b.text)
