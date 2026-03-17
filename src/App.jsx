@@ -5361,65 +5361,65 @@ style={{ display: "block" }}>
 )}
 {tab === "plans" && (
   <div>
-    <div style={{ background: T.surface, border: `1px solid ${T.border}`, borderRadius: 12 }}>
-      <div style={{ padding: "13px 16px", borderBottom: `1px solid ${T.border}`, fontFamily: "'Space Mono',monospace", fontSize: 10, color: T.text3, textTransform: "uppercase", letterSpacing: 2 }}>
-        Trade Plans ({trades.filter(t => t.status === "planned").length})
-      </div>
-      {trades.filter(t => t.status === "planned").length === 0 ? (
-        <div style={{ padding: 48, textAlign: "center", color: T.text4, fontFamily: "'Space Mono',monospace", fontSize: 12 }}>
-          No trade plans yet
+    {selectedPlan ? (
+      <TradeDetail
+        trade={selectedPlan}
+        onClose={() => setSelectedPlan(null)}
+        onEdit={() => {
+          setEditTrade(selectedPlan);
+          setSelectedPlan(null);
+        }}
+        t={T}
+      />
+    ) : (
+      <div>
+        <div style={{ marginBottom: 12 }}>
+          <input
+            style={{
+              background: T.input,
+              border: `1px solid ${T.inputBorder}`,
+              borderRadius: 8,
+              color: T.text,
+              padding: "9px 14px",
+              fontSize: 13,
+              width: "100%",
+              boxSizing: "border-box",
+              fontFamily: "inherit",
+              outline: "none",
+            }}
+            value={planSearch}
+            onChange={(e) => setPlanSearch(e.target.value)}
+            placeholder="Search ticker, strategy, tags..."
+          />
         </div>
-      ) : (
-        trades.filter(t => t.status === "planned").map((plan) => (
-          <div key={plan.id} style={{ padding: "12px 16px", borderTop: `1px solid ${T.border}`, display: "flex", justifyContent: "space-between", alignItems: "center" }}
-            onMouseEnter={(e) => (e.currentTarget.style.background = T.hoverBg)}
-            onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
-          >
-            <div>
-              <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 14, fontWeight: 700, color: T.text, marginBottom: 3 }}>
-                {plan.ticker}
-              </div>
-              <div style={{ fontSize: 12, color: T.text3 }}>
-                {plan.strategy} · {plan.type === "options" ? `${plan.legs?.length}L options` : `${plan.numShares || plan.shares || "—"} shares`} · {plan.date}
-              </div>
-              {plan.checklist?.length > 0 && (
-                <div style={{ fontSize: 11, color: plan.checklistComplete ? T.accent : "#f59e0b", marginTop: 3, fontFamily: "'Space Mono',monospace" }}>
-                  {plan.checklistComplete ? "✓ Checklist complete" : `⚠ ${plan.checklist.filter(c => c.checked).length}/${plan.checklist.length} checked`}
-                </div>
-              )}
-              {plan.tags?.length > 0 && (
-                <div style={{ display: "flex", gap: 4, marginTop: 5, flexWrap: "wrap" }}>
-                  {plan.tags.map(tg => <Tag key={tg} label={tg} t={T} />)}
-                </div>
-              )}
-            </div>
-            <div style={{ textAlign: "right", display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 6 }}>
-              {plan.type === "stock" && plan.purchasePrice && (
-                <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 13, color: T.text3 }}>
-                  @ ${(+plan.purchasePrice).toFixed(2)}
-                </div>
-              )}
-              {plan.plannedR && (
-                <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 13, color: T.accent }}>
-                  +{plan.plannedR.toFixed(2)}R
-                </div>
-              )}
-              {plan.stopLoss && (
-                <div style={{ fontSize: 11, color: T.danger }}>
-                  SL ${plan.stopLoss}
-                </div>
-              )}
-              <button
-                onClick={() => deleteTrade(plan.id)}
-                style={{ background: "none", border: `1px solid ${T.danger}40`, color: T.danger, borderRadius: 6, padding: "3px 8px", cursor: "pointer", fontSize: 11 }}
-              >
-                Del
-              </button>
-            </div>
+        <div style={{ background: T.surface, border: `1px solid ${T.border}`, borderRadius: 12 }}>
+          <div style={{
+            padding: "13px 16px", borderBottom: `1px solid ${T.border}`,
+            fontFamily: "'Space Mono',monospace", fontSize: 10,
+            color: T.text3, textTransform: "uppercase", letterSpacing: 2,
+          }}>
+            Trade Plans ({filteredPlans.length})
           </div>
-        ))
-      )}
-    </div>
+          {filteredPlans.length === 0 ? (
+            <div style={{ padding: 48, textAlign: "center", color: T.text4, fontFamily: "'Space Mono',monospace", fontSize: 12 }}>
+              No trade plans found
+            </div>
+          ) : (
+            filteredPlans.map((plan) => (
+              <TradeRow
+                key={plan.id}
+                trade={plan}
+                onClick={() => setSelectedPlan(plan)}
+                onEdit={() => setEditTrade(plan)}
+                onDelete={() => deleteTrade(plan.id)}
+                t={T}
+                mobile={mobile}
+              />
+            ))
+          )}
+        </div>
+      </div>
+    )}
   </div>
 )}
         {tab === "weekly" && (
