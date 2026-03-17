@@ -4631,7 +4631,7 @@ const [page, setPage] = useState(1);
   const savePlan = async (plan) => {
     setTrades((p) => [...p, plan]);
     setShowPlan(false);
-    showToast("Trade plan saved", T.accent, "plan");
+    showToast("Trade plan saved", T.accent, "log");
     if (user) await supabase.from("trades").upsert({ id: plan.id, user_id: user.id, data: plan });
   };
   const handleUpgrade = async () => {
