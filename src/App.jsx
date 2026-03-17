@@ -4654,6 +4654,7 @@ const [page, setPage] = useState(1);
     setTimeout(() => setToast(null), 2200);
   };
   const addTrade = async (trade) => {
+    if (freeTierFull) { showToast("Free tier limit reached — upgrade to Pro", "#ff4d6d"); return; }
     setTrades((p) => [...p, trade]);
     setShowAdd(false);
     showToast("Trade saved", T.accent, "log");
@@ -5182,7 +5183,7 @@ const paginated = filtered
              
              
               <button
-                onClick={() => freeTierFull ? handleUpgrade() : setShowAdd(true)}
+                onClick={() => setShowAdd(true)}
                 style={{
                   background: T.accent,
                   border: "none",
