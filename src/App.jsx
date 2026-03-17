@@ -4611,27 +4611,27 @@ const [page, setPage] = useState(1);
   }, [isDark]);
 
 
-  const showToast = (msg, color) => {
-    setToast({ msg, color });
+  const showToast = (msg, color, icon = null) => {
+    setToast({ msg, color, icon });
     setTimeout(() => setToast(null), 2200);
   };
   const addTrade = async (trade) => {
     setTrades((p) => [...p, trade]);
     setShowAdd(false);
-    showToast("✓ Trade saved", T.accent);
+    showToast("Trade saved", T.accent, "log");
     if (user) await supabase.from("trades").upsert({ id: trade.id, user_id: user.id, data: trade });
   };
   const saveTrade = async (trade) => {
     setTrades((p) => p.map((tr) => (tr.id === trade.id ? trade : tr)));
     setEditTrade(null);
     setSelected(trade);
-    showToast("✓ Trade updated", T.accent);
+    showToast("Trade updated", T.accent, "log");
     if (user) await supabase.from("trades").upsert({ id: trade.id, user_id: user.id, data: trade });
   };
   const savePlan = async (plan) => {
     setTrades((p) => [...p, plan]);
     setShowPlan(false);
-    showToast("📋 Trade plan saved", T.accent);
+    showToast("Trade plan saved", T.accent, "plan");
     if (user) await supabase.from("trades").upsert({ id: plan.id, user_id: user.id, data: plan });
   };
   const handleUpgrade = async () => {
@@ -4852,9 +4852,27 @@ const paginated = filtered
             fontFamily: "'Space Mono',monospace",
             fontSize: 12,
             color: toast.color,
-            textAlign: mobile ? "center" : "left",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: mobile ? "center" : "flex-start",
+            gap: 8,
           }}
         >
+          {toast.icon === "log" && (
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+              <path d="M20 14V7C20 5.34315 18.6569 4 17 4H12M20 14L13.5 20M20 14H15.5C14.3954 14 13.5 14.8954 13.5 16V20M13.5 20H7C5.34315 20 4 18.6569 4 17V12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M7 4V7M7 10V7M7 7H4M7 7H10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          )}
+          {toast.icon === "plan" && (
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+              <path d="M6 15.8L7.14286 17L10 14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M6 8.8L7.14286 10L10 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M13 9L18 9" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+              <path d="M13 16L18 16" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+              <path d="M22 12C22 16.714 22 19.0711 20.5355 20.5355C19.0711 22 16.714 22 12 22C7.28595 22 4.92893 22 3.46447 20.5355C2 19.0711 2 16.714 2 12C2 7.28595 2 4.92893 3.46447 3.46447C4.92893 2 7.28595 2 12 2C16.714 2 19.0711 2 20.5355 3.46447C21.5093 4.43821 21.8356 5.80655 21.9449 8" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+            </svg>
+          )}
           {toast.msg}
         </div>
       )}

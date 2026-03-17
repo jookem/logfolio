@@ -65,7 +65,7 @@ export default function AuthScreen({ isDark }) {
         {/* Logo */}
         <div style={{ textAlign: "center", marginBottom: 28 }}>
           <div style={{ display: "flex", justifyContent: "center", marginBottom: 10 }}>
-            <svg width="48" height="48" viewBox="0 0 35 35" xmlns="http://www.w3.org/2000/svg">
+            <svg width="100" height="100" viewBox="0 0 35 35" xmlns="http://www.w3.org/2000/svg">
               <rect x="3.8" y="14.7" fill="#FF1212" width="4.3" height="12"/>
               <rect x="5.7" y="12.1" fill="#FF1212" width="0.4" height="17.1"/>
               <rect x="11.3" y="18.2" fill="#12B248" width="4.3" height="7.3"/>
