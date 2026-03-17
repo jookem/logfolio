@@ -2430,17 +2430,19 @@ function TradeDetail({ trade, onClose, onEdit, t }) {
           )}
         </div>
         <div style={{ textAlign: "right" }}>
-          <div
-            style={{
-              fontFamily: "'Space Mono', monospace",
-              fontSize: 22,
-              fontWeight: 700,
-              color: pl >= 0 ? t.accent : t.danger,
-            }}
-          >
-            {pl >= 0 ? "+" : ""}
-            {fmt(pl)}
-          </div>
+          {!isNaN(pl) && (
+            <div
+              style={{
+                fontFamily: "'Space Mono', monospace",
+                fontSize: 22,
+                fontWeight: 700,
+                color: pl >= 0 ? t.accent : t.danger,
+              }}
+            >
+              {pl >= 0 ? "+" : ""}
+              {fmt(pl)}
+            </div>
+          )}
           <div
             style={{
               display: "flex",
@@ -2497,7 +2499,7 @@ function TradeDetail({ trade, onClose, onEdit, t }) {
         >
           {[
             ["Entry", fmt(trade.entryPrice)],
-            ["Exit", fmt(trade.exitPrice)],
+            ...(trade.exitPrice ? [["Exit", fmt(trade.exitPrice)]] : []),
             ["Shares", trade.shares],
             ["Direction", trade.direction],...(trade.stopLoss ? [["Stop Loss", fmt(trade.stopLoss)]] : []),
   ...(trade.takeProfit ? [["Take Profit", fmt(trade.takeProfit)]] : []),
@@ -2627,7 +2629,7 @@ function TradeDetail({ trade, onClose, onEdit, t }) {
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "1fr 1fr",
+          gridTemplateColumns: trade.status === "planned" ? "1fr" : "1fr 1fr",
           gap: 10,
           marginBottom: 12,
         }}
@@ -2648,29 +2650,31 @@ function TradeDetail({ trade, onClose, onEdit, t }) {
           </div>
           <div style={{ fontSize: 13, color: t.text }}>{trade.emotion}</div>
         </div>
-        <div
-          style={{ background: t.card2, borderRadius: 8, padding: "11px 14px" }}
-        >
+        {trade.status !== "planned" && (
           <div
-            style={{
-              fontSize: 10,
-              color: t.text3,
-              marginBottom: 3,
-              textTransform: "uppercase",
-              letterSpacing: 1.5,
-            }}
+            style={{ background: t.card2, borderRadius: 8, padding: "11px 14px" }}
           >
-            Mistake
+            <div
+              style={{
+                fontSize: 10,
+                color: t.text3,
+                marginBottom: 3,
+                textTransform: "uppercase",
+                letterSpacing: 1.5,
+              }}
+            >
+              Mistake
+            </div>
+            <div
+              style={{
+                fontSize: 13,
+                color: trade.mistake === "None" ? t.text3 : t.danger,
+              }}
+            >
+              {trade.mistake}
+            </div>
           </div>
-          <div
-            style={{
-              fontSize: 13,
-              color: trade.mistake === "None" ? t.text3 : t.danger,
-            }}
-          >
-            {trade.mistake}
-          </div>
-        </div>
+        )}
       </div>
       {trade.screenshots?.length > 0 && (
         <div style={{ marginBottom: 10 }}>
