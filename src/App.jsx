@@ -3381,63 +3381,6 @@ const timeStr = now.toLocaleTimeString("en-US", {
   return (
     <div>
       <QuoteOfDay t={t} />
-      {plans?.length > 0 && (
-  <div style={{
-    background: t.surface, border: `1px solid ${t.border}`,
-    borderRadius: 12, overflow: "hidden", marginBottom: 24,
-  }}>
-    <div style={{
-      padding: "13px 16px", borderBottom: `1px solid ${t.border}`,
-      fontFamily: "'Space Mono', monospace", fontSize: 10,
-      color: t.accent, textTransform: "uppercase", letterSpacing: 2,
-    }}>
-      <svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" style={{ display: "block" }}>
-<path d="M6 15.8L7.14286 17L10 14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" stroke-linejoin="round"/>
-<path d="M6 8.8L7.14286 10L10 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" stroke-linejoin="round"/>
-<path d="M13 9L18 9" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-<path d="M13 16L18 16" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-<path d="M22 12C22 16.714 22 19.0711 20.5355 20.5355C19.0711 22 16.714 22 12 22C7.28595 22 4.92893 22 3.46447 20.5355C2 19.0711 2 16.714 2 12C2 7.28595 2 4.92893 3.46447 3.46447C4.92893 2 7.28595 2 12 2C16.714 2 19.0711 2 20.5355 3.46447C21.5093 4.43821 21.8356 5.80655 21.9449 8" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-</svg> Trade Plans ({plans.length})
-    </div>
-    {plans.map((plan) => (
-      <div key={plan.id} style={{
-        display: "flex", justifyContent: "space-between", alignItems: "center",
-        padding: "12px 16px", borderBottom: `1px solid ${t.border}`,
-      }}>
-        <div>
-          <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 14, fontWeight: 700, color: t.text, marginBottom: 3 }}>
-            {plan.ticker}
-          </div>
-          <div style={{ fontSize: 12, color: t.text3 }}>
-            {plan.strategy} · {plan.type === "options" ? `${plan.legs?.length}L options` : `${plan.numShares || plan.shares || "—"} shares`}
-          </div>
-         {plan.checklist?.length > 0 && (
-            <div style={{ fontSize: 11, color: plan.checklistComplete ? t.accent : "#f59e0b", marginTop: 3, fontFamily: "'Space Mono', monospace" }}>
-              {plan.checklistComplete ? "✓ Checklist complete" : `⚠ ${(plan.checklist || []).filter(c => c.checked).length}/${plan.checklist.length} checked`}
-            </div>
-          )}
-        </div>
-        <div style={{ textAlign: "right" }}>
-          {plan.type === "stock" && plan.purchasePrice && (
-            <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 13, color: t.text3 }}>
-              @ ${(+plan.purchasePrice).toFixed(2)}
-            </div>
-          )}
-          {plan.plannedR && (
-            <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 13, color: t.accent }}>
-              +{plan.plannedR.toFixed(2)}R
-            </div>
-          )}
-          {plan.stopLoss && (
-            <div style={{ fontSize: 11, color: t.danger, marginTop: 2 }}>
-              SL ${plan.stopLoss}
-            </div>
-          )}
-        </div>
-      </div>
-    ))}
-  </div>
-)}
       <div
         style={{
           display: "flex",
@@ -3767,6 +3710,58 @@ const timeStr = now.toLocaleTimeString("en-US", {
           ))
         )}
       </div>
+      {plans?.length > 0 && (
+        <div style={{
+          background: t.surface, border: `1px solid ${t.border}`,
+          borderRadius: 12, overflow: "hidden", marginTop: 20,
+        }}>
+          <div style={{
+            padding: "13px 16px", borderBottom: `1px solid ${t.border}`,
+            fontFamily: "'Space Mono', monospace", fontSize: 10,
+            color: t.text3, textTransform: "uppercase", letterSpacing: 2,
+          }}>
+            Trade Plans ({plans.length})
+          </div>
+          {plans.map((plan, i) => (
+            <div key={plan.id} style={{
+              display: "flex", justifyContent: "space-between", alignItems: "center",
+              padding: "12px 16px",
+              borderBottom: i < plans.length - 1 ? `1px solid ${t.border}` : "none",
+            }}>
+              <div>
+                <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 14, fontWeight: 700, color: t.text, marginBottom: 3 }}>
+                  {plan.ticker}
+                </div>
+                <div style={{ fontSize: 12, color: t.text3 }}>
+                  {plan.strategy} · {plan.type === "options" ? `${plan.legs?.length}L options` : `${plan.numShares || plan.shares || "—"} shares`}
+                </div>
+                {plan.checklist?.length > 0 && (
+                  <div style={{ fontSize: 11, color: plan.checklistComplete ? t.accent : "#f59e0b", marginTop: 3, fontFamily: "'Space Mono', monospace" }}>
+                    {plan.checklistComplete ? "✓ Checklist complete" : `⚠ ${(plan.checklist || []).filter(c => c.checked).length}/${plan.checklist.length} checked`}
+                  </div>
+                )}
+              </div>
+              <div style={{ textAlign: "right" }}>
+                {plan.type === "stock" && plan.purchasePrice && (
+                  <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 13, color: t.text3 }}>
+                    @ ${(+plan.purchasePrice).toFixed(2)}
+                  </div>
+                )}
+                {plan.plannedR && (
+                  <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 13, color: t.accent }}>
+                    +{plan.plannedR.toFixed(2)}R
+                  </div>
+                )}
+                {plan.stopLoss && (
+                  <div style={{ fontSize: 11, color: t.danger, marginTop: 2 }}>
+                    SL ${plan.stopLoss}
+                  </div>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
