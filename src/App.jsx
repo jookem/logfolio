@@ -4668,6 +4668,7 @@ const [page, setPage] = useState(1);
     if (user) await supabase.from("trades").upsert({ id: trade.id, user_id: user.id, data: trade });
   };
   const savePlan = async (plan) => {
+    if (freeTierPlanFull) { showToast("Free tier limit reached — upgrade to Pro", "#ff4d6d"); return; }
     setTrades((p) => [...p, plan]);
     setShowPlan(false);
     showToast("Trade plan saved", T.accent, "log");
@@ -5044,7 +5045,7 @@ const paginated = filtered
 </svg> LOG
               </button>
               <button
-  onClick={() => freeTierPlanFull ? handleUpgrade() : setShowPlan(true)}
+  onClick={() => setShowPlan(true)}
                 style={{
                   background: T.accent,
                   border: "none",
@@ -5210,7 +5211,7 @@ style={{ display: "block" }}>
 </svg> LOG
               </button>
               <button
-  onClick={() => freeTierPlanFull ? handleUpgrade() : setShowPlan(true)}
+  onClick={() => setShowPlan(true)}
                  style={{
                   background: T.accent,
                   border: "none",
@@ -5256,7 +5257,7 @@ style={{ display: "block" }}>
             plList={plList}
             plans={trades.filter(t => t.status === "planned")}
             onAddTrade={() => setShowAdd(true)}
-            onAddPlan={() => freeTierPlanFull ? handleUpgrade() : setShowPlan(true)}
+            onAddPlan={() => setShowPlan(true)}
             t={T}
             mobile={mobile}
             isDark={isDark}
