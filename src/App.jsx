@@ -983,7 +983,14 @@ const base = {
 
         {/* Header */}
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
-          <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 16, fontWeight: 700, color: t.accent }}>
+        <div style={{ fontFamily: "'Space Mono', monospace", 
+                     fontSize: 16, 
+                     fontWeight: 700, 
+                     color: t.accent,
+                     display: "flex",
+                     alignItems: "center",
+                     gap: 6
+                    }}>
 <svg
   width="1em"
   height="1em"
