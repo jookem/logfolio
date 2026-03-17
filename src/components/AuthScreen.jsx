@@ -60,7 +60,7 @@ export default function AuthScreen({ isDark }) {
       padding: 20, fontFamily: "'Space Mono', monospace",
     }}>
       <div style={{
-        background: T.card, border: `1px solid ${T.border}`,
+        background: T.card,
         borderRadius: 16, padding: 32, width: "100%", maxWidth: 400,
       }}>
         {/* Logo */}
