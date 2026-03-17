@@ -667,10 +667,10 @@ function VoiceNote({ value, onChange, t }) {
           ) : (
             <>
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-  <path d="M7 8C7 5.23858 9.23858 3 12 3C14.7614 3 17 5.23858 17 8V11C17 13.7614 14.7614 16 12 16C9.23858 16 7 13.7614 7 11V8Z" stroke="currentColor" strokeWidth="1.5"/>
-  <path d="M13 8L17 8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-  <path d="M13 11L17 11" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-  <path d="M12 19V22" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+  <path d="M7 8C7 5.23858 9.23858 3 12 3C14.7614 3 17 5.23858 17 8V11C17 13.7614 14.7614 16 12 16C9.23858 16 7 13.7614 7 11V8Z" stroke="currentColor" strokeWidth="2"/>
+  <path d="M13 8L17 8" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+  <path d="M13 11L17 11" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+  <path d="M12 19V22" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
   <path d="M20.75 10C20.75 9.58579 20.4142 9.25 20 9.25C19.5858 9.25 19.25 9.58579 19.25 10H20.75ZM4.75 10C4.75 9.58579 4.41421 9.25 4 9.25C3.58579 9.25 3.25 9.58579 3.25 10H4.75ZM15.5121 17.3442C15.1499 17.5452 15.0192 18.0017 15.2202 18.3639C15.4212 18.7261 15.8777 18.8568 16.2399 18.6558L15.5121 17.3442ZM19.25 10V11H20.75V10H19.25ZM4.75 11V10H3.25V11H4.75ZM12 18.25C7.99594 18.25 4.75 15.0041 4.75 11H3.25C3.25 15.8325 7.16751 19.75 12 19.75V18.25ZM19.25 11C19.25 13.7287 17.7429 16.1063 15.5121 17.3442L16.2399 18.6558C18.928 17.1642 20.75 14.2954 20.75 11H19.25Z" fill="currentColor"/>
 </svg> Record Voice Note</>
           )}
@@ -1326,7 +1326,7 @@ const base = {
 
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
               <div>
-                <label style={lbl}>Stop Loss ⚠</label>
+                <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 5 }}>Stop Loss <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M12 15H12.01M12 12V9M4.98207 19H19.0179C20.5615 19 21.5233 17.3256 20.7455 15.9923L13.7276 3.96153C12.9558 2.63852 11.0442 2.63852 10.2724 3.96153L3.25452 15.9923C2.47675 17.3256 3.43849 19 4.98207 19Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg></label>
                 <div style={{ position: "relative" }}>
                   <span style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: t.text3, fontSize: 14 }}>$</span>
                   <input style={{ ...inp, paddingLeft: 26, borderColor: form.stopLoss ? t.danger + "80" : t.inputBorder }}
@@ -1334,7 +1334,7 @@ const base = {
                 </div>
               </div>
               <div>
-                <label style={lbl}>Take Profit 🎯</label>
+                <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 5 }}>Take Profit <svg width="13" height="13" viewBox="0 0 512 512"><path fill="currentColor" d="M204.762,254.456l34.212-34.204c-39.807-18.293-88.544-11.079-121.29,21.675c-42.013,42.006-42.013,110.372,0,152.393c42.005,42.014,110.38,42.014,152.386,0c32.746-32.745,39.968-81.49,21.675-121.298l-34.211,34.211c3.381,19.976-2.553,41.224-17.939,56.604c-25.21,25.218-66.225,25.218-91.434,0c-25.21-25.21-25.21-66.224,0-91.427C163.546,257.016,184.794,251.074,204.762,254.456z"/><path fill="currentColor" d="M323.628,241.146c34.324,57.876,26.642,133.939-23.076,183.65c-58.826,58.826-154.527,58.826-213.345,0c-58.826-58.817-58.826-154.527,0-213.352c49.703-49.711,125.775-57.393,183.65-23.076l31.216-31.225c-75.387-50.693-178.754-42.77-245.35,23.817c-75.629,75.621-75.629,198.69,0,274.311c75.63,75.638,198.683,75.638,274.312,0c66.603-66.595,74.518-169.962,23.809-245.358L323.628,241.146z"/><path fill="currentColor" d="M511.279,84.84c-1.61-4.195-5.684-6.78-10.298-6.57l-70.565,3.31l3.318-70.556c0.201-4.622-2.384-8.68-6.578-10.306c-4.17-1.61-9.122-0.451-12.52,2.931l-75.299,75.306l-3.809,81.322L198.634,297.162c-6.964-1.578-14.565,0.29-19.992,5.716c-8.422,8.422-8.422,22.062,0,30.484c8.414,8.422,22.062,8.422,30.484,0c5.418-5.427,7.295-13.028,5.716-20l136.886-136.894l81.314-3.8l75.307-75.316C511.739,93.963,512.89,89.026,511.279,84.84z"/></svg></label>
                 <div style={{ position: "relative" }}>
                   <span style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: t.text3, fontSize: 14 }}>$</span>
                   <input style={{ ...inp, paddingLeft: 26, borderColor: form.takeProfit ? t.accent + "80" : t.inputBorder }}
