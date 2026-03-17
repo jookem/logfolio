@@ -3357,7 +3357,7 @@ return (
     </div>
   );
 }
-function DaySession({ plList, plans, onAddTrade, t, mobile, isDark }) {
+function DaySession({ plList, plans, onAddTrade, onAddPlan, t, mobile, isDark }) {
   const today = todayStr();
   const todayTrades = plList.filter((tr) => tr.date === today);
   const sessionPL = todayTrades.reduce((s, tr) => s + tr.pl, 0);
@@ -3715,17 +3715,37 @@ const timeStr = now.toLocaleTimeString("en-US", {
           ))
         )}
       </div>
-      {plans?.length > 0 && (
-        <div style={{
-          background: t.surface, border: `1px solid ${t.border}`,
-          borderRadius: 12, overflow: "hidden", marginTop: 20,
-        }}>
+      <div style={{
+        background: t.surface, border: `1px solid ${t.border}`,
+        borderRadius: 12, overflow: "hidden", marginTop: 20,
+      }}>
           <div style={{
+            display: "flex", justifyContent: "space-between", alignItems: "center",
             padding: "13px 16px", borderBottom: `1px solid ${t.border}`,
-            fontFamily: "'Space Mono', monospace", fontSize: 10,
-            color: t.text3, textTransform: "uppercase", letterSpacing: 2,
           }}>
-            Trade Plans ({plans.length})
+            <div style={{
+              fontFamily: "'Space Mono', monospace", fontSize: 10,
+              color: t.text3, textTransform: "uppercase", letterSpacing: 2,
+            }}>
+              Trade Plans
+            </div>
+            <button
+              onClick={onAddPlan}
+              style={{
+                background: t.accent, border: "none", color: "#000",
+                borderRadius: 7, padding: "6px 14px", cursor: "pointer",
+                fontSize: 12, fontWeight: 700, fontFamily: "'Space Mono', monospace",
+                display: "flex", alignItems: "center", gap: 6,
+              }}
+            >
+              <svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" style={{ display: "block" }}>
+                <path d="M6 15.8L7.14286 17L10 14" stroke="#000000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M6 8.8L7.14286 10L10 7" stroke="#000000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M13 9L18 9" stroke="#000000" strokeWidth="2" strokeLinecap="round"/>
+                <path d="M13 16L18 16" stroke="#000000" strokeWidth="2" strokeLinecap="round"/>
+                <path d="M22 12C22 16.714 22 19.0711 20.5355 20.5355C19.0711 22 16.714 22 12 22C7.28595 22 4.92893 22 3.46447 20.5355C2 19.0711 2 16.714 2 12C2 7.28595 2 4.92893 3.46447 3.46447C4.92893 2 7.28595 2 12 2C16.714 2 19.0711 2 20.5355 3.46447C21.5093 4.43821 21.8356 5.80655 21.9449 8" stroke="#000000" strokeWidth="2" strokeLinecap="round"/>
+              </svg> PLAN
+            </button>
           </div>
           {plans.map((plan, i) => (
             <div key={plan.id} style={{
@@ -3765,8 +3785,12 @@ const timeStr = now.toLocaleTimeString("en-US", {
               </div>
             </div>
           ))}
+          {(!plans || plans.length === 0) && (
+            <div style={{ padding: 48, textAlign: "center", color: t.text4, fontFamily: "'Space Mono', monospace", fontSize: 12 }}>
+              No trade plans yet
+            </div>
+          )}
         </div>
-      )}
     </div>
   );
 }
@@ -5017,6 +5041,7 @@ style={{ display: "block" }}>
             plList={plList}
             plans={trades.filter(t => t.status === "planned")}
             onAddTrade={() => setShowAdd(true)}
+            onAddPlan={() => setShowPlan(true)}
             t={T}
             mobile={mobile}
             isDark={isDark}
