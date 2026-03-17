@@ -815,6 +815,7 @@ const [form, setForm] = useState(initial ? {
     takeProfit: initial.takeProfit || "",
     notes: initial.notes || "",
     tags: initial.tags || [],
+    emotion: initial.emotion || "None",
   } : {
     date: todayStr(),
     ticker: "",
@@ -830,6 +831,7 @@ const [form, setForm] = useState(initial ? {
     takeProfit: "",
     notes: "",
     tags: [],
+    emotion: "None",
   });
 
 const DEFAULT_CHECKLIST = [
@@ -1428,6 +1430,35 @@ const base = {
             cursor: "pointer", fontSize: 13, whiteSpace: "nowrap",
           }}>+ Add</button>
         </div>
+{/* ══ EMOTION ══ */}
+        {sectionHeader("Mindset")}
+        <div style={{ marginBottom: 12 }}>
+          <label style={lbl}>Emotion</label>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 4 }}>
+            {EMOTIONS.filter((e) => e !== "None").map((e) => {
+              const active = form.emotion === e;
+              return (
+                <span
+                  key={e}
+                  onClick={() => set("emotion", active ? "None" : e)}
+                  style={{
+                    background: active ? t.accent + "30" : t.tagBg,
+                    color: active ? t.accent : t.text3,
+                    border: `1px solid ${active ? t.accent : "transparent"}`,
+                    borderRadius: 6,
+                    padding: "4px 10px",
+                    fontSize: 12,
+                    cursor: "pointer",
+                    fontFamily: "'Space Mono', monospace",
+                    userSelect: "none",
+                  }}
+                >
+                  {e}
+                </span>
+              );
+            })}
+          </div>
+        </div>
 {/* ══ TAGS + THESIS ══ */}
         {sectionHeader("Notes")}
         <div style={{ marginBottom: 12 }}>
@@ -1698,7 +1729,7 @@ function TradeFormModal({ initial, onClose, onSave, onCSVImport, t, editLabel })
           }}
         >
           <div>
-            <label style={lbl}>Ticker</label>
+            <label style={lbl}>Ticker Symbol</label>
             <input
               style={inp}
               value={form.ticker}
@@ -1989,6 +2020,7 @@ function TradeFormModal({ initial, onClose, onSave, onCSVImport, t, editLabel })
             })}
           </div>
         </div>
+        {sectionHeader("Notes")}
         <div style={{ marginBottom: 12 }}>
           <label style={lbl}>Tags</label>
           <div
