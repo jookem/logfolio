@@ -1,4 +1,2 @@
-.App {
-  font-family: sans-serif;
-  text-align: center;
-}
+*, *::before, *::after { box-sizing: border-box; }
+body { margin: 0; padding: 0; }
