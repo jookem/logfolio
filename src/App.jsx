@@ -4576,7 +4576,11 @@ const [page, setPage] = useState(1);
         .from("trades")
         .select("id, data")
         .eq("user_id", user.id);
-      if (!error && data) {
+      if (error) {
+        // Fall back to localStorage if Supabase fails
+        const local = loadTrades();
+        setTrades(local?.length ? local : []);
+      } else {
         const loaded = data.map(row => ({ ...row.data, id: row.id }));
         // Migrate localStorage trades on first load
         if (loaded.length === 0) {
@@ -4586,7 +4590,7 @@ const [page, setPage] = useState(1);
             await supabase.from("trades").upsert(rows);
             setTrades(local);
           } else {
-            setTrades(SEED_TRADES);
+            setTrades([]);
           }
         } else {
           setTrades(loaded);
