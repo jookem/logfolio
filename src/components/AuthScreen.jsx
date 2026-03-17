@@ -60,8 +60,7 @@ export default function AuthScreen({ isDark }) {
       padding: 20, fontFamily: "'Space Mono', monospace",
     }}>
       <div style={{
-        background: T.card,
-        borderRadius: 16, padding: 32, width: "100%", maxWidth: 400,
+        width: "100%", maxWidth: 400, padding: 32,
       }}>
         {/* Logo */}
         <div style={{ textAlign: "center", marginBottom: 28 }}>
