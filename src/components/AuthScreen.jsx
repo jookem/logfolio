@@ -80,7 +80,7 @@ export default function AuthScreen({ isDark }) {
               <path fill="#3B82F6" d="M25.5,18.6C25.5,18.6,25.5,18.6,25.5,18.6c0.1,0.1,0.1,0.1,0.1,0l0.6-0.6l-0.8-0.3L25.5,18.6z"/>
             </svg>
           </div>
-          <div style={{ fontSize: 22, fontWeight: 700, color: T.accent, letterSpacing: -1, marginBottom: 6 }}>
+          <div style={{ fontSize: 22, fontWeight: 700, color: T.accent, letterSpacing: -1, marginBottom: 6, fontFamily: "'Space Mono', monospace" }}>
             LOG-FOLIO
           </div>
           <div style={{ fontSize: 11, color: T.text3, textTransform: "uppercase", letterSpacing: 2 }}>
