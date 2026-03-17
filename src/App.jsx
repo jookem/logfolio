@@ -2722,7 +2722,7 @@ function TradeDetail({ trade, onClose, onEdit, t }) {
         </div>
       )}
 
-      {lightbox && (
+  {lightbox && (
         <div
           onClick={() => setLightbox(null)}
           style={{
@@ -2743,7 +2743,6 @@ function TradeDetail({ trade, onClose, onEdit, t }) {
           >×</button>
         </div>
       )}
-
     </div>
   );
 }
