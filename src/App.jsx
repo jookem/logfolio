@@ -581,7 +581,7 @@ let processed = 0;
               color: "#fff", borderRadius: "50%", width: 36, height: 36,
               cursor: "pointer", fontSize: 18,
             }}
-          ><svg width="1em" height="1em" viewBox="0 0 24 24" fill="none">
+          ><svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" style={{ display: "block" }}>
 <path d="M14.5 9.50002L9.5 14.5M9.49998 9.5L14.5 14.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
 <path d="M22 12C22 16.714 22 19.0711 20.5355 20.5355C19.0711 22 16.714 22 12 22C7.28595 22 4.92893 22 3.46447 20.5355C2 19.0711 2 16.714 2 12C2 7.28595 2 4.92893 3.46447 3.46447C4.92893 2 7.28595 2 12 2C16.714 2 19.0711 2 20.5355 3.46447C21.5093 4.43821 21.8356 5.80655 21.9449 8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
 </svg></button>
@@ -989,7 +989,7 @@ const base = {
   height="1em"
   viewBox="0 0 24 24"
   fill="none"
->
+  style={{ display: "block" }}>
   <path d="M6 15.8L7.14286 17L10 14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
   <path d="M6 8.8L7.14286 10L10 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
   <path d="M13 9L18 9" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
@@ -998,7 +998,7 @@ const base = {
 </svg> Plan A Trade
           </div>
           <button onClick={onClose} style={{ background: "none", border: "none", color: t.text3, fontSize: 20, cursor: "pointer" }}>
-            <svg width="1em" height="1em" viewBox="0 0 24 24" fill="none">
+            <svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" style={{ display: "block" }}>
             <path d="M14.5 9.50002L9.5 14.5M9.49998 9.5L14.5 14.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
             <path d="M22 12C22 16.714 22 19.0711 20.5355 20.5355C19.0711 22 16.714 22 12 22C7.28595 22 4.92893 22 3.46447 20.5355C2 19.0711 2 16.714 2 12C2 7.28595 2 4.92893 3.46447 3.46447C4.92893 2 7.28595 2 12 2C16.714 2 19.0711 2 20.5355 3.46447C21.5093 4.43821 21.8356 5.80655 21.9449 8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
             </svg>
@@ -1605,11 +1605,18 @@ function TradeFormModal({ initial, onClose, onSave, onCSVImport, t }) {
               fontSize: 16,
               fontWeight: 700,
               color: t.accent,
-            }}
+              display: "flex",
+              alignItems: "center",
+              gap: 6
+              }}
           >
            {form.id ? (
   <>
-    <svg width="1em" height="1em" viewBox="0 0 24 24" fill="none">
+    <svg width="1em" 
+          height="1em" 
+          viewBox="0 0 24 24" 
+          fill="none" 
+          style={{ display: "block" }}>
 <path d="M21.2799 6.40005L11.7399 15.94C10.7899 16.89 7.96987 17.33 7.33987 16.7C6.70987 16.07 7.13987 13.25 8.08987 12.3L17.6399 2.75002C17.8754 2.49308 18.1605 2.28654 18.4781 2.14284C18.7956 1.99914 19.139 1.92124 19.4875 1.9139C19.8359 1.90657 20.1823 1.96991 20.5056 2.10012C20.8289 2.23033 21.1225 2.42473 21.3686 2.67153C21.6147 2.91833 21.8083 3.21243 21.9376 3.53609C22.0669 3.85976 22.1294 4.20626 22.1211 4.55471C22.1128 4.90316 22.0339 5.24635 21.8894 5.5635C21.7448 5.88065 21.5375 6.16524 21.2799 6.40005V6.40005Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
 <path d="M11 4H6C4.93913 4 3.92178 4.42142 3.17163 5.17157C2.42149 5.92172 2 6.93913 2 8V18C2 19.0609 2.42149 20.0783 3.17163 20.8284C3.92178 21.5786 4.93913 22 6 22H17C19.21 22 20 20.2 20 18V13" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
 </svg> Edit Trade
@@ -1621,6 +1628,7 @@ function TradeFormModal({ initial, onClose, onSave, onCSVImport, t }) {
   height="1em"
   viewBox="0 0 24 24"
   fill="none"
+  style={{ display: "block" }}>
 >
   <path d="M20 14V7C20 5.34315 18.6569 4 17 4H12M20 14L13.5 20M20 14H15.5C14.3954 14 13.5 14.8954 13.5 16V20M13.5 20H7C5.34315 20 4 18.6569 4 17V12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
   <path d="M7 4V7M7 10V7M7 7H4M7 7H10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -1638,7 +1646,7 @@ function TradeFormModal({ initial, onClose, onSave, onCSVImport, t }) {
               cursor: "pointer",
             }}
           >
-            <svg width="1em" height="1em" viewBox="0 0 24 24" fill="none">
+            <svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" style={{ display: "block" }}>
 <path d="M14.5 9.50002L9.5 14.5M9.49998 9.5L14.5 14.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
 <path d="M22 12C22 16.714 22 19.0711 20.5355 20.5355C19.0711 22 16.714 22 12 22C7.28595 22 4.92893 22 3.46447 20.5355C2 19.0711 2 16.714 2 12C2 7.28595 2 4.92893 3.46447 3.46447C4.92893 2 7.28595 2 12 2C16.714 2 19.0711 2 20.5355 3.46447C21.5093 4.43821 21.8356 5.80655 21.9449 8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
 </svg>
@@ -2221,7 +2229,7 @@ function CSVModal({ onClose, onImport, t }) {
       <div style={{ background: t.card, border: `1px solid ${t.border}`, borderRadius: 16, width: "100%", maxWidth: 600, maxHeight: "92vh", overflowY: "auto", padding: 24 }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 18 }}>
           <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 16, fontWeight: 700, color: t.accent }}>CSV Import</div>
-          <button onClick={onClose} style={{ background: "none", border: "none", color: t.text3, fontSize: 20, cursor: "pointer" }}><svg width="1em" height="1em" viewBox="0 0 24 24" fill="none">
+          <button onClick={onClose} style={{ background: "none", border: "none", color: t.text3, fontSize: 20, cursor: "pointer" }}><svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" style={{ display: "block" }}>
 <path d="M14.5 9.50002L9.5 14.5M9.49998 9.5L14.5 14.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
 <path d="M22 12C22 16.714 22 19.0711 20.5355 20.5355C19.0711 22 16.714 22 12 22C7.28595 22 4.92893 22 3.46447 20.5355C2 19.0711 2 16.714 2 12C2 7.28595 2 4.92893 3.46447 3.46447C4.92893 2 7.28595 2 12 2C16.714 2 19.0711 2 20.5355 3.46447C21.5093 4.43821 21.8356 5.80655 21.9449 8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
 </svg></button>
@@ -2443,7 +2451,7 @@ function TradeDetail({ trade, onClose, onEdit, t }) {
                 fontSize: 12,
               }}
             >
-              <svg width="1em" height="1em" viewBox="0 0 24 24" fill="none">
+              <svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" style={{ display: "block" }}>
 <path d="M21.2799 6.40005L11.7399 15.94C10.7899 16.89 7.96987 17.33 7.33987 16.7C6.70987 16.07 7.13987 13.25 8.08987 12.3L17.6399 2.75002C17.8754 2.49308 18.1605 2.28654 18.4781 2.14284C18.7956 1.99914 19.139 1.92124 19.4875 1.9139C19.8359 1.90657 20.1823 1.96991 20.5056 2.10012C20.8289 2.23033 21.1225 2.42473 21.3686 2.67153C21.6147 2.91833 21.8083 3.21243 21.9376 3.53609C22.0669 3.85976 22.1294 4.20626 22.1211 4.55471C22.1128 4.90316 22.0339 5.24635 21.8894 5.5635C21.7448 5.88065 21.5375 6.16524 21.2799 6.40005V6.40005Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
 <path d="M11 4H6C4.93913 4 3.92178 4.42142 3.17163 5.17157C2.42149 5.92172 2 6.93913 2 8V18C2 19.0609 2.42149 20.0783 3.17163 20.8284C3.92178 21.5786 4.93913 22 6 22H17C19.21 22 20 20.2 20 18V13" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
 </svg> Edit
@@ -2460,7 +2468,7 @@ function TradeDetail({ trade, onClose, onEdit, t }) {
                 fontSize: 12,
               }}
             >
-            <svg width="1em" height="1em" viewBox="0 0 24 24" fill="none">
+            <svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" style={{ display: "block" }}>
 <path d="M14.5 9.50002L9.5 14.5M9.49998 9.5L14.5 14.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
 <path d="M22 12C22 16.714 22 19.0711 20.5355 20.5355C19.0711 22 16.714 22 12 22C7.28595 22 4.92893 22 3.46447 20.5355C2 19.0711 2 16.714 2 12C2 7.28595 2 4.92893 3.46447 3.46447C4.92893 2 7.28595 2 12 2C16.714 2 19.0711 2 20.5355 3.46447C21.5093 4.43821 21.8356 5.80655 21.9449 8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
 </svg>  Close
@@ -3354,7 +3362,7 @@ const timeStr = now.toLocaleTimeString("en-US", {
       fontFamily: "'Space Mono', monospace", fontSize: 10,
       color: t.accent, textTransform: "uppercase", letterSpacing: 2,
     }}>
-      <svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" style={{ display: "block" }}>
 <path d="M6 15.8L7.14286 17L10 14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
 <path d="M6 8.8L7.14286 10L10 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
 <path d="M13 9L18 9" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
@@ -3641,7 +3649,7 @@ const timeStr = now.toLocaleTimeString("en-US", {
   height="1em"
   viewBox="0 0 24 24"
   fill="none"
->
+  style={{ display: "block" }}>
   <path d="M20 14V7C20 5.34315 18.6569 4 17 4H12M20 14L13.5 20M20 14H15.5C14.3954 14 13.5 14.8954 13.5 16V20M13.5 20H7C5.34315 20 4 18.6569 4 17V12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
   <path d="M7 4V7M7 10V7M7 7H4M7 7H10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
 </svg> LOG
@@ -4381,12 +4389,12 @@ function SettingsModal({ onClose, isDark, setIsDark, onClear, t }) {
       <div style={{ background: t.card, border: `1px solid ${t.border}`, borderRadius: 16, width: "100%", maxWidth: 380, padding: 24, marginTop: 60 }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
           <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 16, fontWeight: 700, color: t.accent }}>
-            <svg width="1em" height="1em" viewBox="0 0 24 24" fill="none">
+            <svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" style={{ display: "block" }}>
 <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/>
 <path d="M3.66122 10.6392C4.13377 10.9361 4.43782 11.4419 4.43782 11.9999C4.43781 12.558 4.13376 13.0638 3.66122 13.3607C3.33966 13.5627 3.13248 13.7242 2.98508 13.9163C2.66217 14.3372 2.51966 14.869 2.5889 15.3949C2.64082 15.7893 2.87379 16.1928 3.33973 16.9999C3.80568 17.8069 4.03865 18.2104 4.35426 18.4526C4.77508 18.7755 5.30694 18.918 5.83284 18.8488C6.07287 18.8172 6.31628 18.7185 6.65196 18.5411C7.14544 18.2803 7.73558 18.2699 8.21895 18.549C8.70227 18.8281 8.98827 19.3443 9.00912 19.902C9.02332 20.2815 9.05958 20.5417 9.15224 20.7654C9.35523 21.2554 9.74458 21.6448 10.2346 21.8478C10.6022 22 11.0681 22 12 22C12.9319 22 13.3978 22 13.7654 21.8478C14.2554 21.6448 14.6448 21.2554 14.8478 20.7654C14.9404 20.5417 14.9767 20.2815 14.9909 19.9021C15.0117 19.3443 15.2977 18.8281 15.7811 18.549C16.2644 18.27 16.8545 18.2804 17.3479 18.5412C17.6837 18.7186 17.9271 18.8173 18.1671 18.8489C18.693 18.9182 19.2249 18.7756 19.6457 18.4527C19.9613 18.2106 20.1943 17.807 20.6603 17C20.8677 16.6407 21.029 16.3614 21.1486 16.1272M20.3387 13.3608C19.8662 13.0639 19.5622 12.5581 19.5621 12.0001C19.5621 11.442 19.8662 10.9361 20.3387 10.6392C20.6603 10.4372 20.8674 10.2757 21.0148 10.0836C21.3377 9.66278 21.4802 9.13092 21.411 8.60502C21.3591 8.2106 21.1261 7.80708 20.6601 7.00005C20.1942 6.19301 19.9612 5.7895 19.6456 5.54732C19.2248 5.22441 18.6929 5.0819 18.167 5.15113C17.927 5.18274 17.6836 5.2814 17.3479 5.45883C16.8544 5.71964 16.2643 5.73004 15.781 5.45096C15.2977 5.1719 15.0117 4.6557 14.9909 4.09803C14.9767 3.71852 14.9404 3.45835 14.8478 3.23463C14.6448 2.74458 14.2554 2.35523 13.7654 2.15224C13.3978 2 12.9319 2 12 2C11.0681 2 10.6022 2 10.2346 2.15224C9.74458 2.35523 9.35523 2.74458 9.15224 3.23463C9.05958 3.45833 9.02332 3.71848 9.00912 4.09794C8.98826 4.65566 8.70225 5.17191 8.21891 5.45096C7.73557 5.73002 7.14548 5.71959 6.65205 5.4588C6.31633 5.28136 6.0729 5.18269 5.83285 5.15108C5.30695 5.08185 4.77509 5.22436 4.35427 5.54727C4.03866 5.78945 3.80569 6.19297 3.33974 7C3.13231 7.35929 2.97105 7.63859 2.85138 7.87273" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
 </svg> Settings</div>
           <button onClick={onClose} style={{ background: "none", border: "none", color: t.text3, fontSize: 20, cursor: "pointer" }}>
-            <svg width="1em" height="1em" viewBox="0 0 24 24" fill="none">
+            <svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" style={{ display: "block" }}>
             <path d="M14.5 9.50002L9.5 14.5M9.49998 9.5L14.5 14.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
             <path d="M22 12C22 16.714 22 19.0711 20.5355 20.5355C19.0711 22 16.714 22 12 22C7.28595 22 4.92893 22 3.46447 20.5355C2 19.0711 2 16.714 2 12C2 7.28595 2 4.92893 3.46447 3.46447C4.92893 2 7.28595 2 12 2C16.714 2 19.0711 2 20.5355 3.46447C21.5093 4.43821 21.8356 5.80655 21.9449 8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
             </svg>
@@ -4697,11 +4705,11 @@ const paginated = filtered
                   fontFamily: "'Space Mono', monospace",
                 }}
               >
-          <svg width="1em" height="1em" viewBox="0 0 24 24" fill="none">
-  <path d="M6 7H18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-  <path d="M6 12H18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-  <path d="M6 17H18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-<path d="M22 12C22 16.714 22 19.0711 20.5355 20.5355C19.0711 22 16.714 22 12 22C7.28595 22 4.92893 22 3.46447 20.5355C2 19.0711 2 16.714 2 12C2 7.28595 2 4.92893 3.46447 3.46447C4.92893 2 7.28595 2 12 2C16.714 2 19.0711 2 20.5355 3.46447C21.5093 4.43821 21.8356 5.80655 21.9449 8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          <svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" style={{ display: "block" }}>
+          <path d="M6 7H18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          <path d="M6 12H18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          <path d="M6 17H18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          <path d="M22 12C22 16.714 22 19.0711 20.5355 20.5355C19.0711 22 16.714 22 12 22C7.28595 22 4.92893 22 3.46447 20.5355C2 19.0711 2 16.714 2 12C2 7.28595 2 4.92893 3.46447 3.46447C4.92893 2 7.28595 2 12 2C16.714 2 19.0711 2 20.5355 3.46447C21.5093 4.43821 21.8356 5.80655 21.9449 8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
 </svg>
               </button>
              <button
@@ -4717,7 +4725,7 @@ const paginated = filtered
                   fontFamily: "'Space Mono', monospace",
                 }}
               >
-                <svg width="1em" height="1em" viewBox="0 0 24 24" fill="none">
+                <svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" style={{ display: "block" }}>
 <path d="M10.5213 3.62368C11.3147 2.75255 12.6853 2.75255 13.4787 3.62368L14.2142 4.43128C14.6151 4.87154 15.1914 5.11025 15.7862 5.08245L16.8774 5.03146C18.0543 4.97645 19.0236 5.94568 18.9685 7.12264L18.9176 8.21377C18.8898 8.80859 19.1285 9.38487 19.5687 9.78582L20.3763 10.5213C21.2475 11.3147 21.2475 12.6853 20.3763 13.4787L19.5687 14.2142C19.1285 14.6151 18.8898 15.1914 18.9176 15.7862L18.9685 16.8774C19.0236 18.0543 18.0543 19.0236 16.8774 18.9685L15.7862 18.9176C15.1914 18.8898 14.6151 19.1285 14.2142 19.5687L13.4787 20.3763C12.6853 21.2475 11.3147 21.2475 10.5213 20.3763L9.78582 19.5687C9.38487 19.1285 8.80859 18.8898 8.21376 18.9176L7.12264 18.9685C5.94568 19.0236 4.97645 18.0543 5.03146 16.8774L5.08245 15.7862C5.11025 15.1914 4.87154 14.6151 4.43128 14.2142L3.62368 13.4787C2.75255 12.6853 2.75255 11.3147 3.62368 10.5213L4.43128 9.78582C4.87154 9.38487 5.11025 8.80859 5.08245 8.21376L5.03146 7.12264C4.97645 5.94568 5.94568 4.97645 7.12264 5.03146L8.21376 5.08245C8.80859 5.11025 9.38487 4.87154 9.78583 4.43128L10.5213 3.62368Z" stroke="currentColor" stroke-width="2"/>
 <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/>
 </svg>
@@ -4740,10 +4748,10 @@ const paginated = filtered
                 }}
               >
                 <svg
-  width="1em"
-  height="1em"
-  viewBox="0 0 24 24"
-  fill="none">
+                width="1em"
+                height="1em"
+                viewBox="0 0 24 24"
+                fill="none" style={{ display: "block" }}>
   <path d="M20 14V7C20 5.34315 18.6569 4 17 4H12M20 14L13.5 20M20 14H15.5C14.3954 14 13.5 14.8954 13.5 16V20M13.5 20H7C5.34315 20 4 18.6569 4 17V12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
   <path d="M7 4V7M7 10V7M7 7H4M7 7H10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
 </svg> LOG
@@ -4770,7 +4778,7 @@ const paginated = filtered
   height="1em"
   viewBox="0 0 24 24"
   fill="none"
->
+  style={{ display: "block" }}>
   <path d="M6 15.8L7.14286 17L10 14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
   <path d="M6 8.8L7.14286 10L10 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
   <path d="M13 9L18 9" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
@@ -4879,7 +4887,7 @@ const paginated = filtered
                   gap:6,
                 }}
               >
-                <svg width="1em" height="1em" viewBox="0 0 24 24" fill="none">
+                <svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" style={{ display: "block" }}>
 <path d="M10.5213 3.62368C11.3147 2.75255 12.6853 2.75255 13.4787 3.62368L14.2142 4.43128C14.6151 4.87154 15.1914 5.11025 15.7862 5.08245L16.8774 5.03146C18.0543 4.97645 19.0236 5.94568 18.9685 7.12264L18.9176 8.21377C18.8898 8.80859 19.1285 9.38487 19.5687 9.78582L20.3763 10.5213C21.2475 11.3147 21.2475 12.6853 20.3763 13.4787L19.5687 14.2142C19.1285 14.6151 18.8898 15.1914 18.9176 15.7862L18.9685 16.8774C19.0236 18.0543 18.0543 19.0236 16.8774 18.9685L15.7862 18.9176C15.1914 18.8898 14.6151 19.1285 14.2142 19.5687L13.4787 20.3763C12.6853 21.2475 11.3147 21.2475 10.5213 20.3763L9.78582 19.5687C9.38487 19.1285 8.80859 18.8898 8.21376 18.9176L7.12264 18.9685C5.94568 19.0236 4.97645 18.0543 5.03146 16.8774L5.08245 15.7862C5.11025 15.1914 4.87154 14.6151 4.43128 14.2142L3.62368 13.4787C2.75255 12.6853 2.75255 11.3147 3.62368 10.5213L4.43128 9.78582C4.87154 9.38487 5.11025 8.80859 5.08245 8.21376L5.03146 7.12264C4.97645 5.94568 5.94568 4.97645 7.12264 5.03146L8.21376 5.08245C8.80859 5.11025 9.38487 4.87154 9.78583 4.43128L10.5213 3.62368Z" stroke="currentColor" stroke-width="2"/>
 <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/>
 </svg> SETTINGS
@@ -4908,7 +4916,7 @@ const paginated = filtered
   height="1em"
   viewBox="0 0 24 24"
   fill="none"
->
+style={{ display: "block" }}>
   <path d="M20 14V7C20 5.34315 18.6569 4 17 4H12M20 14L13.5 20M20 14H15.5C14.3954 14 13.5 14.8954 13.5 16V20M13.5 20H7C5.34315 20 4 18.6569 4 17V12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
   <path d="M7 4V7M7 10V7M7 7H4M7 7H10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
 </svg> LOG
@@ -4936,7 +4944,7 @@ const paginated = filtered
   height="1em"
   viewBox="0 0 24 24"
   fill="none"
->
+  style={{ display: "block" }}>
   <path d="M6 15.8L7.14286 17L10 14" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
   <path d="M6 8.8L7.14286 10L10 7" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
   <path d="M13 9L18 9" stroke="#000000" stroke-width="2" stroke-linecap="round"/>
