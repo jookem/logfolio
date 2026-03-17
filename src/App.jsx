@@ -694,7 +694,7 @@ function VoiceNote({ value, onChange, t }) {
     </div>
   );
 }
-function PlanModal({ onClose, onSave, t, isDark }) {
+function PlanModal({ onClose, onSave, t, isDark, initial }) {
   const OPTION_STRATEGIES = {
     "Long Call":        { stockLabel: "Underlying Stock (optional)", showStock: true, legs: [{ position: "buy", type: "call" }], writeLocked: true },
     "Long Put":         { stockLabel: "Underlying Stock (optional)", showStock: true, legs: [{ position: "buy", type: "put" }], writeLocked: true },
@@ -799,7 +799,22 @@ const fetchPremium = async (optionTicker, legIndex, underlyingTicker) => {
     console.log("fetchPremium error:", e.message);
   }
 };
-const [form, setForm] = useState({
+const [form, setForm] = useState(initial ? {
+    date: initial.date || todayStr(),
+    ticker: initial.ticker || "",
+    type: initial.type || "stock",
+    strategy: initial.strategy || "Breakout",
+    direction: initial.direction || "long",
+    stockDirection: initial.direction === "short" ? "sell" : "buy",
+    currentPrice: initial.entryPrice || "",
+    purchasePrice: initial.entryPrice || "",
+    numShares: initial.shares || "",
+    legs: initial.legs?.length ? initial.legs : [blankLeg()],
+    stopLoss: initial.stopLoss || "",
+    takeProfit: initial.takeProfit || "",
+    notes: initial.notes || "",
+    tags: initial.tags || [],
+  } : {
     date: todayStr(),
     ticker: "",
     type: "stock",
@@ -828,7 +843,9 @@ const DEFAULT_CHECKLIST = [
   ];
 
 const [checklist, setChecklist] = useState(
-    DEFAULT_CHECKLIST.map((item) => ({ label: item, checked: false, custom: false }))
+    initial?.checklist?.length
+      ? initial.checklist
+      : DEFAULT_CHECKLIST.map((item) => ({ label: item, checked: false, custom: false }))
   );
 const [newCheckItem, setNewCheckItem] = useState("");
 
@@ -907,7 +924,7 @@ const setLeg = (i, k, v) =>
 const base = {
       ...form,
       ticker: form.ticker.toUpperCase(),
-      id: Date.now(),
+      id: initial?.id ?? Date.now(),
       status: "planned",
       tags: form.tags || [],
       checklist: checklist,
@@ -5968,14 +5985,22 @@ style={{ display: "block" }}>
           t={T}
         />
       )}
-      {editTrade && (
+      {editTrade && editTrade.status === "planned" && (
+        <PlanModal
+          initial={editTrade}
+          onClose={() => setEditTrade(null)}
+          onSave={(plan) => { saveTrade(plan); setEditTrade(null); }}
+          t={T}
+          isDark={isDark}
+        />
+      )}
+      {editTrade && editTrade.status !== "planned" && (
         <TradeFormModal
           initial={editTrade}
           onClose={() => setEditTrade(null)}
           onSave={saveTrade}
           onCSVImport={() => { setEditTrade(null); setShowCSV(true); }}
           t={T}
-          editLabel={editTrade.status === "planned" ? "Edit Plan" : undefined}
         />
       )}
       {showCSV && (
