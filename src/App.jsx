@@ -5503,7 +5503,6 @@ style={{ display: "block" }}>
                 key={plan.id}
                 trade={plan}
                 isFirst={i === 0}
-                editLabel="Edit Plan"
                 onClick={() => setSelectedPlan(plan)}
                 onEdit={() => setEditTrade(plan)}
                 onDelete={() => deleteTrade(plan.id)}
