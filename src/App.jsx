@@ -4915,6 +4915,8 @@ const paginated = filtered
                   cursor: "pointer",
                   fontSize: 12,
                   fontFamily: "'Space Mono', monospace",
+                  display: "flex",
+                  alignItems: "center",
                 }}
               >
           <svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" style={{ display: "block" }}>
@@ -4935,6 +4937,8 @@ const paginated = filtered
                   cursor: "pointer",
                   fontSize: 12,
                   fontFamily: "'Space Mono', monospace",
+                  display: "flex",
+                  alignItems: "center",
                 }}
               >
                 <svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" style={{ display: "block" }}>
