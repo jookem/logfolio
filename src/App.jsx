@@ -2737,7 +2737,6 @@ function TradeDetail({ trade, onClose, onEdit, t }) {
     </div>
   );
 }
-function CalendarView
 function CalendarView({ plList, t, mobile }) {
   const now = new Date();
   const [viewYear, setViewYear] = useState(now.getFullYear());
