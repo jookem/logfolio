@@ -1,4 +1,7 @@
 import { useState, useMemo, useEffect, useRef } from "react"
+import { supabase } from "./lib/supabase"
+import { useAuth } from "./contexts/AuthContext"
+import AuthScreen from "./components/AuthScreen"
 
 const fmt = (n) =>
   new Intl.NumberFormat("en-US", {
@@ -4456,7 +4459,7 @@ Provide 4-6 patterns. Be brutally honest but constructive.`,
     </div>
   );
 }
-function SettingsModal({ onClose, isDark, setIsDark, onClear, t }) {
+function SettingsModal({ onClose, isDark, setIsDark, onClear, t, onSignOut, isPro, onUpgrade, onManageBilling }) {
   return (
     <div style={{ position: "fixed", top: 0, left: 0, right: 0, minHeight: "100%", background: "rgba(0,0,0,0.75)", zIndex: 100, display: "flex", alignItems: "flex-start", justifyContent: "center", padding: 16 }}>
       <div style={{ background: t.card, border: `1px solid ${t.border}`, borderRadius: 16, width: "100%", maxWidth: 380, padding: 24, marginTop: 60 }}>
@@ -4493,17 +4496,56 @@ function SettingsModal({ onClose, isDark, setIsDark, onClear, t }) {
             <button onClick={() => { onClear(); onClose(); }} style={{ background: t.danger + "15", border: `1px solid ${t.danger}40`, color: t.danger, borderRadius: 7, padding: "6px 14px", cursor: "pointer", fontSize: 12, fontFamily: "'Space Mono', monospace" }}>Clear</button>
           </div>
         </div>
+        <div style={{ background: t.surface, border: `1px solid ${t.border}`, borderRadius: 12, padding: "14px 16px", marginTop: 12 }}>
+          <div style={{ fontSize: 11, color: t.text3, fontFamily: "'Space Mono', monospace", textTransform: "uppercase", letterSpacing: 1.5, marginBottom: 12 }}>Account</div>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+            <div>
+              <div style={{ fontSize: 14, color: t.text }}>Plan</div>
+              <div style={{ fontSize: 11, color: isPro ? t.accent : t.text3, marginTop: 2 }}>{isPro ? "Pro — $15/month" : "Free — 20 trade limit"}</div>
+            </div>
+            {isPro
+              ? <button onClick={onManageBilling} style={{ background: "none", border: `1px solid ${t.border}`, color: t.text3, borderRadius: 7, padding: "6px 14px", cursor: "pointer", fontSize: 12, fontFamily: "'Space Mono', monospace" }}>Manage</button>
+              : <button onClick={onUpgrade} style={{ background: t.accent, border: "none", color: "#000", borderRadius: 7, padding: "6px 14px", cursor: "pointer", fontSize: 12, fontWeight: 700, fontFamily: "'Space Mono', monospace" }}>Upgrade</button>
+            }
+          </div>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <div style={{ fontSize: 14, color: t.text }}>Sign Out</div>
+            <button onClick={onSignOut} style={{ background: "none", border: `1px solid ${t.border}`, color: t.text3, borderRadius: 7, padding: "6px 14px", cursor: "pointer", fontSize: 12, fontFamily: "'Space Mono', monospace" }}>Sign Out</button>
+          </div>
+        </div>
       </div>
     </div>
   );
 }
+function UpgradePrompt({ t, onUpgrade, feature }) {
+  return (
+    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "60px 20px", textAlign: "center" }}>
+      <div style={{ fontSize: 32, marginBottom: 12 }}>⚡</div>
+      <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 16, fontWeight: 700, color: t.text, marginBottom: 8 }}>
+        {feature} is a Pro feature
+      </div>
+      <div style={{ fontSize: 13, color: t.text3, marginBottom: 24, maxWidth: 320 }}>
+        Upgrade to Pro for ${15}/month to unlock {feature}, unlimited trades, and options data via Polygon.io.
+      </div>
+      <button
+        onClick={onUpgrade}
+        style={{ background: t.accent, border: "none", color: "#000", borderRadius: 8, padding: "10px 24px", cursor: "pointer", fontSize: 13, fontWeight: 700, fontFamily: "'Space Mono', monospace" }}
+      >
+        Upgrade to Pro
+      </button>
+    </div>
+  );
+}
+
 export default function TradingJournal() {
+  const { user, profile, loading: authLoading, isPro, canUseAI, aiAnalysesLeft, refreshProfile, signOut } = useAuth();
   const [planSearch, setPlanSearch] = useState("");
   const [planFilter, setPlanFilter] = useState({ type: "all", strategy: "all", tag: "all" });
   const [planPerPage, setPlanPerPage] = useState(30);
   const [planPage, setPlanPage] = useState(1);
   const [selectedPlan, setSelectedPlan] = useState(null);
-  const [trades, setTrades] = useState(() => loadTrades() ?? SEED_TRADES);
+  const [trades, setTrades] = useState([]);
+  const [tradesLoaded, setTradesLoaded] = useState(false);
   const [isDark, setIsDark] = useState(() => loadTheme() === "dark");
   const [tab, setTab] = useState("today");
   const [showAdd, setShowAdd] = useState(false);
@@ -4520,45 +4562,116 @@ const [perPage, setPerPage] = useState(30);
 const [page, setPage] = useState(1);
   const [toast, setToast] = useState(null);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [showPlan, setShowPlan] = useState(false); 
+  const [showPlan, setShowPlan] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const mobile = useIsMobile();
   const T = tk(isDark);
 
+  // Load trades from Supabase on login
   useEffect(() => {
-    saveTrades(trades);
-  }, [trades]);
+    if (!user) return;
+    const loadFromSupabase = async () => {
+      const { data, error } = await supabase
+        .from("trades")
+        .select("id, data")
+        .eq("user_id", user.id);
+      if (!error && data) {
+        const loaded = data.map(row => ({ ...row.data, id: row.id }));
+        // Migrate localStorage trades on first load
+        if (loaded.length === 0) {
+          const local = loadTrades();
+          if (local?.length) {
+            const rows = local.map(t => ({ id: t.id, user_id: user.id, data: t }));
+            await supabase.from("trades").upsert(rows);
+            setTrades(local);
+          } else {
+            setTrades(SEED_TRADES);
+          }
+        } else {
+          setTrades(loaded);
+        }
+      }
+      setTradesLoaded(true);
+    };
+    loadFromSupabase();
+  }, [user]);
+
+  // Sync trades to Supabase whenever they change
+  useEffect(() => {
+    if (!user || !tradesLoaded) return;
+    saveTrades(trades); // keep localStorage as backup
+    // Supabase sync is done per-operation (add/save/delete) for efficiency
+  }, [trades, user, tradesLoaded]);
+
   useEffect(() => {
     try {
       localStorage.setItem(THEME_KEY, isDark ? "dark" : "light");
     } catch {}
   }, [isDark]);
 
+  if (authLoading) {
+    return (
+      <div style={{ minHeight: "100vh", background: isDark ? "#0d0d0d" : "#f5f5f5", display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 13, color: "#666" }}>Loading...</div>
+      </div>
+    );
+  }
+
+  if (!user) return <AuthScreen isDark={isDark} />;
+
   const showToast = (msg, color) => {
     setToast({ msg, color });
     setTimeout(() => setToast(null), 2200);
   };
-  const addTrade = (trade) => {
+  const addTrade = async (trade) => {
     setTrades((p) => [...p, trade]);
     setShowAdd(false);
     showToast("✓ Trade saved", T.accent);
+    if (user) await supabase.from("trades").upsert({ id: trade.id, user_id: user.id, data: trade });
   };
-  const saveTrade = (trade) => {
+  const saveTrade = async (trade) => {
     setTrades((p) => p.map((tr) => (tr.id === trade.id ? trade : tr)));
     setEditTrade(null);
     setSelected(trade);
     showToast("✓ Trade updated", T.accent);
+    if (user) await supabase.from("trades").upsert({ id: trade.id, user_id: user.id, data: trade });
   };
-  const savePlan = (plan) => {
-  setTrades((p) => [...p, plan]);
-  setShowPlan(false);
-  showToast("📋 Trade plan saved", T.accent);
-};
-  const deleteTrade = (id) => {
+  const savePlan = async (plan) => {
+    setTrades((p) => [...p, plan]);
+    setShowPlan(false);
+    showToast("📋 Trade plan saved", T.accent);
+    if (user) await supabase.from("trades").upsert({ id: plan.id, user_id: user.id, data: plan });
+  };
+  const handleUpgrade = async () => {
+    if (!user) return;
+    const res = await fetch("/api/create-checkout-session", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ userId: user.id, email: user.email }),
+    });
+    const { url } = await res.json();
+    if (url) window.location.href = url;
+  };
+
+  const handleManageBilling = async () => {
+    if (!user) return;
+    const res = await fetch("/api/customer-portal", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ userId: user.id }),
+    });
+    const { url } = await res.json();
+    if (url) window.location.href = url;
+  };
+
+  const freeTierFull = !isPro && trades.filter(t => t.status !== "planned").length >= 20;
+
+  const deleteTrade = async (id) => {
     if (window.confirm("Delete this trade?")) {
       setTrades((p) => p.filter((tr) => tr.id !== id));
       if (selected?.id === id) setSelected(null);
       showToast("Trade deleted", T.danger);
+      if (user) await supabase.from("trades").delete().eq("id", id).eq("user_id", user.id);
     }
   };
 const importTrades = (incoming) => {
@@ -4988,7 +5101,7 @@ const paginated = filtered
              
              
               <button
-                onClick={() => setShowAdd(true)}
+                onClick={() => freeTierFull ? handleUpgrade() : setShowAdd(true)}
                 style={{
                   background: T.accent,
                   border: "none",
@@ -5052,7 +5165,10 @@ style={{ display: "block" }}>
       </div>
 
       <div style={{ padding: mobile ? 14 : 28 }}>
-        {tab === "ai" && <AIInsights plList={plList} t={T} mobile={mobile} />}
+        {tab === "ai" && (isPro
+          ? <AIInsights plList={plList} t={T} mobile={mobile} />
+          : <UpgradePrompt t={T} onUpgrade={handleUpgrade} feature="AI Insights" />
+        )}
         {tab === "today" && (
 <DaySession
             plList={plList}
@@ -5541,7 +5657,10 @@ style={{ display: "block" }}>
           <WeeklyReview plList={plList} t={T} mobile={mobile} />
         )}
 
-        {tab === "analytics" && (
+        {tab === "analytics" && !isPro && (
+          <UpgradePrompt t={T} onUpgrade={handleUpgrade} feature="Analytics" />
+        )}
+        {tab === "analytics" && isPro && (
           <div>
             {/* Single column on mobile */}
             <div
@@ -6011,6 +6130,10 @@ style={{ display: "block" }}>
     setIsDark={setIsDark}
     onClear={clearAll}
     t={T}
+    onSignOut={() => { setShowSettings(false); signOut(); }}
+    isPro={isPro}
+    onUpgrade={() => { setShowSettings(false); handleUpgrade(); }}
+    onManageBilling={() => { setShowSettings(false); handleManageBilling(); }}
   />
 )}
       {showPlan && (
