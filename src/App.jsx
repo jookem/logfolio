@@ -982,14 +982,13 @@ const base = {
       <div style={{ background: t.card, border: `1px solid ${t.border}`, borderRadius: 16, width: "100%", maxWidth: 540, maxHeight: "93vh", overflowY: "auto", padding: 24 }}>
 
         {/* Header */}
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20, display: "flex",
+              alignItems: "center",
+              gap: 6}}>
         <div style={{ fontFamily: "'Space Mono', monospace", 
                      fontSize: 16, 
                      fontWeight: 700, 
                      color: t.accent,
-                     display: "flex",
-                     alignItems: "center",
-                     gap: 6
                     }}>
 <svg
   width="1em"
