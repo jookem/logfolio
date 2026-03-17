@@ -1616,8 +1616,7 @@ function TradeFormModal({ initial, onClose, onSave, onCSVImport, t }) {
 >
   <path d="M20 14V7C20 5.34315 18.6569 4 17 4H12M20 14L13.5 20M20 14H15.5C14.3954 14 13.5 14.8954 13.5 16V20M13.5 20H7C5.34315 20 4 18.6569 4 17V12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
   <path d="M7 4V7M7 10V7M7 7H4M7 7H10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-</svg>
-    Log A Trade
+</svg> Log A Trade
   </>
 )}
           </div>
@@ -1631,7 +1630,10 @@ function TradeFormModal({ initial, onClose, onSave, onCSVImport, t }) {
               cursor: "pointer",
             }}
           >
-            ✕
+            <svg width="1em" height="1em" viewBox="0 0 24 24" fill="none">
+<path d="M14.5 9.50002L9.5 14.5M9.49998 9.5L14.5 14.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+<path d="M22 12C22 16.714 22 19.0711 20.5355 20.5355C19.0711 22 16.714 22 12 22C7.28595 22 4.92893 22 3.46447 20.5355C2 19.0711 2 16.714 2 12C2 7.28595 2 4.92893 3.46447 3.46447C4.92893 2 7.28595 2 12 2C16.714 2 19.0711 2 20.5355 3.46447C21.5093 4.43821 21.8356 5.80655 21.9449 8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+</svg>
           </button>
         </div>
         <div
