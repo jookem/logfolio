@@ -1036,7 +1036,7 @@ const base = {
       placeholder="AAPL"
     />
     {tickerLoading && (
-      <span style={{ position: "fixed", right: 10, top: "50%", transform: "translateY(-50%)", fontSize: 11, color: t.text3 }}>...</span>
+      <span style={{ position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)", fontSize: 11, color: t.text3 }}>...</span>
     )}
   </div>
 </div>
