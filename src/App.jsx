@@ -5443,7 +5443,7 @@ style={{ display: "block" }}>
             }}
             value={planSearch}
             onChange={(e) => { setPlanSearch(e.target.value); setPlanPage(1); }}
-            placeholder="Search ticker, strategy, tags..."
+            placeholder="Search ticker, strategy, tags, notes..."
           />
         </div>
         <div
