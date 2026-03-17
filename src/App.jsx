@@ -4609,9 +4609,9 @@ const [page, setPage] = useState(1);
     } catch {}
   }, [isDark]);
 
-  if (authLoading) {
+  if (authLoading || (user && !tradesLoaded)) {
     return (
-      <div style={{ minHeight: "100vh", background: isDark ? "#0d0d0d" : "#f5f5f5", display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <div style={{ minHeight: "100vh", background: isDark ? "#000" : "#f4f5f7", display: "flex", alignItems: "center", justifyContent: "center" }}>
         <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 13, color: "#666" }}>Loading...</div>
       </div>
     );
