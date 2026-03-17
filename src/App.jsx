@@ -4457,6 +4457,8 @@ function SettingsModal({ onClose, isDark, setIsDark, onClear, t }) {
   );
 }
 export default function TradingJournal() {
+  const [planSearch, setPlanSearch] = useState("");
+  const [selectedPlan, setSelectedPlan] = useState(null);
   const [trades, setTrades] = useState(() => loadTrades() ?? SEED_TRADES);
   const [isDark, setIsDark] = useState(() => loadTheme() === "dark");
   const [tab, setTab] = useState("today");
@@ -4600,6 +4602,12 @@ const avgR = useMemo(() => {
   const withR = plList.filter(t => t.r !== null && t.r !== undefined);
   return withR.length ? withR.reduce((s, t) => s + t.r, 0) / withR.length : null;
 }, [plList]);
+  const filteredPlans = useMemo(() => {
+  const q = planSearch.toLowerCase().trim();
+  return trades
+    .filter(t => t.status === "planned")
+    .filter(t => !q || [t.ticker, t.strategy, t.notes, ...(t.tags || [])].some(f => (f || "").toLowerCase().includes(q)));
+}, [trades, planSearch]);
   const filtered = useMemo(() => {
   const q = search.toLowerCase().trim();
   return plList.filter((t) =>
