@@ -2381,6 +2381,7 @@ function TradeRow({ trade, onClick, onEdit, onDelete, t, mobile }) {
 }
 function TradeDetail({ trade, onClose, onEdit, t }) {
   const pl = calcPL(trade);
+  const [lightbox, setLightbox] = useState(null);
   return (
     <div
       style={{
@@ -2679,7 +2680,7 @@ function TradeDetail({ trade, onClose, onEdit, t }) {
                 key={img.id}
                 src={img.src}
                 alt="chart"
-                onClick={() => window.open(img.src, "_blank")}
+                onClick={() => setLightbox(img.src)}
                 style={{ width: "100%", aspectRatio: "16/9", objectFit: "cover", borderRadius: 6, cursor: "pointer", border: `1px solid ${t.border}` }}
               />
             ))}
@@ -2715,7 +2716,37 @@ function TradeDetail({ trade, onClose, onEdit, t }) {
     </div>
   );
 }
+<div style={{ fontSize: 13, color: t.text2, lineHeight: 1.6 }}>
+            {trade.notes}
+          </div>
+        </div>
+      )}
 
+      {lightbox && (
+        <div
+          onClick={() => setLightbox(null)}
+          style={{
+            position: "fixed", inset: 0, background: "rgba(0,0,0,0.92)",
+            zIndex: 999, display: "flex", alignItems: "center", justifyContent: "center",
+            padding: 20,
+          }}
+        >
+          <img src={lightbox} alt="chart" style={{ maxWidth: "100%", maxHeight: "90vh", borderRadius: 8, objectFit: "contain" }} />
+          <button
+            onClick={() => setLightbox(null)}
+            style={{
+              position: "absolute", top: 20, right: 20,
+              background: "rgba(255,255,255,0.1)", border: "none",
+              color: "#fff", borderRadius: "50%", width: 36, height: 36,
+              cursor: "pointer", fontSize: 18,
+            }}
+          >×</button>
+        </div>
+      )}
+
+    </div>
+  );
+}
 function CalendarView({ plList, t, mobile }) {
   const now = new Date();
   const [viewYear, setViewYear] = useState(now.getFullYear());
