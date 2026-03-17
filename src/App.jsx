@@ -2713,14 +2713,6 @@ function TradeDetail({ trade, onClose, onEdit, t }) {
           </div>
         </div>
       )}
-    </div>
-  );
-}
-<div style={{ fontSize: 13, color: t.text2, lineHeight: 1.6 }}>
-            {trade.notes}
-          </div>
-        </div>
-      )}
       {lightbox && (
         <div
           onClick={() => setLightbox(null)}
