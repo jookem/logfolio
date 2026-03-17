@@ -4458,6 +4458,9 @@ function SettingsModal({ onClose, isDark, setIsDark, onClear, t }) {
 }
 export default function TradingJournal() {
   const [planSearch, setPlanSearch] = useState("");
+  const [planFilter, setPlanFilter] = useState({ type: "all", strategy: "all", tag: "all" });
+  const [planPerPage, setPlanPerPage] = useState(30);
+  const [planPage, setPlanPage] = useState(1);
   const [selectedPlan, setSelectedPlan] = useState(null);
   const [trades, setTrades] = useState(() => loadTrades() ?? SEED_TRADES);
   const [isDark, setIsDark] = useState(() => loadTheme() === "dark");
@@ -4606,8 +4609,16 @@ const avgR = useMemo(() => {
   const q = planSearch.toLowerCase().trim();
   return trades
     .filter(t => t.status === "planned")
+    .filter(t => planFilter.type === "all" || t.type === planFilter.type)
+    .filter(t => planFilter.strategy === "all" || t.strategy === planFilter.strategy)
+    .filter(t => planFilter.tag === "all" || (t.tags || []).includes(planFilter.tag))
     .filter(t => !q || [t.ticker, t.strategy, t.notes, ...(t.tags || [])].some(f => (f || "").toLowerCase().includes(q)));
-}, [trades, planSearch]);
+}, [trades, planSearch, planFilter]);
+const planList = useMemo(() => trades.filter(t => t.status === "planned"), [trades]);
+const planAllTags = useMemo(() => [...new Set(planList.flatMap(t => t.tags || []))], [planList]);
+const planAllStrategies = useMemo(() => [...new Set(planList.map(t => t.strategy).filter(Boolean))], [planList]);
+const planTotalPages = Math.ceil(filteredPlans.length / planPerPage);
+const paginatedPlans = filteredPlans.slice((planPage - 1) * planPerPage, planPage * planPerPage);
   const filtered = useMemo(() => {
   const q = search.toLowerCase().trim();
   return plList.filter((t) =>
@@ -5388,9 +5399,55 @@ style={{ display: "block" }}>
               outline: "none",
             }}
             value={planSearch}
-            onChange={(e) => setPlanSearch(e.target.value)}
+            onChange={(e) => { setPlanSearch(e.target.value); setPlanPage(1); }}
             placeholder="Search ticker, strategy, tags..."
           />
+        </div>
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: mobile ? "1fr 1fr" : "1fr 1fr 1fr auto auto",
+            gap: 10,
+            marginBottom: 16,
+          }}
+        >
+          <select
+            style={sel}
+            value={planFilter.type}
+            onChange={(e) => { setPlanFilter(f => ({ ...f, type: e.target.value })); setPlanPage(1); }}
+          >
+            <option value="all">All Types</option>
+            <option value="stock">Stock</option>
+            <option value="options">Options</option>
+          </select>
+          <select
+            style={sel}
+            value={planFilter.strategy}
+            onChange={(e) => { setPlanFilter(f => ({ ...f, strategy: e.target.value })); setPlanPage(1); }}
+          >
+            <option value="all">All Strategies</option>
+            {planAllStrategies.map(s => <option key={s}>{s}</option>)}
+          </select>
+          <select
+            style={sel}
+            value={planFilter.tag}
+            onChange={(e) => { setPlanFilter(f => ({ ...f, tag: e.target.value })); setPlanPage(1); }}
+          >
+            <option value="all">All Tags</option>
+            {planAllTags.map(tg => <option key={tg}>{tg}</option>)}
+          </select>
+          <select
+            style={{ ...sel, width: mobile ? "100%" : "auto" }}
+            value={planPerPage}
+            onChange={(e) => { setPlanPerPage(Number(e.target.value)); setPlanPage(1); }}
+          >
+            {[10, 25, 50, 100].map(n => <option key={n} value={n}>{n} / page</option>)}
+          </select>
+          {!mobile && (
+            <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 11, color: T.text3, display: "flex", alignItems: "center", whiteSpace: "nowrap" }}>
+              {filteredPlans.length} plans
+            </div>
+          )}
         </div>
         <div style={{ background: T.surface, border: `1px solid ${T.border}`, borderRadius: 12 }}>
           <div style={{
@@ -5400,12 +5457,12 @@ style={{ display: "block" }}>
           }}>
             Trade Plans ({filteredPlans.length})
           </div>
-          {filteredPlans.length === 0 ? (
+          {paginatedPlans.length === 0 ? (
             <div style={{ padding: 48, textAlign: "center", color: T.text4, fontFamily: "'Space Mono',monospace", fontSize: 12 }}>
               No trade plans found
             </div>
           ) : (
-            filteredPlans.map((plan) => (
+            paginatedPlans.map((plan) => (
               <TradeRow
                 key={plan.id}
                 trade={plan}
@@ -5418,6 +5475,27 @@ style={{ display: "block" }}>
             ))
           )}
         </div>
+        {planTotalPages > 1 && (
+          <div style={{ display: "flex", justifyContent: "center", gap: 6, marginTop: 16 }}>
+            <button
+              style={{ ...sel, padding: "6px 12px", cursor: planPage === 1 ? "default" : "pointer", opacity: planPage === 1 ? 0.4 : 1 }}
+              disabled={planPage === 1}
+              onClick={() => setPlanPage(p => p - 1)}
+            >←</button>
+            {Array.from({ length: planTotalPages }, (_, i) => i + 1).map(n => (
+              <button
+                key={n}
+                style={{ ...sel, padding: "6px 12px", cursor: "pointer", background: n === planPage ? T.accent : T.input, color: n === planPage ? "#fff" : T.text }}
+                onClick={() => setPlanPage(n)}
+              >{n}</button>
+            ))}
+            <button
+              style={{ ...sel, padding: "6px 12px", cursor: planPage === planTotalPages ? "default" : "pointer", opacity: planPage === planTotalPages ? 0.4 : 1 }}
+              disabled={planPage === planTotalPages}
+              onClick={() => setPlanPage(p => p + 1)}
+            >→</button>
+          </div>
+        )}
       </div>
     )}
   </div>
