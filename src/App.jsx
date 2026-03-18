@@ -412,37 +412,50 @@ function Tag({ label, t, onRemove }) {
 }
 
 function EquityCurve({ trades, t, spyData, spyError }) {
-  const sorted = [...trades].sort((a, b) => new Date(a.date) - new Date(b.date));
+  const [range, setRange] = useState("ALL");
+  const allSorted = [...trades].sort((a, b) => new Date(a.date) - new Date(b.date));
+
+  const cutoffDate = (() => {
+    if (range === "ALL") return null;
+    const d = new Date();
+    if (range === "1M") d.setMonth(d.getMonth() - 1);
+    else if (range === "3M") d.setMonth(d.getMonth() - 3);
+    else if (range === "6M") d.setMonth(d.getMonth() - 6);
+    else if (range === "1Y") d.setFullYear(d.getFullYear() - 1);
+    return d.toISOString().slice(0, 10);
+  })();
+  const sorted = cutoffDate ? allSorted.filter(tr => tr.date >= cutoffDate) : allSorted;
+
   let running = 0;
-  // Start from 0, then add each trade
   const points = [{ val: 0, date: null }, ...sorted.map((tr) => {
     running += calcPL(tr);
     return { val: running, date: tr.date };
   })];
+
   if (points.length < 3)
     return (
-      <div style={{ height: 90, display: "flex", alignItems: "center", justifyContent: "center", color: t.text3, fontSize: 12, fontFamily: "monospace" }}>
-        Add more trades to see curve
+      <div style={{ height: 120, display: "flex", alignItems: "center", justifyContent: "center", color: t.text3, fontSize: 12, fontFamily: "monospace" }}>
+        {range !== "ALL" ? "No trades in this period" : "Add more trades to see curve"}
       </div>
     );
-  const W = 500, H = 90;
-  const xs = points.map((_, i) => (i / (points.length - 1)) * W);
 
+  const W = 500, H = 120;
+  const xs = points.map((_, i) => (i / (points.length - 1)) * W);
   const min = Math.min(...points.map(p => p.val));
   const max = Math.max(...points.map(p => p.val));
-  const range = max - min || 1;
-
-  const ys = points.map((p) => H - ((p.val - min) / range) * H);
+  const range_ = max - min || 1;
+  const ys = points.map((p) => H - ((p.val - min) / range_) * H);
   const path = points.map((_, i) => `${i === 0 ? "M" : "L"} ${xs[i]},${ys[i]}`).join(" ");
 
-  // SPY: normalize independently to [0, H] so it always fills the chart
+  // SPY normalized to its own % scale
   let spyPath = null;
   let spyReturnPct = null;
-  if (spyData?.length >= 2 && sorted.length >= 2) {
-    const base = spyData[0].close;
+  const filteredSpy = cutoffDate ? spyData?.filter(s => s.date >= cutoffDate) : spyData;
+  if (filteredSpy?.length >= 2 && sorted.length >= 2) {
+    const base = filteredSpy[0].close;
     const spyRets = points.map((pt) => {
       if (!pt.date) return 0;
-      const match = spyData.filter(s => s.date <= pt.date);
+      const match = filteredSpy.filter(s => s.date <= pt.date);
       if (!match.length) return null;
       return (match[match.length - 1].close - base) / base;
     });
@@ -452,36 +465,78 @@ function EquityCurve({ trades, t, spyData, spyError }) {
       const spyMin = Math.min(...validRets);
       const spyMax = Math.max(...validRets);
       const spyRange = spyMax - spyMin || 0.001;
-      // Pin SPY to equity's 0-line at start, then normalize its own movement
-      const zeroY = H - ((0 - min) / range) * H;
-      const spyYs = spyRets.map(r => {
-        if (r == null) return null;
-        // Normalize SPY returns to occupy the same height as equity curve
-        return zeroY - ((r - spyMin) / spyRange) * (H * 0.7);
-      });
+      const zeroY = H - ((0 - min) / range_) * H;
+      const spyYs = spyRets.map(r => r != null ? zeroY - ((r - spyMin) / spyRange) * (H * 0.7) : null);
       const segs = spyYs.map((y, i) => y != null ? `${i === 0 ? "M" : "L"} ${xs[i]},${y}` : null).filter(Boolean);
       if (segs.length >= 2) spyPath = segs.join(" ");
     }
   }
+
+  // X-axis date labels: pick ~4 evenly spaced points (skip the null start)
+  const datePts = points.filter(p => p.date);
+  const labelIdxs = [0, Math.floor(datePts.length / 3), Math.floor(datePts.length * 2 / 3), datePts.length - 1]
+    .filter((v, i, a) => a.indexOf(v) === i && datePts[v]);
+  const fmtDate = d => { const [y, m, dd] = d.split("-"); return `${m}/${dd}/${y.slice(2)}`; };
+
+  const RANGES = ["1M", "3M", "6M", "1Y", "ALL"];
+
   return (
     <div>
-      <svg viewBox={`0 0 ${W} ${H}`} style={{ width: "100%", height: 90 }} preserveAspectRatio="none">
+      {/* Range selector */}
+      <div style={{ display: "flex", justifyContent: "flex-end", gap: 4, marginBottom: 8 }}>
+        {RANGES.map(r => (
+          <button key={r} onClick={() => setRange(r)} style={{
+            background: range === r ? t.accent + "25" : "transparent",
+            border: `1px solid ${range === r ? t.accent : t.border}`,
+            color: range === r ? t.accent : t.text3,
+            borderRadius: 5, padding: "2px 8px", fontSize: 10,
+            fontFamily: "'Space Mono',monospace", cursor: "pointer",
+          }}>{r}</button>
+        ))}
+      </div>
+
+      {/* Chart */}
+      <svg viewBox={`0 0 ${W} ${H}`} style={{ width: "100%", height: 120 }} preserveAspectRatio="none">
         <defs>
           <linearGradient id="eg" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor={t.accent} stopOpacity="0.3" />
+            <stop offset="0%" stopColor={t.accent} stopOpacity="0.25" />
             <stop offset="100%" stopColor={t.accent} stopOpacity="0" />
           </linearGradient>
         </defs>
         <path d={`${path} L ${xs[xs.length - 1]},${H} L 0,${H} Z`} fill="url(#eg)" />
         <path d={path} fill="none" stroke={t.accent} strokeWidth="2" strokeLinejoin="round" />
         {points.map((p, i) => i > 0 && (
-          <circle key={i} cx={xs[i]} cy={ys[i]} r="3" fill={t.accent} opacity="0.6" />
+          <circle key={i} cx={xs[i]} cy={ys[i]} r="2.5" fill={t.accent} opacity="0.5" />
         ))}
         {spyPath && (
           <path d={spyPath} fill="none" stroke="#3B82F6" strokeWidth="1.5" strokeDasharray="5 3" strokeLinejoin="round" opacity="0.7" />
         )}
       </svg>
-      <div style={{ display: "flex", gap: 16, justifyContent: "flex-end", marginTop: 4, alignItems: "center" }}>
+
+      {/* X-axis date labels */}
+      <div style={{ position: "relative", height: 16, marginTop: 2 }}>
+        {labelIdxs.map(idx => {
+          const pt = datePts[idx];
+          // find the xs position: datePts[idx] is points[idx+1] (offset by the null start)
+          const ptIdx = points.findIndex(p => p.date === pt.date);
+          const xPct = ptIdx >= 0 ? (ptIdx / (points.length - 1)) * 100 : null;
+          if (xPct == null) return null;
+          return (
+            <span key={idx} style={{
+              position: "absolute",
+              left: `${xPct}%`,
+              transform: "translateX(-50%)",
+              fontSize: 9,
+              color: t.text3,
+              fontFamily: "'Space Mono',monospace",
+              whiteSpace: "nowrap",
+            }}>{fmtDate(pt.date)}</span>
+          );
+        })}
+      </div>
+
+      {/* Legend */}
+      <div style={{ display: "flex", gap: 16, justifyContent: "flex-end", marginTop: 6, alignItems: "center" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
           <div style={{ width: 16, height: 2, background: t.accent, borderRadius: 1 }} />
           <span style={{ fontSize: 10, color: t.text3, fontFamily: "'Space Mono',monospace" }}>Your P/L</span>
@@ -502,7 +557,7 @@ function EquityCurve({ trades, t, spyData, spyError }) {
     </div>
   );
 }
-// REPLACE the entire function with this:
+
 function ScreenshotUpload({ value = [], onChange, t }) {
 const fileInputRef = useRef(null);
 const [lightbox, setLightbox] = useState(null);
