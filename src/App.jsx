@@ -5276,7 +5276,7 @@ const [page, setPage] = useState(1);
       if (e.key === "n" || e.key === "N") { e.preventDefault(); setShowAdd(true); }
       if (e.key === "p" || e.key === "P") { e.preventDefault(); setShowPlan(true); }
       if (e.key === "t" || e.key === "T") { setTab("trades"); setSelected(null); }
-      if (e.key === "d" || e.key === "D") { setTab("dashboard"); }
+      if (e.key === "d" || e.key === "D") { setTab("analytics"); }
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
@@ -5558,7 +5558,6 @@ const paginated = filtered
   const maxPL = Math.max(...plList.map((t) => Math.abs(t.pl)), 1);
   const nav = [
     ["today", "Today"],
-    ["dashboard", "Dashboard"],
     ["weekly", "Weekly"],
     ["calendar", "Calendar"],
     ["trades", "Logs"],
@@ -6001,178 +6000,6 @@ style={{ display: "block" }}>
           />
         )}
 
-        {tab === "dashboard" && (
-          <div>
-            {/* Single column on mobile */}
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: mobile ? "1fr 1fr" : "repeat(4,1fr)",
-                gap: 12,
-                marginBottom: 20,
-              }}
-            >
-              <StatCard
-                label="Total P/L"
-                value={fmt(stats.totalPL)}
-                sub={`${stats.total} trades`}
-                color={stats.totalPL >= 0 ? T.accent : T.danger}
-                t={T}
-              />
-              <StatCard
-                label="Win Rate"
-                value={`${(stats.winRate * 100).toFixed(0)}%`}
-                sub={`${stats.wins}W/${stats.total - stats.wins}L`}
-                t={T}
-              />
-              <StatCard
-                label="Expectancy"
-                value={fmt(stats.expectancy)}
-                sub="per trade"
-                color={stats.expectancy >= 0 ? T.accent : T.danger}
-                t={T}
-              />
-              <StatCard
-                label="Profit Factor"
-                value={isFinite(stats.profitFactor) ? stats.profitFactor.toFixed(2) : "∞"}
-                sub="wins/losses"
-                t={T}
-              />
-              <StatCard
-                label="Avg R"
-                value={avgR !== null ? fmtR(avgR) : "—"}
-                sub="per closed trade"
-                color={avgR !== null && avgR >= 0 ? T.accent : avgR !== null ? T.danger : undefined}
-                t={T}
-              />
-              <StatCard
-                label="Best Trade"
-                value={plList.length ? fmt(Math.max(...plList.map(t => t.pl))) : "—"}
-                sub="single trade high"
-                color={T.accent}
-                t={T}
-              />
-              <StatCard
-                label="Max Drawdown"
-                value={maxDrawdown.value > 0 ? `-${fmt(maxDrawdown.value)}` : "—"}
-                sub={maxDrawdown.pct > 0 ? `${(maxDrawdown.pct * 100).toFixed(1)}% of peak` : "no drawdown"}
-                color={maxDrawdown.value > 0 ? T.danger : undefined}
-                t={T}
-              />
-            </div>
-  
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: mobile ? "1fr" : "1fr 1fr",
-                gap: 16,
-                marginBottom: 20,
-              }}
-            >
-              <div
-                style={{
-                  background: T.surface,
-                  border: `1px solid ${T.border}`,
-                  borderRadius: 12,
-                  padding: "16px 18px",
-                }}
-              >
-                <div
-                  style={{
-                    fontFamily: "'Space Mono',monospace",
-                    fontSize: 10,
-                    color: T.text3,
-                    textTransform: "uppercase",
-                    letterSpacing: 2,
-                    marginBottom: 12,
-                  }}
-                >
-                  Equity Curve
-                </div>
-                <EquityCurve trades={plList} t={T} spyData={spyData} />
-              </div>
-              <div
-                style={{
-                  background: T.surface,
-                  border: `1px solid ${T.border}`,
-                  borderRadius: 12,
-                  padding: "16px 18px",
-                }}
-              >
-                <div
-                  style={{
-                    fontFamily: "'Space Mono',monospace",
-                    fontSize: 10,
-                    color: T.text3,
-                    textTransform: "uppercase",
-                    letterSpacing: 2,
-                    marginBottom: 12,
-                  }}
-                >
-                  Strategy Snapshot
-                  </div>
-  {(() => {
-    const maxStratPL = Math.max(...stratStats.map(s => Math.abs(s.pl)), 1);
-    return stratStats.map((s) => (
-      <div key={s.strategy} style={{ marginBottom: 14 }}>
-        <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 3 }}>
-          <span style={{ fontSize: 13, color: T.text2 }}>{s.strategy}</span>
-          <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
-            <span style={{ fontSize: 10, color: T.text3, fontFamily: "monospace" }}>
-              {(s.winRate * 100).toFixed(0)}%WR
-            </span>
-            <span style={{ fontFamily: "'Space Mono',monospace", fontSize: 12, color: s.pl >= 0 ? T.accent : T.danger }}>
-              {s.pl >= 0 ? "+" : ""}{fmt(s.pl)}
-            </span>
-          </div>
-        </div>
-        <MiniBar value={s.pl} max={maxStratPL} t={T} />
-      </div>
-    ));
-  })()}
-              </div>
-            </div>
-            <div
-              style={{
-                background: T.surface,
-                border: `1px solid ${T.border}`,
-                borderRadius: 12,
-              }}
-            >
-              <div
-                style={{
-                  padding: "13px 16px",
-                  borderBottom: `1px solid ${T.border}`,
-                  fontFamily: "'Space Mono',monospace",
-                  fontSize: 10,
-                  color: T.text3,
-                  textTransform: "uppercase",
-                  letterSpacing: 2,
-                }}
-              >
-                Recent Trades
-              </div>
-              {[...plList]
-                .sort((a, b) => new Date(b.date) - new Date(a.date))
-                .slice(0, 5)
-                .map((tr) => (
-                  <TradeRow
-                    key={tr.id}
-                    trade={tr}
-                    onClick={() => {
-                      setSelected(tr);
-                      setTab("trades");
-                    }}
-                    onEdit={() => setEditTrade(tr)}
-                    onDelete={() => deleteTrade(tr.id)}
-                    t={T}
-                    mobile={mobile}
-                  />
-                ))}
-            </div>
-          </div>
-        )}
-
         {tab === "calendar" && (
           <CalendarView plList={plList} t={T} mobile={mobile} />
         )}
@@ -6513,160 +6340,74 @@ style={{ display: "block" }}>
         )}
         {tab === "analytics" && isPro && (
           <div>
-            {/* Single column on mobile */}
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: mobile ? "1fr 1fr" : "repeat(5,1fr)",
-                gap: 12,
-                marginBottom: 20,
-              }}
-            >
-              <StatCard
-                label="Avg Win"
-                value={fmt(stats.avgWin)}
-                color={T.accent}
-                t={T}
-              />
-              <StatCard
-                label="Avg Loss"
-                value={fmt(stats.avgLoss)}
-                color={T.danger}
-                t={T}
-              />
-              <StatCard
-                label="Best Trade"
-                value={fmt(Math.max(...plList.map((t) => t.pl)))}
-                t={T}
-              />
-              <StatCard
-                label="Worst Trade"
-                value={fmt(Math.min(...plList.map((t) => t.pl)))}
-                color={T.danger}
-                t={T}
-              />
+            {/* All key stats */}
+            <div style={{ display: "grid", gridTemplateColumns: mobile ? "1fr 1fr" : "repeat(5,1fr)", gap: 12, marginBottom: 20 }}>
+              <StatCard label="Total P/L" value={fmt(stats.totalPL)} sub={`${stats.total} trades`} color={stats.totalPL >= 0 ? T.accent : T.danger} t={T} />
+              <StatCard label="Win Rate" value={`${(stats.winRate * 100).toFixed(0)}%`} sub={`${stats.wins}W/${stats.total - stats.wins}L`} t={T} />
+              <StatCard label="Expectancy" value={fmt(stats.expectancy)} sub="per trade" color={stats.expectancy >= 0 ? T.accent : T.danger} t={T} />
+              <StatCard label="Profit Factor" value={isFinite(stats.profitFactor) ? stats.profitFactor.toFixed(2) : "∞"} sub="wins/losses" t={T} />
+              <StatCard label="Avg R" value={avgR !== null ? fmtR(avgR) : "—"} sub="per closed trade" color={avgR !== null && avgR >= 0 ? T.accent : avgR !== null ? T.danger : undefined} t={T} />
+              <StatCard label="Avg Win" value={fmt(stats.avgWin)} color={T.accent} t={T} />
+              <StatCard label="Avg Loss" value={fmt(stats.avgLoss)} color={T.danger} t={T} />
+              <StatCard label="Best Trade" value={plList.length ? fmt(Math.max(...plList.map(t => t.pl))) : "—"} color={T.accent} t={T} />
+              <StatCard label="Worst Trade" value={plList.length ? fmt(Math.min(...plList.map(t => t.pl))) : "—"} color={T.danger} t={T} />
+              <StatCard label="Max Drawdown" value={maxDrawdown.value > 0 ? `-${fmt(maxDrawdown.value)}` : "—"} sub={maxDrawdown.pct > 0 ? `${(maxDrawdown.pct * 100).toFixed(1)}% of peak` : "no drawdown"} color={maxDrawdown.value > 0 ? T.danger : undefined} t={T} />
             </div>
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: mobile ? "1fr" : "1fr 1fr",
-                gap: 16,
-              }}
-            >
-             <div
-  style={{
-    background: T.surface,
-    border: `1px solid ${T.border}`,
-    borderRadius: 12,
-    padding: "16px 18px",
-  }}
->
-  <div
-    style={{
-      fontFamily: "'Space Mono',monospace",
-      fontSize: 10,
-      color: T.text3,
-      textTransform: "uppercase",
-      letterSpacing: 2,
-      marginBottom: 16,
-    }}
-  >
-    Strategy Performance
-  </div>
-  {(() => {
-    const maxStratPL = Math.max(...stratStats.map(s => Math.abs(s.pl)), 1);
-    return stratStats.map((s) => (
-      <div key={s.strategy} style={{ marginBottom: 14 }}>
-        <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 3 }}>
-          <span style={{ fontSize: 13, color: T.text2 }}>{s.strategy}</span>
-          <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
-            {s.avgHold != null && (
-              <span style={{ fontSize: 10, color: T.text3, fontFamily: "monospace" }}>
-                {s.avgHold < 60 ? `${s.avgHold}m` : `${Math.floor(s.avgHold/60)}h${s.avgHold%60}m`}
-              </span>
-            )}
-            <span style={{ fontSize: 10, color: T.text3, fontFamily: "monospace" }}>
-              {(s.winRate * 100).toFixed(0)}%WR
-            </span>
-            <span style={{ fontFamily: "'Space Mono',monospace", fontSize: 12, color: s.pl >= 0 ? T.accent : T.danger }}>
-              {s.pl >= 0 ? "+" : ""}{fmt(s.pl)}
-            </span>
-          </div>
-        </div>
-        <MiniBar value={s.pl} max={maxStratPL} t={T} />
-      </div>
-    ));
-  })()}
-</div>
- 
-             <div
-                style={{
-                  background: T.surface,
-                  border: `1px solid ${T.border}`,
-                  borderRadius: 12,
-                  padding: "16px 18px",
-                }}
-              >
-                <div
-                  style={{
-                    fontFamily: "'Space Mono',monospace",
-                    fontSize: 10,
-                    color: T.text3,
-                    textTransform: "uppercase",
-                    letterSpacing: 2,
-                    marginBottom: 16,
-                  }}
-                >
+
+            {/* Equity Curve */}
+            <div style={{ background: T.surface, border: `1px solid ${T.border}`, borderRadius: 12, padding: "16px 18px", marginBottom: 16 }}>
+              <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 10, color: T.text3, textTransform: "uppercase", letterSpacing: 2, marginBottom: 12 }}>
+                Equity Curve
+              </div>
+              <EquityCurve trades={plList} t={T} spyData={spyData} />
+            </div>
+
+            {/* Strategy + Tag/Emotion */}
+            <div style={{ display: "grid", gridTemplateColumns: mobile ? "1fr" : "1fr 1fr", gap: 16 }}>
+              <div style={{ background: T.surface, border: `1px solid ${T.border}`, borderRadius: 12, padding: "16px 18px" }}>
+                <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 10, color: T.text3, textTransform: "uppercase", letterSpacing: 2, marginBottom: 16 }}>
+                  Strategy Performance
+                </div>
+                {(() => {
+                  const maxStratPL = Math.max(...stratStats.map(s => Math.abs(s.pl)), 1);
+                  return stratStats.map((s) => (
+                    <div key={s.strategy} style={{ marginBottom: 14 }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 3 }}>
+                        <span style={{ fontSize: 13, color: T.text2 }}>{s.strategy}</span>
+                        <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
+                          {s.avgHold != null && (
+                            <span style={{ fontSize: 10, color: T.text3, fontFamily: "monospace" }}>
+                              {s.avgHold < 60 ? `${s.avgHold}m` : `${Math.floor(s.avgHold/60)}h${s.avgHold%60}m`}
+                            </span>
+                          )}
+                          <span style={{ fontSize: 10, color: T.text3, fontFamily: "monospace" }}>{(s.winRate * 100).toFixed(0)}%WR</span>
+                          <span style={{ fontFamily: "'Space Mono',monospace", fontSize: 12, color: s.pl >= 0 ? T.accent : T.danger }}>{s.pl >= 0 ? "+" : ""}{fmt(s.pl)}</span>
+                        </div>
+                      </div>
+                      <MiniBar value={s.pl} max={maxStratPL} t={T} />
+                    </div>
+                  ));
+                })()}
+              </div>
+
+              <div style={{ background: T.surface, border: `1px solid ${T.border}`, borderRadius: 12, padding: "16px 18px" }}>
+                <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 10, color: T.text3, textTransform: "uppercase", letterSpacing: 2, marginBottom: 16 }}>
                   Tag Performance
                 </div>
                 {allTags.length === 0 ? (
-                  <div style={{ color: T.text4, fontSize: 13 }}>
-                    No tags added yet
-                  </div>
+                  <div style={{ color: T.text3, fontSize: 13 }}>No tags added yet</div>
                 ) : (
                   allTags.map((tag) => {
-                    const tagged = plList.filter((tr) =>
-                      (tr.tags || []).includes(tag)
-                    );
+                    const tagged = plList.filter((tr) => (tr.tags || []).includes(tag));
                     const tagPL = tagged.reduce((s, tr) => s + tr.pl, 0);
-                    const tagWR = tagged.length
-                      ? tagged.filter((tr) => tr.pl > 0).length / tagged.length
-                      : 0;
+                    const tagWR = tagged.length ? tagged.filter((tr) => tr.pl > 0).length / tagged.length : 0;
                     return (
                       <div key={tag} style={{ marginBottom: 12 }}>
-                        <div
-                          style={{
-                            display: "flex",
-                            justifyContent: "space-between",
-                            marginBottom: 3,
-                          }}
-                        >
-                          <span style={{ fontSize: 13, color: T.text2 }}>
-                            {tag}{" "}
-                            <span style={{ fontSize: 10, color: T.text3 }}>
-                              ({tagged.length})
-                            </span>
-                          </span>
+                        <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 3 }}>
+                          <span style={{ fontSize: 13, color: T.text2 }}>{tag} <span style={{ fontSize: 10, color: T.text3 }}>({tagged.length})</span></span>
                           <div style={{ display: "flex", gap: 10 }}>
-                            <span
-                              style={{
-                                fontSize: 10,
-                                color: T.text3,
-                                fontFamily: "monospace",
-                              }}
-                            >
-                              {(tagWR * 100).toFixed(0)}%WR
-                            </span>
-                            <span
-                              style={{
-                                fontFamily: "'Space Mono',monospace",
-                                fontSize: 12,
-                                color: tagPL >= 0 ? T.accent : T.danger,
-                              }}
-                            >
-                              {tagPL >= 0 ? "+" : ""}
-                              {fmt(tagPL)}
-                            </span>
+                            <span style={{ fontSize: 10, color: T.text3, fontFamily: "monospace" }}>{(tagWR * 100).toFixed(0)}%WR</span>
+                            <span style={{ fontFamily: "'Space Mono',monospace", fontSize: 12, color: tagPL >= 0 ? T.accent : T.danger }}>{tagPL >= 0 ? "+" : ""}{fmt(tagPL)}</span>
                           </div>
                         </div>
                         <MiniBar value={tagPL} max={maxPL} t={T} />
@@ -6674,50 +6415,17 @@ style={{ display: "block" }}>
                     );
                   })
                 )}
-                <div
-                  style={{
-                    marginTop: 18,
-                    fontFamily: "'Space Mono',monospace",
-                    fontSize: 10,
-                    color: T.text3,
-                    textTransform: "uppercase",
-                    letterSpacing: 2,
-                    marginBottom: 10,
-                  }}
-                >
+                <div style={{ marginTop: 18, fontFamily: "'Space Mono',monospace", fontSize: 10, color: T.text3, textTransform: "uppercase", letterSpacing: 2, marginBottom: 10 }}>
                   Emotion Impact
                 </div>
                 {Object.entries(
-                  plList.reduce((acc, tr) => {
-                    if (!acc[tr.emotion]) acc[tr.emotion] = 0;
-                    acc[tr.emotion] += tr.pl;
-                    return acc;
-                  }, {})
-                )
-                  .sort((a, b) => b[1] - a[1])
-                  .map(([em, val]) => (
-                    <div
-                      key={em}
-                      style={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        padding: "6px 0",
-                        borderBottom: `1px solid ${T.border}`,
-                      }}
-                    >
-                      <span style={{ fontSize: 13, color: T.text2 }}>{em}</span>
-                      <span
-                        style={{
-                          fontFamily: "'Space Mono',monospace",
-                          fontSize: 12,
-                          color: val >= 0 ? T.accent : T.danger,
-                        }}
-                      >
-                        {val >= 0 ? "+" : ""}
-                        {fmt(val)}
-                      </span>
-                    </div>
-                  ))}
+                  plList.reduce((acc, tr) => { if (!acc[tr.emotion]) acc[tr.emotion] = 0; acc[tr.emotion] += tr.pl; return acc; }, {})
+                ).sort((a, b) => b[1] - a[1]).map(([em, val]) => (
+                  <div key={em} style={{ display: "flex", justifyContent: "space-between", padding: "6px 0", borderBottom: `1px solid ${T.border}` }}>
+                    <span style={{ fontSize: 13, color: T.text2 }}>{em}</span>
+                    <span style={{ fontFamily: "'Space Mono',monospace", fontSize: 12, color: val >= 0 ? T.accent : T.danger }}>{val >= 0 ? "+" : ""}{fmt(val)}</span>
+                  </div>
+                ))}
               </div>
             </div>
           </div>
