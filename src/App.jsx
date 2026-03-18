@@ -5146,6 +5146,7 @@ export default function TradingJournal() {
   const [trades, setTrades] = useState([]);
   const [tradesLoaded, setTradesLoaded] = useState(false);
   const [isDark, setIsDark] = useState(() => loadTheme() === "dark");
+  useEffect(() => { if (profile?.theme) setIsDark(profile.theme === "dark"); }, [profile?.theme]);
   const [tab, setTab] = useState("today");
   const [showAdd, setShowAdd] = useState(false);
   const [showCSV, setShowCSV] = useState(false);
@@ -5214,10 +5215,10 @@ const [page, setPage] = useState(1);
   }, [trades, user, tradesLoaded]);
 
   useEffect(() => {
-    try {
-      localStorage.setItem(THEME_KEY, isDark ? "dark" : "light");
-    } catch {}
-  }, [isDark]);
+    const theme = isDark ? "dark" : "light";
+    try { localStorage.setItem(THEME_KEY, theme); } catch {}
+    if (user) supabase.from("profiles").update({ theme }).eq("id", user.id).then(() => {});
+  }, [isDark, user]);
 
   useEffect(() => {
     if (!user) return;
