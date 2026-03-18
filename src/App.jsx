@@ -1630,6 +1630,19 @@ function TradeFormModal({ initial, onClose, onSave, onCSVImport, t, editLabel })
     display: "block",
     fontFamily: "'Space Mono', monospace",
   };
+  const sectionHeader = (title) => (
+    <div style={{
+      fontFamily: "'Space Mono', monospace",
+      fontSize: 10,
+      color: t.accent,
+      textTransform: "uppercase",
+      letterSpacing: 2,
+      marginBottom: 10,
+      marginTop: 18,
+      paddingBottom: 6,
+      borderBottom: `1px solid ${t.border}`,
+    }}>{title}</div>
+  );
   return (
     <div
       className="backdrop-enter"
