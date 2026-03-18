@@ -5675,7 +5675,7 @@ style={{ display: "block" }}>
             <div
               style={{
                 display: "grid",
-                gridTemplateColumns: mobile ? "1fr 1fr" : "repeat(4,1fr)",
+                gridTemplateColumns: mobile ? "1fr 1fr" : "repeat(3,1fr)",
                 gap: 12,
                 marginBottom: 20,
               }}
@@ -5702,23 +5702,24 @@ style={{ display: "block" }}>
               />
               <StatCard
                 label="Profit Factor"
-                value={
-                  isFinite(stats.profitFactor)
-                    ? stats.profitFactor.toFixed(2)
-                    : "∞"
-                }
+                value={isFinite(stats.profitFactor) ? stats.profitFactor.toFixed(2) : "∞"}
                 sub="wins/losses"
                 t={T}
-              />          
-              {avgR !== null && (
-  <StatCard
-    label="Avg R"
-    value={fmtR(avgR)}
-    sub="per closed trade"
-    color={avgR >= 0 ? T.accent : T.danger}
-    t={T}
-  />
-)}
+              />
+              <StatCard
+                label="Avg R"
+                value={avgR !== null ? fmtR(avgR) : "—"}
+                sub="per closed trade"
+                color={avgR !== null && avgR >= 0 ? T.accent : avgR !== null ? T.danger : undefined}
+                t={T}
+              />
+              <StatCard
+                label="Best Trade"
+                value={plList.length ? fmt(Math.max(...plList.map(t => t.pl))) : "—"}
+                sub="single trade high"
+                color={T.accent}
+                t={T}
+              />
             </div>
   
             <div
