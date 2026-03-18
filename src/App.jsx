@@ -4215,6 +4215,8 @@ const timeStr = now.toLocaleTimeString("en-US", {
             Today's Journal
           </div>
           <textarea
+            id="today-journal"
+            name="today-journal"
             value={journalText}
             onChange={(e) => onJournalChange(e.target.value)}
             placeholder="How was your session? What did you learn? What would you do differently?"
