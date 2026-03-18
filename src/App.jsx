@@ -428,34 +428,40 @@ function EquityCurve({ trades, t, spyData, spyError }) {
   const W = 500, H = 90;
   const xs = points.map((_, i) => (i / (points.length - 1)) * W);
 
-  // Compute raw SPY PL values first so we can include them in the scale
-  let rawSpyPLs = null;
-  if (spyData?.length >= 2 && sorted.length >= 2) {
-    const base = spyData[0].close;
-    rawSpyPLs = points.map((pt) => {
-      if (!pt.date) return 0;
-      const match = spyData.filter(s => s.date <= pt.date);
-      if (!match.length) return null;
-      const close = match[match.length - 1].close;
-      return ((close - base) / base) * Math.abs(points[points.length - 1].val || 1);
-    });
-  }
-
-  const allVals = [
-    ...points.map(p => p.val),
-    ...(rawSpyPLs ? rawSpyPLs.filter(v => v != null) : []),
-  ];
-  const min = Math.min(...allVals), max = Math.max(...allVals);
+  const min = Math.min(...points.map(p => p.val));
+  const max = Math.max(...points.map(p => p.val));
   const range = max - min || 1;
 
   const ys = points.map((p) => H - ((p.val - min) / range) * H);
   const path = points.map((_, i) => `${i === 0 ? "M" : "L"} ${xs[i]},${ys[i]}`).join(" ");
 
+  // SPY: normalize independently to [0, H] so it always fills the chart
   let spyPath = null;
-  if (rawSpyPLs) {
-    const spyYs = rawSpyPLs.map(v => v != null ? H - ((v - min) / range) * H : null);
-    const segs = spyYs.map((y, i) => y != null ? `${i === 0 ? "M" : "L"} ${xs[i]},${y}` : null).filter(Boolean);
-    if (segs.length >= 2) spyPath = segs.join(" ");
+  let spyReturnPct = null;
+  if (spyData?.length >= 2 && sorted.length >= 2) {
+    const base = spyData[0].close;
+    const spyRets = points.map((pt) => {
+      if (!pt.date) return 0;
+      const match = spyData.filter(s => s.date <= pt.date);
+      if (!match.length) return null;
+      return (match[match.length - 1].close - base) / base;
+    });
+    const validRets = spyRets.filter(v => v != null);
+    if (validRets.length >= 2) {
+      spyReturnPct = validRets[validRets.length - 1] * 100;
+      const spyMin = Math.min(...validRets);
+      const spyMax = Math.max(...validRets);
+      const spyRange = spyMax - spyMin || 0.001;
+      // Pin SPY to equity's 0-line at start, then normalize its own movement
+      const zeroY = H - ((0 - min) / range) * H;
+      const spyYs = spyRets.map(r => {
+        if (r == null) return null;
+        // Normalize SPY returns to occupy the same height as equity curve
+        return zeroY - ((r - spyMin) / spyRange) * (H * 0.7);
+      });
+      const segs = spyYs.map((y, i) => y != null ? `${i === 0 ? "M" : "L"} ${xs[i]},${y}` : null).filter(Boolean);
+      if (segs.length >= 2) spyPath = segs.join(" ");
+    }
   }
   return (
     <div>
@@ -483,11 +489,13 @@ function EquityCurve({ trades, t, spyData, spyError }) {
         {spyPath ? (
           <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
             <div style={{ width: 16, height: 2, background: "#3B82F6", borderRadius: 1 }} />
-            <span style={{ fontSize: 10, color: t.text3, fontFamily: "'Space Mono',monospace" }}>SPY</span>
+            <span style={{ fontSize: 10, color: t.text3, fontFamily: "'Space Mono',monospace" }}>
+              SPY {spyReturnPct != null ? `(${spyReturnPct >= 0 ? "+" : ""}${spyReturnPct.toFixed(1)}%)` : ""}
+            </span>
           </div>
         ) : (
           <span style={{ fontSize: 10, color: t.text3, fontFamily: "'Space Mono',monospace", opacity: 0.5 }}>
-            {spyError ? "SPY data unavailable" : "Loading SPY..."}
+            {spyError ? "SPY unavailable" : "Loading SPY..."}
           </span>
         )}
       </div>
@@ -801,13 +809,19 @@ const fetchStrikes = async (ticker, expiry, optionType) => {
   try {
     const ts = Math.floor(new Date(expiry).getTime() / 1000);
     const data = await yfFetch(yf2(`/v7/finance/options/${ticker}?date=${ts}`));
-    if (data?.error) { setChainError(data.error + (data.preview ? `: ${data.preview}` : "")); return; }
-    const opts = data?.optionChain?.result?.[0]?.options?.[0];
+    // Surface proxy errors (non-JSON upstream, network failure)
+    if (data?.error) { setChainError(`Proxy error: ${data.error}${data.preview ? ` — ${data.preview}` : ""}`); return; }
+    // Surface Yahoo Finance errors
+    const yfErr = data?.optionChain?.error;
+    if (yfErr) { setChainError(`Yahoo Finance: ${yfErr.code} — ${yfErr.description}`); return; }
+    const result = data?.optionChain?.result;
+    if (!result?.length) { setChainError(`No option chain returned for ${ticker}. Check the ticker symbol.`); return; }
+    const opts = result[0]?.options?.[0];
     const contracts = optionType === "call" ? opts?.calls : opts?.puts;
     if (contracts?.length) {
       setStrikes(contracts.map(c => ({ strike: c.strike, ticker: c.contractSymbol })));
     } else {
-      setChainError("No contracts found for this date — try a listed expiry date above.");
+      setChainError(`No ${optionType} contracts on ${expiry}. Available expiries: ${(data?.optionChain?.result?.[0]?.expirationDates || []).slice(0,3).map(ts => new Date(ts*1000).toISOString().slice(0,10)).join(", ")}`);
     }
   } catch (e) { setChainError(e.message); }
 };
