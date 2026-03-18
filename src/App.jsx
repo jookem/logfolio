@@ -695,6 +695,26 @@ function VoiceNote({ value, onChange, t }) {
     </div>
   );
 }
+// ── Black-Scholes helpers ──
+function normCDF(x) {
+  const a = [0.254829592, -0.284496736, 1.421413741, -1.453152027, 1.061405429];
+  const p = 0.3275911;
+  const sign = x < 0 ? -1 : 1;
+  const ax = Math.abs(x) / Math.sqrt(2);
+  const t2 = 1 / (1 + p * ax);
+  const poly = ((((a[4]*t2 + a[3])*t2 + a[2])*t2 + a[1])*t2 + a[0]) * t2;
+  return 0.5 * (1 + sign * (1 - poly * Math.exp(-ax * ax)));
+}
+function bsPrice(S, K, T, sigma, type) {
+  if (T <= 0) return type === "call" ? Math.max(0, S - K) : Math.max(0, K - S);
+  const r = 0.045;
+  const d1 = (Math.log(S / K) + (r + sigma * sigma / 2) * T) / (sigma * Math.sqrt(T));
+  const d2 = d1 - sigma * Math.sqrt(T);
+  return type === "call"
+    ? S * normCDF(d1) - K * Math.exp(-r * T) * normCDF(d2)
+    : K * Math.exp(-r * T) * normCDF(-d2) - S * normCDF(-d1);
+}
+
 function PlanModal({ onClose, onSave, t, isDark, initial }) {
   const OPTION_STRATEGIES = {
     "Long Call":        { stockLabel: "Underlying Stock (optional)", showStock: true, legs: [{ position: "buy", type: "call" }], writeLocked: true },
@@ -1297,6 +1317,100 @@ const base = {
             )}
           </>
         )}
+
+        {/* ══ OPTIONS P&L BY DATE ══ */}
+        {form.type === "options" && (() => {
+          const leg = form.legs[0];
+          if (!leg?.strike || !leg?.expiration || !leg?.entryPremium || !form.currentPrice) return null;
+          const S = +form.currentPrice;
+          const K = +leg.strike;
+          const sigma = Math.max(0.01, (+leg.iv || 30) / 100);
+          const entry = +leg.entryPremium;
+          const contracts = +leg.contracts || 1;
+          const isWrite = leg.position === "sell";
+          const today = new Date(); today.setHours(0,0,0,0);
+          const expDate = new Date(leg.expiration + "T00:00:00");
+          const daysToExp = Math.max(0, Math.round((expDate - today) / 86400000));
+          if (daysToExp === 0) return null;
+
+          // Generate date steps (daily if ≤14 days, else weekly)
+          const step = daysToExp > 14 ? 7 : 1;
+          const days = [];
+          for (let d = 0; d < daysToExp; d += step) days.push(d);
+          days.push(daysToExp);
+          const maxShow = 10;
+          const shown = days.length > maxShow
+            ? [...days.slice(0, maxShow - 1), daysToExp]
+            : days;
+
+          const cells = shown.map(d => {
+            const T = Math.max(0, daysToExp - d) / 365;
+            const price = bsPrice(S, K, T, sigma, leg.type);
+            const pct = entry > 0 ? (price / entry) * 100 : 0;
+            const dt = new Date(today); dt.setDate(dt.getDate() + d);
+            const label = d === 0 ? "Now"
+              : d === daysToExp ? "Exp"
+              : dt.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+            return { label, pct, price };
+          });
+
+          const getCell = (pct) => {
+            if (pct >= 120) return { bg: "#16a34a", color: "#fff" };
+            if (pct >= 105) return { bg: "#22c55e", color: "#fff" };
+            if (pct >= 95)  return { bg: "#86efac", color: "#000" };
+            if (pct >= 80)  return { bg: "#bbf7d0", color: "#000" };
+            if (pct >= 60)  return { bg: "#fef08a", color: "#000" };
+            if (pct >= 40)  return { bg: "#fca5a5", color: "#000" };
+            return { bg: "#ef4444", color: "#fff" };
+          };
+
+          return (
+            <div style={{ marginBottom: 4 }}>
+              {sectionHeader("P&L by Date")}
+              <div style={{ fontSize: 10, color: t.text3, fontFamily: "'Space Mono',monospace", marginBottom: 8 }}>
+                % of entry premium · IV {(sigma*100).toFixed(0)}% · {isWrite ? "Written" : "Bought"} {leg.type}
+              </div>
+              <div style={{ overflowX: "auto", borderRadius: 8, border: `1px solid ${t.border}` }}>
+                <table style={{ width: "100%", borderCollapse: "collapse", fontFamily: "'Space Mono',monospace", fontSize: 11 }}>
+                  <thead>
+                    <tr style={{ background: t.card2 }}>
+                      <td style={{ padding: "6px 10px", color: t.text3, fontSize: 10, whiteSpace: "nowrap" }}>
+                        {form.ticker || "—"} @ ${S}
+                      </td>
+                      {cells.map((c, i) => (
+                        <td key={i} style={{ padding: "6px 8px", color: c.label === "Exp" ? t.danger : t.text3, textAlign: "center", fontWeight: c.label === "Exp" ? 700 : 400, whiteSpace: "nowrap" }}>
+                          {c.label}
+                        </td>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td style={{ padding: "6px 10px", color: t.text2, fontSize: 10 }}>
+                        K ${K} {leg.type}
+                      </td>
+                      {cells.map((c, i) => {
+                        const style = getCell(c.pct);
+                        return (
+                          <td key={i} style={{
+                            padding: "7px 8px", textAlign: "center",
+                            background: style.bg, color: style.color,
+                            fontWeight: 600, whiteSpace: "nowrap",
+                          }}>
+                            {c.pct.toFixed(1)}%
+                          </td>
+                        );
+                      })}
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <div style={{ fontSize: 10, color: t.text3, fontFamily: "'Space Mono',monospace", marginTop: 6, lineHeight: 1.6 }}>
+                100% = break even · &gt;100% = profit · &lt;100% = loss
+              </div>
+            </div>
+          );
+        })()}
 
         {/* ══  SECTION (stock only) ══ */}
         {form.type === "stock" && (
