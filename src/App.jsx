@@ -891,6 +891,8 @@ const removeCheckItem = (i) =>
 const allChecked = checklist.every((item) => item.checked);
 const checkedCount = checklist.filter((item) => item.checked).length;
 const [tagInput, setTagInput] = useState("");
+const [customEmotions, setCustomEmotions] = useState([]);
+const [emotionInput, setEmotionInput] = useState("");
 const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
 
 const setLeg = (i, k, v) =>
@@ -1551,10 +1553,10 @@ const base = {
         </div>
 {/* ══ EMOTION ══ */}
         {sectionHeader("Mindset")}
-        <div style={{ marginBottom: 12 }}>
+        <div style={{ marginBottom: 14 }}>
           <label style={lbl}>Emotion</label>
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 4 }}>
-            {EMOTIONS.filter((e) => e !== "None").map((e) => {
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 4, marginBottom: 8 }}>
+            {[...EMOTIONS.filter((e) => e !== "None"), ...customEmotions].map((e) => {
               const active = form.emotion === e;
               return (
                 <span
@@ -1576,6 +1578,32 @@ const base = {
                 </span>
               );
             })}
+          </div>
+          <div style={{ display: "flex", gap: 8 }}>
+            <input
+              style={{ ...inp, flex: 1, padding: "7px 12px", fontSize: 12 }}
+              value={emotionInput}
+              onChange={(e) => setEmotionInput(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && emotionInput.trim()) {
+                  const v = emotionInput.trim();
+                  if (!customEmotions.includes(v) && !EMOTIONS.includes(v)) setCustomEmotions(c => [...c, v]);
+                  set("emotion", v);
+                  setEmotionInput("");
+                }
+              }}
+              placeholder="Add emotion..."
+            />
+            <button
+              onClick={() => {
+                const v = emotionInput.trim();
+                if (!v) return;
+                if (!customEmotions.includes(v) && !EMOTIONS.includes(v)) setCustomEmotions(c => [...c, v]);
+                set("emotion", v);
+                setEmotionInput("");
+              }}
+              style={{ background: t.accent + "20", border: `1px solid ${t.accent}40`, color: t.accent, borderRadius: 8, padding: "0 14px", cursor: "pointer", fontSize: 13, whiteSpace: "nowrap" }}
+            >+ Add</button>
           </div>
         </div>
 {/* ══ TAGS + THESIS ══ */}
@@ -1651,7 +1679,7 @@ function TradeFormModal({ initial, onClose, onSave, onCSVImport, t, editLabel })
     entryPrice: "",
     exitPrice: "",
     shares: "",
-    emotion: "Calm",
+    emotion: "None",
     mistake: "None",
     notes: "",
     tags: [],
@@ -1669,6 +1697,10 @@ function TradeFormModal({ initial, onClose, onSave, onCSVImport, t, editLabel })
   };
   const [form, setForm] = useState(initial || blank);
   const [tagInput, setTagInput] = useState("");
+  const [customEmotions, setCustomEmotions] = useState([]);
+  const [customMistakes, setCustomMistakes] = useState([]);
+  const [emotionInput, setEmotionInput] = useState("");
+  const [mistakeInput, setMistakeInput] = useState("");
   const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
   const setLeg = (i, k, v) =>
     setForm((f) => {
@@ -2088,10 +2120,11 @@ function TradeFormModal({ initial, onClose, onSave, onCSVImport, t, editLabel })
             ))}
           </div>
         )}
-        <div style={{ marginBottom: 12 }}>
+        {sectionHeader("Mindset")}
+        <div style={{ marginBottom: 14 }}>
           <label style={lbl}>Emotion</label>
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 4 }}>
-            {EMOTIONS.filter((e) => e !== "None").map((e) => {
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 4, marginBottom: 8 }}>
+            {[...EMOTIONS.filter((e) => e !== "None"), ...customEmotions].map((e) => {
               const active = form.emotion === e;
               return (
                 <span
@@ -2114,11 +2147,37 @@ function TradeFormModal({ initial, onClose, onSave, onCSVImport, t, editLabel })
               );
             })}
           </div>
+          <div style={{ display: "flex", gap: 8 }}>
+            <input
+              style={{ ...inp, flex: 1, padding: "7px 12px", fontSize: 12 }}
+              value={emotionInput}
+              onChange={(e) => setEmotionInput(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && emotionInput.trim()) {
+                  const v = emotionInput.trim();
+                  if (!customEmotions.includes(v) && !EMOTIONS.includes(v)) setCustomEmotions(c => [...c, v]);
+                  set("emotion", v);
+                  setEmotionInput("");
+                }
+              }}
+              placeholder="Add emotion..."
+            />
+            <button
+              onClick={() => {
+                const v = emotionInput.trim();
+                if (!v) return;
+                if (!customEmotions.includes(v) && !EMOTIONS.includes(v)) setCustomEmotions(c => [...c, v]);
+                set("emotion", v);
+                setEmotionInput("");
+              }}
+              style={{ background: t.accent + "20", border: `1px solid ${t.accent}40`, color: t.accent, borderRadius: 8, padding: "0 14px", cursor: "pointer", fontSize: 13, whiteSpace: "nowrap" }}
+            >+ Add</button>
+          </div>
         </div>
-        <div style={{ marginBottom: 12 }}>
+        <div style={{ marginBottom: 14 }}>
           <label style={lbl}>Mistake</label>
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 4 }}>
-            {MISTAKES.filter((m) => m !== "None").map((m) => {
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 4, marginBottom: 8 }}>
+            {[...MISTAKES.filter((m) => m !== "None"), ...customMistakes].map((m) => {
               const active = form.mistake === m;
               return (
                 <span
@@ -2140,6 +2199,32 @@ function TradeFormModal({ initial, onClose, onSave, onCSVImport, t, editLabel })
                 </span>
               );
             })}
+          </div>
+          <div style={{ display: "flex", gap: 8 }}>
+            <input
+              style={{ ...inp, flex: 1, padding: "7px 12px", fontSize: 12 }}
+              value={mistakeInput}
+              onChange={(e) => setMistakeInput(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && mistakeInput.trim()) {
+                  const v = mistakeInput.trim();
+                  if (!customMistakes.includes(v) && !MISTAKES.includes(v)) setCustomMistakes(c => [...c, v]);
+                  set("mistake", v);
+                  setMistakeInput("");
+                }
+              }}
+              placeholder="Add mistake..."
+            />
+            <button
+              onClick={() => {
+                const v = mistakeInput.trim();
+                if (!v) return;
+                if (!customMistakes.includes(v) && !MISTAKES.includes(v)) setCustomMistakes(c => [...c, v]);
+                set("mistake", v);
+                setMistakeInput("");
+              }}
+              style={{ background: t.accent + "20", border: `1px solid ${t.accent}40`, color: t.accent, borderRadius: 8, padding: "0 14px", cursor: "pointer", fontSize: 13, whiteSpace: "nowrap" }}
+            >+ Add</button>
           </div>
         </div>
         {sectionHeader("Notes")}
