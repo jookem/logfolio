@@ -893,6 +893,9 @@ const checkedCount = checklist.filter((item) => item.checked).length;
 const [tagInput, setTagInput] = useState("");
 const [customEmotions, setCustomEmotions] = useState([]);
 const [emotionInput, setEmotionInput] = useState("");
+const [showSizeCalc, setShowSizeCalc] = useState(false);
+const [calcAccountSize, setCalcAccountSize] = useState("");
+const [calcRiskPct, setCalcRiskPct] = useState("1");
 const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
 
 const setLeg = (i, k, v) =>
@@ -1114,7 +1117,7 @@ const base = {
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
           {/* Current price — always shown */}
           <div>
-            <label style={lbl}>Current Price *</label>
+            <label style={lbl}>Current Price</label>
             <div style={{ position: "relative" }}>
               <span style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: t.text3, fontSize: 14 }}>$</span>
               <input style={{ ...inp, paddingLeft: 26 }} type="number" value={form.currentPrice}
@@ -1135,7 +1138,7 @@ const base = {
 
           {/* Purchase Price */}
           <div>
-            <label style={lbl}>{form.type === "options" ? "Purchase Price" : "Entry Price"} *</label>
+            <label style={lbl}>{form.type === "options" ? "Purchase Price" : "Entry Price"}</label>
             <div style={{ position: "relative" }}>
               <span style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: t.text3, fontSize: 14 }}>$</span>
               <input style={{ ...inp, paddingLeft: 26 }} type="number" value={form.purchasePrice}
@@ -1223,7 +1226,7 @@ const base = {
 
 {/* Expiry — calendar input */}
       <div>
-        <label style={lbl}>Expiry *</label>
+        <label style={lbl}>Expiry</label>
         <input
           style={{
             ...inp,
@@ -1248,7 +1251,7 @@ const base = {
       
       {/* Strike — dropdown from chain */}
       <div>
-        <label style={lbl}>Strike Price *</label>
+        <label style={lbl}>Strike Price</label>
         {strikes.length > 0 ? (
           <select style={inp} value={leg.strike}
             onChange={(e) => {
@@ -1272,7 +1275,7 @@ const base = {
 
       {/* Price per option — auto-filled */}
       <div>
-        <label style={lbl}>Price per Option *</label>
+        <label style={lbl}>Price per Option</label>
         <div style={{ position: "relative" }}>
           <span style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: t.text3, fontSize: 14 }}>$</span>
           <input style={{ ...inp, paddingLeft: 26 }} type="number"
@@ -1465,6 +1468,56 @@ const base = {
                 </div>
               </div>
             </div>
+
+            {/* Position Size Calculator */}
+            {(() => {
+              const account = parseFloat(calcAccountSize);
+              const risk = parseFloat(calcRiskPct) / 100;
+              const entry = parseFloat(form.purchasePrice);
+              const stop = parseFloat(form.stopLoss);
+              const calcShares = (account && risk && entry && stop && entry !== stop)
+                ? Math.floor((account * risk) / Math.abs(entry - stop)) : null;
+              const riskAmt = calcShares ? (calcShares * Math.abs(entry - stop)).toFixed(2) : null;
+              return (
+                <div style={{ marginBottom: 14, marginTop: 14 }}>
+                  <button
+                    onClick={() => setShowSizeCalc(s => !s)}
+                    style={{ width: "100%", background: t.card2, border: `1px solid ${t.border}`, color: t.text3, borderRadius: 8, padding: "8px 14px", cursor: "pointer", fontSize: 11, fontFamily: "'Space Mono', monospace", textAlign: "left", display: "flex", justifyContent: "space-between", alignItems: "center" }}
+                  >
+                    <span>Position Size Calculator</span>
+                    <span style={{ color: t.accent }}>{showSizeCalc ? "▲" : "▼"}</span>
+                  </button>
+                  {showSizeCalc && (
+                    <div style={{ background: t.card2, border: `1px solid ${t.border}`, borderRadius: "0 0 8px 8px", borderTop: "none", padding: 14 }}>
+                      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 10 }}>
+                        <div>
+                          <label style={lbl}>Account Size $</label>
+                          <input style={inp} type="number" value={calcAccountSize} onChange={e => setCalcAccountSize(e.target.value)} placeholder="50000" />
+                        </div>
+                        <div>
+                          <label style={lbl}>Risk %</label>
+                          <input style={inp} type="number" value={calcRiskPct} onChange={e => setCalcRiskPct(e.target.value)} placeholder="1" step="0.1" />
+                        </div>
+                      </div>
+                      {calcShares !== null ? (
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", background: t.accent + "10", border: `1px solid ${t.accent}30`, borderRadius: 8, padding: "10px 14px" }}>
+                          <div>
+                            <div style={{ fontSize: 11, color: t.text3, fontFamily: "'Space Mono', monospace" }}>Suggested size</div>
+                            <div style={{ fontSize: 18, fontWeight: 700, color: t.accent, fontFamily: "'Space Mono', monospace" }}>{calcShares} {typeLabels(form.type).units.toLowerCase()}</div>
+                            <div style={{ fontSize: 11, color: t.text3, marginTop: 2 }}>Max risk: ${riskAmt}</div>
+                          </div>
+                          <button onClick={() => set("numShares", String(calcShares))} style={{ background: t.accent, border: "none", color: "#000", borderRadius: 7, padding: "8px 16px", cursor: "pointer", fontSize: 12, fontWeight: 700, fontFamily: "'Space Mono', monospace" }}>Apply</button>
+                        </div>
+                      ) : (
+                        <div style={{ fontSize: 11, color: t.text3, fontFamily: "'Space Mono', monospace", textAlign: "center", padding: "8px 0" }}>
+                          Fill in Entry $, Stop Loss $, Account Size and Risk % to calculate
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              );
+            })()}
           </>
         )}
 {/* ══ PRE-TRADE CHECKLIST ══ */}
@@ -1613,7 +1666,14 @@ const base = {
           <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 8 }}>
             {(form.tags || []).map((tg) => <Tag key={tg} label={tg} t={t} onRemove={() => removeTag(tg)} />)}
           </div>
-          <div style={{ display: "flex", gap: 8, marginBottom: 8 }}>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 8 }}>
+            {SUGGESTED_TAGS.filter((s) => !(form.tags || []).includes(s)).map((s) => (
+              <span key={s} onClick={() => addTag(s)} style={{ background: t.tagBg, color: t.text3, borderRadius: 6, padding: "3px 8px", fontSize: 11, cursor: "pointer", fontFamily: "'Space Mono', monospace" }}>
+                + {s}
+              </span>
+            ))}
+          </div>
+          <div style={{ display: "flex", gap: 8 }}>
             <input
               style={{ ...inp, flex: 1 }}
               value={tagInput}
@@ -1622,13 +1682,6 @@ const base = {
               placeholder="Type tag + Enter"
             />
             <button onClick={() => addTag(tagInput)} style={{ background: t.accent + "20", border: `1px solid ${t.accent}40`, color: t.accent, borderRadius: 8, padding: "0 14px", cursor: "pointer", fontSize: 13, whiteSpace: "nowrap" }}>+ Add</button>
-          </div>
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-            {SUGGESTED_TAGS.filter((s) => !(form.tags || []).includes(s)).map((s) => (
-              <span key={s} onClick={() => addTag(s)} style={{ background: t.tagBg, color: t.text3, borderRadius: 6, padding: "3px 8px", fontSize: 11, cursor: "pointer", fontFamily: "'Space Mono', monospace" }}>
-                + {s}
-              </span>
-            ))}
           </div>
         </div>
         <div style={{ marginBottom: 12 }}>
@@ -1704,9 +1757,6 @@ function TradeFormModal({ initial, onClose, onSave, onCSVImport, t, editLabel })
   const [customMistakes, setCustomMistakes] = useState([]);
   const [emotionInput, setEmotionInput] = useState("");
   const [mistakeInput, setMistakeInput] = useState("");
-  const [showSizeCalc, setShowSizeCalc] = useState(false);
-  const [calcAccountSize, setCalcAccountSize] = useState("");
-  const [calcRiskPct, setCalcRiskPct] = useState("1");
   const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
   const setLeg = (i, k, v) =>
     setForm((f) => {
@@ -2162,54 +2212,6 @@ function TradeFormModal({ initial, onClose, onSave, onCSVImport, t, editLabel })
             ))}
           </div>
         )}
-        {STOCK_LIKE.includes(form.type) && (() => {
-          const account = parseFloat(calcAccountSize);
-          const risk = parseFloat(calcRiskPct) / 100;
-          const entry = parseFloat(form.entryPrice);
-          const stop = parseFloat(form.stopLoss);
-          const calcShares = (account && risk && entry && stop && entry !== stop)
-            ? Math.floor((account * risk) / Math.abs(entry - stop)) : null;
-          const riskAmt = calcShares ? (calcShares * Math.abs(entry - stop)).toFixed(2) : null;
-          return (
-            <div style={{ marginBottom: 14 }}>
-              <button
-                onClick={() => setShowSizeCalc(s => !s)}
-                style={{ width: "100%", background: t.card2, border: `1px solid ${t.border}`, color: t.text3, borderRadius: 8, padding: "8px 14px", cursor: "pointer", fontSize: 11, fontFamily: "'Space Mono', monospace", textAlign: "left", display: "flex", justifyContent: "space-between", alignItems: "center" }}
-              >
-                <span>Position Size Calculator</span>
-                <span style={{ color: t.accent }}>{showSizeCalc ? "▲" : "▼"}</span>
-              </button>
-              {showSizeCalc && (
-                <div style={{ background: t.card2, border: `1px solid ${t.border}`, borderRadius: "0 0 8px 8px", borderTop: "none", padding: 14 }}>
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 10 }}>
-                    <div>
-                      <label style={lbl}>Account Size $</label>
-                      <input style={inp} type="number" value={calcAccountSize} onChange={e => setCalcAccountSize(e.target.value)} placeholder="50000" />
-                    </div>
-                    <div>
-                      <label style={lbl}>Risk %</label>
-                      <input style={inp} type="number" value={calcRiskPct} onChange={e => setCalcRiskPct(e.target.value)} placeholder="1" step="0.1" />
-                    </div>
-                  </div>
-                  {calcShares !== null ? (
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", background: t.accent + "10", border: `1px solid ${t.accent}30`, borderRadius: 8, padding: "10px 14px" }}>
-                      <div>
-                        <div style={{ fontSize: 11, color: t.text3, fontFamily: "'Space Mono', monospace" }}>Suggested size</div>
-                        <div style={{ fontSize: 18, fontWeight: 700, color: t.accent, fontFamily: "'Space Mono', monospace" }}>{calcShares} {typeLabels(form.type).units.toLowerCase()}</div>
-                        <div style={{ fontSize: 11, color: t.text3, marginTop: 2 }}>Max risk: ${riskAmt}</div>
-                      </div>
-                      <button onClick={() => set("shares", String(calcShares))} style={{ background: t.accent, border: "none", color: "#000", borderRadius: 7, padding: "8px 16px", cursor: "pointer", fontSize: 12, fontWeight: 700, fontFamily: "'Space Mono', monospace" }}>Apply</button>
-                    </div>
-                  ) : (
-                    <div style={{ fontSize: 11, color: t.text3, fontFamily: "'Space Mono', monospace", textAlign: "center", padding: "8px 0" }}>
-                      Fill in Entry $, Stop Loss $, Account Size and Risk % to calculate
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-          );
-        })()}
         {sectionHeader("Mindset")}
         <div style={{ marginBottom: 14 }}>
           <label style={lbl}>Emotion</label>
@@ -2332,7 +2334,26 @@ function TradeFormModal({ initial, onClose, onSave, onCSVImport, t, editLabel })
               <Tag key={tg} label={tg} t={t} onRemove={() => removeTag(tg)} />
             ))}
           </div>
-          <div style={{ display: "flex", gap: 8, marginBottom: 8 }}>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 8 }}>
+            {SUGGESTED_TAGS.filter((s) => !(form.tags || []).includes(s)).map((s) => (
+              <span
+                key={s}
+                onClick={() => addTag(s)}
+                style={{
+                  background: t.tagBg,
+                  color: t.text3,
+                  borderRadius: 6,
+                  padding: "3px 8px",
+                  fontSize: 11,
+                  cursor: "pointer",
+                  fontFamily: "'Space Mono', monospace",
+                }}
+              >
+                + {s}
+              </span>
+            ))}
+          </div>
+          <div style={{ display: "flex", gap: 8 }}>
             <input
               style={{ ...inp, flex: 1 }}
               value={tagInput}
@@ -2350,31 +2371,11 @@ function TradeFormModal({ initial, onClose, onSave, onCSVImport, t, editLabel })
                 padding: "0 14px",
                 cursor: "pointer",
                 fontSize: 13,
+                whiteSpace: "nowrap",
               }}
             >
               + Add
             </button>
-          </div>
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-            {SUGGESTED_TAGS.filter((s) => !(form.tags || []).includes(s)).map(
-              (s) => (
-                <span
-                  key={s}
-                  onClick={() => addTag(s)}
-                  style={{
-                    background: t.tagBg,
-                    color: t.text3,
-                    borderRadius: 6,
-                    padding: "3px 8px",
-                    fontSize: 11,
-                    cursor: "pointer",
-                    fontFamily: "'Space Mono', monospace",
-                  }}
-                >
-                  + {s}
-                </span>
-              )
-            )}
           </div>
         </div>
         <div style={{ marginBottom: 12 }}>
@@ -4860,6 +4861,16 @@ function SettingsModal({ onClose, isDark, setIsDark, onClear, t, onSignOut, isPr
               ? <button onClick={onManageBilling} style={{ background: "none", border: `1px solid ${t.border}`, color: t.text3, borderRadius: 7, padding: "6px 14px", cursor: "pointer", fontSize: 12, fontFamily: "'Space Mono', monospace" }}>Manage</button>
               : <button onClick={onUpgrade} style={{ background: t.accent, border: "none", color: "#000", borderRadius: 7, padding: "6px 14px", cursor: "pointer", fontSize: 12, fontWeight: 700, fontFamily: "'Space Mono', monospace" }}>Upgrade</button>
             }
+          </div>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+            <div style={{ fontSize: 14, color: t.text }}>Change Password</div>
+            <button onClick={async () => {
+              const { data: { user } } = await supabase.auth.getUser();
+              if (user?.email) {
+                await supabase.auth.resetPasswordForEmail(user.email, { redirectTo: window.location.origin });
+                alert("Password reset email sent to " + user.email);
+              }
+            }} style={{ background: "none", border: `1px solid ${t.border}`, color: t.text3, borderRadius: 7, padding: "6px 14px", cursor: "pointer", fontSize: 12, fontFamily: "'Space Mono', monospace" }}>Send Reset Email</button>
           </div>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
             <div style={{ fontSize: 14, color: t.text }}>Sign Out</div>
