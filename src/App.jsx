@@ -2661,13 +2661,14 @@ function CSVModal({ onClose, onImport, t }) {
       });
 
       const trades = [];
+      let idBase = Date.now();
       Object.entries(byTicker).forEach(([ticker, { buys, sells }]) => {
         const buyQueue = [...buys];
         sells.forEach(sell => {
           const buy = buyQueue.shift();
           if (buy) {
             trades.push({
-              id: Date.now() + Math.random(),
+              id: idBase++,
               date: buy.date,
               ticker,
               type: "stock",
@@ -5446,7 +5447,8 @@ const importTrades = async (incoming) => {
   setPage(1);
   if (user) {
     const rows = toImport.map(t => ({ id: t.id, user_id: user.id, data: t }));
-    await supabase.from("trades").upsert(rows);
+    const { error } = await supabase.from("trades").upsert(rows);
+    if (error) console.error("CSV import Supabase error:", error);
   }
   if (!isPro && toImport.length < incoming.length)
     showToast(`Imported ${toImport.length}/${incoming.length} — free limit reached`, T.accent, "log");
