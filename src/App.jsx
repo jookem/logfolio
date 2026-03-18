@@ -442,44 +442,38 @@ function EquityCurve({ trades, t, spyData, spyError }) {
   const W = 500, H = 200;
   const xs = points.map((_, i) => (i / (points.length - 1)) * W);
 
-  // SPY: scale to same amplitude as equity curve so both share one Y axis
-  let spyEquivs = null;
+  // Equity Y scale from its own P/L range
+  const eMin = Math.min(...points.map(p => p.val));
+  const eMax = Math.max(...points.map(p => p.val));
+  const eRange = eMax - eMin || 1;
+  const ys = points.map((p) => H - ((p.val - eMin) / eRange) * H);
+  const path = points.map((_, i) => `${i === 0 ? "M" : "L"} ${xs[i]},${ys[i]}`).join(" ");
+
+  // SPY: anchored at zeroY (where P/L=0 sits on the equity axis), scaled so its
+  // full swing occupies 45% of chart height — always visible, never dominates
+  let spyPath = null;
   let spyReturnPct = null;
   const filteredSpy = cutoffDate ? spyData?.filter(s => s.date >= cutoffDate) : spyData;
   if (filteredSpy?.length >= 2 && sorted.length >= 2) {
     const base = filteredSpy[0].close;
-    const equityAmplitude = Math.max(...points.map(p => Math.abs(p.val))) || 1;
-    const mapped = points.map((pt) => {
+    const spyRets = points.map((pt) => {
       if (!pt.date) return 0;
       const match = filteredSpy.filter(s => s.date <= pt.date);
       if (!match.length) return null;
-      const ret = (match[match.length - 1].close - base) / base;
-      return ret * equityAmplitude;
+      return (match[match.length - 1].close - base) / base;
     });
-    if (mapped.filter(v => v != null).length >= 2) {
-      spyEquivs = mapped;
-      const lastValid = mapped.filter(v => v != null).at(-1);
-      spyReturnPct = (lastValid / equityAmplitude) * 100;
+    const validRets = spyRets.filter(v => v != null);
+    if (validRets.length >= 2) {
+      spyReturnPct = validRets.at(-1) * 100;
+      const maxAbsSpy = Math.max(...validRets.map(Math.abs)) || 0.001;
+      const zeroY = H - ((0 - eMin) / eRange) * H;
+      const spyScale = (H * 0.45) / maxAbsSpy;
+      const spyYs = spyRets.map(r =>
+        r != null ? Math.max(0, Math.min(H, zeroY - r * spyScale)) : null
+      );
+      const segs = spyYs.map((y, i) => y != null ? `${i === 0 ? "M" : "L"} ${xs[i]},${y}` : null).filter(Boolean);
+      if (segs.length >= 2) spyPath = segs.join(" ");
     }
-  }
-
-  // Combined Y domain — both curves always fully visible
-  const allVals = [
-    ...points.map(p => p.val),
-    ...(spyEquivs ? spyEquivs.filter(v => v != null) : []),
-  ];
-  const min = Math.min(...allVals);
-  const max = Math.max(...allVals);
-  const range_ = max - min || 1;
-
-  const ys = points.map((p) => H - ((p.val - min) / range_) * H);
-  const path = points.map((_, i) => `${i === 0 ? "M" : "L"} ${xs[i]},${ys[i]}`).join(" ");
-
-  let spyPath = null;
-  if (spyEquivs) {
-    const spyYs = spyEquivs.map(v => v != null ? H - ((v - min) / range_) * H : null);
-    const segs = spyYs.map((y, i) => y != null ? `${i === 0 ? "M" : "L"} ${xs[i]},${y}` : null).filter(Boolean);
-    if (segs.length >= 2) spyPath = segs.join(" ");
   }
 
   // Tick positions — always computed so vertical lines always show
@@ -5416,7 +5410,7 @@ const [page, setPage] = useState(1);
       if (user) await supabase.from("trades").delete().eq("id", id).eq("user_id", user.id);
     }
   };
-const importTrades = (incoming) => {
+const importTrades = async (incoming) => {
   const month = new Date().toISOString().slice(0, 7);
   const thisMonthLogs = trades.filter(t => t.status !== "planned" && t.date?.startsWith(month)).length;
   const toImport = isPro ? incoming : incoming.slice(0, Math.max(0, 5 - thisMonthLogs));
@@ -5424,6 +5418,10 @@ const importTrades = (incoming) => {
   setTrades((p) => [...p, ...toImport]);
   setShowCSV(false);
   setPage(1);
+  if (user) {
+    const rows = toImport.map(t => ({ id: t.id, user_id: user.id, data: t }));
+    await supabase.from("trades").upsert(rows);
+  }
   if (!isPro && toImport.length < incoming.length)
     showToast(`Imported ${toImport.length}/${incoming.length} — free limit reached`, T.accent, "log");
   else
