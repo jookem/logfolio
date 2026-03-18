@@ -411,107 +411,76 @@ function Tag({ label, t, onRemove }) {
   );
 }
 
-function EquityCurve({ trades, t, spyData }) {
-  const sorted = [...trades].sort(
-    (a, b) => new Date(a.date) - new Date(b.date)
-  );
+function EquityCurve({ trades, t, spyData, spyError }) {
+  const sorted = [...trades].sort((a, b) => new Date(a.date) - new Date(b.date));
   let running = 0;
-  const points = sorted.map((tr) => {
+  // Start from 0, then add each trade
+  const points = [{ val: 0, date: null }, ...sorted.map((tr) => {
     running += calcPL(tr);
-    return { val: running };
-  });
-  if (points.length < 2)
+    return { val: running, date: tr.date };
+  })];
+  if (points.length < 3)
     return (
-      <div
-        style={{
-          height: 90,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          color: t.text4,
-          fontSize: 12,
-          fontFamily: "monospace",
-        }}
-      >
+      <div style={{ height: 90, display: "flex", alignItems: "center", justifyContent: "center", color: t.text3, fontSize: 12, fontFamily: "monospace" }}>
         Add more trades to see curve
       </div>
     );
-  const min = Math.min(0, ...points.map((p) => p.val)),
+  const min = Math.min(...points.map((p) => p.val)),
     max = Math.max(...points.map((p) => p.val));
-  const range = max - min || 1,
-    W = 500,
-    H = 90;
+  const range = max - min || 1, W = 500, H = 90;
   const xs = points.map((_, i) => (i / (points.length - 1)) * W);
   const ys = points.map((p) => H - ((p.val - min) / range) * H);
-  const path = points
-    .map((_, i) => `${i === 0 ? "M" : "L"} ${xs[i]},${ys[i]}`)
-    .join(" ");
+  const path = points.map((_, i) => `${i === 0 ? "M" : "L"} ${xs[i]},${ys[i]}`).join(" ");
   let spyPath = null;
   if (spyData?.length >= 2 && sorted.length >= 2) {
     const base = spyData[0].close;
-    const firstEquity = 0;
-    const spyYs = sorted.map((tr) => {
-      const match = spyData.filter(s => s.date <= tr.date);
+    // SPY Y positions aligned to the same scale as equity (0 return = 0 PL)
+    const spyYs = points.map((pt) => {
+      if (!pt.date) return H - ((0 - min) / range) * H; // starting point = 0 return
+      const match = spyData.filter(s => s.date <= pt.date);
       if (!match.length) return null;
       const close = match[match.length - 1].close;
-      const spyReturn = (close - base) / base;
-      const spyEquivPL = spyReturn * Math.abs(max - min || 1) + firstEquity;
-      const clampedPL = Math.min(Math.max(spyEquivPL, min - range * 0.1), max + range * 0.1);
-      return H - ((clampedPL - min) / range) * H;
+      const spyPL = ((close - base) / base) * (max - min || 1);
+      const clamped = Math.min(Math.max(spyPL, min - range * 0.1), max + range * 0.1);
+      return H - ((clamped - min) / range) * H;
     });
-    const validPoints = spyYs.map((y, i) => y != null ? `${i === 0 ? "M" : "L"} ${xs[i]},${y}` : null).filter(Boolean);
-    if (validPoints.length >= 2) spyPath = validPoints.join(" ");
+    const segs = spyYs.map((y, i) => y != null ? `${i === 0 ? "M" : "L"} ${xs[i]},${y}` : null).filter(Boolean);
+    if (segs.length >= 2) spyPath = segs.join(" ");
   }
   return (
     <div>
-      <svg
-        viewBox={`0 0 ${W} ${H}`}
-        style={{ width: "100%", height: 90 }}
-        preserveAspectRatio="none"
-      >
+      <svg viewBox={`0 0 ${W} ${H}`} style={{ width: "100%", height: 90 }} preserveAspectRatio="none">
         <defs>
           <linearGradient id="eg" x1="0" y1="0" x2="0" y2="1">
             <stop offset="0%" stopColor={t.accent} stopOpacity="0.3" />
             <stop offset="100%" stopColor={t.accent} stopOpacity="0" />
           </linearGradient>
         </defs>
-        <path
-          d={`${path} L ${xs[xs.length - 1]},${H} L 0,${H} Z`}
-          fill="url(#eg)"
-        />
-        <path
-          d={path}
-          fill="none"
-          stroke={t.accent}
-          strokeWidth="2"
-          strokeLinejoin="round"
-        />
-        {points.map((p, i) => (
-          <circle
-            key={i}
-            cx={xs[i]}
-            cy={ys[i]}
-            r="3"
-            fill={t.accent}
-            opacity="0.6"
-          />
+        <path d={`${path} L ${xs[xs.length - 1]},${H} L 0,${H} Z`} fill="url(#eg)" />
+        <path d={path} fill="none" stroke={t.accent} strokeWidth="2" strokeLinejoin="round" />
+        {points.map((p, i) => i > 0 && (
+          <circle key={i} cx={xs[i]} cy={ys[i]} r="3" fill={t.accent} opacity="0.6" />
         ))}
         {spyPath && (
           <path d={spyPath} fill="none" stroke="#3B82F6" strokeWidth="1.5" strokeDasharray="5 3" strokeLinejoin="round" opacity="0.7" />
         )}
       </svg>
-      {spyPath && (
-        <div style={{ display: "flex", gap: 16, justifyContent: "flex-end", marginTop: 4 }}>
+      <div style={{ display: "flex", gap: 16, justifyContent: "flex-end", marginTop: 4, alignItems: "center" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+          <div style={{ width: 16, height: 2, background: t.accent, borderRadius: 1 }} />
+          <span style={{ fontSize: 10, color: t.text3, fontFamily: "'Space Mono',monospace" }}>Your P/L</span>
+        </div>
+        {spyPath ? (
           <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-            <div style={{ width: 16, height: 2, background: t.accent, borderRadius: 1 }} />
-            <span style={{ fontSize: 10, color: t.text3, fontFamily: "'Space Mono',monospace" }}>Your P/L</span>
-          </div>
-          <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-            <div style={{ width: 16, height: 2, background: "#3B82F6", borderRadius: 1, borderTop: "1px dashed #3B82F6" }} />
+            <div style={{ width: 16, height: 2, background: "#3B82F6", borderRadius: 1 }} />
             <span style={{ fontSize: 10, color: t.text3, fontFamily: "'Space Mono',monospace" }}>SPY</span>
           </div>
-        </div>
-      )}
+        ) : (
+          <span style={{ fontSize: 10, color: t.text3, fontFamily: "'Space Mono',monospace", opacity: 0.5 }}>
+            {spyError ? "SPY data unavailable" : "Loading SPY..."}
+          </span>
+        )}
+      </div>
     </div>
   );
 }
@@ -5208,6 +5177,7 @@ const [page, setPage] = useState(1);
   const [showReplay, setShowReplay] = useState(false);
   const [shareTarget, setShareTarget] = useState(null);
   const [spyData, setSpyData] = useState(null);
+  const [spyError, setSpyError] = useState(false);
   const journalTimerRef = useRef(null);
   const mobile = useIsMobile();
   const T = tk(isDark);
@@ -5414,19 +5384,29 @@ const plList = useMemo(
 );
 
   useEffect(() => {
-    if (plList.length < 2) { setSpyData(null); return; }
+    if (plList.length < 2) { setSpyData(null); setSpyError(false); return; }
     const sorted = [...plList].sort((a, b) => a.date.localeCompare(b.date));
-    const from = sorted[0].date;
-    const to = sorted[sorted.length - 1].date;
-    const POLY_KEY = "rU7M1eNvqo7OLQiLGZe5GPGCjb_dXsgU";
-    fetch(`https://api.polygon.io/v2/aggs/ticker/SPY/range/1/day/${from}/${to}?adjusted=true&sort=asc&limit=500&apiKey=${POLY_KEY}`)
+    const fromTs = Math.floor(new Date(sorted[0].date).getTime() / 1000);
+    const toTs = Math.floor(new Date(sorted[sorted.length - 1].date).getTime() / 1000) + 86400;
+    const url = `https://corsproxy.io/?https://query1.finance.yahoo.com/v8/finance/chart/SPY?period1=${fromTs}&period2=${toTs}&interval=1d`;
+    fetch(url)
       .then(r => r.json())
       .then(data => {
-        if (data.results?.length) {
-          setSpyData(data.results.map(r => ({ date: new Date(r.t).toISOString().slice(0, 10), close: r.c })));
+        const result = data?.chart?.result?.[0];
+        const timestamps = result?.timestamp;
+        const closes = result?.indicators?.quote?.[0]?.close;
+        if (timestamps?.length && closes?.length) {
+          setSpyData(timestamps.map((t, i) => ({
+            date: new Date(t * 1000).toISOString().slice(0, 10),
+            close: closes[i],
+          })).filter(d => d.close != null));
+          setSpyError(false);
+        } else {
+          setSpyData(null);
+          setSpyError(true);
         }
       })
-      .catch(() => {});
+      .catch(() => { setSpyData(null); setSpyError(true); });
   }, [plList.length]);
 
   const allTags = useMemo(
@@ -6364,7 +6344,7 @@ style={{ display: "block" }}>
               <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 10, color: T.text3, textTransform: "uppercase", letterSpacing: 2, marginBottom: 12 }}>
                 Equity Curve
               </div>
-              <EquityCurve trades={plList} t={T} spyData={spyData} />
+              <EquityCurve trades={plList} t={T} spyData={spyData} spyError={spyError} />
             </div>
 
             {/* Strategy + Tag/Emotion */}
