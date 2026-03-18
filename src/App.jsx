@@ -746,17 +746,19 @@ function PlanModal({ onClose, onSave, t, isDark, initial }) {
 const [chainLoading, setChainLoading] = useState(false);
 const [expiryDates, setExpiryDates] = useState([]);
 const [strikes, setStrikes] = useState([]);
-const POLY_KEY = "rU7M1eNvqo7OLQiLGZe5GPGCjb_dXsgU";
+const YF = "https://corsproxy.io/?https://query2.finance.yahoo.com";
+const YF1 = "https://corsproxy.io/?https://query1.finance.yahoo.com";
 
 const fetchStockPrice = async (ticker) => {
   if (!ticker || ticker.length < 1) return;
   setTickerLoading(true);
   try {
-    const res = await fetch(`https://api.polygon.io/v2/aggs/ticker/${ticker}/prev?adjusted=true&apiKey=${POLY_KEY}`);
+    const res = await fetch(`${YF1}/v8/finance/chart/${ticker}?interval=1d&range=1d`);
     const data = await res.json();
-    if (data.results?.[0]?.c) {
-      set("currentPrice", data.results[0].c.toFixed(2));
-      set("purchasePrice", data.results[0].c.toFixed(2));
+    const price = data?.chart?.result?.[0]?.meta?.regularMarketPrice;
+    if (price) {
+      set("currentPrice", price.toFixed(2));
+      set("purchasePrice", price.toFixed(2));
     }
   } catch {}
   setTickerLoading(false);
@@ -768,61 +770,50 @@ const fetchExpiryDates = async (ticker) => {
   setExpiryDates([]);
   setStrikes([]);
   try {
-    let allDates = [];
-    let url = `https://api.polygon.io/v3/reference/options/contracts?underlying_ticker=${ticker}&contract_type=call&limit=1000&sort=expiration_date&order=asc&apiKey=${POLY_KEY}`;
-    while (url) {
-      const res = await fetch(url);
-      const data = await res.json();
-      if (data.results?.length) {
-        const dates = data.results.map(c => c.expiration_date);
-        allDates = [...allDates, ...dates];
-      }
-      url = data.next_url ? `${data.next_url}&apiKey=${POLY_KEY}` : null;
-      if (allDates.length > 2000) break;
+    const res = await fetch(`${YF}/v7/finance/options/${ticker}`);
+    const data = await res.json();
+    const timestamps = data?.optionChain?.result?.[0]?.expirationDates;
+    if (timestamps?.length) {
+      setExpiryDates(timestamps.map(ts => new Date(ts * 1000).toISOString().slice(0, 10)));
     }
-    const uniqueDates = [...new Set(allDates)].sort();
-    setExpiryDates(uniqueDates);
   } catch {}
   setChainLoading(false);
 };
-  
+
 const fetchStrikes = async (ticker, expiry, optionType) => {
   if (!ticker || !expiry) return;
   try {
-    const contractType = optionType === "call" ? "call" : "put";
-    const res = await fetch(`https://api.polygon.io/v3/reference/options/contracts?underlying_ticker=${ticker}&expiration_date=${expiry}&contract_type=${contractType}&limit=250&sort=strike_price&apiKey=${POLY_KEY}`);
+    const ts = Math.floor(new Date(expiry).getTime() / 1000);
+    const res = await fetch(`${YF}/v7/finance/options/${ticker}?date=${ts}`);
     const data = await res.json();
-    if (data.results?.length) {
-      setStrikes(data.results.map(c => ({ strike: c.strike_price, ticker: c.ticker })));
+    const opts = data?.optionChain?.result?.[0]?.options?.[0];
+    const contracts = optionType === "call" ? opts?.calls : opts?.puts;
+    if (contracts?.length) {
+      setStrikes(contracts.map(c => ({ strike: c.strike, ticker: c.contractSymbol })));
     }
   } catch {}
 };
 
-const fetchPremium = async (optionTicker, legIndex, underlyingTicker) => {
-  if (!optionTicker) return;
-  const ticker = underlyingTicker || form.ticker;
+const fetchPremium = async (contractSymbol, legIndex, underlyingTicker) => {
+  if (!contractSymbol) return;
+  const underlying = underlyingTicker || form.ticker;
   try {
-    const res = await fetch(`https://api.polygon.io/v3/snapshot/options/${ticker}/${optionTicker}?apiKey=${POLY_KEY}`);
+    // Parse OCC symbol (e.g. AAPL250117C00150000) to extract expiry date
+    const match = contractSymbol.match(/^[A-Z]+(\d{2})(\d{2})(\d{2})[CP]/);
+    if (!match) return;
+    const expiry = `20${match[1]}-${match[2]}-${match[3]}`;
+    const ts = Math.floor(new Date(expiry).getTime() / 1000);
+    const res = await fetch(`${YF}/v7/finance/options/${underlying}?date=${ts}`);
     const data = await res.json();
-    const result = data.results;
-    if (!result) return;
-
-    const premium =
-      result.last_quote?.midpoint ||
-      ((result.last_quote?.bid + result.last_quote?.ask) / 2) ||
-      result.day?.close ||
-      result.last_trade?.price ||
-      null;
-
+    const opts = data?.optionChain?.result?.[0]?.options?.[0];
+    const all = [...(opts?.calls || []), ...(opts?.puts || [])];
+    const contract = all.find(c => c.contractSymbol === contractSymbol);
+    if (!contract) return;
+    const premium = contract.bid && contract.ask
+      ? (contract.bid + contract.ask) / 2
+      : contract.lastPrice || null;
     if (premium) setLeg(legIndex, "entryPremium", premium.toFixed(2));
-
-    const iv =
-      result.greeks?.implied_volatility ||
-      result.implied_volatility ||
-      null;
-
-    if (iv) setLeg(legIndex, "iv", (iv * 100).toFixed(1));
-
+    if (contract.impliedVolatility) setLeg(legIndex, "iv", (contract.impliedVolatility * 100).toFixed(1));
   } catch {}
 };
 const [form, setForm] = useState(initial ? {
