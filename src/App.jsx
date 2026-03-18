@@ -418,9 +418,9 @@ function EquityCurve({ trades, t, spyData, spyError }) {
   const cutoffDate = (() => {
     if (range === "ALL") return null;
     const d = new Date();
-    if (range === "1M") d.setMonth(d.getMonth() - 1);
-    else if (range === "3M") d.setMonth(d.getMonth() - 3);
-    else if (range === "6M") d.setMonth(d.getMonth() - 6);
+    if (range === "1D") d.setDate(d.getDate() - 1);
+    else if (range === "1W") d.setDate(d.getDate() - 7);
+    else if (range === "1M") d.setMonth(d.getMonth() - 1);
     else if (range === "1Y") d.setFullYear(d.getFullYear() - 1);
     return d.toISOString().slice(0, 10);
   })();
@@ -478,7 +478,7 @@ function EquityCurve({ trades, t, spyData, spyError }) {
     .filter((v, i, a) => a.indexOf(v) === i && datePts[v]);
   const fmtDate = d => { const [y, m, dd] = d.split("-"); return `${m}/${dd}/${y.slice(2)}`; };
 
-  const RANGES = ["1M", "3M", "6M", "1Y", "ALL"];
+  const RANGES = ["1D", "1W", "1M", "1Y", "ALL"];
 
   return (
     <div>
@@ -503,6 +503,13 @@ function EquityCurve({ trades, t, spyData, spyError }) {
             <stop offset="100%" stopColor={t.accent} stopOpacity="0" />
           </linearGradient>
         </defs>
+        {/* Vertical tick lines at date label positions */}
+        {labelIdxs.map(idx => {
+          const pt = datePts[idx];
+          const ptIdx = points.findIndex(p => p.date === pt.date);
+          if (ptIdx < 0) return null;
+          return <line key={idx} x1={xs[ptIdx]} y1={0} x2={xs[ptIdx]} y2={H} stroke={t.border} strokeWidth="0.8" strokeDasharray="3 4" opacity="0.6" />;
+        })}
         <path d={`${path} L ${xs[xs.length - 1]},${H} L 0,${H} Z`} fill="url(#eg)" />
         <path d={path} fill="none" stroke={t.accent} strokeWidth="2" strokeLinejoin="round" />
         {points.map((p, i) => i > 0 && (
@@ -826,7 +833,12 @@ const yfFetch = (yfUrl) => fetch("/api/yf", {
   body: JSON.stringify({ url: yfUrl }),
 }).then(r => r.json());
 const yf = (path) => `https://query1.finance.yahoo.com${path}`;
-const yf2 = (path) => `https://query2.finance.yahoo.com${path}`;
+
+const polyFetch = (path) => fetch("/api/polygon", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({ path }),
+}).then(r => r.json());
 
 const fetchStockPrice = async (ticker) => {
   if (!ticker || ticker.length < 1) return;
@@ -847,13 +859,14 @@ const fetchExpiryDates = async (ticker) => {
   setChainLoading(true);
   setExpiryDates([]);
   setStrikes([]);
+  setChainError(null);
   try {
-    const data = await yfFetch(yf2(`/v7/finance/options/${ticker}`));
-    const timestamps = data?.optionChain?.result?.[0]?.expirationDates;
-    if (timestamps?.length) {
-      setExpiryDates(timestamps.map(ts => new Date(ts * 1000).toISOString().slice(0, 10)));
-    }
-  } catch {}
+    const data = await polyFetch(`/v3/reference/options/contracts?underlying_ticker=${ticker}&limit=250&order=asc&sort=expiration_date`);
+    if (data?.error) { setChainError(`Polygon: ${data.error}`); setChainLoading(false); return; }
+    const today = new Date().toISOString().slice(0, 10);
+    const dates = [...new Set((data?.results || []).map(c => c.expiration_date))].filter(d => d >= today).sort();
+    setExpiryDates(dates);
+  } catch (e) { setChainError(e.message); }
   setChainLoading(false);
 };
 
@@ -862,44 +875,22 @@ const fetchStrikes = async (ticker, expiry, optionType) => {
   setStrikes([]);
   setChainError(null);
   try {
-    const ts = Math.floor(new Date(expiry).getTime() / 1000);
-    const data = await yfFetch(yf2(`/v7/finance/options/${ticker}?date=${ts}`));
-    // Surface proxy errors (non-JSON upstream, network failure)
-    if (data?.error) { setChainError(`Proxy error: ${data.error}${data.preview ? ` — ${data.preview}` : ""}`); return; }
-    // Surface Yahoo Finance errors
-    const yfErr = data?.optionChain?.error;
-    if (yfErr) { setChainError(`Yahoo Finance: ${yfErr.code} — ${yfErr.description}`); return; }
-    const result = data?.optionChain?.result;
-    if (!result?.length) { setChainError(`No option chain returned for ${ticker}. Check the ticker symbol.`); return; }
-    const opts = result[0]?.options?.[0];
-    const contracts = optionType === "call" ? opts?.calls : opts?.puts;
-    if (contracts?.length) {
-      setStrikes(contracts.map(c => ({ strike: c.strike, ticker: c.contractSymbol })));
-    } else {
-      setChainError(`No ${optionType} contracts on ${expiry}. Available expiries: ${(data?.optionChain?.result?.[0]?.expirationDates || []).slice(0,3).map(ts => new Date(ts*1000).toISOString().slice(0,10)).join(", ")}`);
-    }
+    const contractType = optionType === "call" ? "call" : "put";
+    const data = await polyFetch(`/v3/reference/options/contracts?underlying_ticker=${ticker}&expiration_date=${expiry}&contract_type=${contractType}&limit=250&order=asc&sort=strike_price`);
+    if (data?.error) { setChainError(`Polygon: ${data.error}`); return; }
+    const contracts = data?.results || [];
+    if (!contracts.length) { setChainError(`No ${optionType} contracts for ${ticker} on ${expiry}.`); return; }
+    setStrikes(contracts.map(c => ({ strike: c.strike_price, ticker: c.ticker })));
   } catch (e) { setChainError(e.message); }
 };
 
-const fetchPremium = async (contractSymbol, legIndex, underlyingTicker) => {
-  if (!contractSymbol) return;
-  const underlying = underlyingTicker || form.ticker;
+const fetchPremium = async (contractTicker, legIndex) => {
+  if (!contractTicker) return;
   try {
-    // Parse OCC symbol (e.g. AAPL250117C00150000) to extract expiry date
-    const match = contractSymbol.match(/^[A-Z]+(\d{2})(\d{2})(\d{2})[CP]/);
-    if (!match) return;
-    const expiry = `20${match[1]}-${match[2]}-${match[3]}`;
-    const ts = Math.floor(new Date(expiry).getTime() / 1000);
-    const data = await yfFetch(yf2(`/v7/finance/options/${underlying}?date=${ts}`));
-    const opts = data?.optionChain?.result?.[0]?.options?.[0];
-    const all = [...(opts?.calls || []), ...(opts?.puts || [])];
-    const contract = all.find(c => c.contractSymbol === contractSymbol);
-    if (!contract) return;
-    const premium = contract.bid && contract.ask
-      ? (contract.bid + contract.ask) / 2
-      : contract.lastPrice || null;
-    if (premium) setLeg(legIndex, "entryPremium", premium.toFixed(2));
-    if (contract.impliedVolatility) setLeg(legIndex, "iv", (contract.impliedVolatility * 100).toFixed(1));
+    // contractTicker is Polygon format: O:SPY251017C00600000
+    const data = await polyFetch(`/v2/aggs/ticker/${contractTicker}/prev?adjusted=true`);
+    const close = data?.results?.[0]?.c;
+    if (close) setLeg(legIndex, "entryPremium", close.toFixed(2));
   } catch {}
 };
 const [form, setForm] = useState(initial ? {
