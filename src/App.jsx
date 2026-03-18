@@ -20,8 +20,10 @@ const todayStr = () => {
   )}-${String(t.getDate()).padStart(2, "0")}`;
 };
 
+const STOCK_LIKE = ["stock", "forex", "crypto"];
+
 function calcPL(trade) {
-  if (trade.type === "stock") {
+  if (STOCK_LIKE.includes(trade.type)) {
     const dir = trade.direction === "long" ? 1 : -1;
     return dir * (trade.exitPrice - trade.entryPrice) * trade.shares;
   }
@@ -35,11 +37,17 @@ function calcR(trade) {
   if (!trade.stopLoss || !trade.entryPrice) return null;
   const risk = Math.abs(trade.entryPrice - trade.stopLoss);
   if (risk === 0) return null;
-  if (trade.type === "stock") {
+  if (STOCK_LIKE.includes(trade.type)) {
     const pl = (trade.exitPrice - trade.entryPrice) * (trade.direction === "long" ? 1 : -1);
     return pl / risk;
   }
   return null;
+}
+
+function typeLabels(type) {
+  if (type === "forex")  return { ticker: "Pair",   units: "Units",  section: "Forex Details" };
+  if (type === "crypto") return { ticker: "Symbol", units: "Amount", section: "Crypto Details" };
+  return { ticker: "Ticker Symbol", units: "Shares", section: "Stock Details" };
 }
 
 function fmtR(r) {
@@ -937,7 +945,7 @@ const setLeg = (i, k, v) =>
 
   // R calculation (stock only)
   const plannedR =
-    form.type === "stock" && form.purchasePrice && form.stopLoss && form.takeProfit
+    STOCK_LIKE.includes(form.type) && form.purchasePrice && form.stopLoss && form.takeProfit
       ? ((+form.takeProfit - +form.purchasePrice) * (form.stockDirection === "buy" ? 1 : -1)) /
         Math.abs(+form.purchasePrice - +form.stopLoss)
       : null;
@@ -953,7 +961,7 @@ const base = {
       checklist: checklist,
       checklistComplete: allChecked,
     };
-    if (form.type === "stock") {
+    if (STOCK_LIKE.includes(form.type)) {
       base.entryPrice = +form.purchasePrice;
       base.stopLoss = form.stopLoss ? +form.stopLoss : null;
       base.takeProfit = form.takeProfit ? +form.takeProfit : null;
@@ -1057,7 +1065,7 @@ const base = {
         {/* ── Ticker / Date / Type / Strategy ── */}
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
 <div>
-  <label style={lbl}>Ticker Symbol</label>
+  <label style={lbl}>{typeLabels(form.type).ticker}</label>
   <div style={{ position: "relative" }}>
     <input
       style={{ ...inp, paddingRight: tickerLoading ? 36 : 14 }}
@@ -1089,12 +1097,14 @@ const base = {
             <select style={inp} value={form.type} onChange={(e) => handleTypeChange(e.target.value)}>
               <option value="stock">Stock</option>
               <option value="options">Options</option>
+              <option value="forex">Forex</option>
+              <option value="crypto">Crypto</option>
             </select>
           </div>
           <div>
             <label style={lbl}>Strategy</label>
             <select style={inp} value={form.strategy} onChange={(e) => handleStrategyChange(e.target.value)}>
-              {(form.type === "stock" ? STOCK_STRATEGIES : OPTION_STRATEGY_NAMES).map((s) => (
+              {(form.type === "options" ? OPTION_STRATEGY_NAMES : STOCK_STRATEGIES).map((s) => (
                 <option key={s}>{s}</option>
               ))}
             </select>
@@ -1102,7 +1112,7 @@ const base = {
         </div>
 
         {/* ══ STOCK SECTION ══ */}
-        {sectionHeader(form.type === "options" ? (optConfig?.stockLabel || "Underlying Stock") : "Stock Details")}
+        {sectionHeader(form.type === "options" ? (optConfig?.stockLabel || "Underlying Stock") : typeLabels(form.type).section)}
 
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
           {/* Current price — always shown */}
@@ -1116,7 +1126,7 @@ const base = {
           </div>
 
           {/* Buy / Short toggle — for stock type or covered call */}
-          {(form.type === "stock" || optConfig?.stockRequired) && (
+          {(STOCK_LIKE.includes(form.type) || optConfig?.stockRequired) && (
             <div>
               <label style={lbl}>Buy or Short</label>
               <select style={inp} value={form.stockDirection} onChange={(e) => set("stockDirection", e.target.value)}>
@@ -1138,7 +1148,7 @@ const base = {
 
           {/* Num Shares */}
           <div>
-            <label style={lbl}>Num. Shares</label>
+            <label style={lbl}>Num. {typeLabels(form.type).units}</label>
             <input style={inp} type="number" value={form.numShares}
               onChange={(e) => set("numShares", e.target.value)} placeholder="100" />
           </div>
@@ -1412,8 +1422,8 @@ const base = {
           );
         })()}
 
-        {/* ══  SECTION (stock only) ══ */}
-        {form.type === "stock" && (
+        {/* ══  SECTION (stock-like only) ══ */}
+        {STOCK_LIKE.includes(form.type) && (
           <>
             {sectionHeader("Risk Plan")}
 
@@ -1708,7 +1718,7 @@ function TradeFormModal({ initial, onClose, onSave, onCSVImport, t, editLabel })
       id: form.id || Date.now(),
       tags: form.tags || [],
     };
-    if (form.type === "stock") {
+    if (STOCK_LIKE.includes(form.type)) {
       trade.entryPrice = +form.entryPrice;
       trade.exitPrice = +form.exitPrice;
       trade.shares = +form.shares;
@@ -1856,12 +1866,12 @@ function TradeFormModal({ initial, onClose, onSave, onCSVImport, t, editLabel })
           }}
         >
           <div>
-            <label style={lbl}>Ticker Symbol</label>
+            <label style={lbl}>{typeLabels(form.type).ticker}</label>
             <input
               style={inp}
               value={form.ticker}
               onChange={(e) => set("ticker", e.target.value.toUpperCase())}
-              placeholder="AAPL"
+              placeholder={form.type === "forex" ? "EUR/USD" : form.type === "crypto" ? "BTC/USDT" : "AAPL"}
             />
           </div>
           <div>
@@ -1882,6 +1892,8 @@ function TradeFormModal({ initial, onClose, onSave, onCSVImport, t, editLabel })
             >
               <option value="stock">Stock</option>
               <option value="options">Options</option>
+              <option value="forex">Forex</option>
+              <option value="crypto">Crypto</option>
             </select>
           </div>
           <div>
@@ -1891,28 +1903,16 @@ function TradeFormModal({ initial, onClose, onSave, onCSVImport, t, editLabel })
               value={form.strategy}
               onChange={(e) => set("strategy", e.target.value)}
             >
-              {(form.type === "stock"
-                ? ["Breakout", "Pullback", "Reversal", "Scalp"]
-                : [
-                    "Long Call",
-                    "Long Put",
-                    "Bull Call Spread",
-                    "Bear Put Spread",
-                    "Iron Condor",
-                    "Straddle",
-                    "Strangle",
-                    "Covered Call",
-                    "Cash Secured Put",
-                    "Butterfly",
-                    "Calendar Spread",
-                  ]
+              {(form.type === "options"
+                ? ["Long Call","Long Put","Bull Call Spread","Bear Put Spread","Iron Condor","Straddle","Strangle","Covered Call","Cash Secured Put","Butterfly","Calendar Spread"]
+                : ["Breakout","Pullback","Reversal","Scalp","Trend Follow","Range","Swing"]
               ).map((s) => (
                 <option key={s}>{s}</option>
               ))}
             </select>
           </div>
         </div>
-        {form.type === "stock" ? (
+        {STOCK_LIKE.includes(form.type) ? (
           <div
             style={{
               display: "grid",
@@ -1933,7 +1933,7 @@ function TradeFormModal({ initial, onClose, onSave, onCSVImport, t, editLabel })
               </select>
             </div>
             <div>
-              <label style={lbl}>Shares</label>
+              <label style={lbl}>{typeLabels(form.type).units}</label>
               <input
                 style={inp}
                 type="number"
@@ -5659,6 +5659,8 @@ style={{ display: "block" }}>
             <option value="all">All Types</option>
             <option value="stock">Stock</option>
             <option value="options">Options</option>
+            <option value="forex">Forex</option>
+            <option value="crypto">Crypto</option>
           </select>
           <select
             style={sel}
@@ -5839,6 +5841,8 @@ style={{ display: "block" }}>
             <option value="all">All Types</option>
             <option value="stock">Stock</option>
             <option value="options">Options</option>
+            <option value="forex">Forex</option>
+            <option value="crypto">Crypto</option>
           </select>
           <select
             style={sel}
