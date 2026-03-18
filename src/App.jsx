@@ -5195,20 +5195,22 @@ const [page, setPage] = useState(1);
         .select("id, data")
         .eq("user_id", user.id);
       if (error) {
-        // Fall back to localStorage if Supabase fails
+        // Supabase unreachable — fall back to localStorage, don't show onboarding
         const local = loadTrades();
         setTrades(local?.length ? local : []);
       } else {
         const loaded = data.map(row => ({ ...row.data, id: row.id }));
-        // Migrate localStorage trades on first load
         if (loaded.length === 0) {
+          // Migrate localStorage trades if present; otherwise confirmed new user
           const local = loadTrades();
           if (local?.length) {
             const rows = local.map(t => ({ id: t.id, user_id: user.id, data: t }));
             await supabase.from("trades").upsert(rows);
             setTrades(local);
           } else {
+            // Supabase confirmed zero trades — show onboarding
             setTrades([]);
+            setShowOnboarding(true);
           }
         } else {
           setTrades(loaded);
@@ -5226,20 +5228,12 @@ const [page, setPage] = useState(1);
     // Supabase sync is done per-operation (add/save/delete) for efficiency
   }, [trades, user, tradesLoaded]);
 
-  // Show onboarding for new users
-  useEffect(() => {
-    if (!tradesLoaded) return;
-    try { if (localStorage.getItem(ONBOARDING_KEY)) return; } catch {}
-    if (trades.length === 0) setShowOnboarding(true);
-  }, [tradesLoaded]);
-
   const loadSampleTrades = async () => {
     const baseId = Date.now();
     const withIds = SEED_TRADES.map((t, i) => ({ ...t, id: baseId + i }));
     setTrades(withIds);
     setShowOnboarding(false);
     setTab("analytics");
-    try { localStorage.setItem(ONBOARDING_KEY, "1"); } catch {}
     if (user) {
       const rows = withIds.map(t => ({ id: t.id, user_id: user.id, data: t }));
       await supabase.from("trades").upsert(rows);
@@ -5250,7 +5244,6 @@ const [page, setPage] = useState(1);
   const dismissOnboarding = () => {
     setShowOnboarding(false);
     setShowGuide(true);
-    try { localStorage.setItem(ONBOARDING_KEY, "1"); } catch {}
   };
 
   useEffect(() => {
