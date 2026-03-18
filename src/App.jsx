@@ -746,14 +746,14 @@ function PlanModal({ onClose, onSave, t, isDark, initial }) {
 const [chainLoading, setChainLoading] = useState(false);
 const [expiryDates, setExpiryDates] = useState([]);
 const [strikes, setStrikes] = useState([]);
-const YF = "https://corsproxy.io/?https://query2.finance.yahoo.com";
-const YF1 = "https://corsproxy.io/?https://query1.finance.yahoo.com";
+const yf = (path) => `/api/yf?url=${encodeURIComponent("https://query1.finance.yahoo.com" + path)}`;
+const yf2 = (path) => `/api/yf?url=${encodeURIComponent("https://query2.finance.yahoo.com" + path)}`;
 
 const fetchStockPrice = async (ticker) => {
   if (!ticker || ticker.length < 1) return;
   setTickerLoading(true);
   try {
-    const res = await fetch(`${YF1}/v8/finance/chart/${ticker}?interval=1d&range=1d`);
+    const res = await fetch(yf(`/v8/finance/chart/${ticker}?interval=1d&range=1d`));
     const data = await res.json();
     const price = data?.chart?.result?.[0]?.meta?.regularMarketPrice;
     if (price) {
@@ -770,7 +770,7 @@ const fetchExpiryDates = async (ticker) => {
   setExpiryDates([]);
   setStrikes([]);
   try {
-    const res = await fetch(`${YF}/v7/finance/options/${ticker}`);
+    const res = await fetch(yf2(`/v7/finance/options/${ticker}`));
     const data = await res.json();
     const timestamps = data?.optionChain?.result?.[0]?.expirationDates;
     if (timestamps?.length) {
@@ -784,7 +784,7 @@ const fetchStrikes = async (ticker, expiry, optionType) => {
   if (!ticker || !expiry) return;
   try {
     const ts = Math.floor(new Date(expiry).getTime() / 1000);
-    const res = await fetch(`${YF}/v7/finance/options/${ticker}?date=${ts}`);
+    const res = await fetch(yf2(`/v7/finance/options/${ticker}?date=${ts}`));
     const data = await res.json();
     const opts = data?.optionChain?.result?.[0]?.options?.[0];
     const contracts = optionType === "call" ? opts?.calls : opts?.puts;
@@ -803,7 +803,7 @@ const fetchPremium = async (contractSymbol, legIndex, underlyingTicker) => {
     if (!match) return;
     const expiry = `20${match[1]}-${match[2]}-${match[3]}`;
     const ts = Math.floor(new Date(expiry).getTime() / 1000);
-    const res = await fetch(`${YF}/v7/finance/options/${underlying}?date=${ts}`);
+    const res = await fetch(yf2(`/v7/finance/options/${underlying}?date=${ts}`));
     const data = await res.json();
     const opts = data?.optionChain?.result?.[0]?.options?.[0];
     const all = [...(opts?.calls || []), ...(opts?.puts || [])];
@@ -5382,7 +5382,7 @@ const plList = useMemo(
     const sorted = [...plList].sort((a, b) => a.date.localeCompare(b.date));
     const fromTs = Math.floor(new Date(sorted[0].date).getTime() / 1000);
     const toTs = Math.floor(new Date(sorted[sorted.length - 1].date).getTime() / 1000) + 86400;
-    const url = `https://api.allorigins.win/raw?url=${encodeURIComponent(`https://query1.finance.yahoo.com/v8/finance/chart/SPY?period1=${fromTs}&period2=${toTs}&interval=1d`)}`;
+    const url = `/api/yf?url=${encodeURIComponent(`https://query1.finance.yahoo.com/v8/finance/chart/SPY?period1=${fromTs}&period2=${toTs}&interval=1d`)}`;
     fetch(url)
       .then(r => r.json())
       .then(data => {
