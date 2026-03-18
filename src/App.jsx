@@ -73,6 +73,7 @@ const STRATEGIES = [
 ];
 const EMOTIONS = [
   "None",
+  "Calm",
   "Confident",
   "Anxious",
   "FOMO",
@@ -798,11 +799,9 @@ const fetchStrikes = async (ticker, expiry, optionType) => {
 const fetchPremium = async (optionTicker, legIndex, underlyingTicker) => {
   if (!optionTicker) return;
   const ticker = underlyingTicker || form.ticker;
-  console.log("fetchPremium called:", optionTicker, ticker);
   try {
     const res = await fetch(`https://api.polygon.io/v3/snapshot/options/${ticker}/${optionTicker}?apiKey=${POLY_KEY}`);
     const data = await res.json();
-    console.log("Polygon snapshot response:", JSON.stringify(data));
     const result = data.results;
     if (!result) return;
 
@@ -813,7 +812,6 @@ const fetchPremium = async (optionTicker, legIndex, underlyingTicker) => {
       result.last_trade?.price ||
       null;
 
-    console.log("Premium value:", premium);
     if (premium) setLeg(legIndex, "entryPremium", premium.toFixed(2));
 
     const iv =
@@ -821,12 +819,9 @@ const fetchPremium = async (optionTicker, legIndex, underlyingTicker) => {
       result.implied_volatility ||
       null;
 
-    console.log("IV value:", iv);
     if (iv) setLeg(legIndex, "iv", (iv * 100).toFixed(1));
 
-  } catch (e) {
-    console.log("fetchPremium error:", e.message);
-  }
+  } catch {}
 };
 const [form, setForm] = useState(initial ? {
     date: initial.date || todayStr(),
@@ -985,7 +980,7 @@ const base = {
   };
 
   const canSave = form.ticker && (
-    form.type === "stock"
+    STOCK_LIKE.includes(form.type)
       ? form.purchasePrice
       : form.legs.every((l) => l.strike && l.entryPremium && l.expiration)
   );
@@ -2675,7 +2670,7 @@ function TradeDetail({ trade, onClose, onEdit, t }) {
           )}
         </div>
       </div>
-      {trade.type === "stock" ? (
+      {STOCK_LIKE.includes(trade.type) ? (
         <div
           style={{
             display: "grid",
@@ -2687,7 +2682,7 @@ function TradeDetail({ trade, onClose, onEdit, t }) {
           {[
             ["Entry", fmt(trade.entryPrice)],
             ...(trade.exitPrice ? [["Exit", fmt(trade.exitPrice)]] : []),
-            ["Shares", trade.shares],
+            [typeLabels(trade.type).units, trade.shares],
             ["Direction", trade.direction],...(trade.stopLoss ? [["Stop Loss", fmt(trade.stopLoss)]] : []),
   ...(trade.takeProfit ? [["Take Profit", fmt(trade.takeProfit)]] : []),
   ...(trade.plannedR != null ? [["Planned R", `+${trade.plannedR?.toFixed(2)}R`]] : []),
@@ -3863,7 +3858,7 @@ const timeStr = now.toLocaleTimeString("en-US", {
                   {tr.strategy} ·{" "}
                   {tr.type === "options"
                     ? `${tr.legs?.length}L options`
-                    : `${tr.shares} shares`}
+                    : `${tr.shares} ${typeLabels(tr.type).units.toLowerCase()}`}
                 </div>
                 {tr.tags?.length > 0 && (
                   <div
@@ -3945,7 +3940,7 @@ const timeStr = now.toLocaleTimeString("en-US", {
                   {plan.ticker}
                 </div>
                 <div style={{ fontSize: 12, color: t.text3 }}>
-                  {plan.strategy} · {plan.type === "options" ? `${plan.legs?.length}L options` : `${plan.numShares || plan.shares || "—"} shares`}
+                  {plan.strategy} · {plan.type === "options" ? `${plan.legs?.length}L options` : `${plan.numShares || plan.shares || "—"} ${typeLabels(plan.type).units.toLowerCase()}`}
                 </div>
                 {plan.checklist?.length > 0 && (
                   <div style={{ fontSize: 11, color: plan.checklistComplete ? t.accent : "#f59e0b", marginTop: 3, fontFamily: "'Space Mono', monospace" }}>
@@ -3954,7 +3949,7 @@ const timeStr = now.toLocaleTimeString("en-US", {
                 )}
               </div>
               <div style={{ textAlign: "right" }}>
-                {plan.type === "stock" && plan.purchasePrice && (
+                {STOCK_LIKE.includes(plan.type) && plan.purchasePrice && (
                   <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 13, color: t.text3 }}>
                     @ ${(+plan.purchasePrice).toFixed(2)}
                   </div>
