@@ -1621,7 +1621,7 @@ const base = {
               onKeyDown={(e) => e.key === "Enter" && addTag(tagInput)}
               placeholder="Type tag + Enter"
             />
-            <button onClick={() => addTag(tagInput)} style={{ background: t.accent + "20", border: `1px solid ${t.accent}40`, color: t.accent, borderRadius: 8, padding: "0 14px", cursor: "pointer", fontSize: 13 }}>Add</button>
+            <button onClick={() => addTag(tagInput)} style={{ background: t.accent + "20", border: `1px solid ${t.accent}40`, color: t.accent, borderRadius: 8, padding: "0 14px", cursor: "pointer", fontSize: 13, whiteSpace: "nowrap" }}>+ Add</button>
           </div>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
             {SUGGESTED_TAGS.filter((s) => !(form.tags || []).includes(s)).map((s) => (
@@ -1679,6 +1679,9 @@ function TradeFormModal({ initial, onClose, onSave, onCSVImport, t, editLabel })
     entryPrice: "",
     exitPrice: "",
     shares: "",
+    stopLoss: "",
+    entryTime: "",
+    exitTime: "",
     emotion: "None",
     mistake: "None",
     notes: "",
@@ -1701,6 +1704,9 @@ function TradeFormModal({ initial, onClose, onSave, onCSVImport, t, editLabel })
   const [customMistakes, setCustomMistakes] = useState([]);
   const [emotionInput, setEmotionInput] = useState("");
   const [mistakeInput, setMistakeInput] = useState("");
+  const [showSizeCalc, setShowSizeCalc] = useState(false);
+  const [calcAccountSize, setCalcAccountSize] = useState("");
+  const [calcRiskPct, setCalcRiskPct] = useState("1");
   const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
   const setLeg = (i, k, v) =>
     setForm((f) => {
@@ -1749,6 +1755,7 @@ function TradeFormModal({ initial, onClose, onSave, onCSVImport, t, editLabel })
       trade.entryPrice = +form.entryPrice;
       trade.exitPrice = +form.exitPrice;
       trade.shares = +form.shares;
+      if (form.stopLoss) trade.stopLoss = +form.stopLoss;
     } else {
       trade.legs = form.legs.map((l) => ({
         ...l,
@@ -1757,6 +1764,13 @@ function TradeFormModal({ initial, onClose, onSave, onCSVImport, t, editLabel })
         exitPremium: +l.exitPremium,
         contracts: +l.contracts,
       }));
+    }
+    if (form.entryTime && form.exitTime) {
+      const [eh, em] = form.entryTime.split(":").map(Number);
+      const [xh, xm] = form.exitTime.split(":").map(Number);
+      let mins = (xh * 60 + xm) - (eh * 60 + em);
+      if (mins < 0) mins += 24 * 60;
+      trade.holdMinutes = mins;
     }
     onSave(trade);
   };
@@ -1989,6 +2003,34 @@ function TradeFormModal({ initial, onClose, onSave, onCSVImport, t, editLabel })
                 placeholder="196"
               />
             </div>
+            <div>
+              <label style={lbl}>Stop Loss $</label>
+              <input
+                style={inp}
+                type="number"
+                value={form.stopLoss || ""}
+                onChange={(e) => set("stopLoss", e.target.value)}
+                placeholder="185"
+              />
+            </div>
+            <div>
+              <label style={lbl}>Entry Time</label>
+              <input
+                style={inp}
+                type="time"
+                value={form.entryTime || ""}
+                onChange={(e) => set("entryTime", e.target.value)}
+              />
+            </div>
+            <div>
+              <label style={lbl}>Exit Time</label>
+              <input
+                style={inp}
+                type="time"
+                value={form.exitTime || ""}
+                onChange={(e) => set("exitTime", e.target.value)}
+              />
+            </div>
           </div>
         ) : (
           <div style={{ marginBottom: 12 }}>
@@ -2120,6 +2162,54 @@ function TradeFormModal({ initial, onClose, onSave, onCSVImport, t, editLabel })
             ))}
           </div>
         )}
+        {STOCK_LIKE.includes(form.type) && (() => {
+          const account = parseFloat(calcAccountSize);
+          const risk = parseFloat(calcRiskPct) / 100;
+          const entry = parseFloat(form.entryPrice);
+          const stop = parseFloat(form.stopLoss);
+          const calcShares = (account && risk && entry && stop && entry !== stop)
+            ? Math.floor((account * risk) / Math.abs(entry - stop)) : null;
+          const riskAmt = calcShares ? (calcShares * Math.abs(entry - stop)).toFixed(2) : null;
+          return (
+            <div style={{ marginBottom: 14 }}>
+              <button
+                onClick={() => setShowSizeCalc(s => !s)}
+                style={{ width: "100%", background: t.card2, border: `1px solid ${t.border}`, color: t.text3, borderRadius: 8, padding: "8px 14px", cursor: "pointer", fontSize: 11, fontFamily: "'Space Mono', monospace", textAlign: "left", display: "flex", justifyContent: "space-between", alignItems: "center" }}
+              >
+                <span>Position Size Calculator</span>
+                <span style={{ color: t.accent }}>{showSizeCalc ? "▲" : "▼"}</span>
+              </button>
+              {showSizeCalc && (
+                <div style={{ background: t.card2, border: `1px solid ${t.border}`, borderRadius: "0 0 8px 8px", borderTop: "none", padding: 14 }}>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 10 }}>
+                    <div>
+                      <label style={lbl}>Account Size $</label>
+                      <input style={inp} type="number" value={calcAccountSize} onChange={e => setCalcAccountSize(e.target.value)} placeholder="50000" />
+                    </div>
+                    <div>
+                      <label style={lbl}>Risk %</label>
+                      <input style={inp} type="number" value={calcRiskPct} onChange={e => setCalcRiskPct(e.target.value)} placeholder="1" step="0.1" />
+                    </div>
+                  </div>
+                  {calcShares !== null ? (
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", background: t.accent + "10", border: `1px solid ${t.accent}30`, borderRadius: 8, padding: "10px 14px" }}>
+                      <div>
+                        <div style={{ fontSize: 11, color: t.text3, fontFamily: "'Space Mono', monospace" }}>Suggested size</div>
+                        <div style={{ fontSize: 18, fontWeight: 700, color: t.accent, fontFamily: "'Space Mono', monospace" }}>{calcShares} {typeLabels(form.type).units.toLowerCase()}</div>
+                        <div style={{ fontSize: 11, color: t.text3, marginTop: 2 }}>Max risk: ${riskAmt}</div>
+                      </div>
+                      <button onClick={() => set("shares", String(calcShares))} style={{ background: t.accent, border: "none", color: "#000", borderRadius: 7, padding: "8px 16px", cursor: "pointer", fontSize: 12, fontWeight: 700, fontFamily: "'Space Mono', monospace" }}>Apply</button>
+                    </div>
+                  ) : (
+                    <div style={{ fontSize: 11, color: t.text3, fontFamily: "'Space Mono', monospace", textAlign: "center", padding: "8px 0" }}>
+                      Fill in Entry $, Stop Loss $, Account Size and Risk % to calculate
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          );
+        })()}
         {sectionHeader("Mindset")}
         <div style={{ marginBottom: 14 }}>
           <label style={lbl}>Emotion</label>
@@ -2262,7 +2352,7 @@ function TradeFormModal({ initial, onClose, onSave, onCSVImport, t, editLabel })
                 fontSize: 13,
               }}
             >
-              Add
+              + Add
             </button>
           </div>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
@@ -2669,7 +2759,7 @@ function TradeRow({ trade, onClick, onEdit, onDelete, t, mobile, isFirst, editLa
     </div>
   );
 }
-function TradeDetail({ trade, onClose, onEdit, t }) {
+function TradeDetail({ trade, onClose, onEdit, onExecute, t }) {
   const pl = calcPL(trade);
   const [lightbox, setLightbox] = useState(null);
   return (
@@ -2710,7 +2800,23 @@ function TradeDetail({ trade, onClose, onEdit, t }) {
               ))}
             </div>
           )}
-          <div style={{ display: "flex", gap: 7, marginTop: 10 }}>
+          <div style={{ display: "flex", gap: 7, marginTop: 10, flexWrap: "wrap" }}>
+            {trade.status === "planned" && onExecute && (
+              <button
+                onClick={onExecute}
+                style={{
+                  background: t.accent, border: "none",
+                  color: "#000", borderRadius: 6, padding: "4px 12px",
+                  cursor: "pointer", fontSize: 12, fontWeight: 700,
+                  fontFamily: "'Space Mono', monospace", display: "flex", alignItems: "center", gap: 5,
+                }}
+              >
+                <svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" style={{ display: "block" }}>
+                  <path d="M20 14V7C20 5.34315 18.6569 4 17 4H12M20 14L13.5 20M20 14H15.5C14.3954 14 13.5 14.8954 13.5 16V20M13.5 20H7C5.34315 20 4 18.6569 4 17V12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M7 4V7M7 10V7M7 7H4M7 7H10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg> Execute Plan
+              </button>
+            )}
             <button
               onClick={onEdit}
               style={{
@@ -2772,6 +2878,9 @@ function TradeDetail({ trade, onClose, onEdit, t }) {
   ...(trade.takeProfit ? [["Take Profit", fmt(trade.takeProfit)]] : []),
   ...(trade.plannedR != null ? [["Planned R", `+${trade.plannedR?.toFixed(2)}R`]] : []),
   ...(trade.r != null ? [["R-Multiple", fmtR(trade.r)]] : []),
+  ...(trade.holdMinutes != null ? [["Hold Time", trade.holdMinutes < 60 ? `${trade.holdMinutes}m` : `${Math.floor(trade.holdMinutes/60)}h ${trade.holdMinutes%60}m`]] : []),
+  ...(trade.entryTime ? [["Entry Time", trade.entryTime]] : []),
+  ...(trade.exitTime ? [["Exit Time", trade.exitTime]] : []),
 ].map(([k, v]) => (
             <div
               key={k}
@@ -3419,7 +3528,7 @@ function CalendarView({ plList, t, mobile }) {
                     {tr.strategy} ·{" "}
                     {tr.type === "options"
                       ? `${tr.legs?.length}L options`
-                      : `${tr.shares} shares`}
+                      : `${tr.shares} ${typeLabels(tr.type).units.toLowerCase()}`}
                   </div>
                   {tr.tags?.length > 0 && (
                     <div
@@ -4381,7 +4490,6 @@ Provide 4-6 patterns. Be brutally honest but constructive.`,
         });
 
       const data = await response.json();
-      console.log("API response:", JSON.stringify(data));
       if (data.error) throw new Error(data.error.message || JSON.stringify(data.error));
       if (!data.content) throw new Error("Empty response from API");
       const text = data.content
@@ -4711,7 +4819,7 @@ Provide 4-6 patterns. Be brutally honest but constructive.`,
 function SettingsModal({ onClose, isDark, setIsDark, onClear, t, onSignOut, isPro, onUpgrade, onManageBilling }) {
   return (
     <div className="backdrop-enter" style={{ position: "fixed", top: 0, left: 0, right: 0, minHeight: "100%", background: "rgba(0,0,0,0.75)", zIndex: 100, display: "flex", alignItems: "flex-start", justifyContent: "center", padding: 16 }}>
-      <div className="modal-enter" style={{ background: t.card, border: `1px solid ${t.border}`, borderRadius: 16, width: "100%", maxWidth: 380, padding: 24, marginTop: 60 }}>
+      <div className="modal-enter" style={{ background: t.card, border: `1px solid ${t.border}`, borderRadius: 16, width: "100%", maxWidth: 380, maxHeight: "92vh", overflowY: "auto", padding: 24, marginTop: 60 }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
           <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 16, fontWeight: 700, color: t.accent, display: "flex", alignItems: "center", gap: 6}}>
             <svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" style={{ display: "block" }}>
@@ -4807,6 +4915,7 @@ export default function TradingJournal() {
   const [showAdd, setShowAdd] = useState(false);
   const [showCSV, setShowCSV] = useState(false);
   const [editTrade, setEditTrade] = useState(null);
+  const [planPrefill, setPlanPrefill] = useState(null);
   const [selected, setSelected] = useState(null);
   const [filter, setFilter] = useState({
   type: "all",
@@ -4878,8 +4987,31 @@ const [page, setPage] = useState(1);
     if (freeTierFull) { showToast("Free tier limit reached — upgrade to Pro", "#ff4d6d", "warning"); return; }
     setTrades((p) => [...p, trade]);
     setShowAdd(false);
+    setPlanPrefill(null);
     showToast("Trade saved", T.accent, "log");
     if (user) await supabase.from("trades").upsert({ id: trade.id, user_id: user.id, data: trade });
+  };
+  const executePlan = (plan) => {
+    const prefill = {
+      ticker: plan.ticker,
+      type: plan.type,
+      strategy: plan.strategy,
+      direction: plan.direction || (plan.stockDirection === "buy" ? "long" : "short"),
+      entryPrice: plan.entryPrice || plan.purchasePrice || "",
+      exitPrice: "",
+      shares: plan.shares || plan.numShares || "",
+      stopLoss: plan.stopLoss || "",
+      takeProfit: plan.takeProfit || "",
+      tags: plan.tags || [],
+      notes: plan.notes || "",
+      emotion: plan.emotion || "None",
+      mistake: "None",
+      legs: plan.legs?.length ? plan.legs.map(l => ({ ...l, exitPremium: "" })) : [{ position:"buy",type:"call",strike:"",expiration:"",entryPremium:"",exitPremium:"",contracts:1 }],
+      fromPlanId: plan.id,
+    };
+    setSelectedPlan(null);
+    setPlanPrefill(prefill);
+    setShowAdd(true);
   };
   const saveTrade = async (trade) => {
     setTrades((p) => p.map((tr) => (tr.id === trade.id ? trade : tr)));
@@ -4995,14 +5127,32 @@ const plList = useMemo(
   const stratStats = useMemo(() => {
     const map = {};
     plList.forEach((t) => {
-      if (!map[t.strategy]) map[t.strategy] = { pl: 0, wins: 0, total: 0 };
+      if (!map[t.strategy]) map[t.strategy] = { pl: 0, wins: 0, total: 0, holdSum: 0, holdCount: 0 };
       map[t.strategy].pl += t.pl;
       map[t.strategy].total++;
       if (t.pl > 0) map[t.strategy].wins++;
+      if (t.holdMinutes != null) { map[t.strategy].holdSum += t.holdMinutes; map[t.strategy].holdCount++; }
     });
     return Object.entries(map)
-      .map(([s, d]) => ({ strategy: s, ...d, winRate: d.wins / d.total }))
+      .map(([s, d]) => ({ strategy: s, ...d, winRate: d.wins / d.total, avgHold: d.holdCount ? Math.round(d.holdSum / d.holdCount) : null }))
       .sort((a, b) => b.pl - a.pl);
+  }, [plList]);
+
+  const dayOfWeekStats = useMemo(() => {
+    const DAYS = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+    const map = {};
+    DAYS.forEach(d => { map[d] = { pl: 0, wins: 0, total: 0 }; });
+    plList.forEach(t => {
+      const [y, mo, d] = t.date.split("-").map(Number);
+      const dayName = DAYS[new Date(y, mo - 1, d).getDay()];
+      map[dayName].pl += t.pl;
+      map[dayName].total++;
+      if (t.pl > 0) map[dayName].wins++;
+    });
+    return ["Monday","Tuesday","Wednesday","Thursday","Friday"].map(d => ({
+      day: d, short: d.slice(0, 3), ...map[d],
+      winRate: map[d].total ? map[d].wins / map[d].total : 0,
+    }));
   }, [plList]);
 
   const mistakeStats = useMemo(() => {
@@ -5860,6 +6010,7 @@ style={{ display: "block" }}>
           setEditTrade(selectedPlan);
           setSelectedPlan(null);
         }}
+        onExecute={() => executePlan(selectedPlan)}
         t={T}
       />
     ) : (
@@ -6052,6 +6203,11 @@ style={{ display: "block" }}>
         <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 3 }}>
           <span style={{ fontSize: 13, color: T.text2 }}>{s.strategy}</span>
           <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
+            {s.avgHold != null && (
+              <span style={{ fontSize: 10, color: T.text3, fontFamily: "monospace" }}>
+                {s.avgHold < 60 ? `${s.avgHold}m` : `${Math.floor(s.avgHold/60)}h${s.avgHold%60}m`}
+              </span>
+            )}
             <span style={{ fontSize: 10, color: T.text3, fontFamily: "monospace" }}>
               {(s.winRate * 100).toFixed(0)}%WR
             </span>
@@ -6409,15 +6565,36 @@ style={{ display: "block" }}>
                   </div>
                 ))}
             </div>
+          {/* Day of Week */}
+          <div style={{ background: T.surface, border: `1px solid ${T.border}`, borderRadius: 12, padding: "16px 18px", marginTop: 16 }}>
+            <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 10, color: T.text3, textTransform: "uppercase", letterSpacing: 2, marginBottom: 16 }}>
+              Performance by Day
+            </div>
+            <div style={{ display: "grid", gridTemplateColumns: mobile ? "repeat(3,1fr)" : "repeat(5,1fr)", gap: 10 }}>
+              {dayOfWeekStats.map(d => (
+                <div key={d.day} style={{ textAlign: "center", background: T.card2, borderRadius: 10, padding: "12px 8px" }}>
+                  <div style={{ fontSize: 10, color: T.text3, fontFamily: "'Space Mono',monospace", marginBottom: 6, textTransform: "uppercase", letterSpacing: 1 }}>{d.short}</div>
+                  <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 13, fontWeight: 700, color: d.total === 0 ? T.text4 : d.pl >= 0 ? T.accent : T.danger }}>
+                    {d.total === 0 ? "—" : `${d.pl >= 0 ? "+" : ""}${fmt(d.pl)}`}
+                  </div>
+                  <div style={{ fontSize: 10, color: T.text3, marginTop: 4 }}>
+                    {d.total === 0 ? "no trades" : `${(d.winRate * 100).toFixed(0)}% WR · ${d.total}t`}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
           </div>
         )}
       </div>
 
 {showAdd && (
         <TradeFormModal
-          onClose={() => setShowAdd(false)}
+          initial={planPrefill || undefined}
+          editLabel={planPrefill ? "Execute Plan" : undefined}
+          onClose={() => { setShowAdd(false); setPlanPrefill(null); }}
           onSave={addTrade}
-          onCSVImport={() => { setShowAdd(false); setShowCSV(true); }}
+          onCSVImport={() => { setShowAdd(false); setPlanPrefill(null); setShowCSV(true); }}
           t={T}
         />
       )}
