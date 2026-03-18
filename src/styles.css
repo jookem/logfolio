@@ -41,3 +41,9 @@ body { margin: 0; padding: 0; }
 .tab-enter {
   animation: tabFade 0.18s ease forwards;
 }
+
+input.time-dark::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+  opacity: 0.6;
+  cursor: pointer;
+}

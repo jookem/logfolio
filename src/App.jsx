@@ -1790,7 +1790,7 @@ const base = {
     </div>
   );
 }
-function TradeFormModal({ initial, onClose, onSave, onCSVImport, t, editLabel }) {
+function TradeFormModal({ initial, onClose, onSave, onCSVImport, t, editLabel, isDark }) {
   const blank = {
     date: todayStr(),
     ticker: "",
@@ -1801,6 +1801,7 @@ function TradeFormModal({ initial, onClose, onSave, onCSVImport, t, editLabel })
     exitPrice: "",
     shares: "",
     stopLoss: "",
+    takeProfit: "",
     entryTime: "",
     exitTime: "",
     emotion: "None",
@@ -1874,6 +1875,7 @@ function TradeFormModal({ initial, onClose, onSave, onCSVImport, t, editLabel })
       trade.exitPrice = +form.exitPrice;
       trade.shares = +form.shares;
       if (form.stopLoss) trade.stopLoss = +form.stopLoss;
+      if (form.takeProfit) trade.takeProfit = +form.takeProfit;
     } else {
       trade.legs = form.legs.map((l) => ({
         ...l,
@@ -2132,18 +2134,42 @@ function TradeFormModal({ initial, onClose, onSave, onCSVImport, t, editLabel })
               />
             </div>
             <div>
-              <label style={lbl}>Entry Time</label>
+              <label style={lbl}>Take Profit $</label>
               <input
                 style={inp}
+                type="number"
+                value={form.takeProfit || ""}
+                onChange={(e) => set("takeProfit", e.target.value)}
+                placeholder="200"
+              />
+            </div>
+            <div>
+              <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 5 }}>
+                Entry Time
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" style={{ opacity: 0.7 }}>
+                  <path d="M12 8V12L14.5 14.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M7 3.33782C8.47087 2.48697 10.1786 2 12 2C17.5228 2 22 6.47715 22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 10.1786 2.48697 8.47087 3.33782 7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                </svg>
+              </label>
+              <input
+                style={inp}
+                className={isDark ? "time-dark" : ""}
                 type="time"
                 value={form.entryTime || ""}
                 onChange={(e) => set("entryTime", e.target.value)}
               />
             </div>
             <div>
-              <label style={lbl}>Exit Time</label>
+              <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 5 }}>
+                Exit Time
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" style={{ opacity: 0.7 }}>
+                  <path d="M12 8V12L14.5 14.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M7 3.33782C8.47087 2.48697 10.1786 2 12 2C17.5228 2 22 6.47715 22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 10.1786 2.48697 8.47087 3.33782 7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                </svg>
+              </label>
               <input
                 style={inp}
+                className={isDark ? "time-dark" : ""}
                 type="time"
                 value={form.exitTime || ""}
                 onChange={(e) => set("exitTime", e.target.value)}
@@ -6727,6 +6753,7 @@ style={{ display: "block" }}>
           onSave={addTrade}
           onCSVImport={() => { setShowAdd(false); setPlanPrefill(null); setShowCSV(true); }}
           t={T}
+          isDark={isDark}
         />
       )}
       {editTrade && editTrade.status === "planned" && (
@@ -6745,6 +6772,7 @@ style={{ display: "block" }}>
           onSave={saveTrade}
           onCSVImport={() => { setEditTrade(null); setShowCSV(true); }}
           t={T}
+          isDark={isDark}
         />
       )}
       {showCSV && (
