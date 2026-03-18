@@ -1585,7 +1585,7 @@ const base = {
         {/* Add custom item */}
         <div style={{ display: "flex", gap: 8, marginBottom: 4 }}>
           <input
-            style={{ ...inp, flex: 1 }}
+            style={{ ...inp, flex: 1, padding: "7px 12px", fontSize: 12 }}
             value={newCheckItem}
             onChange={(e) => setNewCheckItem(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && addCheckItem()}
