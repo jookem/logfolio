@@ -4996,9 +4996,15 @@ const [page, setPage] = useState(1);
   };
   const addTrade = async (trade) => {
     if (freeTierFull) { showToast("Free tier limit reached — upgrade to Pro", "#ff4d6d", "warning"); return; }
-    setTrades((p) => [...p, trade]);
+    if (trade.fromPlanId) {
+      setTrades((p) => [...p.filter(t => t.id !== trade.fromPlanId), trade]);
+      if (user) await supabase.from("trades").delete().eq("id", trade.fromPlanId).eq("user_id", user.id);
+    } else {
+      setTrades((p) => [...p, trade]);
+    }
     setShowAdd(false);
     setPlanPrefill(null);
+    setTab("trades");
     showToast("Trade saved", T.accent, "log");
     if (user) await supabase.from("trades").upsert({ id: trade.id, user_id: user.id, data: trade });
   };
