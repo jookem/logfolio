@@ -3179,7 +3179,7 @@ function CalendarView({ plList, t, mobile }) {
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: mobile ? "1fr" : "repeat(4,1fr)",
+          gridTemplateColumns: mobile ? "1fr 1fr" : "repeat(4,1fr)",
           gap: 12,
           marginBottom: 20,
         }}
@@ -5667,7 +5667,7 @@ style={{ display: "block" }}>
             <div
               style={{
                 display: "grid",
-                gridTemplateColumns: mobile ? "1fr" : "repeat(4,1fr)",
+                gridTemplateColumns: mobile ? "1fr 1fr" : "repeat(4,1fr)",
                 gap: 12,
                 marginBottom: 20,
               }}
@@ -6151,7 +6151,7 @@ style={{ display: "block" }}>
             <div
               style={{
                 display: "grid",
-                gridTemplateColumns: mobile ? "1fr" : "repeat(5,1fr)",
+                gridTemplateColumns: mobile ? "1fr 1fr" : "repeat(5,1fr)",
                 gap: 12,
                 marginBottom: 20,
               }}
