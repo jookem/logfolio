@@ -170,53 +170,6 @@ Provide 4-6 patterns. Be brutally honest but constructive.`,
 
   return (
     <div>
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          marginBottom: 20,
-          flexWrap: "wrap",
-          gap: 10,
-        }}
-      >
-        <div>
-          <div
-            style={{
-              fontFamily: "'Space Mono',monospace",
-              fontSize: 11,
-              color: t.text3,
-              textTransform: "uppercase",
-              letterSpacing: 2,
-              marginBottom: 4,
-            }}
-          >
-            AI Pattern Detector
-          </div>
-          <div style={{ fontSize: 13, color: t.text3 }}>
-            Powered by Claude · Based on {plList.length} trades
-          </div>
-        </div>
-        <button
-          onClick={analysePatterns}
-          disabled={loading}
-          style={{
-            background: t.accent,
-            border: "none",
-            color: "#000",
-            borderRadius: 8,
-            padding: "8px 16px",
-            cursor: loading ? "not-allowed" : "pointer",
-            fontSize: 12,
-            fontWeight: 700,
-            fontFamily: "'Space Mono',monospace",
-            opacity: loading ? 0.6 : 1,
-          }}
-        >
-          {loading ? "Analysing..." : "↻ Re-analyse"}
-        </button>
-      </div>
-
       {/* ── Strategy Leaderboard ───────────────────────────────────────── */}
       <div style={{ background: t.surface, border: `1px solid ${t.border}`, borderRadius: 12, padding: "18px 20px", marginBottom: 16 }}>
         {sectionLabel("Strategy Leaderboard")}
@@ -305,12 +258,12 @@ Provide 4-6 patterns. Be brutally honest but constructive.`,
                 const base = isGood ? t.accent : t.danger;
                 const alpha = Math.round(0.15 + intensity * 0.7, 2);
                 const winPct = Math.round((d.wins / d.total) * 100);
-                const label = h === 0 ? "12a" : h < 12 ? `${h}a` : h === 12 ? "12p" : `${h-12}p`;
+                const label = h === 0 ? "12:00" : `${h}:00`;
                 return (
                   <div key={h} style={{ background: base + Math.round(alpha * 255).toString(16).padStart(2,"0"), border: `1px solid ${base}50`, borderRadius: 8, padding: "8px 10px", textAlign: "center", minWidth: 52 }}>
-                    <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 10, color: t.text3, marginBottom: 4 }}>{label}</div>
+                    <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 10, color: t.text2, marginBottom: 4 }}>{label}</div>
                     <div style={{ fontSize: 13, fontWeight: 700, color: isGood ? t.accent : t.danger, fontFamily: "'Space Mono',monospace" }}>{winPct}%</div>
-                    <div style={{ fontSize: 10, color: t.text3, marginTop: 2 }}>{d.total}t</div>
+                    <div style={{ fontSize: 10, color: t.text3, marginTop: 2 }}>{d.total} trade{d.total !== 1 ? "s" : ""}</div>
                   </div>
                 );
               })}
@@ -321,6 +274,53 @@ Provide 4-6 patterns. Be brutally honest but constructive.`,
       </div>
 
       {/* ── AI Pattern Detector ────────────────────────────────────────── */}
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          marginBottom: 20,
+          flexWrap: "wrap",
+          gap: 10,
+        }}
+      >
+        <div>
+          <div
+            style={{
+              fontFamily: "'Space Mono',monospace",
+              fontSize: 11,
+              color: t.text3,
+              textTransform: "uppercase",
+              letterSpacing: 2,
+              marginBottom: 4,
+            }}
+          >
+            AI Pattern Detector
+          </div>
+          <div style={{ fontSize: 13, color: t.text3 }}>
+            Powered by Claude · Based on {plList.length} trades
+          </div>
+        </div>
+        <button
+          onClick={analysePatterns}
+          disabled={loading}
+          style={{
+            background: t.accent,
+            border: "none",
+            color: "#000",
+            borderRadius: 8,
+            padding: "8px 16px",
+            cursor: loading ? "not-allowed" : "pointer",
+            fontSize: 12,
+            fontWeight: 700,
+            fontFamily: "'Space Mono',monospace",
+            opacity: loading ? 0.6 : 1,
+          }}
+        >
+          {loading ? "Analysing..." : "↻ Re-analyse"}
+        </button>
+      </div>
+
       {loading && (
         <div
           style={{
