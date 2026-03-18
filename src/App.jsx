@@ -105,141 +105,24 @@ const SUGGESTED_TAGS = [
 ];
 const STORAGE_KEY = "tradelog_trades";
 const THEME_KEY = "tradelog_theme";
+const ONBOARDING_KEY = "logfolio-onboarded";
 
 const SEED_TRADES = [
-  {
-    id: 1,
-    date: "2026-03-01",
-    ticker: "AAPL",
-    type: "stock",
-    strategy: "Breakout",
-    direction: "long",
-    entryPrice: 190,
-    exitPrice: 196,
-    shares: 50,
-    notes: "Clean breakout above resistance.",
-    emotion: "Confident",
-    mistake: "None",
-    tags: ["High Volume"],
-  },
-  {
-    id: 2,
-    date: "2026-03-03",
-    ticker: "NVDA",
-    type: "stock",
-    strategy: "Pullback",
-    direction: "long",
-    entryPrice: 870,
-    exitPrice: 855,
-    shares: 20,
-    notes: "Entered too early.",
-    emotion: "FOMO",
-    mistake: "FOMO Entry",
-    tags: ["Trend Follow"],
-  },
-  {
-    id: 3,
-    date: "2026-03-05",
-    ticker: "TSLA",
-    type: "options",
-    strategy: "Long Call",
-    direction: "long",
-    legs: [
-      {
-        position: "buy",
-        type: "call",
-        strike: 250,
-        expiration: "2026-04-18",
-        entryPremium: 4.2,
-        exitPremium: 7.8,
-        contracts: 3,
-      },
-    ],
-    notes: "Earnings play.",
-    emotion: "Disciplined",
-    mistake: "None",
-    tags: ["Earnings"],
-  },
-  {
-    id: 4,
-    date: "2026-03-07",
-    ticker: "SPY",
-    type: "options",
-    strategy: "Iron Condor",
-    direction: "neutral",
-    legs: [
-      {
-        position: "buy",
-        type: "put",
-        strike: 490,
-        expiration: "2026-03-21",
-        entryPremium: 0.8,
-        exitPremium: 0.3,
-        contracts: 5,
-      },
-      {
-        position: "sell",
-        type: "put",
-        strike: 495,
-        expiration: "2026-03-21",
-        entryPremium: 2.1,
-        exitPremium: 0.6,
-        contracts: 5,
-      },
-      {
-        position: "sell",
-        type: "call",
-        strike: 520,
-        expiration: "2026-03-21",
-        entryPremium: 1.9,
-        exitPremium: 0.45,
-        contracts: 5,
-      },
-      {
-        position: "buy",
-        type: "call",
-        strike: 525,
-        expiration: "2026-03-21",
-        entryPremium: 0.7,
-        exitPremium: 0.2,
-        contracts: 5,
-      },
-    ],
-    notes: "Theta decay.",
-    emotion: "Calm",
-    mistake: "None",
-    tags: ["Hedge"],
-  },
-  {
-    id: 5,
-    date: "2026-03-09",
-    ticker: "META",
-    type: "stock",
-    strategy: "Breakout",
-    direction: "long",
-    entryPrice: 570,
-    exitPrice: 582,
-    shares: 30,
-    notes: "Strong momentum.",
-    emotion: "Disciplined",
-    mistake: "None",
-    tags: ["Trend Follow", "High Volume"],
-  },
-  {
-    id: 6,
-    date: "2026-03-10",
-    ticker: "AMD",
-    type: "stock",
-    strategy: "Reversal",
-    direction: "short",
-    entryPrice: 155,
-    exitPrice: 162,
-    shares: 40,
-    notes: "Bad read.",
-    emotion: "Anxious",
-    mistake: "No Plan",
-    tags: [],
-  },
+  { id: 1001, date: "2026-01-06", ticker: "AAPL", type: "stock", strategy: "Breakout", direction: "long", entryPrice: 228.50, exitPrice: 234.20, shares: 50, emotion: "Confident", mistake: "None", notes: "Clean breakout above 228 resistance with volume confirmation.", tags: ["tech", "breakout"], status: "closed" },
+  { id: 1002, date: "2026-01-09", ticker: "TSLA", type: "stock", strategy: "Pullback", direction: "long", entryPrice: 398, exitPrice: 381, shares: 20, emotion: "FOMO", mistake: "Chased Entry", notes: "Didn't wait for the pullback level — entered into strength.", tags: ["momentum", "ev"], status: "closed" },
+  { id: 1003, date: "2026-01-13", ticker: "SPY", type: "stock", strategy: "Trend Follow", direction: "long", entryPrice: 585, exitPrice: 591, shares: 30, emotion: "Calm", mistake: "None", notes: "Trend continuation on the daily. Held through a small dip.", tags: ["index"], status: "closed" },
+  { id: 1004, date: "2026-01-16", ticker: "NVDA", type: "stock", strategy: "Breakout", direction: "long", entryPrice: 142, exitPrice: 148.50, shares: 40, emotion: "Confident", mistake: "None", notes: "AI narrative + volume breakout out of two-week consolidation.", tags: ["tech", "ai"], status: "closed" },
+  { id: 1005, date: "2026-01-21", ticker: "AMZN", type: "stock", strategy: "Scalp", direction: "long", entryPrice: 222, exitPrice: 219.50, shares: 25, emotion: "Anxious", mistake: "Early Exit", notes: "Panicked out at support. Price recovered to 226 an hour later.", tags: ["tech"], status: "closed" },
+  { id: 1006, date: "2026-01-24", ticker: "AAPL", type: "stock", strategy: "Pullback", direction: "long", entryPrice: 222, exitPrice: 229, shares: 60, emotion: "Calm", mistake: "None", notes: "Textbook pullback to 20 EMA, clean risk/reward setup.", tags: ["tech", "swing"], status: "closed" },
+  { id: 1007, date: "2026-01-28", ticker: "META", type: "stock", strategy: "Breakout", direction: "long", entryPrice: 612, exitPrice: 628, shares: 10, emotion: "Confident", mistake: "None", notes: "Pre-earnings momentum breakout, took partial profits early.", tags: ["tech", "earnings"], status: "closed" },
+  { id: 1008, date: "2026-01-31", ticker: "SPY", type: "stock", strategy: "Reversal", direction: "short", entryPrice: 597, exitPrice: 589, shares: 20, emotion: "Calm", mistake: "None", notes: "Bearish reversal candle at resistance. Tight stop above HOD.", tags: ["index", "short"], status: "closed" },
+  { id: 1009, date: "2026-02-04", ticker: "TSLA", type: "stock", strategy: "Breakout", direction: "long", entryPrice: 365, exitPrice: 382, shares: 30, emotion: "Confident", mistake: "None", notes: "Volume breakout, caught the morning momentum perfectly.", tags: ["momentum", "ev"], status: "closed" },
+  { id: 1010, date: "2026-02-07", ticker: "NVDA", type: "stock", strategy: "Pullback", direction: "long", entryPrice: 128, exitPrice: 121, shares: 50, emotion: "Fearful", mistake: "Moved Stop", notes: "Moved stop loss wider — took a much bigger loss than planned.", tags: ["tech"], status: "closed" },
+  { id: 1011, date: "2026-02-12", ticker: "GOOGL", type: "stock", strategy: "Trend Follow", direction: "long", entryPrice: 195, exitPrice: 201.50, shares: 35, emotion: "Calm", mistake: "None", notes: "Riding the uptrend on the daily chart. Clean entry on a doji.", tags: ["tech", "ai"], status: "closed" },
+  { id: 1012, date: "2026-02-19", ticker: "AAPL", type: "stock", strategy: "Scalp", direction: "long", entryPrice: 226, exitPrice: 228.80, shares: 100, emotion: "Focused", mistake: "None", notes: "Quick intraday scalp on the open — in and out in 40 minutes.", tags: ["scalp", "tech"], status: "closed" },
+  { id: 1013, date: "2026-02-26", ticker: "MSFT", type: "stock", strategy: "Pullback", direction: "long", entryPrice: 388, exitPrice: 395.50, shares: 25, emotion: "Calm", mistake: "None", notes: "AI narrative driving tech. Pulled back to VWAP, textbook entry.", tags: ["tech", "ai"], status: "closed" },
+  { id: 1014, date: "2026-03-04", ticker: "SPY", type: "stock", strategy: "Breakout", direction: "long", entryPrice: 578, exitPrice: 584.50, shares: 40, emotion: "Confident", mistake: "None", notes: "Market broke out of 2-week consolidation on strong volume.", tags: ["index"], status: "closed" },
+  { id: 1015, date: "2026-03-10", ticker: "NVDA", type: "stock", strategy: "Breakout", direction: "long", entryPrice: 135, exitPrice: 143, shares: 45, emotion: "Confident", mistake: "None", notes: "Resumed uptrend after post-earnings pullback. Strong R:R.", tags: ["tech", "ai", "breakout"], status: "closed" },
 ];
 
 function loadTrades() {
@@ -5227,6 +5110,40 @@ function exportCSV(trades) {
   URL.revokeObjectURL(url);
 }
 
+function OnboardingModal({ onLoadSample, onStartFresh, t }) {
+  const optStyle = {
+    display: "flex", gap: 12, alignItems: "flex-start", background: t.card2,
+    border: `1px solid ${t.border}`, borderRadius: 12, padding: "16px 18px",
+    cursor: "pointer", textAlign: "left", width: "100%",
+  };
+  return (
+    <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.85)", zIndex: 200, display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }}>
+      <div className="modal-enter" style={{ background: t.card, border: `1px solid ${t.border}`, borderRadius: 20, width: "100%", maxWidth: 420, padding: 32 }}>
+        <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 11, color: t.accent, letterSpacing: 3, textTransform: "uppercase", marginBottom: 20 }}>LOG-FOLIO</div>
+        <div style={{ fontSize: 22, fontWeight: 700, color: t.text, marginBottom: 8, lineHeight: 1.3 }}>Welcome to your trading journal</div>
+        <div style={{ fontSize: 13, color: t.text3, marginBottom: 28, lineHeight: 1.6 }}>Track every trade, spot your patterns, and improve with each session.</div>
+        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+          <button onClick={onLoadSample} style={{ ...optStyle, borderColor: t.accent + "50" }}>
+            <div style={{ fontSize: 24, lineHeight: 1 }}>📊</div>
+            <div>
+              <div style={{ fontSize: 14, fontWeight: 600, color: t.text, marginBottom: 4 }}>Load Sample Data</div>
+              <div style={{ fontSize: 12, color: t.text3, lineHeight: 1.5 }}>Explore with 15 pre-built trades across AAPL, TSLA, NVDA & SPY. See analytics, equity curve, and insights right away.</div>
+            </div>
+          </button>
+          <button onClick={onStartFresh} style={optStyle}>
+            <div style={{ fontSize: 24, lineHeight: 1 }}>✏️</div>
+            <div>
+              <div style={{ fontSize: 14, fontWeight: 600, color: t.text, marginBottom: 4 }}>Start Fresh</div>
+              <div style={{ fontSize: 12, color: t.text3, lineHeight: 1.5 }}>Log your first real trade and build your journal from scratch.</div>
+            </div>
+          </button>
+        </div>
+        <div style={{ fontSize: 10, color: t.text4, textAlign: "center", marginTop: 20, fontFamily: "'Space Mono',monospace" }}>Sample data can be cleared anytime in Settings</div>
+      </div>
+    </div>
+  );
+}
+
 export default function TradingJournal() {
   const { user, profile, loading: authLoading, isPro, canUseAI, aiAnalysesLeft, refreshProfile, signOut } = useAuth();
   const [planSearch, setPlanSearch] = useState("");
@@ -5261,7 +5178,11 @@ const [page, setPage] = useState(1);
   const [shareTarget, setShareTarget] = useState(null);
   const [spyData, setSpyData] = useState(null);
   const [spyError, setSpyError] = useState(false);
+  const [showOnboarding, setShowOnboarding] = useState(false);
+  const [showGuide, setShowGuide] = useState(false);
   const journalTimerRef = useRef(null);
+  const touchStartX = useRef(null);
+  const touchStartY = useRef(null);
   const mobile = useIsMobile();
   const T = tk(isDark);
 
@@ -5305,6 +5226,33 @@ const [page, setPage] = useState(1);
     // Supabase sync is done per-operation (add/save/delete) for efficiency
   }, [trades, user, tradesLoaded]);
 
+  // Show onboarding for new users
+  useEffect(() => {
+    if (!tradesLoaded) return;
+    try { if (localStorage.getItem(ONBOARDING_KEY)) return; } catch {}
+    if (trades.length === 0) setShowOnboarding(true);
+  }, [tradesLoaded]);
+
+  const loadSampleTrades = async () => {
+    const baseId = Date.now();
+    const withIds = SEED_TRADES.map((t, i) => ({ ...t, id: baseId + i }));
+    setTrades(withIds);
+    setShowOnboarding(false);
+    setTab("analytics");
+    try { localStorage.setItem(ONBOARDING_KEY, "1"); } catch {}
+    if (user) {
+      const rows = withIds.map(t => ({ id: t.id, user_id: user.id, data: t }));
+      await supabase.from("trades").upsert(rows);
+    }
+    showToast("Sample data loaded — explore your analytics!", T.accent, "log");
+  };
+
+  const dismissOnboarding = () => {
+    setShowOnboarding(false);
+    setShowGuide(true);
+    try { localStorage.setItem(ONBOARDING_KEY, "1"); } catch {}
+  };
+
   useEffect(() => {
     const theme = isDark ? "dark" : "light";
     try { localStorage.setItem(THEME_KEY, theme); } catch {}
@@ -5343,6 +5291,24 @@ const [page, setPage] = useState(1);
   const showToast = (msg, color, icon = null) => {
     setToast({ msg, color, icon });
     setTimeout(() => setToast(null), 2200);
+  };
+
+  const TAB_ORDER = ["today", "weekly", "calendar", "trades", "plans", "analytics", "ai"];
+  const handleTouchStart = (e) => {
+    touchStartX.current = e.touches[0].clientX;
+    touchStartY.current = e.touches[0].clientY;
+  };
+  const handleTouchEnd = (e) => {
+    if (touchStartX.current === null) return;
+    const dx = e.changedTouches[0].clientX - touchStartX.current;
+    const dy = e.changedTouches[0].clientY - touchStartY.current;
+    touchStartX.current = null;
+    touchStartY.current = null;
+    // Only trigger on predominantly horizontal swipes > 55px
+    if (Math.abs(dx) < 55 || Math.abs(dx) < Math.abs(dy) * 1.5) return;
+    const idx = TAB_ORDER.indexOf(tab);
+    if (dx < 0 && idx < TAB_ORDER.length - 1) setTab(TAB_ORDER[idx + 1]);
+    if (dx > 0 && idx > 0) setTab(TAB_ORDER[idx - 1]);
   };
   const saveJournal = (date, text) => {
     const updated = { ...journals, [date]: text };
@@ -6057,7 +6023,7 @@ style={{ display: "block" }}>
         )}
       </div>
 
-      <div key={tab} className="tab-enter" style={{ padding: mobile ? 14 : 28 }}>
+      <div key={tab} className="tab-enter" style={{ padding: mobile ? 14 : 28 }} onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
         {tab === "ai" && (isPro
           ? <AIInsights plList={plList} t={T} mobile={mobile} />
           : <UpgradePrompt t={T} onUpgrade={handleUpgrade} feature="AI Insights" />
@@ -6810,6 +6776,34 @@ style={{ display: "block" }}>
       )}
       {shareTarget && (
         <ShareModal trade={shareTarget} onClose={() => setShareTarget(null)} t={T} isDark={isDark} />
+      )}
+
+      {showOnboarding && (
+        <OnboardingModal onLoadSample={loadSampleTrades} onStartFresh={dismissOnboarding} t={T} />
+      )}
+
+      {/* Start guide — shown after "Start Fresh", disappears once first trade logged */}
+      {showGuide && trades.length === 0 && (
+        <div style={{
+          position: "fixed", bottom: 80, left: mobile ? 14 : 24, zIndex: 100,
+          background: T.card, border: `1px solid ${T.border}`, borderRadius: 14,
+          padding: "16px 20px", maxWidth: 260, boxShadow: "0 8px 32px rgba(0,0,0,0.4)",
+        }}>
+          <div style={{ fontSize: 13, fontWeight: 600, color: T.text, marginBottom: 10 }}>Ready to start?</div>
+          <div style={{ display: "flex", flexDirection: "column", gap: 7 }}>
+            {[
+              { key: "N", label: "Log a trade" },
+              { key: "M", label: "Plan a trade" },
+              { key: "A", label: "View analytics" },
+            ].map(({ key, label }) => (
+              <div key={key} style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12, color: T.text3 }}>
+                <kbd style={{ background: T.card2, border: `1px solid ${T.border}`, borderRadius: 5, padding: "1px 7px", fontFamily: "'Space Mono',monospace", fontSize: 11, color: T.accent }}>{key}</kbd>
+                {label}
+              </div>
+            ))}
+          </div>
+          <button onClick={() => setShowGuide(false)} style={{ marginTop: 12, background: "none", border: "none", color: T.text4, fontSize: 11, cursor: "pointer", fontFamily: "'Space Mono',monospace", padding: 0 }}>Got it</button>
+        </div>
       )}
     </div>
   );
