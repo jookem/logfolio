@@ -714,6 +714,7 @@ const [chainLoading, setChainLoading] = useState(false);
 const [chainError, setChainError] = useState(null);
 const [expiryDates, setExpiryDates] = useState([]);
 const [strikes, setStrikes] = useState([]);
+const [pnlMode, setPnlMode] = useState("pct"); // "pct" | "dollar"
 const polyFetch = (path) => fetch("/api/polygon", {
   method: "POST",
   headers: { "Content-Type": "application/json" },
@@ -1325,11 +1326,39 @@ const base = {
             return { bg: "#ef4444", color: "#fff" };
           };
 
+          // Dollar P/L per cell
+          const getDollarPL = (price) => {
+            const diff = isWrite ? (entry - price) : (price - entry);
+            return diff * contracts * 100;
+          };
+          const getDollarCell = (pl) => {
+            if (pl > 0)  return { bg: pl > entry * contracts * 100 * 0.2 ? "#16a34a" : "#22c55e", color: "#fff" };
+            if (pl < -entry * contracts * 100 * 0.4) return { bg: "#ef4444", color: "#fff" };
+            if (pl < 0)  return { bg: "#fca5a5", color: "#000" };
+            return { bg: "#86efac", color: "#000" };
+          };
+
           return (
             <div style={{ marginBottom: 4 }}>
-              {sectionHeader("P&L by Date")}
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+                {sectionHeader("P&L by Date")}
+                <div style={{ display: "flex", gap: 4 }}>
+                  {[["pct", "%"], ["dollar", "$"]].map(([mode, label]) => (
+                    <button key={mode} onClick={() => setPnlMode(mode)} style={{
+                      background: pnlMode === mode ? t.accent : t.card2,
+                      border: `1px solid ${pnlMode === mode ? t.accent : t.border}`,
+                      color: pnlMode === mode ? "#000" : t.text3,
+                      borderRadius: 6, padding: "3px 10px", cursor: "pointer",
+                      fontSize: 11, fontWeight: pnlMode === mode ? 700 : 400,
+                      fontFamily: "'Space Mono',monospace",
+                    }}>{label}</button>
+                  ))}
+                </div>
+              </div>
               <div style={{ fontSize: 10, color: t.text3, fontFamily: "'Space Mono',monospace", marginBottom: 8 }}>
-                % of entry premium · IV {(sigma*100).toFixed(0)}% · {isWrite ? "Written" : "Bought"} {leg.type}
+                {pnlMode === "pct"
+                  ? `% of entry premium · IV ${(sigma*100).toFixed(0)}% · ${isWrite ? "Written" : "Bought"} ${leg.type}`
+                  : `P/L in $ · ${contracts} contract${contracts !== 1 ? "s" : ""} · IV ${(sigma*100).toFixed(0)}%`}
               </div>
               <div style={{ overflowX: "auto", borderRadius: 8, border: `1px solid ${t.border}` }}>
                 <table style={{ width: "100%", borderCollapse: "collapse", fontFamily: "'Space Mono',monospace", fontSize: 11 }}>
@@ -1351,23 +1380,31 @@ const base = {
                         K ${K} {leg.type}
                       </td>
                       {cells.map((c, i) => {
-                        const style = getCell(c.pct);
-                        return (
-                          <td key={i} style={{
-                            padding: "7px 8px", textAlign: "center",
-                            background: style.bg, color: style.color,
-                            fontWeight: 600, whiteSpace: "nowrap",
-                          }}>
-                            {c.pct.toFixed(1)}%
-                          </td>
-                        );
+                        if (pnlMode === "pct") {
+                          const style = getCell(c.pct);
+                          return (
+                            <td key={i} style={{ padding: "7px 8px", textAlign: "center", background: style.bg, color: style.color, fontWeight: 600, whiteSpace: "nowrap" }}>
+                              {c.pct.toFixed(1)}%
+                            </td>
+                          );
+                        } else {
+                          const pl = getDollarPL(c.price);
+                          const style = getDollarCell(pl);
+                          return (
+                            <td key={i} style={{ padding: "7px 8px", textAlign: "center", background: style.bg, color: style.color, fontWeight: 600, whiteSpace: "nowrap" }}>
+                              {pl >= 0 ? "+" : ""}${Math.abs(pl) >= 1000 ? (pl/1000).toFixed(1)+"k" : pl.toFixed(0)}
+                            </td>
+                          );
+                        }
                       })}
                     </tr>
                   </tbody>
                 </table>
               </div>
               <div style={{ fontSize: 10, color: t.text3, fontFamily: "'Space Mono',monospace", marginTop: 6, lineHeight: 1.6 }}>
-                100% = break even · &gt;100% = profit · &lt;100% = loss
+                {pnlMode === "pct"
+                  ? "100% = break even · >100% = profit · <100% = loss"
+                  : `Entry premium $${entry} × ${contracts} contract${contracts !== 1 ? "s" : ""} = $${(entry * contracts * 100).toFixed(0)} cost`}
               </div>
             </div>
           );
