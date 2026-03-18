@@ -5004,6 +5004,7 @@ const [page, setPage] = useState(1);
   };
   const executePlan = (plan) => {
     const prefill = {
+      date: todayStr(),
       ticker: plan.ticker,
       type: plan.type,
       strategy: plan.strategy,
@@ -5154,6 +5155,7 @@ const plList = useMemo(
     const map = {};
     DAYS.forEach(d => { map[d] = { pl: 0, wins: 0, total: 0 }; });
     plList.forEach(t => {
+      if (!t.date) return;
       const [y, mo, d] = t.date.split("-").map(Number);
       const dayName = DAYS[new Date(y, mo - 1, d).getDay()];
       map[dayName].pl += t.pl;
