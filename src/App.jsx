@@ -5274,9 +5274,14 @@ const [page, setPage] = useState(1);
         setShowSettings(false); setSelected(null); setSelectedPlan(null); setEditTrade(null);
       }
       if (e.key === "n" || e.key === "N") { e.preventDefault(); setShowAdd(true); }
-      if (e.key === "p" || e.key === "P") { e.preventDefault(); setShowPlan(true); }
-      if (e.key === "t" || e.key === "T") { setTab("trades"); setSelected(null); }
-      if (e.key === "d" || e.key === "D") { setTab("analytics"); }
+      if (e.key === "m" || e.key === "M") { e.preventDefault(); setShowPlan(true); }
+      if (e.key === "t" || e.key === "T") { setTab("today"); }
+      if (e.key === "w" || e.key === "W") { setTab("weekly"); }
+      if (e.key === "c" || e.key === "C") { setTab("calendar"); }
+      if (e.key === "l" || e.key === "L") { setTab("trades"); setSelected(null); }
+      if (e.key === "p" || e.key === "P") { setTab("plans"); }
+      if (e.key === "a" || e.key === "A") { setTab("analytics"); }
+      if (e.key === "i" || e.key === "I") { setTab("ai"); }
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
