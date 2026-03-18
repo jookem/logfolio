@@ -434,12 +434,12 @@ function EquityCurve({ trades, t, spyData, spyError }) {
 
   if (points.length < 3)
     return (
-      <div style={{ height: 120, display: "flex", alignItems: "center", justifyContent: "center", color: t.text3, fontSize: 12, fontFamily: "monospace" }}>
+      <div style={{ height: 200, display: "flex", alignItems: "center", justifyContent: "center", color: t.text3, fontSize: 12, fontFamily: "monospace" }}>
         {range !== "ALL" ? "No trades in this period" : "Add more trades to see curve"}
       </div>
     );
 
-  const W = 500, H = 120;
+  const W = 500, H = 200;
   const xs = points.map((_, i) => (i / (points.length - 1)) * W);
   const min = Math.min(...points.map(p => p.val));
   const max = Math.max(...points.map(p => p.val));
@@ -474,7 +474,7 @@ function EquityCurve({ trades, t, spyData, spyError }) {
 
   // X-axis date labels: pick ~4 evenly spaced points (skip the null start)
   const datePts = points.filter(p => p.date);
-  const labelIdxs = [0, Math.floor(datePts.length / 3), Math.floor(datePts.length * 2 / 3), datePts.length - 1]
+  const labelIdxs = range === "1D" ? [] : [0, Math.floor(datePts.length / 3), Math.floor(datePts.length * 2 / 3), datePts.length - 1]
     .filter((v, i, a) => a.indexOf(v) === i && datePts[v]);
   const fmtDate = d => { const [y, m, dd] = d.split("-"); return `${m}/${dd}/${y.slice(2)}`; };
 
@@ -496,7 +496,7 @@ function EquityCurve({ trades, t, spyData, spyError }) {
       </div>
 
       {/* Chart */}
-      <svg viewBox={`0 0 ${W} ${H}`} style={{ width: "100%", height: 120 }} preserveAspectRatio="none">
+      <svg viewBox={`0 0 ${W} ${H}`} style={{ width: "100%", height: 200 }} preserveAspectRatio="none">
         <defs>
           <linearGradient id="eg" x1="0" y1="0" x2="0" y2="1">
             <stop offset="0%" stopColor={t.accent} stopOpacity="0.25" />
@@ -827,13 +827,6 @@ const [chainLoading, setChainLoading] = useState(false);
 const [chainError, setChainError] = useState(null);
 const [expiryDates, setExpiryDates] = useState([]);
 const [strikes, setStrikes] = useState([]);
-const yfFetch = (yfUrl) => fetch("/api/yf", {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({ url: yfUrl }),
-}).then(r => r.json());
-const yf = (path) => `https://query1.finance.yahoo.com${path}`;
-
 const polyFetch = (path) => fetch("/api/polygon", {
   method: "POST",
   headers: { "Content-Type": "application/json" },
@@ -844,8 +837,8 @@ const fetchStockPrice = async (ticker) => {
   if (!ticker || ticker.length < 1) return;
   setTickerLoading(true);
   try {
-    const data = await yfFetch(yf(`/v8/finance/chart/${ticker}?interval=1d&range=1d`));
-    const price = data?.chart?.result?.[0]?.meta?.regularMarketPrice;
+    const data = await polyFetch(`/v2/aggs/ticker/${ticker.toUpperCase()}/prev?adjusted=true`);
+    const price = data?.results?.[0]?.c;
     if (price) {
       set("currentPrice", price.toFixed(2));
       set("purchasePrice", price.toFixed(2));
@@ -3854,7 +3847,7 @@ return (
     </div>
   );
 }
-function DaySession({ plList, plans, onAddTrade, onAddPlan, t, mobile, isDark, journalText = "", onJournalChange }) {
+function DaySession({ plList, plans, onAddTrade, onAddPlan, t, mobile, isDark }) {
   const today = todayStr();
   const todayTrades = plList.filter((tr) => tr.date === today);
   const sessionPL = todayTrades.reduce((s, tr) => s + tr.pl, 0);
@@ -4287,19 +4280,6 @@ const timeStr = now.toLocaleTimeString("en-US", {
               No trade plans yet
             </div>
           )}
-        </div>
-        <div style={{ background: t.surface, border: `1px solid ${t.border}`, borderRadius: 12, padding: "16px 18px", marginTop: 16 }}>
-          <div style={{ fontSize: 10, color: t.text3, fontFamily: "'Space Mono',monospace", textTransform: "uppercase", letterSpacing: 2, marginBottom: 10 }}>
-            Today's Journal
-          </div>
-          <textarea
-            id="today-journal"
-            name="today-journal"
-            value={journalText}
-            onChange={(e) => onJournalChange(e.target.value)}
-            placeholder="How was your session? What did you learn? What would you do differently?"
-            style={{ width: "100%", minHeight: 100, background: t.input, border: `1px solid ${t.inputBorder}`, borderRadius: 8, color: t.text, padding: "10px 14px", fontSize: 13, fontFamily: "inherit", resize: "vertical", outline: "none", boxSizing: "border-box" }}
-          />
         </div>
     </div>
   );
@@ -6055,8 +6035,6 @@ style={{ display: "block" }}>
             t={T}
             mobile={mobile}
             isDark={isDark}
-            journalText={journals[todayStr()] || ""}
-            onJournalChange={(text) => saveJournal(todayStr(), text)}
           />
         )}
 
