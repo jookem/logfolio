@@ -1675,11 +1675,11 @@ const base = {
           </div>
           <div style={{ display: "flex", gap: 8 }}>
             <input
-              style={{ ...inp, flex: 1 }}
+              style={{ ...inp, flex: 1, padding: "7px 12px", fontSize: 12 }}
               value={tagInput}
               onChange={(e) => setTagInput(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && addTag(tagInput)}
-              placeholder="Type tag + Enter"
+              placeholder="Add tag..."
             />
             <button onClick={() => addTag(tagInput)} style={{ background: t.accent + "20", border: `1px solid ${t.accent}40`, color: t.accent, borderRadius: 8, padding: "0 14px", cursor: "pointer", fontSize: 13, whiteSpace: "nowrap" }}>+ Add</button>
           </div>
@@ -2355,11 +2355,11 @@ function TradeFormModal({ initial, onClose, onSave, onCSVImport, t, editLabel })
           </div>
           <div style={{ display: "flex", gap: 8 }}>
             <input
-              style={{ ...inp, flex: 1 }}
+              style={{ ...inp, flex: 1, padding: "7px 12px", fontSize: 12 }}
               value={tagInput}
               onChange={(e) => setTagInput(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && addTag(tagInput)}
-              placeholder="Type tag + Enter"
+              placeholder="Add tag..."
             />
             <button
               onClick={() => addTag(tagInput)}
