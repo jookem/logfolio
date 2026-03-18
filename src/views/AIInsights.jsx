@@ -261,9 +261,9 @@ Provide 4-6 patterns. Be brutally honest but constructive.`,
                 const label = h === 0 ? "12:00" : `${h}:00`;
                 return (
                   <div key={h} style={{ background: base + Math.round(alpha * 255).toString(16).padStart(2,"0"), border: `1px solid ${base}50`, borderRadius: 8, padding: "8px 10px", textAlign: "center", minWidth: 52 }}>
-                    <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 10, color: t.text2, marginBottom: 4 }}>{label}</div>
-                    <div style={{ fontSize: 13, fontWeight: 700, color: isGood ? t.accent : t.danger, fontFamily: "'Space Mono',monospace" }}>{winPct}%</div>
-                    <div style={{ fontSize: 10, color: t.text3, marginTop: 2 }}>{d.total} trade{d.total !== 1 ? "s" : ""}</div>
+                    <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 10, color: "rgba(255,255,255,0.7)", marginBottom: 4 }}>{label}</div>
+                    <div style={{ fontSize: 13, fontWeight: 700, color: "#fff", fontFamily: "'Space Mono',monospace" }}>{winPct}%</div>
+                    <div style={{ fontSize: 10, color: "rgba(255,255,255,0.6)", marginTop: 2 }}>{d.total} trade{d.total !== 1 ? "s" : ""}</div>
                   </div>
                 );
               })}
