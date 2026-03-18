@@ -441,41 +441,52 @@ function EquityCurve({ trades, t, spyData, spyError }) {
 
   const W = 500, H = 200;
   const xs = points.map((_, i) => (i / (points.length - 1)) * W);
-  const min = Math.min(...points.map(p => p.val));
-  const max = Math.max(...points.map(p => p.val));
-  const range_ = max - min || 1;
-  const ys = points.map((p) => H - ((p.val - min) / range_) * H);
-  const path = points.map((_, i) => `${i === 0 ? "M" : "L"} ${xs[i]},${ys[i]}`).join(" ");
 
-  // SPY normalized to its own % scale
-  let spyPath = null;
+  // SPY: scale to same amplitude as equity curve so both share one Y axis
+  let spyEquivs = null;
   let spyReturnPct = null;
   const filteredSpy = cutoffDate ? spyData?.filter(s => s.date >= cutoffDate) : spyData;
   if (filteredSpy?.length >= 2 && sorted.length >= 2) {
     const base = filteredSpy[0].close;
-    const spyRets = points.map((pt) => {
+    const equityAmplitude = Math.max(...points.map(p => Math.abs(p.val))) || 1;
+    const mapped = points.map((pt) => {
       if (!pt.date) return 0;
       const match = filteredSpy.filter(s => s.date <= pt.date);
       if (!match.length) return null;
-      return (match[match.length - 1].close - base) / base;
+      const ret = (match[match.length - 1].close - base) / base;
+      return ret * equityAmplitude;
     });
-    const validRets = spyRets.filter(v => v != null);
-    if (validRets.length >= 2) {
-      spyReturnPct = validRets[validRets.length - 1] * 100;
-      const spyMin = Math.min(...validRets);
-      const spyMax = Math.max(...validRets);
-      const spyRange = spyMax - spyMin || 0.001;
-      const zeroY = H - ((0 - min) / range_) * H;
-      const spyYs = spyRets.map(r => r != null ? zeroY - ((r - spyMin) / spyRange) * (H * 0.7) : null);
-      const segs = spyYs.map((y, i) => y != null ? `${i === 0 ? "M" : "L"} ${xs[i]},${y}` : null).filter(Boolean);
-      if (segs.length >= 2) spyPath = segs.join(" ");
+    if (mapped.filter(v => v != null).length >= 2) {
+      spyEquivs = mapped;
+      const lastValid = mapped.filter(v => v != null).at(-1);
+      spyReturnPct = (lastValid / equityAmplitude) * 100;
     }
   }
 
-  // X-axis date labels: pick ~4 evenly spaced points (skip the null start)
+  // Combined Y domain — both curves always fully visible
+  const allVals = [
+    ...points.map(p => p.val),
+    ...(spyEquivs ? spyEquivs.filter(v => v != null) : []),
+  ];
+  const min = Math.min(...allVals);
+  const max = Math.max(...allVals);
+  const range_ = max - min || 1;
+
+  const ys = points.map((p) => H - ((p.val - min) / range_) * H);
+  const path = points.map((_, i) => `${i === 0 ? "M" : "L"} ${xs[i]},${ys[i]}`).join(" ");
+
+  let spyPath = null;
+  if (spyEquivs) {
+    const spyYs = spyEquivs.map(v => v != null ? H - ((v - min) / range_) * H : null);
+    const segs = spyYs.map((y, i) => y != null ? `${i === 0 ? "M" : "L"} ${xs[i]},${y}` : null).filter(Boolean);
+    if (segs.length >= 2) spyPath = segs.join(" ");
+  }
+
+  // Tick positions — always computed so vertical lines always show
   const datePts = points.filter(p => p.date);
-  const labelIdxs = range === "1D" ? [] : [0, Math.floor(datePts.length / 3), Math.floor(datePts.length * 2 / 3), datePts.length - 1]
+  const tickIdxs = [0, Math.floor(datePts.length / 3), Math.floor(datePts.length * 2 / 3), datePts.length - 1]
     .filter((v, i, a) => a.indexOf(v) === i && datePts[v]);
+  const showDateLabels = range !== "1D";
   const fmtDate = d => { const [y, m, dd] = d.split("-"); return `${m}/${dd}/${y.slice(2)}`; };
 
   const RANGES = ["1D", "1W", "1M", "1Y", "ALL"];
@@ -503,8 +514,8 @@ function EquityCurve({ trades, t, spyData, spyError }) {
             <stop offset="100%" stopColor={t.accent} stopOpacity="0" />
           </linearGradient>
         </defs>
-        {/* Vertical tick lines at date label positions */}
-        {labelIdxs.map(idx => {
+        {/* Vertical tick lines — always rendered */}
+        {tickIdxs.map(idx => {
           const pt = datePts[idx];
           const ptIdx = points.findIndex(p => p.date === pt.date);
           if (ptIdx < 0) return null;
@@ -520,11 +531,10 @@ function EquityCurve({ trades, t, spyData, spyError }) {
         )}
       </svg>
 
-      {/* X-axis date labels */}
+      {/* X-axis date labels — hidden on 1D (all same date, no intraday time data) */}
       <div style={{ position: "relative", height: 16, marginTop: 2 }}>
-        {labelIdxs.map(idx => {
+        {showDateLabels && tickIdxs.map(idx => {
           const pt = datePts[idx];
-          // find the xs position: datePts[idx] is points[idx+1] (offset by the null start)
           const ptIdx = points.findIndex(p => p.date === pt.date);
           const xPct = ptIdx >= 0 ? (ptIdx / (points.length - 1)) * 100 : null;
           if (xPct == null) return null;
