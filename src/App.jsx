@@ -425,25 +425,35 @@ function EquityCurve({ trades, t, spyData, spyError }) {
         Add more trades to see curve
       </div>
     );
-  const min = Math.min(...points.map((p) => p.val)),
-    max = Math.max(...points.map((p) => p.val));
-  const range = max - min || 1, W = 500, H = 90;
+  const W = 500, H = 90;
   const xs = points.map((_, i) => (i / (points.length - 1)) * W);
-  const ys = points.map((p) => H - ((p.val - min) / range) * H);
-  const path = points.map((_, i) => `${i === 0 ? "M" : "L"} ${xs[i]},${ys[i]}`).join(" ");
-  let spyPath = null;
+
+  // Compute raw SPY PL values first so we can include them in the scale
+  let rawSpyPLs = null;
   if (spyData?.length >= 2 && sorted.length >= 2) {
     const base = spyData[0].close;
-    // SPY Y positions aligned to the same scale as equity (0 return = 0 PL)
-    const spyYs = points.map((pt) => {
-      if (!pt.date) return H - ((0 - min) / range) * H; // starting point = 0 return
+    rawSpyPLs = points.map((pt) => {
+      if (!pt.date) return 0;
       const match = spyData.filter(s => s.date <= pt.date);
       if (!match.length) return null;
       const close = match[match.length - 1].close;
-      const spyPL = ((close - base) / base) * (max - min || 1);
-      const clamped = Math.min(Math.max(spyPL, min - range * 0.1), max + range * 0.1);
-      return H - ((clamped - min) / range) * H;
+      return ((close - base) / base) * Math.abs(points[points.length - 1].val || 1);
     });
+  }
+
+  const allVals = [
+    ...points.map(p => p.val),
+    ...(rawSpyPLs ? rawSpyPLs.filter(v => v != null) : []),
+  ];
+  const min = Math.min(...allVals), max = Math.max(...allVals);
+  const range = max - min || 1;
+
+  const ys = points.map((p) => H - ((p.val - min) / range) * H);
+  const path = points.map((_, i) => `${i === 0 ? "M" : "L"} ${xs[i]},${ys[i]}`).join(" ");
+
+  let spyPath = null;
+  if (rawSpyPLs) {
+    const spyYs = rawSpyPLs.map(v => v != null ? H - ((v - min) / range) * H : null);
     const segs = spyYs.map((y, i) => y != null ? `${i === 0 ? "M" : "L"} ${xs[i]},${y}` : null).filter(Boolean);
     if (segs.length >= 2) spyPath = segs.join(" ");
   }
@@ -744,6 +754,7 @@ function PlanModal({ onClose, onSave, t, isDark, initial }) {
   });
   const [tickerLoading, setTickerLoading] = useState(false);
 const [chainLoading, setChainLoading] = useState(false);
+const [chainError, setChainError] = useState(null);
 const [expiryDates, setExpiryDates] = useState([]);
 const [strikes, setStrikes] = useState([]);
 const yfFetch = (yfUrl) => fetch("/api/yf", {
@@ -785,15 +796,20 @@ const fetchExpiryDates = async (ticker) => {
 
 const fetchStrikes = async (ticker, expiry, optionType) => {
   if (!ticker || !expiry) return;
+  setStrikes([]);
+  setChainError(null);
   try {
     const ts = Math.floor(new Date(expiry).getTime() / 1000);
     const data = await yfFetch(yf2(`/v7/finance/options/${ticker}?date=${ts}`));
+    if (data?.error) { setChainError(data.error + (data.preview ? `: ${data.preview}` : "")); return; }
     const opts = data?.optionChain?.result?.[0]?.options?.[0];
     const contracts = optionType === "call" ? opts?.calls : opts?.puts;
     if (contracts?.length) {
       setStrikes(contracts.map(c => ({ strike: c.strike, ticker: c.contractSymbol })));
+    } else {
+      setChainError("No contracts found for this date — try a listed expiry date above.");
     }
-  } catch {}
+  } catch (e) { setChainError(e.message); }
 };
 
 const fetchPremium = async (contractSymbol, legIndex, underlyingTicker) => {
@@ -1246,6 +1262,7 @@ const base = {
       {/* Strike — dropdown from chain */}
       <div>
         <label style={lbl}>Strike Price</label>
+        {chainError && <div style={{ fontSize: 10, color: t.danger, marginBottom: 4, fontFamily: "'Space Mono',monospace" }}>{chainError}</div>}
         {strikes.length > 0 ? (
           <select style={inp} value={leg.strike}
             onChange={(e) => {
