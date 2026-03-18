@@ -1,0 +1,12 @@
+{
+  "name": "LOG-FOLIO",
+  "short_name": "LOG-FOLIO",
+  "description": "Trading journal and performance analytics",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#00ff87",
+  "icons": [
+    { "src": "/images/logfolio-ico.svg", "sizes": "any", "type": "image/svg+xml" }
+  ]
+}
