@@ -4545,6 +4545,55 @@ Provide 4-6 patterns. Be brutally honest but constructive.`,
       : t.danger
     : t.text3;
 
+  // ── Data analytics (no AI tokens needed) ──────────────────────────────
+  const DAYS_ORDER = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+
+  const stratLeaderboard = useMemo(() => {
+    const map = {};
+    plList.forEach(tr => {
+      const s = tr.strategy || "Unknown";
+      if (!map[s]) map[s] = { wins: 0, total: 0, pl: 0 };
+      map[s].total++;
+      map[s].pl += tr.pl;
+      if (tr.pl > 0) map[s].wins++;
+    });
+    return Object.entries(map)
+      .map(([name, d]) => ({ name, ...d, winRate: d.total ? d.wins / d.total : 0 }))
+      .sort((a, b) => b.pl - a.pl);
+  }, [plList]);
+
+  const dowBreakdown = useMemo(() => {
+    const map = {};
+    DAYS_ORDER.forEach(d => { map[d] = { wins: 0, total: 0, pl: 0 }; });
+    plList.forEach(tr => {
+      const d = new Date(tr.date + "T12:00:00").toLocaleDateString("en-US", { weekday: "short" });
+      if (map[d]) { map[d].total++; map[d].pl += tr.pl; if (tr.pl > 0) map[d].wins++; }
+    });
+    return DAYS_ORDER.map(day => ({ day, ...map[day] }));
+  }, [plList]);
+
+  const hourHeatmap = useMemo(() => {
+    const map = {};
+    plList.forEach(tr => {
+      if (!tr.entryTime) return;
+      const h = parseInt(tr.entryTime.split(":")[0], 10);
+      if (isNaN(h)) return;
+      if (!map[h]) map[h] = { wins: 0, total: 0, pl: 0 };
+      map[h].total++; map[h].pl += tr.pl;
+      if (tr.pl > 0) map[h].wins++;
+    });
+    return map;
+  }, [plList]);
+  const hasHourData = Object.keys(hourHeatmap).length > 0;
+  const maxHourAbsPL = hasHourData ? Math.max(...Object.values(hourHeatmap).map(h => Math.abs(h.pl)), 1) : 1;
+  const activeHours = hasHourData
+    ? Array.from({ length: 24 }, (_, i) => i).filter(h => hourHeatmap[h])
+    : [];
+
+  const sectionLabel = (label) => (
+    <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 10, color: t.text3, textTransform: "uppercase", letterSpacing: 2, marginBottom: 14 }}>{label}</div>
+  );
+
   return (
     <div>
       <div
@@ -4594,6 +4643,110 @@ Provide 4-6 patterns. Be brutally honest but constructive.`,
         </button>
       </div>
 
+      {/* ── Strategy Leaderboard ───────────────────────────────────────── */}
+      <div style={{ background: t.surface, border: `1px solid ${t.border}`, borderRadius: 12, padding: "18px 20px", marginBottom: 16 }}>
+        {sectionLabel("Strategy Leaderboard")}
+        {stratLeaderboard.length === 0 ? (
+          <div style={{ fontSize: 13, color: t.text4, fontStyle: "italic" }}>Log trades with strategies to see rankings.</div>
+        ) : (
+          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+            {stratLeaderboard.map((s, i) => {
+              const winPct = Math.round(s.winRate * 100);
+              const plColor = s.pl >= 0 ? t.accent : t.danger;
+              const rankColors = ["#f59e0b", t.text3, "#cd7f32"];
+              return (
+                <div key={s.name} style={{ display: "grid", gridTemplateColumns: "24px 1fr auto", gap: 12, alignItems: "center" }}>
+                  <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 11, color: i < 3 ? rankColors[i] : t.text4, fontWeight: 700, textAlign: "center" }}>
+                    {i < 3 ? ["🥇","🥈","🥉"][i] : `#${i+1}`}
+                  </div>
+                  <div>
+                    <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 5 }}>
+                      <span style={{ fontSize: 13, color: t.text, fontWeight: 600 }}>{s.name}</span>
+                      <span style={{ fontSize: 11, color: t.text3 }}>{s.total} trade{s.total !== 1 ? "s" : ""} · {winPct}% win</span>
+                    </div>
+                    <div style={{ height: 5, borderRadius: 3, background: t.border, overflow: "hidden" }}>
+                      <div style={{ height: "100%", width: `${winPct}%`, borderRadius: 3, background: winPct >= 50 ? t.accent : t.danger, transition: "width 0.4s ease" }} />
+                    </div>
+                  </div>
+                  <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 12, fontWeight: 700, color: plColor, minWidth: 64, textAlign: "right" }}>
+                    {s.pl >= 0 ? "+" : ""}{fmt(s.pl)}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+
+      {/* ── Day of Week Breakdown ──────────────────────────────────────── */}
+      <div style={{ background: t.surface, border: `1px solid ${t.border}`, borderRadius: 12, padding: "18px 20px", marginBottom: 16 }}>
+        {sectionLabel("Day of Week")}
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: mobile ? 6 : 10 }}>
+          {dowBreakdown.map(({ day, total, wins, pl }) => {
+            const winRate = total ? Math.round((wins / total) * 100) : null;
+            const avgPL = total ? pl / total : 0;
+            const hasData = total > 0;
+            const bg = !hasData ? t.border + "30"
+              : avgPL > 0 ? t.accent + Math.round(Math.min(0.9, avgPL / 200) * 255).toString(16).padStart(2,"0") + "30"
+              : t.danger + "30";
+            const borderCol = !hasData ? t.border
+              : avgPL > 0 ? t.accent + "50" : t.danger + "50";
+            return (
+              <div key={day} style={{ background: bg, border: `1px solid ${borderCol}`, borderRadius: 8, padding: mobile ? "8px 4px" : "10px 8px", textAlign: "center" }}>
+                <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 10, color: t.text3, marginBottom: 6 }}>{day}</div>
+                {hasData ? (
+                  <>
+                    <div style={{ fontSize: mobile ? 13 : 15, fontWeight: 700, color: avgPL >= 0 ? t.accent : t.danger, fontFamily: "'Space Mono',monospace", lineHeight: 1 }}>
+                      {winRate}%
+                    </div>
+                    <div style={{ fontSize: 10, color: t.text3, marginTop: 4 }}>{total}t</div>
+                    <div style={{ fontSize: 10, color: avgPL >= 0 ? t.accent : t.danger, marginTop: 2, fontFamily: "'Space Mono',monospace" }}>
+                      {avgPL >= 0 ? "+" : ""}{fmt(avgPL)}
+                    </div>
+                  </>
+                ) : (
+                  <div style={{ fontSize: 16, color: t.border }}>—</div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+        <div style={{ fontSize: 11, color: t.text4, marginTop: 10 }}>Win rate % · avg P/L per day</div>
+      </div>
+
+      {/* ── Hour Heatmap ───────────────────────────────────────────────── */}
+      <div style={{ background: t.surface, border: `1px solid ${t.border}`, borderRadius: 12, padding: "18px 20px", marginBottom: 24 }}>
+        {sectionLabel("Best Time to Trade")}
+        {!hasHourData ? (
+          <div style={{ fontSize: 13, color: t.text4 }}>
+            Add entry times when logging trades to unlock hourly performance data.
+          </div>
+        ) : (
+          <>
+            <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+              {activeHours.map(h => {
+                const d = hourHeatmap[h];
+                const intensity = Math.min(1, Math.abs(d.pl) / maxHourAbsPL);
+                const isGood = d.pl >= 0;
+                const base = isGood ? t.accent : t.danger;
+                const alpha = Math.round(0.15 + intensity * 0.7, 2);
+                const winPct = Math.round((d.wins / d.total) * 100);
+                const label = h === 0 ? "12a" : h < 12 ? `${h}a` : h === 12 ? "12p" : `${h-12}p`;
+                return (
+                  <div key={h} style={{ background: base + Math.round(alpha * 255).toString(16).padStart(2,"0"), border: `1px solid ${base}50`, borderRadius: 8, padding: "8px 10px", textAlign: "center", minWidth: 52 }}>
+                    <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 10, color: t.text3, marginBottom: 4 }}>{label}</div>
+                    <div style={{ fontSize: 13, fontWeight: 700, color: isGood ? t.accent : t.danger, fontFamily: "'Space Mono',monospace" }}>{winPct}%</div>
+                    <div style={{ fontSize: 10, color: t.text3, marginTop: 2 }}>{d.total}t</div>
+                  </div>
+                );
+              })}
+            </div>
+            <div style={{ fontSize: 11, color: t.text4, marginTop: 10 }}>Win rate by entry hour</div>
+          </>
+        )}
+      </div>
+
+      {/* ── AI Pattern Detector ────────────────────────────────────────── */}
       {loading && (
         <div
           style={{
