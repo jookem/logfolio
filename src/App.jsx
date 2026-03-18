@@ -5103,7 +5103,7 @@ const importTrades = (incoming) => {
 
 const plList = useMemo(
   () => trades
-    .filter((t) => t.status !== "planned")
+    .filter((t) => t.status !== "planned" && t.date)
     .map((t) => ({ ...t, pl: calcPL(t), r: calcR(t) })),
   [trades]
 );
