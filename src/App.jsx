@@ -1687,8 +1687,8 @@ style={{ display: "block" }}>
           onNext={() => setTutorialStep(s => s + 1)}
           onPrev={() => setTutorialStep(s => s - 1)}
           onClose={() => { setShowTutorial(false); setShowGuide(true); }}
-          onOpenLog={() => { setShowTutorial(false); setShowAdd(true); }}
-          onOpenPlan={() => { setShowTutorial(false); setShowPlan(true); }}
+          onOpenLog={() => setShowAdd(true)}
+          onOpenPlan={() => setShowPlan(true)}
           onSetTab={setTab}
           t={T}
         />
