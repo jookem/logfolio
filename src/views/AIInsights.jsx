@@ -379,11 +379,15 @@ Provide 4-6 patterns. Be brutally honest but constructive.`,
                 const alpha = Math.round(0.15 + intensity * 0.7, 2);
                 const winPct = Math.round((d.wins / d.total) * 100);
                 const label = h === 0 ? "12:00" : `${h}:00`;
+                // Green is a bright color — dark text is always readable on it.
+                // Red is a dark color — white text always works.
+                const textColor = isGood ? "rgba(0,0,0,0.85)" : "#fff";
+                const subColor = isGood ? "rgba(0,0,0,0.55)" : "rgba(255,255,255,0.7)";
                 return (
                   <div key={h} style={{ background: base + Math.round(alpha * 255).toString(16).padStart(2,"0"), border: `1px solid ${base}50`, borderRadius: 8, padding: "8px 10px", textAlign: "center", minWidth: 52 }}>
-                    <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 10, color: t.text2, marginBottom: 4 }}>{label}</div>
-                    <div style={{ fontSize: 13, fontWeight: 700, color: t.text, fontFamily: "'Space Mono',monospace" }}>{winPct}%</div>
-                    <div style={{ fontSize: 10, color: t.text2, marginTop: 2 }}>{d.total} trade{d.total !== 1 ? "s" : ""}</div>
+                    <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 10, color: subColor, marginBottom: 4 }}>{label}</div>
+                    <div style={{ fontSize: 13, fontWeight: 700, color: textColor, fontFamily: "'Space Mono',monospace" }}>{winPct}%</div>
+                    <div style={{ fontSize: 10, color: subColor, marginTop: 2 }}>{d.total} trade{d.total !== 1 ? "s" : ""}</div>
                   </div>
                 );
               })}
