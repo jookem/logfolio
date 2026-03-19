@@ -55,11 +55,11 @@ const fetchExpiryDates = async (ticker) => {
   setChainError(null);
   try {
     const data = await polyFetch(`/v3/reference/options/contracts?underlying_ticker=${ticker}&limit=250&order=asc&sort=expiration_date`);
-    if (data?.error) { setChainError(`Polygon: ${data.error}`); setChainLoading(false); return; }
+    if (data?.error) { setChainError("Too many requests — please try again in a moment."); setChainLoading(false); return; }
     const today = new Date().toISOString().slice(0, 10);
     const dates = [...new Set((data?.results || []).map(c => c.expiration_date))].filter(d => d >= today).sort();
     setExpiryDates(dates);
-  } catch (e) { setChainError(e.message); }
+  } catch { setChainError("Too many requests — please try again in a moment."); }
   setChainLoading(false);
 };
 
@@ -70,11 +70,11 @@ const fetchStrikes = async (ticker, expiry, optionType) => {
   try {
     const contractType = optionType === "call" ? "call" : "put";
     const data = await polyFetch(`/v3/reference/options/contracts?underlying_ticker=${ticker}&expiration_date=${expiry}&contract_type=${contractType}&limit=250&order=asc&sort=strike_price`);
-    if (data?.error) { setChainError(`Polygon: ${data.error}`); return; }
+    if (data?.error) { setChainError("Too many requests — please try again in a moment."); return; }
     const contracts = data?.results || [];
     if (!contracts.length) { setChainError(`No ${optionType} contracts for ${ticker} on ${expiry}.`); return; }
     setStrikes(contracts.map(c => ({ strike: c.strike_price, ticker: c.ticker })));
-  } catch (e) { setChainError(e.message); }
+  } catch { setChainError("Too many requests — please try again in a moment."); }
 };
 
 const fetchPremium = async (contractTicker, legIndex) => {
