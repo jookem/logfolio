@@ -290,6 +290,201 @@ Provide 4-6 patterns. Be brutally honest but constructive.`,
         </div>
       )}
 
+      {insights && (
+        <div style={{ marginBottom: 24 }}>
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: mobile ? "1fr" : "1fr 1fr",
+              gap: 16,
+              marginBottom: 20,
+            }}
+          >
+            <div
+              style={{
+                background: t.surface,
+                border: `1px solid ${t.border}`,
+                borderRadius: 12,
+                padding: "20px 24px",
+                display: "flex",
+                alignItems: "center",
+                gap: 20,
+              }}
+            >
+              <div
+                style={{
+                  width: 72,
+                  height: 72,
+                  borderRadius: "50%",
+                  border: `3px solid ${scoreColor}`,
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  flexShrink: 0,
+                }}
+              >
+                <div
+                  style={{
+                    fontFamily: "'Space Mono',monospace",
+                    fontSize: 22,
+                    fontWeight: 700,
+                    color: scoreColor,
+                    lineHeight: 1,
+                  }}
+                >
+                  {insights.score}
+                </div>
+                <div
+                  style={{
+                    fontSize: 9,
+                    color: t.text3,
+                    textTransform: "uppercase",
+                    letterSpacing: 1,
+                  }}
+                >
+                  score
+                </div>
+              </div>
+              <div>
+                <div
+                  style={{
+                    fontFamily: "'Space Mono',monospace",
+                    fontSize: 18,
+                    fontWeight: 700,
+                    color: scoreColor,
+                    marginBottom: 4,
+                  }}
+                >
+                  {insights.scoreLabel}
+                </div>
+                <div style={{ fontSize: 12, color: t.text3, lineHeight: 1.5 }}>
+                  Overall trader rating based on consistency, discipline and execution
+                </div>
+              </div>
+            </div>
+            <div
+              style={{
+                background: t.surface,
+                border: `1px solid ${t.border}`,
+                borderRadius: 12,
+                padding: "20px 24px",
+              }}
+            >
+              <div
+                style={{
+                  fontFamily: "'Space Mono',monospace",
+                  fontSize: 10,
+                  color: t.text3,
+                  textTransform: "uppercase",
+                  letterSpacing: 2,
+                  marginBottom: 12,
+                }}
+              >
+                Pattern Summary
+              </div>
+              <div style={{ display: "flex", gap: 16 }}>
+                {[
+                  ["warning", t.danger, "⚠ Warnings"],
+                  ["strength", t.accent, "✓ Strengths"],
+                  ["neutral", t.text3, "○ Neutral"],
+                ].map(([type, color, label]) => (
+                  <div key={type} style={{ textAlign: "center" }}>
+                    <div
+                      style={{
+                        fontFamily: "'Space Mono',monospace",
+                        fontSize: 22,
+                        fontWeight: 700,
+                        color,
+                      }}
+                    >
+                      {insights.patterns.filter((p) => p.type === type).length}
+                    </div>
+                    <div style={{ fontSize: 11, color: t.text3 }}>{label}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+            {insights.patterns.map((p, i) => {
+              const color =
+                p.type === "warning"
+                  ? t.danger
+                  : p.type === "strength"
+                  ? t.accent
+                  : t.text3;
+              const icon =
+                p.type === "warning" ? "⚠" : p.type === "strength" ? "✓" : "○";
+              return (
+                <div
+                  key={i}
+                  style={{
+                    background: t.surface,
+                    border: `1px solid ${color}25`,
+                    borderRadius: 12,
+                    overflow: "hidden",
+                  }}
+                >
+                  <div
+                    style={{
+                      padding: "14px 18px",
+                      borderBottom: `1px solid ${color}15`,
+                      display: "flex",
+                      alignItems: "flex-start",
+                      gap: 12,
+                    }}
+                  >
+                    <span style={{ fontSize: 16, marginTop: 1, flexShrink: 0 }}>{icon}</span>
+                    <div style={{ flex: 1 }}>
+                      <div
+                        style={{
+                          fontFamily: "'Space Mono',monospace",
+                          fontSize: 13,
+                          fontWeight: 700,
+                          color,
+                          marginBottom: 5,
+                        }}
+                      >
+                        {p.title}
+                      </div>
+                      <div style={{ fontSize: 13, color: t.text2, lineHeight: 1.6 }}>
+                        {p.detail}
+                      </div>
+                    </div>
+                  </div>
+                  <div
+                    style={{
+                      padding: "11px 18px",
+                      background: color + "08",
+                      display: "flex",
+                      alignItems: "flex-start",
+                      gap: 10,
+                    }}
+                  >
+                    <span
+                      style={{
+                        fontSize: 11,
+                        color,
+                        fontFamily: "'Space Mono',monospace",
+                        flexShrink: 0,
+                        marginTop: 1,
+                      }}
+                    >
+                      ACTION
+                    </span>
+                    <div style={{ fontSize: 13, color: t.text2, lineHeight: 1.5 }}>
+                      {p.action}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
       {/* ── Strategy Leaderboard ───────────────────────────────────────── */}
       <div style={{ background: t.surface, border: `1px solid ${t.border}`, borderRadius: 12, padding: "18px 20px", marginBottom: 16 }}>
         {sectionLabel("Strategy Leaderboard")}
@@ -398,216 +593,11 @@ Provide 4-6 patterns. Be brutally honest but constructive.`,
                   </div>
                 );
               })}
-            <div style={{ fontSize: 11, color: t.text4, marginTop: 4 }}>Sorted by total P&L · bar shows relative performance</div>
+            <div style={{ fontSize: 11, color: t.text3, marginTop: 4 }}>Sorted by total P&L · bar shows relative performance</div>
           </div>
         )}
       </div>
 
-      {insights && (
-        <div>
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: mobile ? "1fr" : "1fr 1fr",
-              gap: 16,
-              marginBottom: 20,
-            }}
-          >
-            <div
-              style={{
-                background: t.surface,
-                border: `1px solid ${t.border}`,
-                borderRadius: 12,
-                padding: "20px 24px",
-                display: "flex",
-                alignItems: "center",
-                gap: 20,
-              }}
-            >
-              <div
-                style={{
-                  width: 72,
-                  height: 72,
-                  borderRadius: "50%",
-                  border: `3px solid ${scoreColor}`,
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  flexShrink: 0,
-                }}
-              >
-                <div
-                  style={{
-                    fontFamily: "'Space Mono',monospace",
-                    fontSize: 22,
-                    fontWeight: 700,
-                    color: scoreColor,
-                    lineHeight: 1,
-                  }}
-                >
-                  {insights.score}
-                </div>
-                <div
-                  style={{
-                    fontSize: 9,
-                    color: t.text3,
-                    textTransform: "uppercase",
-                    letterSpacing: 1,
-                  }}
-                >
-                  score
-                </div>
-              </div>
-              <div>
-                <div
-                  style={{
-                    fontFamily: "'Space Mono',monospace",
-                    fontSize: 18,
-                    fontWeight: 700,
-                    color: scoreColor,
-                    marginBottom: 4,
-                  }}
-                >
-                  {insights.scoreLabel}
-                </div>
-                <div style={{ fontSize: 12, color: t.text3, lineHeight: 1.5 }}>
-                  Overall trader rating based on consistency, discipline and
-                  execution
-                </div>
-              </div>
-            </div>
-            <div
-              style={{
-                background: t.surface,
-                border: `1px solid ${t.border}`,
-                borderRadius: 12,
-                padding: "20px 24px",
-              }}
-            >
-              <div
-                style={{
-                  fontFamily: "'Space Mono',monospace",
-                  fontSize: 10,
-                  color: t.text3,
-                  textTransform: "uppercase",
-                  letterSpacing: 2,
-                  marginBottom: 12,
-                }}
-              >
-                Pattern Summary
-              </div>
-              <div style={{ display: "flex", gap: 16 }}>
-                {[
-                  ["warning", t.danger, "⚠ Warnings"],
-                  ["strength", t.accent, "✓ Strengths"],
-                  ["neutral", t.text3, "○ Neutral"],
-                ].map(([type, color, label]) => (
-                  <div key={type} style={{ textAlign: "center" }}>
-                    <div
-                      style={{
-                        fontFamily: "'Space Mono',monospace",
-                        fontSize: 22,
-                        fontWeight: 700,
-                        color,
-                      }}
-                    >
-                      {insights.patterns.filter((p) => p.type === type).length}
-                    </div>
-                    <div style={{ fontSize: 11, color: t.text3 }}>{label}</div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-            {insights.patterns.map((p, i) => {
-              const color =
-                p.type === "warning"
-                  ? t.danger
-                  : p.type === "strength"
-                  ? t.accent
-                  : t.text3;
-              const icon =
-                p.type === "warning" ? "⚠" : p.type === "strength" ? "✓" : "○";
-              return (
-                <div
-                  key={i}
-                  style={{
-                    background: t.surface,
-                    border: `1px solid ${color}25`,
-                    borderRadius: 12,
-                    overflow: "hidden",
-                  }}
-                >
-                  <div
-                    style={{
-                      padding: "14px 18px",
-                      borderBottom: `1px solid ${color}15`,
-                      display: "flex",
-                      alignItems: "flex-start",
-                      gap: 12,
-                    }}
-                  >
-                    <span style={{ fontSize: 16, marginTop: 1, flexShrink: 0 }}>
-                      {icon}
-                    </span>
-                    <div style={{ flex: 1 }}>
-                      <div
-                        style={{
-                          fontFamily: "'Space Mono',monospace",
-                          fontSize: 13,
-                          fontWeight: 700,
-                          color,
-                          marginBottom: 5,
-                        }}
-                      >
-                        {p.title}
-                      </div>
-                      <div
-                        style={{
-                          fontSize: 13,
-                          color: t.text2,
-                          lineHeight: 1.6,
-                        }}
-                      >
-                        {p.detail}
-                      </div>
-                    </div>
-                  </div>
-                  <div
-                    style={{
-                      padding: "11px 18px",
-                      background: color + "08",
-                      display: "flex",
-                      alignItems: "flex-start",
-                      gap: 10,
-                    }}
-                  >
-                    <span
-                      style={{
-                        fontSize: 11,
-                        color,
-                        fontFamily: "'Space Mono',monospace",
-                        flexShrink: 0,
-                        marginTop: 1,
-                      }}
-                    >
-                      ACTION
-                    </span>
-                    <div
-                      style={{ fontSize: 13, color: t.text2, lineHeight: 1.5 }}
-                    >
-                      {p.action}
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      )}
     </div>
   );
 }
