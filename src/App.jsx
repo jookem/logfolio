@@ -56,6 +56,7 @@ export default function TradingJournal() {
   const [showAdd, setShowAdd] = useState(false);
   const [showCSV, setShowCSV] = useState(false);
   const [editTrade, setEditTrade] = useState(null);
+  const [confirmDelete, setConfirmDelete] = useState(null); // { id, ticker, isPlan }
   const [planPrefill, setPlanPrefill] = useState(null);
   const [selected, setSelected] = useState(null);
   const [filter, setFilter] = useState({
@@ -293,13 +294,17 @@ const [page, setPage] = useState(1);
   const freeTierFull = !isPro && trades.filter(t => t.status !== "planned" && t.date?.startsWith(currentMonth)).length >= 5;
   const freeTierPlanFull = !isPro && trades.filter(t => t.status === "planned" && t.date?.startsWith(currentMonth)).length >= 5;
 
-  const deleteTrade = async (id) => {
-    if (window.confirm("Delete this trade?")) {
-      setTrades((p) => p.filter((tr) => tr.id !== id));
-      if (selected?.id === id) setSelected(null);
-      showToast("Trade deleted", T.danger, "delete");
-      if (user) await supabase.from("trades").delete().eq("id", id).eq("user_id", user.id);
-    }
+  const deleteTrade = (id) => {
+    const trade = trades.find((tr) => tr.id === id);
+    setConfirmDelete({ id, ticker: trade?.ticker || "this entry", isPlan: trade?.status === "planned" });
+  };
+  const confirmDeleteExec = async () => {
+    const { id } = confirmDelete;
+    setConfirmDelete(null);
+    setTrades((p) => p.filter((tr) => tr.id !== id));
+    if (selected?.id === id) setSelected(null);
+    showToast("Deleted", T.danger, "delete");
+    if (user) await supabase.from("trades").delete().eq("id", id).eq("user_id", user.id);
   };
 const importTrades = async (incoming) => {
   const month = new Date().toISOString().slice(0, 7);
@@ -1837,6 +1842,38 @@ style={{ display: "block" }}>
       )}
 
       {/* Tutorial — shown after "Start Fresh" from onboarding */}
+      {confirmDelete && (
+        <div style={{ position: "fixed", inset: 0, zIndex: 300, background: "rgba(0,0,0,0.6)", display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>
+          <div style={{ background: T.card, border: `1px solid ${T.border}`, borderRadius: 16, padding: "28px 28px 24px", maxWidth: 360, width: "100%", textAlign: "center" }}>
+            <div style={{ width: 44, height: 44, borderRadius: "50%", background: T.danger + "15", border: `1px solid ${T.danger}30`, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px" }}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={T.danger} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M3 6H5H21M8 6V4a1 1 0 011-1h6a1 1 0 011 1v2m3 0v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6h14zM10 11v6M14 11v6" />
+              </svg>
+            </div>
+            <div style={{ fontSize: 15, fontWeight: 700, color: T.text, marginBottom: 8 }}>
+              Delete {confirmDelete.isPlan ? "plan" : "trade"}?
+            </div>
+            <div style={{ fontSize: 13, color: T.text3, marginBottom: 24 }}>
+              <span style={{ fontFamily: "'Space Mono',monospace", color: T.text2 }}>{confirmDelete.ticker}</span> will be permanently removed.
+            </div>
+            <div style={{ display: "flex", gap: 10 }}>
+              <button
+                onClick={() => setConfirmDelete(null)}
+                style={{ flex: 1, background: T.card2, border: `1px solid ${T.border}`, borderRadius: 10, padding: "10px 0", color: T.text2, fontSize: 13, cursor: "pointer", fontFamily: "inherit" }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmDeleteExec}
+                style={{ flex: 1, background: T.danger, border: "none", borderRadius: 10, padding: "10px 0", color: "#fff", fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "inherit" }}
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {showTutorial && (
         <TutorialModal
           step={tutorialStep}
