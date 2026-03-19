@@ -1361,14 +1361,15 @@ style={{ display: "block" }}>
                         <div>
                           <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 5 }}>
                             <span style={{ fontSize: 13, color: T.text, fontWeight: 600 }}>{s.name}</span>
-                            <span style={{ fontSize: 11, color: T.text3 }}>{s.total} trade{s.total !== 1 ? "s" : ""} · {winPct}% win</span>
+                            <span style={{ fontSize: 11, color: T.text3 }}>{s.total} trade{s.total !== 1 ? "s" : ""}</span>
                           </div>
                           <div style={{ height: 5, borderRadius: 3, background: T.border, overflow: "hidden" }}>
                             <div style={{ height: "100%", width: `${winPct}%`, borderRadius: 3, background: winPct >= 50 ? T.accent : T.danger, transition: "width 0.4s ease" }} />
                           </div>
                         </div>
-                        <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 12, fontWeight: 700, color: plColor, minWidth: 64, textAlign: "right" }}>
-                          {s.pl >= 0 ? "+" : ""}{fmt(s.pl)}
+                        <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 2, minWidth: 72 }}>
+                          <span style={{ fontFamily: "'Space Mono',monospace", fontSize: 10, color: winPct >= 50 ? T.accent : T.danger, fontWeight: 700 }}>{winPct}%WR</span>
+                          <span style={{ fontFamily: "'Space Mono',monospace", fontSize: 12, fontWeight: 700, color: plColor }}>{s.pl >= 0 ? "+" : ""}{fmt(s.pl)}</span>
                         </div>
                       </div>
                     );
@@ -1448,34 +1449,8 @@ style={{ display: "block" }}>
               </div>
             </div>
 
-            {/* Strategy + Tag/Emotion */}
+            {/* Tag + Emotion */}
             <div style={{ display: "grid", gridTemplateColumns: mobile ? "1fr" : "1fr 1fr", gap: 16 }}>
-              <div style={{ background: T.surface, border: `1px solid ${T.border}`, borderRadius: 12, padding: "16px 18px" }}>
-                <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 10, color: T.text3, textTransform: "uppercase", letterSpacing: 2, marginBottom: 16 }}>
-                  Strategy Performance
-                </div>
-                {(() => {
-                  const maxStratPL = Math.max(...stratStats.map(s => Math.abs(s.pl)), 1);
-                  return stratStats.map((s) => (
-                    <div key={s.strategy} style={{ marginBottom: 14 }}>
-                      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 3 }}>
-                        <span style={{ fontSize: 13, color: T.text2 }}>{s.strategy}</span>
-                        <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
-                          {s.avgHold != null && (
-                            <span style={{ fontSize: 10, color: T.text3, fontFamily: "monospace" }}>
-                              {s.avgHold < 60 ? `${s.avgHold}m` : `${Math.floor(s.avgHold/60)}h${s.avgHold%60}m`}
-                            </span>
-                          )}
-                          <span style={{ fontSize: 10, color: T.text3, fontFamily: "monospace" }}>{(s.winRate * 100).toFixed(0)}%WR</span>
-                          <span style={{ fontFamily: "'Space Mono',monospace", fontSize: 12, color: s.pl >= 0 ? T.accent : T.danger }}>{s.pl >= 0 ? "+" : ""}{fmt(s.pl)}</span>
-                        </div>
-                      </div>
-                      <MiniBar value={s.pl} max={maxStratPL} t={T} />
-                    </div>
-                  ));
-                })()}
-              </div>
-
               <div style={{ background: T.surface, border: `1px solid ${T.border}`, borderRadius: 12, padding: "16px 18px" }}>
                 <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 10, color: T.text3, textTransform: "uppercase", letterSpacing: 2, marginBottom: 16 }}>
                   Tag Performance
