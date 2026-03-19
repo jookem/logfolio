@@ -76,33 +76,33 @@ const TUTORIAL_STEPS = [
 const TRADE_WALKTHROUGH = [
   {
     icon: "🏷️",
-    title: "Ticker & Type",
-    desc: "Enter the ticker symbol (e.g. AAPL, SPY) and choose the trade type — Stock, Options, Forex, or Crypto. The form adjusts to match.",
+    title: "Ticker, Type & Strategy",
+    desc: "Enter the ticker (e.g. AAPL), the Date, the Type (Stock, Options, Forex, Crypto), and the Strategy (Breakout, Pullback, etc.). The form adapts based on Type.",
   },
   {
     icon: "↕️",
-    title: "Direction & Prices",
-    desc: "Select Long (buying) or Short (selling). Then enter your entry price (where you opened) and exit price (where you closed).",
+    title: "Direction & Shares",
+    desc: "Choose Long or Short, then enter the number of Shares (or contracts for options). This number is multiplied by your price difference to calculate P&L.",
   },
   {
-    icon: "🔢",
-    title: "Size",
-    desc: "Enter the number of shares (or contracts for options). Logfolio uses this along with your prices to calculate your total P&L automatically.",
+    icon: "💲",
+    title: "Entry $ & Exit $",
+    desc: "Enter the Entry $ — the price you opened the trade at — and the Exit $ — the price you closed at. Logfolio calculates your P&L from these automatically.",
   },
   {
     icon: "🛡️",
-    title: "Risk Management",
-    desc: "Add your stop loss and take profit levels. Logfolio calculates your R-value — how many times your risk you made or lost. Aim for trades above +1R.",
+    title: "Stop Loss $ & Take Profit $",
+    desc: "Add your Stop Loss $ and Take Profit $ to calculate your R-value — how much you made or lost relative to your planned risk. Also log your Entry Time and Exit Time to unlock the Best Time to Trade chart.",
   },
   {
     icon: "🧠",
-    title: "Psychology",
-    desc: "Honestly record your emotion at the time (Calm, FOMO, Anxious…) and any mistakes made. This is what powers the AI pattern analysis — don't skip it.",
+    title: "Mindset",
+    desc: "Select your Emotion at the time of the trade (Calm, FOMO, Anxious…) and flag any Mistakes made. This section is what powers AI pattern analysis — be honest here.",
   },
   {
     icon: "📝",
-    title: "Notes & Tags",
-    desc: "Write what happened and why you took the trade. Add tags for easy filtering later. When you're done — hit Save Trade.",
+    title: "Notes",
+    desc: "Add Tags for filtering, attach Chart Screenshots, record a Voice Note, and write your trade Notes. When you're done, hit Save Trade.",
   },
 ];
 
@@ -110,27 +110,32 @@ const PLAN_WALKTHROUGH = [
   {
     icon: "🎯",
     title: "Strategy Type",
-    desc: "Choose the type of position you're planning — Stock, Forex, Crypto, or an Options strategy like Bull Call Spread or Iron Condor. The form adapts to match.",
+    desc: "Choose a Stock strategy (Breakout, Pullback…) or an Options strategy (Iron Condor, Bull Call Spread…). The form sections below update to match your selection.",
   },
   {
     icon: "🏷️",
-    title: "Ticker & Thesis",
-    desc: "Enter the ticker and write your trade thesis — the reason you're considering this trade. Articulating your reasoning forces discipline before you enter.",
+    title: "Stock Details / Option",
+    desc: "Enter the Ticker and direction. For options, each leg shows Strike, Expiry, Entry Premium, Contracts, and IV. You can look up the live options chain directly from this section.",
   },
   {
-    icon: "📐",
-    title: "Entry, Stop & Target",
-    desc: "Set your exact entry price, stop loss, and take profit target before you enter. Locking these in advance is the whole point — no moving the goalposts once you're in.",
-  },
-  {
-    icon: "📊",
-    title: "Options Chain",
-    desc: "For options strategies, use the live chain lookup to browse real strikes and premiums. Enter your legs directly from the chain to pre-fill the form.",
+    icon: "🛡️",
+    title: "Risk Plan",
+    desc: "Set your Stop Loss $, Take Profit $, and Entry Target. Logfolio shows you your risk/reward ratio in real time so you can confirm the trade is worth taking before you enter.",
   },
   {
     icon: "✅",
-    title: "Save & Execute Later",
-    desc: "Save your plan. It appears in the Plans tab. When you're ready to enter, open it and hit Execute — it converts instantly to a logged trade with no re-entry.",
+    title: "Pre-Trade Checklist",
+    desc: "Run through the Pre-Trade Checklist — a set of conditions to confirm before entering. Check off each item to make sure you're not entering on impulse.",
+  },
+  {
+    icon: "🧠",
+    title: "Mindset",
+    desc: "Record your Emotion going into the trade. Setting this before you enter (not after) gives the most honest data for pattern analysis.",
+  },
+  {
+    icon: "📝",
+    title: "Notes",
+    desc: "Write your trade thesis — why you're taking this trade. Add Tags, Chart Screenshots, and a Voice Note. When you're ready, hit Save Plan.",
   },
 ];
 
