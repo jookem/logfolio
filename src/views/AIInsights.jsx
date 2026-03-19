@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useMemo } from "react";
 import { fmt } from "../lib/utils";
 
 export default function AIInsights({ plList, t, mobile }) {
@@ -107,10 +107,6 @@ Provide 4-6 patterns. Be brutally honest but constructive.`,
     setLoading(false);
   };
 
-  useEffect(() => {
-    analysePatterns();
-  }, []);
-
   const scoreColor = insights
     ? insights.score >= 70
       ? t.accent
@@ -170,6 +166,98 @@ Provide 4-6 patterns. Be brutally honest but constructive.`,
 
   return (
     <div>
+      {/* ── AI Pattern Detector ────────────────────────────────────────── */}
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          marginBottom: 20,
+          flexWrap: "wrap",
+          gap: 10,
+        }}
+      >
+        <div>
+          <div
+            style={{
+              fontFamily: "'Space Mono',monospace",
+              fontSize: 11,
+              color: t.text3,
+              textTransform: "uppercase",
+              letterSpacing: 2,
+              marginBottom: 4,
+            }}
+          >
+            AI Pattern Detector
+          </div>
+          <div style={{ fontSize: 13, color: t.text3 }}>
+            Powered by Claude · Based on {plList.length} trades
+          </div>
+        </div>
+        <button
+          onClick={analysePatterns}
+          disabled={loading}
+          style={{
+            background: t.accent,
+            border: "none",
+            color: "#000",
+            borderRadius: 8,
+            padding: "8px 16px",
+            cursor: loading ? "not-allowed" : "pointer",
+            fontSize: 12,
+            fontWeight: 700,
+            fontFamily: "'Space Mono',monospace",
+            opacity: loading ? 0.6 : 1,
+          }}
+        >
+          {loading ? "Analysing..." : "↻ Re-analyse"}
+        </button>
+      </div>
+
+      {loading && (
+        <div
+          style={{
+            background: t.surface,
+            border: `1px solid ${t.border}`,
+            borderRadius: 12,
+            padding: 48,
+            textAlign: "center",
+            marginBottom: 24,
+          }}
+        >
+          <div
+            style={{
+              fontFamily: "'Space Mono',monospace",
+              fontSize: 13,
+              color: t.accent,
+              marginBottom: 8,
+            }}
+          >
+            Analysing your trading patterns...
+          </div>
+          <div style={{ fontSize: 12, color: t.text3 }}>
+            Claude is reviewing your trade history
+          </div>
+        </div>
+      )}
+
+      {error && (
+        <div
+          style={{
+            background: t.danger + "10",
+            border: `1px solid ${t.danger}30`,
+            borderRadius: 12,
+            padding: 20,
+            color: t.danger,
+            fontSize: 13,
+            fontFamily: "'Space Mono',monospace",
+            marginBottom: 24,
+          }}
+        >
+          ⚠ {error}
+        </div>
+      )}
+
       {/* ── Strategy Leaderboard ───────────────────────────────────────── */}
       <div style={{ background: t.surface, border: `1px solid ${t.border}`, borderRadius: 12, padding: "18px 20px", marginBottom: 16 }}>
         {sectionLabel("Strategy Leaderboard")}
@@ -261,9 +349,9 @@ Provide 4-6 patterns. Be brutally honest but constructive.`,
                 const label = h === 0 ? "12:00" : `${h}:00`;
                 return (
                   <div key={h} style={{ background: base + Math.round(alpha * 255).toString(16).padStart(2,"0"), border: `1px solid ${base}50`, borderRadius: 8, padding: "8px 10px", textAlign: "center", minWidth: 52 }}>
-                    <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 10, color: "rgba(255,255,255,0.7)", marginBottom: 4 }}>{label}</div>
-                    <div style={{ fontSize: 13, fontWeight: 700, color: "#fff", fontFamily: "'Space Mono',monospace" }}>{winPct}%</div>
-                    <div style={{ fontSize: 10, color: "rgba(255,255,255,0.6)", marginTop: 2 }}>{d.total} trade{d.total !== 1 ? "s" : ""}</div>
+                    <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 10, color: t.text2, marginBottom: 4 }}>{label}</div>
+                    <div style={{ fontSize: 13, fontWeight: 700, color: t.text, fontFamily: "'Space Mono',monospace" }}>{winPct}%</div>
+                    <div style={{ fontSize: 10, color: t.text2, marginTop: 2 }}>{d.total} trade{d.total !== 1 ? "s" : ""}</div>
                   </div>
                 );
               })}
@@ -272,96 +360,6 @@ Provide 4-6 patterns. Be brutally honest but constructive.`,
           </>
         )}
       </div>
-
-      {/* ── AI Pattern Detector ────────────────────────────────────────── */}
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          marginBottom: 20,
-          flexWrap: "wrap",
-          gap: 10,
-        }}
-      >
-        <div>
-          <div
-            style={{
-              fontFamily: "'Space Mono',monospace",
-              fontSize: 11,
-              color: t.text3,
-              textTransform: "uppercase",
-              letterSpacing: 2,
-              marginBottom: 4,
-            }}
-          >
-            AI Pattern Detector
-          </div>
-          <div style={{ fontSize: 13, color: t.text3 }}>
-            Powered by Claude · Based on {plList.length} trades
-          </div>
-        </div>
-        <button
-          onClick={analysePatterns}
-          disabled={loading}
-          style={{
-            background: t.accent,
-            border: "none",
-            color: "#000",
-            borderRadius: 8,
-            padding: "8px 16px",
-            cursor: loading ? "not-allowed" : "pointer",
-            fontSize: 12,
-            fontWeight: 700,
-            fontFamily: "'Space Mono',monospace",
-            opacity: loading ? 0.6 : 1,
-          }}
-        >
-          {loading ? "Analysing..." : "↻ Re-analyse"}
-        </button>
-      </div>
-
-      {loading && (
-        <div
-          style={{
-            background: t.surface,
-            border: `1px solid ${t.border}`,
-            borderRadius: 12,
-            padding: 48,
-            textAlign: "center",
-          }}
-        >
-          <div
-            style={{
-              fontFamily: "'Space Mono',monospace",
-              fontSize: 13,
-              color: t.accent,
-              marginBottom: 8,
-            }}
-          >
-            Analysing your trading patterns...
-          </div>
-          <div style={{ fontSize: 12, color: t.text3 }}>
-            Claude is reviewing your trade history
-          </div>
-        </div>
-      )}
-
-      {error && (
-        <div
-          style={{
-            background: t.danger + "10",
-            border: `1px solid ${t.danger}30`,
-            borderRadius: 12,
-            padding: 20,
-            color: t.danger,
-            fontSize: 13,
-            fontFamily: "'Space Mono',monospace",
-          }}
-        >
-          ⚠ {error}
-        </div>
-      )}
 
       {insights && (
         <div>
