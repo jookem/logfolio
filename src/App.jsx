@@ -1461,8 +1461,9 @@ style={{ display: "block" }}>
               </div>
             </div>
 
-            {/* Tag Performance */}
-            <div style={{ background: T.surface, border: `1px solid ${T.border}`, borderRadius: 12, padding: "16px 18px", marginBottom: 16 }}>
+            {/* Tag Performance + Emotion Impact */}
+            <div style={{ display: "grid", gridTemplateColumns: mobile ? "1fr" : "1fr 1fr", gap: 16, marginBottom: 16 }}>
+            <div style={{ background: T.surface, border: `1px solid ${T.border}`, borderRadius: 12, padding: "16px 18px" }}>
               <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 10, color: T.text3, textTransform: "uppercase", letterSpacing: 2, marginBottom: 16 }}>
                 Tag Performance
               </div>
@@ -1490,7 +1491,7 @@ style={{ display: "block" }}>
             </div>
 
             {/* Emotion Impact */}
-            <div style={{ background: T.surface, border: `1px solid ${T.border}`, borderRadius: 12, padding: "16px 18px", marginBottom: 16 }}>
+            <div style={{ background: T.surface, border: `1px solid ${T.border}`, borderRadius: 12, padding: "16px 18px" }}>
               <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 10, color: T.text3, textTransform: "uppercase", letterSpacing: 2, marginBottom: 16 }}>
                 Emotion Impact
               </div>
@@ -1517,6 +1518,7 @@ style={{ display: "block" }}>
                   );
                 })
               )}
+            </div>
             </div>
           </div>
           </ErrorBoundary>
