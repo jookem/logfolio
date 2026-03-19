@@ -9,6 +9,8 @@ create table if not exists public.profiles (
   subscription_status text default 'free',
   ai_analyses_used int default 0,
   ai_analyses_reset_at timestamptz default date_trunc('month', now()),
+  ai_insights jsonb,
+  ai_insights_at timestamptz,
   created_at timestamptz default now()
 );
 
@@ -52,6 +54,10 @@ drop trigger if exists on_auth_user_created on auth.users;
 create trigger on_auth_user_created
   after insert on auth.users
   for each row execute procedure public.handle_new_user();
+
+-- Add these columns if upgrading an existing database:
+-- alter table public.profiles add column if not exists ai_insights jsonb;
+-- alter table public.profiles add column if not exists ai_insights_at timestamptz;
 
 -- Reset AI analysis counter monthly (run as a cron job in Supabase or pg_cron)
 -- update public.profiles

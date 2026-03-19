@@ -1,10 +1,29 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { fmt } from "../lib/utils";
+import { supabase } from "../lib/supabase";
+import { useAuth } from "../contexts/AuthContext";
 
 export default function AIInsights({ plList, t, mobile }) {
+  const { user } = useAuth();
   const [insights, setInsights] = useState(null);
+  const [insightsAt, setInsightsAt] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+
+  useEffect(() => {
+    if (!user) return;
+    supabase
+      .from("profiles")
+      .select("ai_insights, ai_insights_at")
+      .eq("id", user.id)
+      .single()
+      .then(({ data }) => {
+        if (data?.ai_insights) {
+          setInsights(data.ai_insights);
+          setInsightsAt(data.ai_insights_at);
+        }
+      });
+  }, [user]);
 
   const analysePatterns = async () => {
     if (plList.length < 3) {
@@ -100,7 +119,15 @@ Provide 4-6 patterns. Be brutally honest but constructive.`,
         .join("");
       const clean = text.replace(/```json|```/g, "").trim();
       const parsed = JSON.parse(clean);
+      const now = new Date().toISOString();
       setInsights(parsed);
+      setInsightsAt(now);
+      if (user) {
+        await supabase
+          .from("profiles")
+          .update({ ai_insights: parsed, ai_insights_at: now })
+          .eq("id", user.id);
+      }
     } catch (e) {
       setError("Could not generate insights. Please try again. " + e.message);
     }
@@ -193,6 +220,11 @@ Provide 4-6 patterns. Be brutally honest but constructive.`,
           <div style={{ fontSize: 13, color: t.text3 }}>
             Powered by Claude · Based on {plList.length} trades
           </div>
+          {insightsAt && (
+            <div style={{ fontSize: 11, color: t.text3, marginTop: 3 }}>
+              Last analysed {new Date(insightsAt).toLocaleDateString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}
+            </div>
+          )}
         </div>
         <button
           onClick={analysePatterns}
