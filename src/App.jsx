@@ -495,6 +495,49 @@ const paginated = filtered
   .sort((a, b) => new Date(b.date) - new Date(a.date))
   .slice((page - 1) * perPage, page * perPage);
   const maxPL = Math.max(...plList.map((t) => Math.abs(t.pl)), 1);
+
+  // ── Time performance (analytics tab) ────────────────────────────────────
+  const DAYS_ORDER = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+  const stratLeaderboard = useMemo(() => {
+    const map = {};
+    plList.forEach(tr => {
+      const s = tr.strategy || "Unknown";
+      if (!map[s]) map[s] = { wins: 0, total: 0, pl: 0 };
+      map[s].total++; map[s].pl += tr.pl;
+      if (tr.pl > 0) map[s].wins++;
+    });
+    return Object.entries(map)
+      .map(([name, d]) => ({ name, ...d, winRate: d.total ? d.wins / d.total : 0 }))
+      .sort((a, b) => b.pl - a.pl);
+  }, [plList]);
+  const dowBreakdown = useMemo(() => {
+    const map = {};
+    DAYS_ORDER.forEach(d => { map[d] = { wins: 0, total: 0, pl: 0 }; });
+    plList.forEach(tr => {
+      const d = new Date(tr.date + "T12:00:00").toLocaleDateString("en-US", { weekday: "short" });
+      if (map[d]) { map[d].total++; map[d].pl += tr.pl; if (tr.pl > 0) map[d].wins++; }
+    });
+    return DAYS_ORDER.map(day => ({ day, ...map[day] })).filter(d => d.total > 0);
+  }, [plList]);
+  const hourHeatmap = useMemo(() => {
+    const map = {};
+    plList.forEach(tr => {
+      if (!tr.entryTime) return;
+      const h = parseInt(tr.entryTime.split(":")[0], 10);
+      if (isNaN(h)) return;
+      if (!map[h]) map[h] = { wins: 0, total: 0, pl: 0 };
+      map[h].total++; map[h].pl += tr.pl;
+      if (tr.pl > 0) map[h].wins++;
+    });
+    return map;
+  }, [plList]);
+  const activeHours = Object.keys(hourHeatmap).map(Number).sort((a, b) => hourHeatmap[b].pl - hourHeatmap[a].pl);
+  const maxTimeAbsPL = Math.max(
+    ...dowBreakdown.map(d => Math.abs(d.pl)),
+    ...activeHours.map(h => Math.abs(hourHeatmap[h].pl)),
+    1
+  );
+
   const nav = [
     ["today", "Today"],
     ["weekly", "Weekly"],
@@ -1297,6 +1340,112 @@ style={{ display: "block" }}>
                 Equity Curve
               </div>
               <EquityCurve trades={plList} t={T} spyData={spyData} spyError={spyError} />
+            </div>
+
+            {/* Strategy Leaderboard */}
+            <div style={{ background: T.surface, border: `1px solid ${T.border}`, borderRadius: 12, padding: "16px 18px", marginBottom: 16 }}>
+              <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 10, color: T.text3, textTransform: "uppercase", letterSpacing: 2, marginBottom: 16 }}>Strategy Leaderboard</div>
+              {stratLeaderboard.length === 0 ? (
+                <div style={{ fontSize: 13, color: T.text3, fontStyle: "italic" }}>Log trades with strategies to see rankings.</div>
+              ) : (
+                <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                  {stratLeaderboard.map((s, i) => {
+                    const winPct = Math.round(s.winRate * 100);
+                    const plColor = s.pl >= 0 ? T.accent : T.danger;
+                    const rankColors = ["#f59e0b", T.text3, "#cd7f32"];
+                    return (
+                      <div key={s.name} style={{ display: "grid", gridTemplateColumns: "24px 1fr auto", gap: 12, alignItems: "center" }}>
+                        <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 11, color: i < 3 ? rankColors[i] : T.text4, fontWeight: 700, textAlign: "center" }}>
+                          {i < 3 ? ["🥇","🥈","🥉"][i] : `#${i+1}`}
+                        </div>
+                        <div>
+                          <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 5 }}>
+                            <span style={{ fontSize: 13, color: T.text, fontWeight: 600 }}>{s.name}</span>
+                            <span style={{ fontSize: 11, color: T.text3 }}>{s.total} trade{s.total !== 1 ? "s" : ""} · {winPct}% win</span>
+                          </div>
+                          <div style={{ height: 5, borderRadius: 3, background: T.border, overflow: "hidden" }}>
+                            <div style={{ height: "100%", width: `${winPct}%`, borderRadius: 3, background: winPct >= 50 ? T.accent : T.danger, transition: "width 0.4s ease" }} />
+                          </div>
+                        </div>
+                        <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 12, fontWeight: 700, color: plColor, minWidth: 64, textAlign: "right" }}>
+                          {s.pl >= 0 ? "+" : ""}{fmt(s.pl)}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+            {/* Day of Week + Best Time to Trade — matching row format */}
+            <div style={{ display: "grid", gridTemplateColumns: mobile ? "1fr" : "1fr 1fr", gap: 16, marginBottom: 16 }}>
+              {/* Day of Week */}
+              <div style={{ background: T.surface, border: `1px solid ${T.border}`, borderRadius: 12, padding: "16px 18px" }}>
+                <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 10, color: T.text3, textTransform: "uppercase", letterSpacing: 2, marginBottom: 16 }}>Day of Week</div>
+                {dowBreakdown.length === 0 ? (
+                  <div style={{ fontSize: 13, color: T.text3 }}>No trade data yet.</div>
+                ) : (
+                  <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                    {[...dowBreakdown].sort((a, b) => b.pl - a.pl).map(({ day, total, wins, pl }) => {
+                      const winPct = Math.round((wins / total) * 100);
+                      const avgPL = pl / total;
+                      const color = pl >= 0 ? T.accent : T.danger;
+                      const barWidth = Math.round((Math.abs(pl) / maxTimeAbsPL) * 100);
+                      return (
+                        <div key={day}>
+                          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 5 }}>
+                            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                              <span style={{ fontFamily: "'Space Mono',monospace", fontSize: 12, color: T.text, fontWeight: 700, minWidth: 34 }}>{day}</span>
+                              <span style={{ fontSize: 12, color, fontFamily: "'Space Mono',monospace", fontWeight: 700 }}>{winPct}%</span>
+                              <span style={{ fontSize: 11, color: T.text3 }}>{total} trade{total !== 1 ? "s" : ""}</span>
+                            </div>
+                            <span style={{ fontFamily: "'Space Mono',monospace", fontSize: 12, fontWeight: 700, color }}>{avgPL >= 0 ? "+" : ""}{fmt(avgPL)} avg</span>
+                          </div>
+                          <div style={{ height: 6, borderRadius: 3, background: T.border2, overflow: "hidden" }}>
+                            <div style={{ height: "100%", width: `${barWidth}%`, borderRadius: 3, background: color, transition: "width 0.4s ease" }} />
+                          </div>
+                        </div>
+                      );
+                    })}
+                    <div style={{ fontSize: 11, color: T.text3, marginTop: 4 }}>Sorted by total P&L · bar shows relative performance</div>
+                  </div>
+                )}
+              </div>
+
+              {/* Best Time to Trade */}
+              <div style={{ background: T.surface, border: `1px solid ${T.border}`, borderRadius: 12, padding: "16px 18px" }}>
+                <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 10, color: T.text3, textTransform: "uppercase", letterSpacing: 2, marginBottom: 16 }}>Best Time to Trade</div>
+                {activeHours.length === 0 ? (
+                  <div style={{ fontSize: 13, color: T.text3 }}>Add entry times when logging trades to unlock hourly performance data.</div>
+                ) : (
+                  <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                    {activeHours.map(h => {
+                      const d = hourHeatmap[h];
+                      const color = d.pl >= 0 ? T.accent : T.danger;
+                      const winPct = Math.round((d.wins / d.total) * 100);
+                      const barWidth = Math.round((Math.abs(d.pl) / maxTimeAbsPL) * 100);
+                      const label = h < 10 ? `0${h}:00` : `${h}:00`;
+                      const avgPL = d.pl / d.total;
+                      return (
+                        <div key={h}>
+                          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 5 }}>
+                            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                              <span style={{ fontFamily: "'Space Mono',monospace", fontSize: 12, color: T.text, fontWeight: 700, minWidth: 44 }}>{label}</span>
+                              <span style={{ fontSize: 12, color, fontFamily: "'Space Mono',monospace", fontWeight: 700 }}>{winPct}%</span>
+                              <span style={{ fontSize: 11, color: T.text3 }}>{d.total} trade{d.total !== 1 ? "s" : ""}</span>
+                            </div>
+                            <span style={{ fontFamily: "'Space Mono',monospace", fontSize: 12, fontWeight: 700, color }}>{avgPL >= 0 ? "+" : ""}{fmt(avgPL)} avg</span>
+                          </div>
+                          <div style={{ height: 6, borderRadius: 3, background: T.border2, overflow: "hidden" }}>
+                            <div style={{ height: "100%", width: `${barWidth}%`, borderRadius: 3, background: color, transition: "width 0.4s ease" }} />
+                          </div>
+                        </div>
+                      );
+                    })}
+                    <div style={{ fontSize: 11, color: T.text3, marginTop: 4 }}>Sorted by total P&L · bar shows relative performance</div>
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* Strategy + Tag/Emotion */}
