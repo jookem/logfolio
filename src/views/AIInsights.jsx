@@ -369,31 +369,37 @@ Provide 4-6 patterns. Be brutally honest but constructive.`,
             Add entry times when logging trades to unlock hourly performance data.
           </div>
         ) : (
-          <>
-            <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-              {activeHours.map(h => {
+          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+            {activeHours
+              .sort((a, b) => hourHeatmap[b].pl - hourHeatmap[a].pl)
+              .map(h => {
                 const d = hourHeatmap[h];
-                const intensity = Math.min(1, Math.abs(d.pl) / maxHourAbsPL);
                 const isGood = d.pl >= 0;
-                const base = isGood ? t.accent : t.danger;
-                const alpha = Math.round(0.15 + intensity * 0.7, 2);
+                const color = isGood ? t.accent : t.danger;
                 const winPct = Math.round((d.wins / d.total) * 100);
-                const label = h === 0 ? "12:00" : `${h}:00`;
-                // Green is a bright color — dark text is always readable on it.
-                // Red is a dark color — white text always works.
-                const textColor = isGood ? "rgba(0,0,0,0.85)" : "#fff";
-                const subColor = isGood ? "rgba(0,0,0,0.55)" : "rgba(255,255,255,0.7)";
+                const barWidth = Math.round((Math.abs(d.pl) / maxHourAbsPL) * 100);
+                const label = h === 0 ? "12:00" : h < 10 ? `0${h}:00` : `${h}:00`;
+                const avgPL = d.pl / d.total;
                 return (
-                  <div key={h} style={{ background: base + Math.round(alpha * 255).toString(16).padStart(2,"0"), border: `1px solid ${base}50`, borderRadius: 8, padding: "8px 10px", textAlign: "center", minWidth: 52 }}>
-                    <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 10, color: subColor, marginBottom: 4 }}>{label}</div>
-                    <div style={{ fontSize: 13, fontWeight: 700, color: textColor, fontFamily: "'Space Mono',monospace" }}>{winPct}%</div>
-                    <div style={{ fontSize: 10, color: subColor, marginTop: 2 }}>{d.total} trade{d.total !== 1 ? "s" : ""}</div>
+                  <div key={h}>
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 6 }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                        <span style={{ fontFamily: "'Space Mono',monospace", fontSize: 12, color: t.text, fontWeight: 700, minWidth: 44 }}>{label}</span>
+                        <span style={{ fontSize: 12, color: color, fontFamily: "'Space Mono',monospace", fontWeight: 700 }}>{winPct}%</span>
+                        <span style={{ fontSize: 11, color: t.text3 }}>{d.total} trade{d.total !== 1 ? "s" : ""}</span>
+                      </div>
+                      <span style={{ fontFamily: "'Space Mono',monospace", fontSize: 12, fontWeight: 700, color }}>
+                        {avgPL >= 0 ? "+" : ""}{fmt(avgPL)} avg
+                      </span>
+                    </div>
+                    <div style={{ height: 6, borderRadius: 3, background: t.border2, overflow: "hidden" }}>
+                      <div style={{ height: "100%", width: `${barWidth}%`, borderRadius: 3, background: color, transition: "width 0.4s ease" }} />
+                    </div>
                   </div>
                 );
               })}
-            </div>
-            <div style={{ fontSize: 11, color: t.text4, marginTop: 10 }}>Win rate by entry hour</div>
-          </>
+            <div style={{ fontSize: 11, color: t.text4, marginTop: 4 }}>Sorted by total P&L · bar shows relative performance</div>
+          </div>
         )}
       </div>
 
