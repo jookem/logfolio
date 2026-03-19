@@ -1,3 +1,5 @@
+import { useState } from "react";
+
 const TUTORIAL_STEPS = [
   {
     icon: "👋",
@@ -71,10 +73,86 @@ const TUTORIAL_STEPS = [
   },
 ];
 
+const TRADE_WALKTHROUGH = [
+  {
+    icon: "🏷️",
+    title: "Ticker & Type",
+    desc: "Enter the ticker symbol (e.g. AAPL, SPY) and choose the trade type — Stock, Options, Forex, or Crypto. The form adjusts to match.",
+  },
+  {
+    icon: "↕️",
+    title: "Direction & Prices",
+    desc: "Select Long (buying) or Short (selling). Then enter your entry price (where you opened) and exit price (where you closed).",
+  },
+  {
+    icon: "🔢",
+    title: "Size",
+    desc: "Enter the number of shares (or contracts for options). Logfolio uses this along with your prices to calculate your total P&L automatically.",
+  },
+  {
+    icon: "🛡️",
+    title: "Risk Management",
+    desc: "Add your stop loss and take profit levels. Logfolio calculates your R-value — how many times your risk you made or lost. Aim for trades above +1R.",
+  },
+  {
+    icon: "🧠",
+    title: "Psychology",
+    desc: "Honestly record your emotion at the time (Calm, FOMO, Anxious…) and any mistakes made. This is what powers the AI pattern analysis — don't skip it.",
+  },
+  {
+    icon: "📝",
+    title: "Notes & Tags",
+    desc: "Write what happened and why you took the trade. Add tags for easy filtering later. When you're done — hit Save Trade.",
+  },
+];
+
+const PLAN_WALKTHROUGH = [
+  {
+    icon: "🎯",
+    title: "Strategy Type",
+    desc: "Choose the type of position you're planning — Stock, Forex, Crypto, or an Options strategy like Bull Call Spread or Iron Condor. The form adapts to match.",
+  },
+  {
+    icon: "🏷️",
+    title: "Ticker & Thesis",
+    desc: "Enter the ticker and write your trade thesis — the reason you're considering this trade. Articulating your reasoning forces discipline before you enter.",
+  },
+  {
+    icon: "📐",
+    title: "Entry, Stop & Target",
+    desc: "Set your exact entry price, stop loss, and take profit target before you enter. Locking these in advance is the whole point — no moving the goalposts once you're in.",
+  },
+  {
+    icon: "📊",
+    title: "Options Chain",
+    desc: "For options strategies, use the live chain lookup to browse real strikes and premiums. Enter your legs directly from the chain to pre-fill the form.",
+  },
+  {
+    icon: "✅",
+    title: "Save & Execute Later",
+    desc: "Save your plan. It appears in the Plans tab. When you're ready to enter, open it and hit Execute — it converts instantly to a logged trade with no re-entry.",
+  },
+];
+
 export default function TutorialModal({ step, onNext, onPrev, onClose, onOpenLog, onOpenPlan, onSetTab, t }) {
+  const [subMode, setSubMode] = useState(null); // null | "log" | "plan"
+  const [subStep, setSubStep] = useState(0);
+
   const s = TUTORIAL_STEPS[step];
   const total = TUTORIAL_STEPS.length;
   const isLast = step === total - 1;
+
+  const handleCTA = (action) => {
+    if (action === "openLog") {
+      onOpenLog();
+      setSubStep(0);
+      setSubMode("log");
+    } else {
+      onOpenPlan();
+      setSubStep(0);
+      setSubMode("plan");
+    }
+  };
 
   const handleNext = () => {
     if (isLast) { onClose(); return; }
@@ -88,6 +166,53 @@ export default function TutorialModal({ step, onNext, onPrev, onClose, onOpenLog
     onPrev();
   };
 
+  // ── Sub-walkthrough mode ──────────────────────────────────────────────────
+  if (subMode) {
+    const steps = subMode === "log" ? TRADE_WALKTHROUGH : PLAN_WALKTHROUGH;
+    const sub = steps[subStep];
+    const isSubLast = subStep === steps.length - 1;
+
+    return (
+      <div style={{ position: "fixed", inset: 0, zIndex: 200, display: "flex", alignItems: "flex-end", justifyContent: "center", padding: "0 16px 28px", pointerEvents: "none" }}>
+        <div className="modal-enter" style={{ background: t.card, border: `1px solid ${t.accent}40`, borderRadius: 20, width: "100%", maxWidth: 460, padding: 28, boxShadow: "0 16px 48px rgba(0,0,0,0.5)", pointerEvents: "all" }}>
+          {/* sub-header */}
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <div style={{ fontSize: 10, fontFamily: "'Space Mono',monospace", color: t.accent, textTransform: "uppercase", letterSpacing: 1.5 }}>
+                {subMode === "log" ? "Trade Form Guide" : "Plan Form Guide"}
+              </div>
+            </div>
+            <div style={{ display: "flex", gap: 5 }}>
+              {steps.map((_, i) => (
+                <div key={i} style={{ width: i === subStep ? 18 : 6, height: 6, borderRadius: 3, background: i === subStep ? t.accent : t.border, transition: "all 0.25s ease" }} />
+              ))}
+            </div>
+          </div>
+          {/* content */}
+          <div style={{ fontSize: 26, marginBottom: 10, lineHeight: 1 }}>{sub.icon}</div>
+          <div style={{ fontSize: 16, fontWeight: 700, color: t.text, marginBottom: 8, lineHeight: 1.3 }}>{sub.title}</div>
+          <div style={{ fontSize: 13, color: t.text3, lineHeight: 1.75, marginBottom: 22 }}>{sub.desc}</div>
+          {/* nav */}
+          <div style={{ display: "flex", gap: 10 }}>
+            {subStep > 0 ? (
+              <button onClick={() => setSubStep(s => s - 1)} style={{ flex: "0 0 80px", background: t.card2, border: `1px solid ${t.border}`, borderRadius: 10, padding: "10px 0", color: t.text3, fontSize: 13, cursor: "pointer", fontFamily: "inherit" }}>← Back</button>
+            ) : (
+              <button onClick={() => setSubMode(null)} style={{ flex: "0 0 80px", background: t.card2, border: `1px solid ${t.border}`, borderRadius: 10, padding: "10px 0", color: t.text3, fontSize: 13, cursor: "pointer", fontFamily: "inherit" }}>← Guide</button>
+            )}
+            <button
+              onClick={() => isSubLast ? setSubMode(null) : setSubStep(s => s + 1)}
+              style={{ flex: 1, background: isSubLast ? t.accent : t.card2, border: `1px solid ${isSubLast ? t.accent : t.border}`, borderRadius: 10, padding: "10px 16px", color: isSubLast ? "#000" : t.text, fontSize: 13, fontWeight: isSubLast ? 700 : 400, cursor: "pointer", fontFamily: "inherit" }}
+            >
+              {isSubLast ? "Got it ✓" : "Next →"}
+            </button>
+          </div>
+          <div style={{ fontSize: 10, color: t.text4, textAlign: "center", marginTop: 14, fontFamily: "'Space Mono',monospace" }}>{subStep + 1} / {steps.length}</div>
+        </div>
+      </div>
+    );
+  }
+
+  // ── Main tutorial ─────────────────────────────────────────────────────────
   return (
     <div style={{ position: "fixed", inset: 0, zIndex: 200, display: "flex", alignItems: "flex-end", justifyContent: "center", padding: "0 16px 28px", pointerEvents: "none" }}>
       <div className="modal-enter" style={{ background: t.card, border: `1px solid ${t.border}`, borderRadius: 20, width: "100%", maxWidth: 460, padding: 28, boxShadow: "0 16px 48px rgba(0,0,0,0.5)", pointerEvents: "all" }}>
@@ -107,7 +232,7 @@ export default function TutorialModal({ step, onNext, onPrev, onClose, onOpenLog
         {/* optional CTA */}
         {s.cta && (
           <button
-            onClick={() => { s.cta.action === "openLog" ? onOpenLog() : onOpenPlan(); }}
+            onClick={() => handleCTA(s.cta.action)}
             style={{ display: "block", width: "100%", background: t.accent + "18", border: `1px solid ${t.accent}40`, borderRadius: 10, padding: "10px 16px", color: t.accent, fontSize: 13, fontWeight: 600, cursor: "pointer", marginBottom: 16, textAlign: "center", fontFamily: "inherit" }}
           >
             {s.cta.label} →
