@@ -35,6 +35,7 @@ import ShareModal from "./components/ShareModal";
 import TradeReplay from "./components/TradeReplay";
 import TutorialModal from "./components/TutorialModal";
 import OnboardingModal from "./components/OnboardingModal";
+import ErrorBoundary from "./components/ErrorBoundary";
 import CalendarView from "./views/CalendarView";
 import DaySession from "./views/DaySession";
 import WeeklyReview from "./views/WeeklyReview";
@@ -964,24 +965,32 @@ style={{ display: "block" }}>
       </div>
 
       <div key={tab} className="tab-enter" style={{ padding: mobile ? 14 : 28 }} onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
-        {tab === "ai" && (isPro
-          ? <AIInsights plList={plList} t={T} mobile={mobile} />
-          : <UpgradePrompt t={T} onUpgrade={handleUpgrade} feature="AI Insights" />
+        {tab === "ai" && (
+          <ErrorBoundary compact>
+            {isPro
+              ? <AIInsights plList={plList} t={T} mobile={mobile} />
+              : <UpgradePrompt t={T} onUpgrade={handleUpgrade} feature="AI Insights" />
+            }
+          </ErrorBoundary>
         )}
         {tab === "today" && (
-<DaySession
-            plList={plList}
-            plans={trades.filter(t => t.status === "planned")}
-            onAddTrade={() => setShowAdd(true)}
-            onAddPlan={() => setShowPlan(true)}
-            t={T}
-            mobile={mobile}
-            isDark={isDark}
-          />
+          <ErrorBoundary compact>
+            <DaySession
+              plList={plList}
+              plans={trades.filter(t => t.status === "planned")}
+              onAddTrade={() => setShowAdd(true)}
+              onAddPlan={() => setShowPlan(true)}
+              t={T}
+              mobile={mobile}
+              isDark={isDark}
+            />
+          </ErrorBoundary>
         )}
 
         {tab === "calendar" && (
-          <CalendarView plList={plList} t={T} mobile={mobile} />
+          <ErrorBoundary compact>
+            <CalendarView plList={plList} t={T} mobile={mobile} />
+          </ErrorBoundary>
         )}
 
 {tab === "trades" && (
@@ -1312,13 +1321,16 @@ style={{ display: "block" }}>
   </div>
 )}
         {tab === "weekly" && (
-          <WeeklyReview plList={plList} t={T} mobile={mobile} />
+          <ErrorBoundary compact>
+            <WeeklyReview plList={plList} t={T} mobile={mobile} />
+          </ErrorBoundary>
         )}
 
         {tab === "analytics" && !isPro && (
           <UpgradePrompt t={T} onUpgrade={handleUpgrade} feature="Analytics" />
         )}
         {tab === "analytics" && isPro && (
+          <ErrorBoundary compact>
           <div>
             {/* All key stats */}
             <div style={{ display: "grid", gridTemplateColumns: mobile ? "1fr 1fr" : "repeat(5,1fr)", gap: 12, marginBottom: 20 }}>
@@ -1449,47 +1461,65 @@ style={{ display: "block" }}>
               </div>
             </div>
 
-            {/* Tag + Emotion */}
-            <div style={{ display: "grid", gridTemplateColumns: mobile ? "1fr" : "1fr 1fr", gap: 16 }}>
-              <div style={{ background: T.surface, border: `1px solid ${T.border}`, borderRadius: 12, padding: "16px 18px" }}>
-                <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 10, color: T.text3, textTransform: "uppercase", letterSpacing: 2, marginBottom: 16 }}>
-                  Tag Performance
-                </div>
-                {allTags.length === 0 ? (
-                  <div style={{ color: T.text3, fontSize: 13 }}>No tags added yet</div>
-                ) : (
-                  allTags.map((tag) => {
-                    const tagged = plList.filter((tr) => (tr.tags || []).includes(tag));
-                    const tagPL = tagged.reduce((s, tr) => s + tr.pl, 0);
-                    const tagWR = tagged.length ? tagged.filter((tr) => tr.pl > 0).length / tagged.length : 0;
-                    return (
-                      <div key={tag} style={{ marginBottom: 12 }}>
-                        <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 3 }}>
-                          <span style={{ fontSize: 13, color: T.text2 }}>{tag} <span style={{ fontSize: 10, color: T.text3 }}>({tagged.length})</span></span>
-                          <div style={{ display: "flex", gap: 10 }}>
-                            <span style={{ fontSize: 10, color: T.text3, fontFamily: "monospace" }}>{(tagWR * 100).toFixed(0)}%WR</span>
-                            <span style={{ fontFamily: "'Space Mono',monospace", fontSize: 12, color: tagPL >= 0 ? T.accent : T.danger }}>{tagPL >= 0 ? "+" : ""}{fmt(tagPL)}</span>
-                          </div>
-                        </div>
-                        <MiniBar value={tagPL} max={maxPL} t={T} />
-                      </div>
-                    );
-                  })
-                )}
-                <div style={{ marginTop: 18, fontFamily: "'Space Mono',monospace", fontSize: 10, color: T.text3, textTransform: "uppercase", letterSpacing: 2, marginBottom: 10 }}>
-                  Emotion Impact
-                </div>
-                {Object.entries(
-                  plList.reduce((acc, tr) => { if (!acc[tr.emotion]) acc[tr.emotion] = 0; acc[tr.emotion] += tr.pl; return acc; }, {})
-                ).sort((a, b) => b[1] - a[1]).map(([em, val]) => (
-                  <div key={em} style={{ display: "flex", justifyContent: "space-between", padding: "6px 0", borderBottom: `1px solid ${T.border}` }}>
-                    <span style={{ fontSize: 13, color: T.text2 }}>{em}</span>
-                    <span style={{ fontFamily: "'Space Mono',monospace", fontSize: 12, color: val >= 0 ? T.accent : T.danger }}>{val >= 0 ? "+" : ""}{fmt(val)}</span>
-                  </div>
-                ))}
+            {/* Tag Performance */}
+            <div style={{ background: T.surface, border: `1px solid ${T.border}`, borderRadius: 12, padding: "16px 18px", marginBottom: 16 }}>
+              <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 10, color: T.text3, textTransform: "uppercase", letterSpacing: 2, marginBottom: 16 }}>
+                Tag Performance
               </div>
+              {allTags.length === 0 ? (
+                <div style={{ color: T.text3, fontSize: 13 }}>No tags added yet</div>
+              ) : (
+                allTags.map((tag) => {
+                  const tagged = plList.filter((tr) => (tr.tags || []).includes(tag));
+                  const tagPL = tagged.reduce((s, tr) => s + tr.pl, 0);
+                  const tagWR = tagged.length ? tagged.filter((tr) => tr.pl > 0).length / tagged.length : 0;
+                  return (
+                    <div key={tag} style={{ marginBottom: 12 }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 3 }}>
+                        <span style={{ fontSize: 13, color: T.text2 }}>{tag} <span style={{ fontSize: 10, color: T.text3 }}>({tagged.length})</span></span>
+                        <div style={{ display: "flex", gap: 10 }}>
+                          <span style={{ fontSize: 10, color: T.text3, fontFamily: "monospace" }}>{(tagWR * 100).toFixed(0)}%WR</span>
+                          <span style={{ fontFamily: "'Space Mono',monospace", fontSize: 12, color: tagPL >= 0 ? T.accent : T.danger }}>{tagPL >= 0 ? "+" : ""}{fmt(tagPL)}</span>
+                        </div>
+                      </div>
+                      <MiniBar value={tagPL} max={maxPL} t={T} />
+                    </div>
+                  );
+                })
+              )}
+            </div>
+
+            {/* Emotion Impact */}
+            <div style={{ background: T.surface, border: `1px solid ${T.border}`, borderRadius: 12, padding: "16px 18px", marginBottom: 16 }}>
+              <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 10, color: T.text3, textTransform: "uppercase", letterSpacing: 2, marginBottom: 16 }}>
+                Emotion Impact
+              </div>
+              {plList.length === 0 ? (
+                <div style={{ color: T.text3, fontSize: 13 }}>No trades logged yet</div>
+              ) : (
+                Object.entries(
+                  plList.reduce((acc, tr) => {
+                    const em = tr.emotion && tr.emotion !== "None" ? tr.emotion : "None";
+                    if (!acc[em]) acc[em] = { pl: 0, count: 0, wins: 0 };
+                    acc[em].pl += tr.pl; acc[em].count++; if (tr.pl > 0) acc[em].wins++;
+                    return acc;
+                  }, {})
+                ).sort((a, b) => b[1].pl - a[1].pl).map(([em, d]) => {
+                  const winPct = Math.round((d.wins / d.count) * 100);
+                  return (
+                    <div key={em} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "8px 0", borderBottom: `1px solid ${T.border}` }}>
+                      <div>
+                        <span style={{ fontSize: 13, color: T.text2 }}>{em}</span>
+                        <span style={{ fontSize: 10, color: T.text3, marginLeft: 8 }}>{d.count} trade{d.count !== 1 ? "s" : ""} · {winPct}%WR</span>
+                      </div>
+                      <span style={{ fontFamily: "'Space Mono',monospace", fontSize: 12, fontWeight: 700, color: d.pl >= 0 ? T.accent : T.danger }}>{d.pl >= 0 ? "+" : ""}{fmt(d.pl)}</span>
+                    </div>
+                  );
+                })
+              )}
             </div>
           </div>
+          </ErrorBoundary>
         )}
 
         {tab === "mistakes" && (

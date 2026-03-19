@@ -36,6 +36,7 @@ export default function TradeFormModal({ initial, onClose, onSave, onCSVImport, 
     ],
   };
   const [form, setForm] = useState(initial || blank);
+  const [errors, setErrors] = useState({});
   const [tagInput, setTagInput] = useState("");
   const [customEmotions, setCustomEmotions] = useState([]);
   const [customMistakes, setCustomMistakes] = useState([]);
@@ -77,8 +78,29 @@ export default function TradeFormModal({ initial, onClose, onSave, onCSVImport, 
       "tags",
       (form.tags || []).filter((tg) => tg !== tag)
     );
+  const validate = () => {
+    const e = {};
+    if (!form.ticker.trim()) e.ticker = "Ticker is required";
+    if (STOCK_LIKE.includes(form.type)) {
+      if (!form.shares || +form.shares <= 0) e.shares = "Must be > 0";
+      if (!form.entryPrice || +form.entryPrice <= 0) e.entryPrice = "Must be > 0";
+      if (form.exitPrice !== "" && +form.exitPrice < 0) e.exitPrice = "Cannot be negative";
+      if (form.stopLoss && +form.stopLoss <= 0) e.stopLoss = "Must be > 0";
+      if (form.takeProfit && +form.takeProfit <= 0) e.takeProfit = "Must be > 0";
+    } else {
+      form.legs.forEach((l, i) => {
+        if (!l.strike || +l.strike <= 0) e[`leg_${i}_strike`] = "Required";
+        if (!l.entryPremium || +l.entryPremium <= 0) e[`leg_${i}_entryPremium`] = "Required";
+        if (!l.expiration) e[`leg_${i}_expiration`] = "Required";
+        if (!l.contracts || +l.contracts <= 0) e[`leg_${i}_contracts`] = "Required";
+      });
+    }
+    return e;
+  };
   const save = () => {
-    if (!form.ticker) return;
+    const e = validate();
+    if (Object.keys(e).length) { setErrors(e); return; }
+    setErrors({});
     const trade = {
       ...form,
       ticker: form.ticker.toUpperCase(),
@@ -109,9 +131,9 @@ export default function TradeFormModal({ initial, onClose, onSave, onCSVImport, 
     }
     onSave(trade);
   };
-  const inp = {
+  const inp = (errKey) => ({
     background: t.input,
-    border: `1px solid ${t.inputBorder}`,
+    border: `1px solid ${errors[errKey] ? "#ff4d4d" : t.inputBorder}`,
     borderRadius: 8,
     color: t.text,
     padding: "10px 14px",
@@ -120,7 +142,10 @@ export default function TradeFormModal({ initial, onClose, onSave, onCSVImport, 
     boxSizing: "border-box",
     fontFamily: "inherit",
     outline: "none",
-  };
+  });
+  const errMsg = (key) => errors[key]
+    ? <div style={{ color: "#ff4d4d", fontSize: 10, marginTop: 4, fontFamily: "'Space Mono',monospace" }}>{errors[key]}</div>
+    : null;
   const lbl = {
     fontSize: 11,
     color: t.text3,
@@ -244,16 +269,17 @@ export default function TradeFormModal({ initial, onClose, onSave, onCSVImport, 
           <div>
             <label style={lbl}>{typeLabels(form.type).ticker}</label>
             <input
-              style={inp}
+              style={inp("ticker")}
               value={form.ticker}
-              onChange={(e) => set("ticker", e.target.value.toUpperCase())}
+              onChange={(e) => { set("ticker", e.target.value.toUpperCase()); setErrors((p) => ({ ...p, ticker: undefined })); }}
               placeholder={form.type === "forex" ? "EUR/USD" : form.type === "crypto" ? "BTC/USDT" : "AAPL"}
             />
+            {errMsg("ticker")}
           </div>
           <div>
             <label style={lbl}>Date</label>
             <input
-              style={inp}
+              style={inp()}
               type="date"
               value={form.date}
               onChange={(e) => set("date", e.target.value)}
@@ -262,7 +288,7 @@ export default function TradeFormModal({ initial, onClose, onSave, onCSVImport, 
           <div>
             <label style={lbl}>Type</label>
             <select
-              style={inp}
+              style={inp()}
               value={form.type}
               onChange={(e) => set("type", e.target.value)}
             >
@@ -275,7 +301,7 @@ export default function TradeFormModal({ initial, onClose, onSave, onCSVImport, 
           <div>
             <label style={lbl}>Strategy</label>
             <select
-              style={inp}
+              style={inp()}
               value={form.strategy}
               onChange={(e) => set("strategy", e.target.value)}
             >
@@ -300,7 +326,7 @@ export default function TradeFormModal({ initial, onClose, onSave, onCSVImport, 
             <div>
               <label style={lbl}>Direction</label>
               <select
-                style={inp}
+                style={inp()}
                 value={form.direction}
                 onChange={(e) => set("direction", e.target.value)}
               >
@@ -311,52 +337,57 @@ export default function TradeFormModal({ initial, onClose, onSave, onCSVImport, 
             <div>
               <label style={lbl}>{typeLabels(form.type).units}</label>
               <input
-                style={inp}
+                style={inp("shares")}
                 type="number"
                 value={form.shares}
-                onChange={(e) => set("shares", e.target.value)}
+                onChange={(e) => { set("shares", e.target.value); setErrors((p) => ({ ...p, shares: undefined })); }}
                 placeholder="100"
               />
+              {errMsg("shares")}
             </div>
             <div>
               <label style={lbl}>Entry $</label>
               <input
-                style={inp}
+                style={inp("entryPrice")}
                 type="number"
                 value={form.entryPrice}
-                onChange={(e) => set("entryPrice", e.target.value)}
+                onChange={(e) => { set("entryPrice", e.target.value); setErrors((p) => ({ ...p, entryPrice: undefined })); }}
                 placeholder="190"
               />
+              {errMsg("entryPrice")}
             </div>
             <div>
               <label style={lbl}>Exit $</label>
               <input
-                style={inp}
+                style={inp("exitPrice")}
                 type="number"
                 value={form.exitPrice}
-                onChange={(e) => set("exitPrice", e.target.value)}
+                onChange={(e) => { set("exitPrice", e.target.value); setErrors((p) => ({ ...p, exitPrice: undefined })); }}
                 placeholder="196"
               />
+              {errMsg("exitPrice")}
             </div>
             <div>
               <label style={lbl}>Stop Loss $</label>
               <input
-                style={inp}
+                style={inp("stopLoss")}
                 type="number"
                 value={form.stopLoss || ""}
-                onChange={(e) => set("stopLoss", e.target.value)}
+                onChange={(e) => { set("stopLoss", e.target.value); setErrors((p) => ({ ...p, stopLoss: undefined })); }}
                 placeholder="185"
               />
+              {errMsg("stopLoss")}
             </div>
             <div>
               <label style={lbl}>Take Profit $</label>
               <input
-                style={inp}
+                style={inp("takeProfit")}
                 type="number"
                 value={form.takeProfit || ""}
-                onChange={(e) => set("takeProfit", e.target.value)}
+                onChange={(e) => { set("takeProfit", e.target.value); setErrors((p) => ({ ...p, takeProfit: undefined })); }}
                 placeholder="200"
               />
+              {errMsg("takeProfit")}
             </div>
             <div>
               <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 5 }}>
@@ -367,7 +398,7 @@ export default function TradeFormModal({ initial, onClose, onSave, onCSVImport, 
                 </svg>
               </label>
               <input
-                style={inp}
+                style={inp()}
                 className={isDark ? "time-dark" : ""}
                 type="time"
                 value={form.entryTime || ""}
@@ -383,7 +414,7 @@ export default function TradeFormModal({ initial, onClose, onSave, onCSVImport, 
                 </svg>
               </label>
               <input
-                style={inp}
+                style={inp()}
                 className={isDark ? "time-dark" : ""}
                 type="time"
                 value={form.exitTime || ""}
@@ -467,7 +498,7 @@ export default function TradeFormModal({ initial, onClose, onSave, onCSVImport, 
                   }}
                 >
                   <select
-                    style={inp}
+                    style={inp()}
                     value={leg.position}
                     onChange={(e) => setLeg(i, "position", e.target.value)}
                   >
@@ -475,7 +506,7 @@ export default function TradeFormModal({ initial, onClose, onSave, onCSVImport, 
                     <option value="sell">Sell</option>
                   </select>
                   <select
-                    style={inp}
+                    style={inp()}
                     value={leg.type}
                     onChange={(e) => setLeg(i, "type", e.target.value)}
                   >
@@ -483,38 +514,38 @@ export default function TradeFormModal({ initial, onClose, onSave, onCSVImport, 
                     <option value="put">Put</option>
                   </select>
                   <input
-                    style={inp}
+                    style={inp(`leg_${i}_strike`)}
                     type="number"
                     placeholder="Strike"
                     value={leg.strike}
-                    onChange={(e) => setLeg(i, "strike", e.target.value)}
+                    onChange={(e) => { setLeg(i, "strike", e.target.value); setErrors((p) => ({ ...p, [`leg_${i}_strike`]: undefined })); }}
                   />
                   <input
-                    style={inp}
+                    style={inp(`leg_${i}_expiration`)}
                     type="date"
                     value={leg.expiration}
-                    onChange={(e) => setLeg(i, "expiration", e.target.value)}
+                    onChange={(e) => { setLeg(i, "expiration", e.target.value); setErrors((p) => ({ ...p, [`leg_${i}_expiration`]: undefined })); }}
                   />
                   <input
-                    style={inp}
+                    style={inp(`leg_${i}_entryPremium`)}
                     type="number"
                     placeholder="Entry $"
                     value={leg.entryPremium}
-                    onChange={(e) => setLeg(i, "entryPremium", e.target.value)}
+                    onChange={(e) => { setLeg(i, "entryPremium", e.target.value); setErrors((p) => ({ ...p, [`leg_${i}_entryPremium`]: undefined })); }}
                   />
                   <input
-                    style={inp}
+                    style={inp()}
                     type="number"
                     placeholder="Exit $"
                     value={leg.exitPremium}
                     onChange={(e) => setLeg(i, "exitPremium", e.target.value)}
                   />
                   <input
-                    style={inp}
+                    style={inp(`leg_${i}_contracts`)}
                     type="number"
                     placeholder="Contracts"
                     value={leg.contracts}
-                    onChange={(e) => setLeg(i, "contracts", e.target.value)}
+                    onChange={(e) => { setLeg(i, "contracts", e.target.value); setErrors((p) => ({ ...p, [`leg_${i}_contracts`]: undefined })); }}
                   />
                 </div>
               </div>
