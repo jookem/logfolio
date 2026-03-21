@@ -356,28 +356,33 @@ const plList = useMemo(
     const sorted = [...plList].sort((a, b) => a.date.localeCompare(b.date));
     const fromTs = Math.floor(new Date(sorted[0].date).getTime() / 1000);
     const toTs = Math.floor(new Date(sorted[sorted.length - 1].date).getTime() / 1000) + 86400;
-    fetch("/api/yf", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ url: `https://query1.finance.yahoo.com/v8/finance/chart/SPY?period1=${fromTs}&period2=${toTs}&interval=1d` }),
-    })
-      .then(r => r.json())
-      .then(data => {
-        const result = data?.chart?.result?.[0];
-        const timestamps = result?.timestamp;
-        const closes = result?.indicators?.quote?.[0]?.close;
-        if (timestamps?.length && closes?.length) {
-          setSpyData(timestamps.map((t, i) => ({
-            date: new Date(t * 1000).toISOString().slice(0, 10),
-            close: closes[i],
-          })).filter(d => d.close != null));
-          setSpyError(false);
-        } else {
-          setSpyData(null);
-          setSpyError(true);
-        }
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      fetch("/api/yf", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {}),
+        },
+        body: JSON.stringify({ url: `https://query1.finance.yahoo.com/v8/finance/chart/SPY?period1=${fromTs}&period2=${toTs}&interval=1d` }),
       })
-      .catch(() => { setSpyData(null); setSpyError(true); });
+        .then(r => r.json())
+        .then(data => {
+          const result = data?.chart?.result?.[0];
+          const timestamps = result?.timestamp;
+          const closes = result?.indicators?.quote?.[0]?.close;
+          if (timestamps?.length && closes?.length) {
+            setSpyData(timestamps.map((t, i) => ({
+              date: new Date(t * 1000).toISOString().slice(0, 10),
+              close: closes[i],
+            })).filter(d => d.close != null));
+            setSpyError(false);
+          } else {
+            setSpyData(null);
+            setSpyError(true);
+          }
+        })
+        .catch(() => { setSpyData(null); setSpyError(true); });
+    });
   }, [plList.length]);
 
   const allTags = useMemo(
