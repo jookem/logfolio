@@ -1,9 +1,13 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 
 export default function VoiceNote({ value, onChange, t }) {
   const [recording, setRecording] = useState(false);
   const [mediaRecorder, setMediaRecorder] = useState(null);
   const [audioUrl, setAudioUrl] = useState(value || null);
+
+  useEffect(() => {
+    setAudioUrl(value || null);
+  }, [value]);
   const chunksRef = useRef([]);
 
   const startRecording = async () => {

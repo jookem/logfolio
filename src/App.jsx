@@ -134,6 +134,16 @@ const [page, setPage] = useState(1);
     setShowTutorial(true);
   };
 
+  const loadSeedTrades = async () => {
+    setShowOnboarding(false);
+    const seeded = SEED_TRADES.map(t => ({ ...t, id: Date.now() + Math.random() }));
+    setTrades(seeded);
+    if (user) {
+      const rows = seeded.map(t => ({ id: t.id, user_id: user.id, data: t }));
+      await supabase.from("trades").upsert(rows);
+    }
+  };
+
   const openTutorial = () => {
     setTutorialStep(0);
     setShowTutorial(true);
@@ -1828,7 +1838,7 @@ style={{ display: "block" }}>
       )}
 
       {showOnboarding && (
-        <OnboardingModal onStartFresh={dismissOnboarding} t={T} />
+        <OnboardingModal onStartFresh={dismissOnboarding} onLoadSamples={loadSeedTrades} t={T} />
       )}
 
       {/* Tutorial — shown after "Start Fresh" from onboarding */}
