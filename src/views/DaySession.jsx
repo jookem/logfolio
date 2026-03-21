@@ -10,6 +10,21 @@ export default function DaySession({ plList, plans, onAddTrade, onAddPlan, t, mo
   const sessionPL = todayTrades.reduce((s, tr) => s + tr.pl, 0);
   const wins = todayTrades.filter((tr) => tr.pl > 0).length;
   const losses = todayTrades.filter((tr) => tr.pl < 0).length;
+
+  const streak = (() => {
+    const sorted = [...plList].sort((a, b) => a.date.localeCompare(b.date) || 0);
+    if (!sorted.length) return null;
+    let count = 1;
+    const last = sorted[sorted.length - 1];
+    const type = last.pl > 0 ? "W" : last.pl < 0 ? "L" : null;
+    if (!type) return null;
+    for (let i = sorted.length - 2; i >= 0; i--) {
+      const isWin = sorted[i].pl > 0;
+      if ((type === "W" && isWin) || (type === "L" && !isWin && sorted[i].pl < 0)) count++;
+      else break;
+    }
+    return { count, type };
+  })();
   const [now, setNow] = useState(new Date());
 
 useEffect(() => {
@@ -148,6 +163,24 @@ const timeStr = now.toLocaleTimeString("en-US", {
                 {losses}
               </div>
             </div>
+            {streak && streak.count >= 2 && (
+              <div
+                style={{
+                  background: (streak.type === "W" ? t.accent : t.danger) + "15",
+                  border: `1px solid ${(streak.type === "W" ? t.accent : t.danger)}30`,
+                  borderRadius: 8,
+                  padding: "8px 14px",
+                  textAlign: "center",
+                }}
+              >
+                <div style={{ fontSize: 10, color: streak.type === "W" ? t.accent : t.danger, fontFamily: "'Space Mono', monospace", marginBottom: 2 }}>
+                  STREAK
+                </div>
+                <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 18, fontWeight: 700, color: streak.type === "W" ? t.accent : t.danger }}>
+                  {streak.count}{streak.type}
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>

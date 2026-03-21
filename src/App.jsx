@@ -40,6 +40,7 @@ import CalendarView from "./views/CalendarView";
 import DaySession from "./views/DaySession";
 import WeeklyReview from "./views/WeeklyReview";
 import AIInsights from "./views/AIInsights";
+import JournalView from "./views/JournalView";
 
 export default function TradingJournal() {
   const { user, profile, loading: authLoading, isPro, canUseAI, aiAnalysesLeft, refreshProfile, signOut } = useAuth();
@@ -189,7 +190,7 @@ const [page, setPage] = useState(1);
     setTimeout(() => setToast(null), 2200);
   };
 
-  const TAB_ORDER = ["today", "weekly", "calendar", "trades", "plans", "analytics", "ai"];
+  const TAB_ORDER = ["today", "weekly", "calendar", "trades", "plans", "analytics", "ai", "journal"];
   const handleTouchStart = (e) => {
     touchStartX.current = e.touches[0].clientX;
     touchStartY.current = e.touches[0].clientY;
@@ -435,6 +436,33 @@ const avgR = useMemo(() => {
   const withR = plList.filter(t => t.r !== null && t.r !== undefined);
   return withR.length ? withR.reduce((s, t) => s + t.r, 0) / withR.length : null;
 }, [plList]);
+
+const tickerBreakdown = useMemo(() => {
+  const map = {};
+  plList.forEach(t => {
+    if (!map[t.ticker]) map[t.ticker] = { pl: 0, total: 0, wins: 0 };
+    map[t.ticker].pl += t.pl;
+    map[t.ticker].total++;
+    if (t.pl > 0) map[t.ticker].wins++;
+  });
+  return Object.entries(map)
+    .map(([ticker, d]) => ({ ticker, ...d, winRate: d.total ? d.wins / d.total : 0 }))
+    .sort((a, b) => b.pl - a.pl);
+}, [plList]);
+
+const mistakeBreakdown = useMemo(() => {
+  const map = {};
+  plList.forEach(t => {
+    if (t.mistake && t.mistake !== "None") {
+      if (!map[t.mistake]) map[t.mistake] = { cost: 0, count: 0 };
+      map[t.mistake].cost += t.pl;
+      map[t.mistake].count++;
+    }
+  });
+  return Object.entries(map)
+    .map(([mistake, d]) => ({ mistake, ...d }))
+    .sort((a, b) => a.cost - b.cost);
+}, [plList]);
   const filteredPlans = useMemo(() => {
   const q = planSearch.toLowerCase().trim();
   return trades
@@ -522,6 +550,7 @@ const paginated = filtered
     ["plans", "Plans"],
     ["analytics", "Analytics"],
     ["ai", "AI Insights"],
+    ["journal", "Journal"],
   ];
   const sel = {
     background: T.input,
@@ -1495,8 +1524,82 @@ style={{ display: "block" }}>
               )}
             </div>
             </div>
+
+            {/* Ticker Performance + Mistake Cost */}
+            <div style={{ display: "grid", gridTemplateColumns: mobile ? "1fr" : "1fr 1fr", gap: 16, marginBottom: 16 }}>
+              {/* Ticker Performance */}
+              <div style={{ background: T.surface, border: `1px solid ${T.border}`, borderRadius: 12, padding: "16px 18px" }}>
+                <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 10, color: T.text3, textTransform: "uppercase", letterSpacing: 2, marginBottom: 16 }}>Ticker Performance</div>
+                {tickerBreakdown.length === 0 ? (
+                  <div style={{ fontSize: 13, color: T.text3 }}>No trades logged yet.</div>
+                ) : (
+                  <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                    {tickerBreakdown.slice(0, 8).map(({ ticker, pl, total, winRate }) => {
+                      const winPct = Math.round(winRate * 100);
+                      const color = pl >= 0 ? T.accent : T.danger;
+                      const maxAbs = Math.max(...tickerBreakdown.map(t => Math.abs(t.pl)), 1);
+                      const barWidth = Math.round((Math.abs(pl) / maxAbs) * 100);
+                      return (
+                        <div key={ticker}>
+                          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 5 }}>
+                            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                              <span style={{ fontFamily: "'Space Mono',monospace", fontSize: 12, color: T.text, fontWeight: 700, minWidth: 52 }}>{ticker}</span>
+                              <span style={{ fontSize: 12, color, fontFamily: "'Space Mono',monospace", fontWeight: 700 }}>{winPct}%</span>
+                              <span style={{ fontSize: 11, color: T.text3 }}>{total}t</span>
+                            </div>
+                            <span style={{ fontFamily: "'Space Mono',monospace", fontSize: 12, fontWeight: 700, color }}>{pl >= 0 ? "+" : ""}{fmt(pl)}</span>
+                          </div>
+                          <div style={{ height: 5, borderRadius: 3, background: T.border, overflow: "hidden" }}>
+                            <div style={{ height: "100%", width: `${barWidth}%`, borderRadius: 3, background: color, transition: "width 0.4s ease" }} />
+                          </div>
+                        </div>
+                      );
+                    })}
+                    {tickerBreakdown.length > 8 && (
+                      <div style={{ fontSize: 11, color: T.text3, marginTop: 2 }}>+{tickerBreakdown.length - 8} more tickers</div>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              {/* Mistake Cost */}
+              <div style={{ background: T.surface, border: `1px solid ${T.border}`, borderRadius: 12, padding: "16px 18px" }}>
+                <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 10, color: T.text3, textTransform: "uppercase", letterSpacing: 2, marginBottom: 16 }}>Mistake Cost</div>
+                {mistakeBreakdown.length === 0 ? (
+                  <div style={{ fontSize: 13, color: T.text3 }}>No mistakes flagged yet — nice discipline.</div>
+                ) : (
+                  <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                    {mistakeBreakdown.map(({ mistake, cost, count }) => {
+                      const maxAbs = Math.max(...mistakeBreakdown.map(m => Math.abs(m.cost)), 1);
+                      const barWidth = Math.round((Math.abs(cost) / maxAbs) * 100);
+                      return (
+                        <div key={mistake}>
+                          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 5 }}>
+                            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                              <span style={{ fontSize: 12, color: T.text }}>{mistake}</span>
+                              <span style={{ fontSize: 11, color: T.text3 }}>{count}×</span>
+                            </div>
+                            <span style={{ fontFamily: "'Space Mono',monospace", fontSize: 12, fontWeight: 700, color: cost >= 0 ? T.accent : T.danger }}>{cost >= 0 ? "+" : ""}{fmt(cost)}</span>
+                          </div>
+                          <div style={{ height: 5, borderRadius: 3, background: T.border, overflow: "hidden" }}>
+                            <div style={{ height: "100%", width: `${barWidth}%`, borderRadius: 3, background: T.danger, transition: "width 0.4s ease" }} />
+                          </div>
+                        </div>
+                      );
+                    })}
+                    <div style={{ fontSize: 11, color: T.text3, marginTop: 4 }}>
+                      Total cost: <span style={{ color: T.danger, fontFamily: "'Space Mono',monospace" }}>{fmt(mistakeBreakdown.reduce((s, m) => s + m.cost, 0))}</span>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
           </ErrorBoundary>
+        )}
+
+        {tab === "journal" && (
+          <JournalView journals={journals} onSave={saveJournal} t={T} mobile={mobile} />
         )}
 
       </div>
