@@ -73,6 +73,7 @@ const [page, setPage] = useState(1);
   const [showPlan, setShowPlan] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [journals, setJournals] = useState({});
+  const [tradeDefaults, setTradeDefaults] = useState({ type: "stock", strategy: "Breakout", direction: "long" });
   const [showReplay, setShowReplay] = useState(false);
   const [shareTarget, setShareTarget] = useState(null);
   const [spyData, setSpyData] = useState(null);
@@ -161,6 +162,15 @@ const [page, setPage] = useState(1);
     supabase.from("journals").select("data").eq("user_id", user.id).maybeSingle()
       .then(({ data }) => { if (data?.data) setJournals(data.data); });
   }, [user]);
+
+  useEffect(() => {
+    if (profile?.trade_defaults) setTradeDefaults(profile.trade_defaults);
+  }, [profile]);
+
+  const saveTradeDefaults = (defaults) => {
+    setTradeDefaults(defaults);
+    if (user) supabase.from("profiles").update({ trade_defaults: defaults }).eq("id", user.id).then(() => {});
+  };
 
   useEffect(() => {
     const handler = (e) => {
@@ -1607,6 +1617,7 @@ style={{ display: "block" }}>
 {showAdd && (
         <TradeFormModal
           initial={planPrefill || undefined}
+          defaults={planPrefill ? undefined : tradeDefaults}
           editLabel={planPrefill ? "Execute Plan" : undefined}
           onClose={() => { setShowAdd(false); setPlanPrefill(null); }}
           onSave={addTrade}
@@ -1648,11 +1659,14 @@ style={{ display: "block" }}>
     setIsDark={setIsDark}
     onClear={clearAll}
     t={T}
+    user={user}
     onSignOut={() => { setShowSettings(false); signOut(); }}
     isPro={isPro}
     onUpgrade={() => { setShowSettings(false); handleUpgrade(); }}
     onManageBilling={() => { setShowSettings(false); handleManageBilling(); }}
     onTutorial={openTutorial}
+    tradeDefaults={tradeDefaults}
+    onSaveDefaults={saveTradeDefaults}
   />
 )}
       {showPlan && (

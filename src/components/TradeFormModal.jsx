@@ -5,13 +5,13 @@ import Tag from "./Tag";
 import VoiceNote from "./VoiceNote";
 import ScreenshotUpload from "./ScreenshotUpload";
 
-export default function TradeFormModal({ initial, onClose, onSave, onCSVImport, t, editLabel, isDark }) {
+export default function TradeFormModal({ initial, defaults, onClose, onSave, onCSVImport, t, editLabel, isDark }) {
   const blank = {
     date: todayStr(),
     ticker: "",
-    type: "stock",
-    strategy: "Breakout",
-    direction: "long",
+    type: defaults?.type || "stock",
+    strategy: defaults?.strategy || "Breakout",
+    direction: defaults?.direction || "long",
     entryPrice: "",
     exitPrice: "",
     shares: "",
@@ -85,8 +85,20 @@ export default function TradeFormModal({ initial, onClose, onSave, onCSVImport, 
       if (!form.shares || +form.shares <= 0) e.shares = "Must be > 0";
       if (!form.entryPrice || +form.entryPrice <= 0) e.entryPrice = "Must be > 0";
       if (form.exitPrice !== "" && +form.exitPrice <= 0) e.exitPrice = "Must be > 0";
-      if (form.stopLoss && +form.stopLoss <= 0) e.stopLoss = "Must be > 0";
-      if (form.takeProfit && +form.takeProfit <= 0) e.takeProfit = "Must be > 0";
+      if (form.stopLoss) {
+        if (+form.stopLoss <= 0) e.stopLoss = "Must be > 0";
+        else if (form.entryPrice) {
+          if (form.direction === "long" && +form.stopLoss >= +form.entryPrice) e.stopLoss = "Must be below entry for a long";
+          if (form.direction === "short" && +form.stopLoss <= +form.entryPrice) e.stopLoss = "Must be above entry for a short";
+        }
+      }
+      if (form.takeProfit) {
+        if (+form.takeProfit <= 0) e.takeProfit = "Must be > 0";
+        else if (form.entryPrice) {
+          if (form.direction === "long" && +form.takeProfit <= +form.entryPrice) e.takeProfit = "Must be above entry for a long";
+          if (form.direction === "short" && +form.takeProfit >= +form.entryPrice) e.takeProfit = "Must be below entry for a short";
+        }
+      }
     } else {
       form.legs.forEach((l, i) => {
         if (!l.strike || +l.strike <= 0) e[`leg_${i}_strike`] = "Required";
