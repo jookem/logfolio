@@ -31,14 +31,20 @@ export function calcPL(trade) {
 }
 
 export function calcR(trade) {
-  if (!trade.stopLoss || !trade.entryPrice) return null;
-  const risk = Math.abs(trade.entryPrice - trade.stopLoss);
-  if (risk === 0) return null;
   if (STOCK_LIKE.includes(trade.type)) {
+    if (!trade.stopLoss || !trade.entryPrice) return null;
+    const risk = Math.abs(trade.entryPrice - trade.stopLoss);
+    if (risk === 0) return null;
     const pl = (trade.exitPrice - trade.entryPrice) * (trade.direction === "long" ? 1 : -1);
     return pl / risk;
   }
-  return null;
+  // Options: risk = total premium paid on long legs (max loss on debit trades)
+  const legs = trade.legs || [];
+  const totalRisk = legs
+    .filter(l => l.position === "buy")
+    .reduce((s, l) => s + l.entryPremium * (l.contracts || 1) * 100, 0);
+  if (totalRisk === 0) return null;
+  return calcPL(trade) / totalRisk;
 }
 
 export function typeLabels(type) {
