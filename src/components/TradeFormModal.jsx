@@ -1,17 +1,18 @@
 import { useState } from "react";
-import { STOCK_LIKE, SUGGESTED_TAGS, EMOTIONS, MISTAKES } from "../lib/constants";
-import { todayStr, typeLabels } from "../lib/utils";
+import { STOCK_LIKE, SUGGESTED_TAGS, EMOTIONS, MISTAKES, TIMEFRAMES } from "../lib/constants";
+import { todayStr, typeLabels, fmt } from "../lib/utils";
 import Tag from "./Tag";
 import VoiceNote from "./VoiceNote";
 import ScreenshotUpload from "./ScreenshotUpload";
 
-export default function TradeFormModal({ initial, onClose, onSave, onCSVImport, t, editLabel, isDark }) {
+export default function TradeFormModal({ initial, defaults, onClose, onSave, onCSVImport, t, editLabel, isDark }) {
   const blank = {
     date: todayStr(),
     ticker: "",
-    type: "stock",
-    strategy: "Breakout",
-    direction: "long",
+    type: defaults?.type || "stock",
+    strategy: defaults?.strategy || "Breakout",
+    direction: defaults?.direction || "long",
+    timeframe: defaults?.timeframe || "Daily",
     entryPrice: "",
     exitPrice: "",
     shares: "",
@@ -84,9 +85,21 @@ export default function TradeFormModal({ initial, onClose, onSave, onCSVImport, 
     if (STOCK_LIKE.includes(form.type)) {
       if (!form.shares || +form.shares <= 0) e.shares = "Must be > 0";
       if (!form.entryPrice || +form.entryPrice <= 0) e.entryPrice = "Must be > 0";
-      if (form.exitPrice !== "" && +form.exitPrice < 0) e.exitPrice = "Cannot be negative";
-      if (form.stopLoss && +form.stopLoss <= 0) e.stopLoss = "Must be > 0";
-      if (form.takeProfit && +form.takeProfit <= 0) e.takeProfit = "Must be > 0";
+      if (form.exitPrice !== "" && +form.exitPrice <= 0) e.exitPrice = "Must be > 0";
+      if (form.stopLoss) {
+        if (+form.stopLoss <= 0) e.stopLoss = "Must be > 0";
+        else if (form.entryPrice) {
+          if (form.direction === "long" && +form.stopLoss >= +form.entryPrice) e.stopLoss = "Must be below entry for a long";
+          if (form.direction === "short" && +form.stopLoss <= +form.entryPrice) e.stopLoss = "Must be above entry for a short";
+        }
+      }
+      if (form.takeProfit) {
+        if (+form.takeProfit <= 0) e.takeProfit = "Must be > 0";
+        else if (form.entryPrice) {
+          if (form.direction === "long" && +form.takeProfit <= +form.entryPrice) e.takeProfit = "Must be above entry for a long";
+          if (form.direction === "short" && +form.takeProfit >= +form.entryPrice) e.takeProfit = "Must be below entry for a short";
+        }
+      }
     } else {
       form.legs.forEach((l, i) => {
         if (!l.strike || +l.strike <= 0) e[`leg_${i}_strike`] = "Required";
@@ -313,6 +326,12 @@ export default function TradeFormModal({ initial, onClose, onSave, onCSVImport, 
               ))}
             </select>
           </div>
+          <div>
+            <label style={lbl}>Timeframe</label>
+            <select style={inp()} value={form.timeframe || "Daily"} onChange={(e) => set("timeframe", e.target.value)}>
+              {TIMEFRAMES.map(tf => <option key={tf}>{tf}</option>)}
+            </select>
+          </div>
         </div>
         {STOCK_LIKE.includes(form.type) ? (
           <div
@@ -366,6 +385,19 @@ export default function TradeFormModal({ initial, onClose, onSave, onCSVImport, 
                 placeholder="196"
               />
               {errMsg("exitPrice")}
+              {(() => {
+                const entry = +form.entryPrice;
+                const exit = +form.exitPrice;
+                const qty = +form.shares;
+                if (!entry || !exit || !qty) return null;
+                const dir = form.direction === "long" ? 1 : -1;
+                const pl = dir * (exit - entry) * qty;
+                return (
+                  <div style={{ fontSize: 11, fontFamily: "'Space Mono',monospace", color: pl >= 0 ? t.accent : t.danger, marginTop: 4 }}>
+                    → {pl >= 0 ? "+" : ""}{fmt(pl)}
+                  </div>
+                );
+              })()}
             </div>
             <div>
               <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 5 }}>

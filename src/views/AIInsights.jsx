@@ -80,10 +80,15 @@ export default function AIInsights({ plList, t, mobile }) {
     const winRate = ((wins.length / plList.length) * 100).toFixed(0);
 
     try {
+      const { data: { session } } = await supabase.auth.getSession();
       const response = await fetch("/api/analyse", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          ...(session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {}),
+        },
         body: JSON.stringify({
+          userId: user?.id,
           model: "claude-sonnet-4-6",
           max_tokens: 2000,
           messages: [
@@ -121,6 +126,11 @@ Provide 4-6 patterns. Be brutally honest but constructive.`,
       });
 
       const data = await response.json();
+      if (response.status === 429) {
+        setError(data.error || "Daily limit reached. Resets at midnight.");
+        setLoading(false);
+        return;
+      }
       if (data.error) throw new Error(data.error.message || JSON.stringify(data.error));
       if (!data.content) throw new Error("Empty response from API");
       const text = data.content.filter((b) => b.type === "text").map((b) => b.text).join("");

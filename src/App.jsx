@@ -13,6 +13,8 @@ import {
   saveTrades,
   loadTheme,
   exportCSV,
+  setCurrency,
+  setTimezone,
 } from "./lib/utils";
 import {
   STORAGE_KEY,
@@ -40,6 +42,7 @@ import CalendarView from "./views/CalendarView";
 import DaySession from "./views/DaySession";
 import WeeklyReview from "./views/WeeklyReview";
 import AIInsights from "./views/AIInsights";
+import JournalView from "./views/JournalView";
 
 export default function TradingJournal() {
   const { user, profile, loading: authLoading, isPro, canUseAI, aiAnalysesLeft, refreshProfile, signOut } = useAuth();
@@ -72,6 +75,7 @@ const [page, setPage] = useState(1);
   const [showPlan, setShowPlan] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [journals, setJournals] = useState({});
+  const [tradeDefaults, setTradeDefaults] = useState({ type: "stock", strategy: "Breakout", direction: "long" });
   const [showReplay, setShowReplay] = useState(false);
   const [shareTarget, setShareTarget] = useState(null);
   const [spyData, setSpyData] = useState(null);
@@ -134,6 +138,16 @@ const [page, setPage] = useState(1);
     setShowTutorial(true);
   };
 
+  const loadSeedTrades = async () => {
+    setShowOnboarding(false);
+    const seeded = SEED_TRADES.map(t => ({ ...t, id: Date.now() + Math.random() }));
+    setTrades(seeded);
+    if (user) {
+      const rows = seeded.map(t => ({ id: t.id, user_id: user.id, data: t }));
+      await supabase.from("trades").upsert(rows);
+    }
+  };
+
   const openTutorial = () => {
     setTutorialStep(0);
     setShowTutorial(true);
@@ -150,6 +164,20 @@ const [page, setPage] = useState(1);
     supabase.from("journals").select("data").eq("user_id", user.id).maybeSingle()
       .then(({ data }) => { if (data?.data) setJournals(data.data); });
   }, [user]);
+
+  useEffect(() => {
+    if (profile?.trade_defaults) setTradeDefaults(profile.trade_defaults);
+  }, [profile]);
+
+  const saveTradeDefaults = (defaults) => {
+    setTradeDefaults(defaults);
+    if (user) supabase.from("profiles").update({ trade_defaults: defaults }).eq("id", user.id).then(() => {});
+  };
+
+  useEffect(() => {
+    setCurrency(tradeDefaults.currency);
+    setTimezone(tradeDefaults.timezone);
+  }, [tradeDefaults.currency, tradeDefaults.timezone]);
 
   useEffect(() => {
     const handler = (e) => {
@@ -179,7 +207,7 @@ const [page, setPage] = useState(1);
     setTimeout(() => setToast(null), 2200);
   };
 
-  const TAB_ORDER = ["today", "weekly", "calendar", "trades", "plans", "analytics", "ai"];
+  const TAB_ORDER = ["today", "weekly", "calendar", "trades", "plans", "analytics", "ai", "journal"];
   const handleTouchStart = (e) => {
     touchStartX.current = e.touches[0].clientX;
     touchStartY.current = e.touches[0].clientY;
@@ -277,7 +305,7 @@ const [page, setPage] = useState(1);
     if (url) window.location.href = url;
   };
 
-  const currentMonth = new Date().toISOString().slice(0, 7);
+  const currentMonth = todayStr().slice(0, 7);
   const freeTierFull = !isPro && trades.filter(t => t.status !== "planned" && t.date?.startsWith(currentMonth)).length >= 5;
   const freeTierPlanFull = !isPro && trades.filter(t => t.status === "planned" && t.date?.startsWith(currentMonth)).length >= 5;
 
@@ -335,28 +363,33 @@ const plList = useMemo(
     const sorted = [...plList].sort((a, b) => a.date.localeCompare(b.date));
     const fromTs = Math.floor(new Date(sorted[0].date).getTime() / 1000);
     const toTs = Math.floor(new Date(sorted[sorted.length - 1].date).getTime() / 1000) + 86400;
-    fetch("/api/yf", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ url: `https://query1.finance.yahoo.com/v8/finance/chart/SPY?period1=${fromTs}&period2=${toTs}&interval=1d` }),
-    })
-      .then(r => r.json())
-      .then(data => {
-        const result = data?.chart?.result?.[0];
-        const timestamps = result?.timestamp;
-        const closes = result?.indicators?.quote?.[0]?.close;
-        if (timestamps?.length && closes?.length) {
-          setSpyData(timestamps.map((t, i) => ({
-            date: new Date(t * 1000).toISOString().slice(0, 10),
-            close: closes[i],
-          })).filter(d => d.close != null));
-          setSpyError(false);
-        } else {
-          setSpyData(null);
-          setSpyError(true);
-        }
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      fetch("/api/yf", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {}),
+        },
+        body: JSON.stringify({ url: `https://query1.finance.yahoo.com/v8/finance/chart/SPY?period1=${fromTs}&period2=${toTs}&interval=1d` }),
       })
-      .catch(() => { setSpyData(null); setSpyError(true); });
+        .then(r => r.json())
+        .then(data => {
+          const result = data?.chart?.result?.[0];
+          const timestamps = result?.timestamp;
+          const closes = result?.indicators?.quote?.[0]?.close;
+          if (timestamps?.length && closes?.length) {
+            setSpyData(timestamps.map((t, i) => ({
+              date: new Date(t * 1000).toISOString().slice(0, 10),
+              close: closes[i],
+            })).filter(d => d.close != null));
+            setSpyError(false);
+          } else {
+            setSpyData(null);
+            setSpyError(true);
+          }
+        })
+        .catch(() => { setSpyData(null); setSpyError(true); });
+    });
   }, [plList.length]);
 
   const allTags = useMemo(
@@ -421,39 +454,36 @@ const plList = useMemo(
     return { value: maxDD, pct: peak > 0 ? maxDD / peak : 0 };
   }, [plList]);
 
-  const dayOfWeekStats = useMemo(() => {
-    const DAYS = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
-    const map = {};
-    DAYS.forEach(d => { map[d] = { pl: 0, wins: 0, total: 0 }; });
-    plList.forEach(t => {
-      if (!t.date) return;
-      const [y, mo, d] = t.date.split("-").map(Number);
-      const dayName = DAYS[new Date(y, mo - 1, d).getDay()];
-      map[dayName].pl += t.pl;
-      map[dayName].total++;
-      if (t.pl > 0) map[dayName].wins++;
-    });
-    return ["Monday","Tuesday","Wednesday","Thursday","Friday"].map(d => ({
-      day: d, short: d.slice(0, 3), ...map[d],
-      winRate: map[d].total ? map[d].wins / map[d].total : 0,
-    }));
-  }, [plList]);
-
-  const mistakeStats = useMemo(() => {
-    const map = {};
-    plList.forEach((t) => {
-      if (t.mistake && t.mistake !== "None") {
-        if (!map[t.mistake]) map[t.mistake] = 0;
-        map[t.mistake] += t.pl;
-      }
-    });
-    return Object.entries(map)
-      .map(([m, cost]) => ({ mistake: m, cost }))
-      .sort((a, b) => a.cost - b.cost);
-  }, [plList]);
 const avgR = useMemo(() => {
   const withR = plList.filter(t => t.r !== null && t.r !== undefined);
   return withR.length ? withR.reduce((s, t) => s + t.r, 0) / withR.length : null;
+}, [plList]);
+
+const tickerBreakdown = useMemo(() => {
+  const map = {};
+  plList.forEach(t => {
+    if (!map[t.ticker]) map[t.ticker] = { pl: 0, total: 0, wins: 0 };
+    map[t.ticker].pl += t.pl;
+    map[t.ticker].total++;
+    if (t.pl > 0) map[t.ticker].wins++;
+  });
+  return Object.entries(map)
+    .map(([ticker, d]) => ({ ticker, ...d, winRate: d.total ? d.wins / d.total : 0 }))
+    .sort((a, b) => b.pl - a.pl);
+}, [plList]);
+
+const mistakeBreakdown = useMemo(() => {
+  const map = {};
+  plList.forEach(t => {
+    if (t.mistake && t.mistake !== "None") {
+      if (!map[t.mistake]) map[t.mistake] = { cost: 0, count: 0 };
+      map[t.mistake].cost += t.pl;
+      map[t.mistake].count++;
+    }
+  });
+  return Object.entries(map)
+    .map(([mistake, d]) => ({ mistake, ...d }))
+    .sort((a, b) => a.cost - b.cost);
 }, [plList]);
   const filteredPlans = useMemo(() => {
   const q = planSearch.toLowerCase().trim();
@@ -542,6 +572,7 @@ const paginated = filtered
     ["plans", "Plans"],
     ["analytics", "Analytics"],
     ["ai", "AI Insights"],
+    ["journal", "Journal"],
   ];
   const sel = {
     background: T.input,
@@ -1515,255 +1546,90 @@ style={{ display: "block" }}>
               )}
             </div>
             </div>
+
+            {/* Ticker Performance + Mistake Cost */}
+            <div style={{ display: "grid", gridTemplateColumns: mobile ? "1fr" : "1fr 1fr", gap: 16, marginBottom: 16 }}>
+              {/* Ticker Performance */}
+              <div style={{ background: T.surface, border: `1px solid ${T.border}`, borderRadius: 12, padding: "16px 18px" }}>
+                <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 10, color: T.text3, textTransform: "uppercase", letterSpacing: 2, marginBottom: 16 }}>Ticker Performance</div>
+                {tickerBreakdown.length === 0 ? (
+                  <div style={{ fontSize: 13, color: T.text3 }}>No trades logged yet.</div>
+                ) : (
+                  <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                    {tickerBreakdown.slice(0, 8).map(({ ticker, pl, total, winRate }) => {
+                      const winPct = Math.round(winRate * 100);
+                      const color = pl >= 0 ? T.accent : T.danger;
+                      const maxAbs = Math.max(...tickerBreakdown.map(t => Math.abs(t.pl)), 1);
+                      const barWidth = Math.round((Math.abs(pl) / maxAbs) * 100);
+                      return (
+                        <div key={ticker}>
+                          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 5 }}>
+                            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                              <span style={{ fontFamily: "'Space Mono',monospace", fontSize: 12, color: T.text, fontWeight: 700, minWidth: 52 }}>{ticker}</span>
+                              <span style={{ fontSize: 12, color, fontFamily: "'Space Mono',monospace", fontWeight: 700 }}>{winPct}%</span>
+                              <span style={{ fontSize: 11, color: T.text3 }}>{total}t</span>
+                            </div>
+                            <span style={{ fontFamily: "'Space Mono',monospace", fontSize: 12, fontWeight: 700, color }}>{pl >= 0 ? "+" : ""}{fmt(pl)}</span>
+                          </div>
+                          <div style={{ height: 5, borderRadius: 3, background: T.border, overflow: "hidden" }}>
+                            <div style={{ height: "100%", width: `${barWidth}%`, borderRadius: 3, background: color, transition: "width 0.4s ease" }} />
+                          </div>
+                        </div>
+                      );
+                    })}
+                    {tickerBreakdown.length > 8 && (
+                      <div style={{ fontSize: 11, color: T.text3, marginTop: 2 }}>+{tickerBreakdown.length - 8} more tickers</div>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              {/* Mistake Cost */}
+              <div style={{ background: T.surface, border: `1px solid ${T.border}`, borderRadius: 12, padding: "16px 18px" }}>
+                <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 10, color: T.text3, textTransform: "uppercase", letterSpacing: 2, marginBottom: 16 }}>Mistake Cost</div>
+                {mistakeBreakdown.length === 0 ? (
+                  <div style={{ fontSize: 13, color: T.text3 }}>No mistakes flagged yet — nice discipline.</div>
+                ) : (
+                  <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                    {mistakeBreakdown.map(({ mistake, cost, count }) => {
+                      const maxAbs = Math.max(...mistakeBreakdown.map(m => Math.abs(m.cost)), 1);
+                      const barWidth = Math.round((Math.abs(cost) / maxAbs) * 100);
+                      return (
+                        <div key={mistake}>
+                          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 5 }}>
+                            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                              <span style={{ fontSize: 12, color: T.text }}>{mistake}</span>
+                              <span style={{ fontSize: 11, color: T.text3 }}>{count}×</span>
+                            </div>
+                            <span style={{ fontFamily: "'Space Mono',monospace", fontSize: 12, fontWeight: 700, color: cost >= 0 ? T.accent : T.danger }}>{cost >= 0 ? "+" : ""}{fmt(cost)}</span>
+                          </div>
+                          <div style={{ height: 5, borderRadius: 3, background: T.border, overflow: "hidden" }}>
+                            <div style={{ height: "100%", width: `${barWidth}%`, borderRadius: 3, background: T.danger, transition: "width 0.4s ease" }} />
+                          </div>
+                        </div>
+                      );
+                    })}
+                    <div style={{ fontSize: 11, color: T.text3, marginTop: 4 }}>
+                      Total cost: <span style={{ color: T.danger, fontFamily: "'Space Mono',monospace" }}>{fmt(mistakeBreakdown.reduce((s, m) => s + m.cost, 0))}</span>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
           </ErrorBoundary>
         )}
 
-        {tab === "mistakes" && (
-          <div>
-            <div
-              style={{
-                background: T.danger + "08",
-                border: `1px solid ${T.danger}20`,
-                borderRadius: 12,
-                padding: "16px 20px",
-                marginBottom: 20,
-              }}
-            >
-              <div
-                style={{
-                  fontFamily: "'Space Mono',monospace",
-                  fontSize: 10,
-                  color: T.danger,
-                  textTransform: "uppercase",
-                  letterSpacing: 2,
-                  marginBottom: 5,
-                }}
-              >
-                Total Cost of Mistakes
-              </div>
-              <div
-                style={{
-                  fontFamily: "'Space Mono',monospace",
-                  fontSize: 28,
-                  fontWeight: 700,
-                  color: T.danger,
-                }}
-              >
-                {fmt(mistakeStats.reduce((s, m) => s + m.cost, 0))}
-              </div>
-            </div>
-            {mistakeStats.length === 0 ? (
-              <div
-                style={{
-                  textAlign: "center",
-                  padding: 60,
-                  color: T.text4,
-                  fontFamily: "'Space Mono',monospace",
-                  fontSize: 12,
-                }}
-              >
-                No mistakes logged — nice discipline.
-              </div>
-            ) : (
-              <div style={{ display: "grid", gap: 10, marginBottom: 20 }}>
-                {mistakeStats.map((m) => (
-                  <div
-                    key={m.mistake}
-                    style={{
-                      background: T.danger + "06",
-                      border: `1px solid ${T.danger}15`,
-                      borderRadius: 10,
-                      padding: "14px 18px",
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                    }}
-                  >
-                    <div>
-                      <div
-                        style={{ fontSize: 14, color: T.text, marginBottom: 3 }}
-                      >
-                        {m.mistake}
-                      </div>
-                      <div style={{ fontSize: 12, color: T.text3 }}>
-                        {plList.filter((tr) => tr.mistake === m.mistake).length}{" "}
-                        occurrence(s)
-                      </div>
-                    </div>
-                    <div
-                      style={{
-                        fontFamily: "'Space Mono',monospace",
-                        fontSize: 18,
-                        fontWeight: 700,
-                        color: T.danger,
-                      }}
-                    >
-                      {fmt(m.cost)}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-            <div
-              style={{
-                background: T.surface,
-                border: `1px solid ${T.border}`,
-                borderRadius: 12,
-              }}
-            >
-              <div
-                style={{
-                  padding: "12px 16px",
-                  borderBottom: `1px solid ${T.border}`,
-                  fontFamily: "'Space Mono',monospace",
-                  fontSize: 10,
-                  color: T.text3,
-                  textTransform: "uppercase",
-                  letterSpacing: 2,
-                }}
-              >
-                Flagged Trades
-              </div>
-              {plList
-                .filter((tr) => tr.mistake && tr.mistake !== "None")
-                .map((tr) => (
-                  <div
-                    key={tr.id}
-                    style={{
-                      padding: "12px 16px",
-                      borderBottom: `1px solid ${T.border}`,
-                    }}
-                  >
-                    {mobile ? (
-                      <div>
-                        <div
-                          style={{
-                            display: "flex",
-                            justifyContent: "space-between",
-                            marginBottom: 3,
-                          }}
-                        >
-                          <span
-                            style={{
-                              fontFamily: "'Space Mono',monospace",
-                              fontSize: 14,
-                              fontWeight: 700,
-                              color: T.text,
-                            }}
-                          >
-                            {tr.ticker}
-                          </span>
-                          <span
-                            style={{
-                              fontFamily: "'Space Mono',monospace",
-                              fontSize: 13,
-                              fontWeight: 700,
-                              color: tr.pl >= 0 ? T.accent : T.danger,
-                            }}
-                          >
-                            {tr.pl >= 0 ? "+" : ""}
-                            {fmt(tr.pl)}
-                          </span>
-                        </div>
-                        <span
-                          style={{
-                            fontSize: 11,
-                            color: T.danger,
-                            background: T.danger + "12",
-                            borderRadius: 5,
-                            padding: "2px 7px",
-                          }}
-                        >
-                          {tr.mistake}
-                        </span>
-                      </div>
-                    ) : (
-                      <div
-                        style={{
-                          display: "grid",
-                          gridTemplateColumns: "85px 65px 1fr 100px 85px",
-                          gap: 10,
-                          alignItems: "center",
-                        }}
-                      >
-                        <span
-                          style={{
-                            fontFamily: "monospace",
-                            fontSize: 11,
-                            color: T.text3,
-                          }}
-                        >
-                          {fmtDate(tr.date)}
-                        </span>
-                        <span
-                          style={{
-                            fontFamily: "'Space Mono',monospace",
-                            fontSize: 13,
-                            fontWeight: 700,
-                            color: T.text,
-                          }}
-                        >
-                          {tr.ticker}
-                        </span>
-                        <span
-                          style={{
-                            fontSize: 12,
-                            color: T.danger,
-                            background: T.danger + "12",
-                            borderRadius: 5,
-                            padding: "2px 7px",
-                            display: "inline-block",
-                          }}
-                        >
-                          {tr.mistake}
-                        </span>
-                        <span style={{ fontSize: 12, color: T.text3 }}>
-                          {tr.strategy}
-                        </span>
-                        <span
-                          style={{
-                            fontFamily: "'Space Mono',monospace",
-                            fontSize: 13,
-                            fontWeight: 700,
-                            color: tr.pl >= 0 ? T.accent : T.danger,
-                            textAlign: "right",
-                          }}
-                        >
-                          {tr.pl >= 0 ? "+" : ""}
-                          {fmt(tr.pl)}
-                        </span>
-                      </div>
-                    )}
-                  </div>
-                ))}
-            </div>
-          {/* Day of Week */}
-          <div style={{ background: T.surface, border: `1px solid ${T.border}`, borderRadius: 12, padding: "16px 18px", marginTop: 16 }}>
-            <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 10, color: T.text3, textTransform: "uppercase", letterSpacing: 2, marginBottom: 16 }}>
-              Performance by Day
-            </div>
-            <div style={{ display: "grid", gridTemplateColumns: mobile ? "repeat(3,1fr)" : "repeat(5,1fr)", gap: 10 }}>
-              {dayOfWeekStats.map(d => (
-                <div key={d.day} style={{ textAlign: "center", background: T.card2, borderRadius: 10, padding: "12px 8px" }}>
-                  <div style={{ fontSize: 10, color: T.text3, fontFamily: "'Space Mono',monospace", marginBottom: 6, textTransform: "uppercase", letterSpacing: 1 }}>{d.short}</div>
-                  <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 13, fontWeight: 700, color: d.total === 0 ? T.text4 : d.pl >= 0 ? T.accent : T.danger }}>
-                    {d.total === 0 ? "—" : `${d.pl >= 0 ? "+" : ""}${fmt(d.pl)}`}
-                  </div>
-                  <div style={{ fontSize: 10, color: T.text3, marginTop: 4 }}>
-                    {d.total === 0 ? "no trades" : `${(d.winRate * 100).toFixed(0)}% WR · ${d.total}t`}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-          </div>
+        {tab === "journal" && (
+          <JournalView journals={journals} onSave={saveJournal} t={T} mobile={mobile} />
         )}
+
       </div>
 
 {showAdd && (
         <TradeFormModal
           initial={planPrefill || undefined}
+          defaults={planPrefill ? undefined : tradeDefaults}
           editLabel={planPrefill ? "Execute Plan" : undefined}
           onClose={() => { setShowAdd(false); setPlanPrefill(null); }}
           onSave={addTrade}
@@ -1805,11 +1671,15 @@ style={{ display: "block" }}>
     setIsDark={setIsDark}
     onClear={clearAll}
     t={T}
+    user={user}
     onSignOut={() => { setShowSettings(false); signOut(); }}
     isPro={isPro}
     onUpgrade={() => { setShowSettings(false); handleUpgrade(); }}
     onManageBilling={() => { setShowSettings(false); handleManageBilling(); }}
     onTutorial={openTutorial}
+    tradeDefaults={tradeDefaults}
+    onSaveDefaults={saveTradeDefaults}
+    trades={trades}
   />
 )}
       {showPlan && (
@@ -1828,7 +1698,7 @@ style={{ display: "block" }}>
       )}
 
       {showOnboarding && (
-        <OnboardingModal onStartFresh={dismissOnboarding} t={T} />
+        <OnboardingModal onStartFresh={dismissOnboarding} onLoadSamples={loadSeedTrades} t={T} />
       )}
 
       {/* Tutorial — shown after "Start Fresh" from onboarding */}

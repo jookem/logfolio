@@ -1,3 +1,10 @@
+import { createClient } from "@supabase/supabase-js";
+
+const ALLOWED_HOSTS = [
+  "https://query1.finance.yahoo.com",
+  "https://query2.finance.yahoo.com",
+];
+
 const BASE_HEADERS = {
   "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
   "Accept": "application/json, text/plain, */*",
@@ -32,9 +39,19 @@ export default async function handler(req, res) {
   if (req.method !== "POST") return res.status(405).end();
 
   const { url } = req.body || {};
-  if (!url) return res.status(400).json({ error: "Missing url" });
+  if (!url || typeof url !== "string" || !ALLOWED_HOSTS.some(h => url.startsWith(h))) {
+    return res.status(400).json({ error: "Invalid url" });
+  }
 
-  res.setHeader("Access-Control-Allow-Origin", "*");
+  // Verify JWT
+  const token = req.headers.authorization?.replace("Bearer ", "");
+  if (!token) return res.status(401).json({ error: "Unauthorized" });
+  if (process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    const admin = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
+    const { error } = await admin.auth.getUser(token);
+    if (error) return res.status(401).json({ error: "Unauthorized" });
+  }
+
   res.setHeader("Cache-Control", "s-maxage=300, stale-while-revalidate");
 
   const isOptionsUrl = url.includes("/v7/finance/options");

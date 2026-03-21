@@ -24,6 +24,9 @@ export default function CSVModal({ onClose, onImport, t }) {
       const delimiter = lines[0].includes("\t") ? "\t" : ",";
       const headers = lines[0].split(delimiter).map(h => h.trim().toLowerCase().replace(/\s+/g, " "));
       const broker = detectBroker(headers);
+      if (broker === "unknown") {
+        setError("Broker format not recognised — falling back to generic parsing. Results may be incomplete. Supported formats: Webull, Robinhood, TD Ameritrade, Interactive Brokers.");
+      }
 
       const rows = lines.slice(1).map(line => {
         const vals = line.split(delimiter).map(v => v.trim().replace(/^"|"$/g, ""));

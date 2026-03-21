@@ -110,7 +110,7 @@ export default function TradeDetail({ trade, onClose, onEdit, onExecute, onSave,
           </div>
         </div>
         <div>
-          {!isNaN(pl) && (
+          {!isNaN(pl) ? (
             <div
               style={{
                 fontFamily: "'Space Mono', monospace",
@@ -122,6 +122,10 @@ export default function TradeDetail({ trade, onClose, onEdit, onExecute, onSave,
             >
               {pl >= 0 ? "+" : ""}{fmt(pl)}
             </div>
+          ) : (
+            <span style={{ fontSize: 11, fontFamily: "'Space Mono',monospace", color: "#f59e0b", background: "#f59e0b18", border: "1px solid #f59e0b40", borderRadius: 6, padding: "4px 10px", letterSpacing: 1 }}>
+              OPEN
+            </span>
           )}
         </div>
       </div>

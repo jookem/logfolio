@@ -5,6 +5,7 @@ import { EditIcon, DeleteIcon } from "../lib/icons";
 export default function TradeRow({ trade, onClick, onEdit, onDelete, t, mobile, isFirst, editLabel }) {
   const pl = calcPL(trade);
   const plDisplay = isNaN(pl) ? null : pl;
+  const isOpen = plDisplay === null;
   return (
     <div
       style={{ padding: "12px 16px", borderTop: isFirst ? "none" : `1px solid ${t.border}`, cursor: "pointer" }}
@@ -14,8 +15,9 @@ export default function TradeRow({ trade, onClick, onEdit, onDelete, t, mobile, 
       {mobile ? (
         <div onClick={onClick}>
           <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
-            <span style={{ fontFamily: "'Space Mono', monospace", fontSize: 15, fontWeight: 700, color: t.text }}>
-              {trade.ticker}
+            <span style={{ display: "flex", alignItems: "center", gap: 7 }}>
+              <span style={{ fontFamily: "'Space Mono', monospace", fontSize: 15, fontWeight: 700, color: t.text }}>{trade.ticker}</span>
+              {isOpen && <span style={{ fontSize: 9, fontFamily: "'Space Mono',monospace", color: "#f59e0b", background: "#f59e0b18", border: "1px solid #f59e0b40", borderRadius: 4, padding: "1px 5px", letterSpacing: 1 }}>OPEN</span>}
             </span>
             <span style={{ fontFamily: "'Space Mono', monospace", fontSize: 15, fontWeight: 700, color: plDisplay == null ? t.text3 : plDisplay >= 0 ? t.accent : t.danger }}>
               {plDisplay == null ? "—" : `${plDisplay >= 0 ? "+" : ""}${fmt(plDisplay)}`}
@@ -51,6 +53,7 @@ export default function TradeRow({ trade, onClick, onEdit, onDelete, t, mobile, 
           <span onClick={onClick} style={{ fontFamily: "'Space Mono', monospace", fontSize: 14, fontWeight: 700, color: t.text }}>{trade.ticker}</span>
           <span onClick={onClick} style={{ fontSize: 13, color: t.text3 }}>
             {trade.strategy}
+            {isOpen && <span style={{ marginLeft: 6, fontSize: 9, fontFamily: "'Space Mono',monospace", color: "#f59e0b", background: "#f59e0b18", border: "1px solid #f59e0b40", borderRadius: 4, padding: "1px 5px", letterSpacing: 1 }}>OPEN</span>}
             {trade.tags?.length > 0 && (
               <span style={{ marginLeft: 6, fontSize: 10, color: t.accent, background: t.accent + "15", borderRadius: 4, padding: "1px 6px" }}>
                 {trade.tags[0]}{trade.tags.length > 1 ? ` +${trade.tags.length - 1}` : ""}
@@ -58,6 +61,11 @@ export default function TradeRow({ trade, onClick, onEdit, onDelete, t, mobile, 
             )}
             {trade.screenshots?.length > 0 && (
               <span style={{ marginLeft: 6, fontSize: 10, color: t.text3, display: "inline-flex", alignItems: "center", gap: 3 }}><svg width="11" height="11" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="13" r="3" stroke="currentColor" strokeWidth="2"/><path d="M2 13.3636C2 10.2994 2 8.76721 2.74902 7.6666C3.07328 7.19014 3.48995 6.78104 3.97524 6.46268C4.69555 5.99013 5.59733 5.82123 6.978 5.76086C7.63685 5.76086 8.20412 5.27068 8.33333 4.63636C8.52715 3.68489 9.37805 3 10.3663 3H13.6337C14.6219 3 15.4728 3.68489 15.6667 4.63636C15.7959 5.27068 16.3631 5.76086 17.022 5.76086C18.4027 5.82123 19.3044 5.99013 20.0248 6.46268C20.51 6.78104 20.9267 7.19014 21.251 7.6666C22 8.76721 22 10.2994 22 13.3636C22 16.4279 22 17.9601 21.251 19.0607C20.9267 19.5371 20.51 19.9462 20.0248 20.2646C18.9038 21 17.3433 21 3.97524 20.2646C3.48995 19.9462 3.07328 19.5371 2.74902 19.0607C2.53746 18.7498 2.38566 18.4045 2.27673 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/><path d="M19 10H18" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/></svg> {trade.screenshots.length}</span>
+            )}
+            {trade.voiceNote && (
+              <span style={{ marginLeft: 6, fontSize: 10, color: t.text3, display: "inline-flex", alignItems: "center", gap: 3 }} title="Has voice note">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none"><path d="M7 8C7 5.23858 9.23858 3 12 3C14.7614 3 17 5.23858 17 8V11C17 13.7614 14.7614 16 12 16C9.23858 16 7 13.7614 7 11V8Z" stroke="currentColor" strokeWidth="2"/><path d="M12 19V22" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/><path d="M4 11C4 15.4183 7.58172 19 12 19C16.4183 19 20 15.4183 20 11" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/></svg>
+              </span>
             )}
           </span>
           <div style={{ display: "flex", gap: 6 }}>

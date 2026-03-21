@@ -84,16 +84,16 @@ export const CloseIcon = ({ size = 24 }) => (
 // ── Tutorial / Analytics icons ────────────────────────────────────────────────
 
 export const TodayIcon = ({ size = 36 }) => (
-  <svg viewBox="0 0 800 800" width={size} height={size} fill="none" stroke="currentColor" strokeWidth="66.6667" strokeLinecap="round" strokeLinejoin="round" strokeMiterlimit="133.3333">
-    <path d="M575.3,700H206.7c-37.3,0-56,0-70.3-7.3c-12.5-6.4-22.7-16.6-29.1-29.1c-7.3-14.3-7.3-32.9-7.3-70.3v-320c0-37.3,0-56,7.3-70.3c6.4-12.5,16.6-22.7,29.1-29.1c14.3-7.3,32.9-7.3,70.3-7.3h386.7c37.3,0,56,0,70.3,7.3c12.5,6.4,22.7,16.6,29.1,29.1c7.3,14.3,7.3,32.9,7.3,70.3v262 M233.3,100v66.7 M566.7,100v66.7 M100,300h600" />
-    <rect x="207.2" y="396.8" width="133.3" height="133.3" />
+  <svg viewBox="0 0 24 24" width={size} height={size} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M17.26,21H6.2c-1.12,0-1.68,0-2.11,-0.22c-0.38,-0.19-0.68,-0.5-0.87,-0.87c-0.22,-0.43-0.22,-0.99-0.22,-2.11V8.2c0,-1.12,0,-1.68,0.22,-2.11c0.19,-0.38,0.5,-0.68,0.87,-0.87c0.43,-0.22,0.99,-0.22,2.11,-0.22h11.6c1.12,0,1.68,0,2.11,0.22c0.38,0.19,0.68,0.5,0.87,0.87c0.22,0.43,0.22,0.99,0.22,2.11v7.86 M7,3v2 M17,3v2 M3,9h18" />
+    <rect x="6.22" y="11.9" width="4" height="4" />
   </svg>
 );
 
 export const WeekIcon = ({ size = 36 }) => (
-  <svg viewBox="0 0 800 800" width={size} height={size} fill="none" stroke="currentColor" strokeWidth="66.6667" strokeLinecap="round" strokeLinejoin="round" strokeMiterlimit="133.3333">
-    <path d="M575.3,700H206.7c-37.3,0-56,0-70.3-7.3c-12.5-6.4-22.7-16.6-29.1-29.1c-7.3-14.3-7.3-32.9-7.3-70.3v-320c0-37.3,0-56,7.3-70.3c6.4-12.5,16.6-22.7,29.1-29.1c14.3-7.3,32.9-7.3,70.3-7.3h386.7c37.3,0,56,0,70.3,7.3c12.5,6.4,22.7,16.6,29.1,29.1c7.3,14.3,7.3,32.9,7.3,70.3v262 M233.3,100v66.7 M566.7,100v66.7 M100,300h600" />
-    <rect x="207.2" y="396.8" width="379.3" height="133.3" />
+  <svg viewBox="0 0 24 24" width={size} height={size} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M17.26,21H6.2c-1.12,0-1.68,0-2.11,-0.22c-0.38,-0.19-0.68,-0.5-0.87,-0.87c-0.22,-0.43-0.22,-0.99-0.22,-2.11V8.2c0,-1.12,0,-1.68,0.22,-2.11c0.19,-0.38,0.5,-0.68,0.87,-0.87c0.43,-0.22,0.99,-0.22,2.11,-0.22h11.6c1.12,0,1.68,0,2.11,0.22c0.38,0.19,0.68,0.5,0.87,0.87c0.22,0.43,0.22,0.99,0.22,2.11v7.86 M7,3v2 M17,3v2 M3,9h18" />
+    <rect x="6.22" y="11.9" width="11.4" height="4" />
   </svg>
 );
 
@@ -104,23 +104,23 @@ export const CalendarIcon = ({ size = 36 }) => (
 );
 
 export const AnalysisIcon = ({ size = 36 }) => (
-  <svg viewBox="0 0 48 48" width={size} height={size} fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M44 5H4V17H44V5Z" />
-    <path d="M4 41.03L16.18 28.73L22.75 35.03L30.8 27L35.28 31.37" />
-    <path d="M44 17V42" />
-    <path d="M4 17V30" />
-    <path d="M13 43H44" />
+  <svg viewBox="0 0 24 24" width={size} height={size} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M22 2.5H2V8.5H22V2.5Z" />
+    <path d="M2 20.52L8.09 14.37L11.38 17.52L15.4 13.5L17.64 15.69" />
+    <path d="M22 8.5V21" />
+    <path d="M2 8.5V15" />
+    <path d="M6.5 21.5H22" />
   </svg>
 );
 
 export const RobotIcon = ({ size = 36 }) => (
-  <svg viewBox="0 0 800 800" width={size} height={size} fill="none" stroke="currentColor" strokeWidth="50" strokeLinecap="round" strokeMiterlimit="133.3333" xmlns="http://www.w3.org/2000/svg">
-    <path d="M700,446c0,58.1-3.2,70.2-9.6,128l-0.6,5.1c-8.2,74-66.4,132.8-140.5,142l-30.2,3.8c-16.5,2.1-24.7,3.1-33,3.9c-57.3,6-115,6-172.3,0c-8.2-0.9-16.5-1.9-33-3.9l-33.8-4.2c-72.1-9-128.6-65.9-136.8-137.9c-8.1-114.2-4.8-145.8,0-266.3l0.5-4.6c8-70.2,61-126.9,130.6-139.9l7.2-1.3c100.1-18.7,202.9-18.7,303,0l10.8,2c67.5,12.6,119,67.5,127,135.6c1.9,16.1,3.5,32.2,4.9,48.4" />
-    <path d="M524.8,548.6c-20.4,24-46.7,50-129.7,50s-108.2-27.6-129.7-50" />
-    <circle cx="302" cy="376.9" r="68.7" />
-    <circle cx="509.6" cy="376.9" r="68.7" />
-    <line x1="391.7" y1="147.8" x2="391.7" y2="60.6" />
-    <circle cx="391.7" cy="71.9" r="51.8" fill="currentColor" stroke="none" />
+  <svg viewBox="0 0 24 24" width={size} height={size} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M21,13.38c0,1.74-0.1,2.11-0.29,3.84l-0.02,0.15c-0.25,2.22-1.99,3.98-4.22,4.26l-0.91,0.11c-0.5,0.06-0.74,0.09-0.99,0.12c-1.72,0.18-3.45,0.18-5.17,0c-0.25,-0.03-0.5,-0.06-0.99,-0.12l-1.01,-0.13c-2.16,-0.27-3.86,-1.98-4.1,-4.14c-0.24,-3.43-0.14,-4.37,0,-7.99l0.02,-0.14c0.24,-2.11,1.83,-3.81,3.92,-4.2l0.22,-0.04c3,-0.56,6.09,-0.56,9.09,0l0.32,0.06c2.03,0.38,3.57,2.03,3.81,4.07c0.06,0.48,0.11,0.97,0.15,1.45" />
+    <path d="M15.74,16.46c-0.61,0.72-1.4,1.5-3.89,1.5s-3.25,-0.83-3.89,-1.5" />
+    <circle cx="9.06" cy="11.31" r="2.06" />
+    <circle cx="15.29" cy="11.31" r="2.06" />
+    <line x1="11.75" y1="4.43" x2="11.75" y2="1.82" />
+    <circle cx="11.75" cy="2.16" r="1.55" fill="currentColor" stroke="none" />
   </svg>
 );
 

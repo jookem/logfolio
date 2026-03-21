@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { supabase } from "../lib/supabase";
 import { STOCK_LIKE, SUGGESTED_TAGS, EMOTIONS } from "../lib/constants";
 import { todayStr, typeLabels, normCDF, bsPrice } from "../lib/utils";
 import Tag from "./Tag";
@@ -27,11 +28,17 @@ const [chainError, setChainError] = useState(null);
 const [expiryDates, setExpiryDates] = useState([]);
 const [strikes, setStrikes] = useState([]);
 const [pnlMode, setPnlMode] = useState("pct"); // "pct" | "dollar"
-const polyFetch = (path) => fetch("/api/polygon", {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({ path }),
-}).then(r => r.json());
+const polyFetch = async (path) => {
+  const { data: { session } } = await supabase.auth.getSession();
+  return fetch("/api/polygon", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      ...(session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {}),
+    },
+    body: JSON.stringify({ path }),
+  }).then(r => r.json());
+};
 
 const fetchStockPrice = async (ticker) => {
   if (!ticker || ticker.length < 1) return;

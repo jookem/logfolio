@@ -1,19 +1,45 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
+
+const MAX_SECONDS = 120; // 2 minutes
+
+// Prefer Opus (best compression); fall back to browser default
+const PREFERRED_TYPES = [
+  "audio/webm;codecs=opus",
+  "audio/ogg;codecs=opus",
+  "audio/webm",
+];
+const AUDIO_MIME = PREFERRED_TYPES.find(t => MediaRecorder.isTypeSupported(t)) || "";
 
 export default function VoiceNote({ value, onChange, t }) {
   const [recording, setRecording] = useState(false);
   const [mediaRecorder, setMediaRecorder] = useState(null);
   const [audioUrl, setAudioUrl] = useState(value || null);
+  const [elapsed, setElapsed] = useState(0);
+
+  useEffect(() => {
+    setAudioUrl(value || null);
+  }, [value]);
+
   const chunksRef = useRef([]);
+  const timerRef = useRef(null);
+  const mrRef = useRef(null);
+
+  const stopRecording = () => {
+    mrRef.current?.stop();
+    clearInterval(timerRef.current);
+    setRecording(false);
+    setElapsed(0);
+  };
 
   const startRecording = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const mr = new MediaRecorder(stream);
+      const mr = new MediaRecorder(stream, AUDIO_MIME ? { mimeType: AUDIO_MIME } : {});
+      mrRef.current = mr;
       chunksRef.current = [];
       mr.ondataavailable = (e) => chunksRef.current.push(e.data);
       mr.onstop = () => {
-        const blob = new Blob(chunksRef.current, { type: "audio/webm" });
+        const blob = new Blob(chunksRef.current, { type: mr.mimeType || "audio/webm" });
         const url = URL.createObjectURL(blob);
         setAudioUrl(url);
         const reader = new FileReader();
@@ -24,20 +50,27 @@ export default function VoiceNote({ value, onChange, t }) {
       mr.start();
       setMediaRecorder(mr);
       setRecording(true);
+      setElapsed(0);
+
+      let secs = 0;
+      timerRef.current = setInterval(() => {
+        secs += 1;
+        setElapsed(secs);
+        if (secs >= MAX_SECONDS) stopRecording();
+      }, 1000);
     } catch {
       alert("Microphone access denied.");
     }
-  };
-
-  const stopRecording = () => {
-    mediaRecorder?.stop();
-    setRecording(false);
   };
 
   const clearRecording = () => {
     setAudioUrl(null);
     onChange(null);
   };
+
+  const remaining = MAX_SECONDS - elapsed;
+  const isNearLimit = elapsed >= MAX_SECONDS - 15;
+  const fmtTime = (s) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
 
   return (
     <div style={{
@@ -69,7 +102,14 @@ export default function VoiceNote({ value, onChange, t }) {
                 background: t.danger, display: "inline-block",
                 animation: "pulse 1s infinite",
               }} />
-              Stop Recording
+              Stop — {fmtTime(elapsed)}
+              <span style={{
+                marginLeft: "auto", fontSize: 11,
+                color: isNearLimit ? t.danger : t.text3,
+                opacity: 0.8,
+              }}>
+                -{fmtTime(remaining)}
+              </span>
             </>
           ) : (
             <>
@@ -79,7 +119,11 @@ export default function VoiceNote({ value, onChange, t }) {
   <path d="M13 11L17 11" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
   <path d="M12 19V22" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
   <path d="M4 11C4 15.4183 7.58172 19 12 19C16.4183 19 20 15.4183 20 11" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-</svg> Record Voice Note</>
+</svg> Record Voice Note
+              <span style={{ marginLeft: "auto", fontSize: 11, color: t.text3, opacity: 0.7 }}>
+                max {fmtTime(MAX_SECONDS)}
+              </span>
+            </>
           )}
         </button>
       ) : (
