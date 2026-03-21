@@ -727,7 +727,7 @@ export default function TradeFormModal({ initial, onClose, onSave, onCSVImport, 
         <div style={{ marginBottom: 20 }}>
           <label style={lbl}>Notes</label>
           <textarea
-            style={{ ...inp, height: 80, resize: "none" }}
+            style={{ ...inp(), height: 80, resize: "none" }}
             value={form.notes}
             onChange={(e) => set("notes", e.target.value)}
             placeholder="What happened? What did you learn?"

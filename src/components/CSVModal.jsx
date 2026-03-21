@@ -34,7 +34,7 @@ export default function CSVModal({ onClose, onImport, t }) {
 
       const parseDate = (str) => {
         if (!str) return todayStr();
-        const clean = str.split(" ")[0];
+        const clean = str.trim().split(/\s+/)[0];
         if (clean.includes("/")) {
           const parts = clean.split("/");
           if (parts[2]?.length === 4) return `${parts[2]}-${parts[0].padStart(2,"0")}-${parts[1].padStart(2,"0")}`;
@@ -42,6 +42,15 @@ export default function CSVModal({ onClose, onImport, t }) {
         }
         if (clean.includes("-")) return clean.slice(0, 10);
         return todayStr();
+      };
+
+      const parseTime = (str) => {
+        if (!str) return "";
+        const parts = str.trim().split(/\s+/);
+        if (parts.length < 2) return "";
+        const hm = parts[1].split(":");
+        if (hm.length < 2) return "";
+        return `${hm[0].padStart(2,"0")}:${hm[1].padStart(2,"0")}`;
       };
 
       const parsePrice = (v) => parseFloat(String(v).replace(/[^0-9.-]/g, "")) || 0;
@@ -52,36 +61,43 @@ export default function CSVModal({ onClose, onImport, t }) {
         rows.forEach(row => {
           const ticker = (row.symbol || "").toUpperCase();
           if (!ticker) return;
+          if ((row.status || "").toLowerCase() === "failed") return;
+          const timeStr = row["filled time"] || row["placed time"] || "";
           orders.push({
             ticker,
             side: (row.side || "").toLowerCase(),
             price: parsePrice(row["avg price"] || row.price),
             shares: parsePrice(row.filled || row["total qty"]),
-            date: parseDate(row["filled time"] || row["placed time"]),
+            date: parseDate(timeStr),
+            time: parseTime(timeStr),
           });
         });
       } else if (broker === "robinhood") {
         rows.forEach(row => {
           const ticker = (row.symbol || "").toUpperCase();
           if (!ticker || row.state?.toLowerCase() !== "filled") return;
+          const timeStr = row["last transaction at"] || row.date || "";
           orders.push({
             ticker,
             side: (row.side || "").toLowerCase(),
             price: parsePrice(row["average price"] || row.price),
             shares: parsePrice(row["filled quantity"] || row.quantity),
-            date: parseDate(row["last transaction at"] || row.date),
+            date: parseDate(timeStr),
+            time: parseTime(timeStr),
           });
         });
       } else if (broker === "tdameritrade") {
         rows.forEach(row => {
           const ticker = (row.symbol || "").toUpperCase();
           if (!ticker) return;
+          const timeStr = row["exec time"] || row.date || "";
           orders.push({
             ticker,
             side: (row["buy/sell"] || "").toLowerCase(),
             price: parsePrice(row.price),
             shares: parsePrice(row.quantity),
-            date: parseDate(row["exec time"] || row.date),
+            date: parseDate(timeStr),
+            time: parseTime(timeStr),
           });
         });
       } else if (broker === "ibkr") {
@@ -89,25 +105,30 @@ export default function CSVModal({ onClose, onImport, t }) {
           const ticker = (row.symbol || "").toUpperCase();
           if (!ticker || row["asset category"]?.toLowerCase() !== "stocks") return;
           const side = parsePrice(row.quantity) > 0 ? "buy" : "sell";
+          const timeStr = row["date/time"] || row.date || "";
           orders.push({
             ticker,
             side,
             price: parsePrice(row["t. price"] || row.price),
             shares: Math.abs(parsePrice(row.quantity)),
-            date: parseDate(row["date/time"] || row.date),
+            date: parseDate(timeStr),
+            time: parseTime(timeStr),
           });
         });
       } else {
         rows.forEach(row => {
           const ticker = (row.symbol || row.ticker || "").toUpperCase();
           if (!ticker) return;
+          if ((row.status || "").toLowerCase() === "failed") return;
           const side = (row.side || row["buy/sell"] || row.action || "").toLowerCase();
+          const timeStr = row.date || row["filled time"] || row["exec time"] || "";
           orders.push({
             ticker,
             side: side.includes("buy") ? "buy" : "sell",
             price: parsePrice(row["avg price"] || row.price || row["average price"]),
             shares: parsePrice(row.filled || row.quantity || row.shares),
-            date: parseDate(row.date || row["filled time"] || row["exec time"]),
+            date: parseDate(timeStr),
+            time: parseTime(timeStr),
           });
         });
       }
@@ -135,6 +156,8 @@ export default function CSVModal({ onClose, onImport, t }) {
               entryPrice: buy.price,
               exitPrice: sell.price,
               shares: Math.min(buy.shares, sell.shares),
+              entryTime: buy.time || "",
+              exitTime: sell.time || "",
               strategy: "Breakout",
               emotion: "Calm",
               mistake: "None",
