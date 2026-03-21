@@ -2,6 +2,7 @@ import { useState } from "react";
 import { calcPL, fmt, fmtDate, fmtR, typeLabels } from "../lib/utils";
 import { STOCK_LIKE } from "../lib/constants";
 import Tag from "./Tag";
+import { LogIcon, EditIcon, QuickIcon, ShareIcon, CloseIcon } from "../lib/icons";
 
 export default function TradeDetail({ trade, onClose, onEdit, onExecute, onSave, onShare, t }) {
   const pl = calcPL(trade);
@@ -67,10 +68,7 @@ export default function TradeDetail({ trade, onClose, onEdit, onExecute, onSave,
                   fontFamily: "'Space Mono', monospace", display: "flex", alignItems: "center", gap: 5,
                 }}
               >
-                <svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" style={{ display: "block" }}>
-                  <path d="M20 14V7C20 5.34315 18.6569 4 17 4H12M20 14L13.5 20M20 14H15.5C14.3954 14 13.5 14.8954 13.5 16V20M13.5 20H7C5.34315 20 4 18.6569 4 17V12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  <path d="M7 4V7M7 10V7M7 7H4M7 7H10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg> Execute Plan
+                <LogIcon size="1em" /> Execute Plan
               </button>
             )}
             <button
@@ -81,17 +79,14 @@ export default function TradeDetail({ trade, onClose, onEdit, onExecute, onSave,
                 cursor: "pointer", fontSize: 12, display: "flex", alignItems: "center", gap: 5,
               }}
             >
-              <svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" style={{ display: "block" }}>
-                <path d="M21.2799 6.40005L11.7399 15.94C10.7899 16.89 7.96987 17.33 7.33987 16.7C6.70987 16.07 7.13987 13.25 8.08987 12.3L17.6399 2.75002C17.8754 2.49308 18.1605 2.28654 18.4781 2.14284C18.7956 1.99914 19.139 1.92124 19.4875 1.9139C19.8359 1.90657 20.1823 1.96991 20.5056 2.10012C20.8289 2.23033 21.1225 2.42473 21.3686 2.67153C21.6147 2.91833 21.8083 3.21243 21.9376 3.53609C22.0669 3.85976 22.1294 4.20626 22.1211 4.55471C22.1128 4.90316 22.0339 5.24635 21.8894 5.5635C21.7448 5.88065 21.5375 6.16524 21.2799 6.40005V6.40005Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                <path d="M11 4H6C4.93913 4 3.92178 4.42142 3.17163 5.17157C2.42149 5.92172 2 6.93913 2 8V18C2 19.0609 2.42149 20.0783 3.17163 20.8284C3.92178 21.5786 4.93913 22 6 22H17C19.21 22 20 20.2 20 18V13" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg> Edit
+              <EditIcon size="1em" /> Edit
             </button>
             {trade.status !== "planned" && onSave && (
               <button
                 onClick={() => setQuickEdit(q => !q)}
                 style={{ background: quickEdit ? t.accent+"20" : "none", border: `1px solid ${t.border}`, color: quickEdit ? t.accent : t.text3, borderRadius: 6, padding: "4px 10px", cursor: "pointer", fontSize: 12, display: "flex", alignItems: "center", gap: 5 }}
               >
-                ✏ Quick Edit
+                <QuickIcon size="1em" /> Quick Edit
               </button>
             )}
             {onShare && (
@@ -99,7 +94,7 @@ export default function TradeDetail({ trade, onClose, onEdit, onExecute, onSave,
                 onClick={onShare}
                 style={{ background: "none", border: `1px solid ${t.border}`, color: t.text3, borderRadius: 6, padding: "4px 10px", cursor: "pointer", fontSize: 12, display: "flex", alignItems: "center", gap: 5 }}
               >
-                ↗ Share
+                <ShareIcon size="1em" /> Share
               </button>
             )}
             <button
@@ -110,10 +105,7 @@ export default function TradeDetail({ trade, onClose, onEdit, onExecute, onSave,
                 cursor: "pointer", fontSize: 12, display: "flex", alignItems: "center", gap: 5,
               }}
             >
-              <svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" style={{ display: "block" }}>
-                <path d="M14.5 9.50002L9.5 14.5M9.49998 9.5L14.5 14.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                <path d="M22 12C22 16.714 22 19.0711 20.5355 20.5355C19.0711 22 16.714 22 12 22C7.28595 22 4.92893 22 3.46447 20.5355C2 19.0711 2 16.714 2 12C2 7.28595 2 4.92893 3.46447 3.46447C4.92893 2 7.28595 2 12 2C16.714 2 19.0711 2 20.5355 3.46447C21.5093 4.43821 21.8356 5.80655 21.9449 8" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-              </svg> Close
+              <CloseIcon size="1em" /> Close
             </button>
           </div>
         </div>

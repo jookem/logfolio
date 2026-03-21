@@ -1,5 +1,6 @@
 import { calcPL, fmt, fmtDate, fmtR } from "../lib/utils";
 import Tag from "./Tag";
+import { EditIcon, DeleteIcon } from "../lib/icons";
 
 export default function TradeRow({ trade, onClick, onEdit, onDelete, t, mobile, isFirst, editLabel }) {
   const pl = calcPL(trade);
@@ -26,8 +27,8 @@ export default function TradeRow({ trade, onClick, onEdit, onDelete, t, mobile, 
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
             <span style={{ fontSize: 12, color: t.text3 }}>{trade.strategy} · {fmtDate(trade.date)}</span>
             <div style={{ display: "flex", gap: 6 }}>
-              <button onClick={(e) => { e.stopPropagation(); onEdit(); }} style={{ background: "none", border: `1px solid ${t.border}`, color: t.text3, borderRadius: 5, padding: "2px 8px", cursor: "pointer", fontSize: 11 }}>{editLabel || "Edit"}</button>
-              <button onClick={(e) => { e.stopPropagation(); onDelete(); }} style={{ background: "none", border: `1px solid ${t.danger}40`, color: t.danger, borderRadius: 5, padding: "2px 8px", cursor: "pointer", fontSize: 11 }}>Del</button>
+              <button onClick={(e) => { e.stopPropagation(); onEdit(); }} style={{ background: "none", border: `1px solid ${t.border}`, color: t.text3, borderRadius: 5, padding: "2px 8px", cursor: "pointer", fontSize: 11, display: "flex", alignItems: "center", gap: 4 }}><EditIcon size="1em" />{editLabel || "Edit"}</button>
+              <button onClick={(e) => { e.stopPropagation(); onDelete(); }} style={{ background: "none", border: `1px solid ${t.danger}40`, color: t.danger, borderRadius: 5, padding: "2px 8px", cursor: "pointer", fontSize: 11, display: "flex", alignItems: "center", gap: 4 }}><DeleteIcon size="1em" />Del</button>
             </div>
           </div>
           {trade.tags?.length > 0 && (
@@ -60,8 +61,8 @@ export default function TradeRow({ trade, onClick, onEdit, onDelete, t, mobile, 
             )}
           </span>
           <div style={{ display: "flex", gap: 6 }}>
-            <button onClick={(e) => { e.stopPropagation(); onEdit(); }} style={{ background: "none", border: `1px solid ${t.border}`, color: t.text3, borderRadius: 6, padding: "3px 8px", cursor: "pointer", fontSize: 11 }}>{editLabel || "Edit"}</button>
-            <button onClick={(e) => { e.stopPropagation(); onDelete(); }} style={{ background: "none", border: `1px solid ${t.danger}40`, color: t.danger, borderRadius: 6, padding: "3px 8px", cursor: "pointer", fontSize: 11 }}>Del</button>
+            <button onClick={(e) => { e.stopPropagation(); onEdit(); }} style={{ background: "none", border: `1px solid ${t.border}`, color: t.text3, borderRadius: 6, padding: "3px 8px", cursor: "pointer", fontSize: 11, display: "flex", alignItems: "center", gap: 4 }}><EditIcon size="1em" />{editLabel || "Edit"}</button>
+            <button onClick={(e) => { e.stopPropagation(); onDelete(); }} style={{ background: "none", border: `1px solid ${t.danger}40`, color: t.danger, borderRadius: 6, padding: "3px 8px", cursor: "pointer", fontSize: 11, display: "flex", alignItems: "center", gap: 4 }}><DeleteIcon size="1em" />Del</button>
           </div>
           <span onClick={onClick} style={{ fontFamily: "'Space Mono', monospace", fontSize: 13, fontWeight: 700, color: plDisplay == null ? t.text3 : plDisplay >= 0 ? t.accent : t.danger, textAlign: "right" }}>
             {plDisplay == null ? "—" : `${plDisplay >= 0 ? "+" : ""}${fmt(plDisplay)}`}
