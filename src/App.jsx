@@ -128,19 +128,6 @@ const [page, setPage] = useState(1);
     // Supabase sync is done per-operation (add/save/delete) for efficiency
   }, [trades, user, tradesLoaded]);
 
-  const loadSampleTrades = async () => {
-    const baseId = Date.now();
-    const withIds = SEED_TRADES.map((t, i) => ({ ...t, id: baseId + i }));
-    setTrades(withIds);
-    setShowOnboarding(false);
-    setTab("analytics");
-    if (user) {
-      const rows = withIds.map(t => ({ id: t.id, user_id: user.id, data: t }));
-      await supabase.from("trades").upsert(rows);
-    }
-    showToast("Sample data loaded — explore your analytics!", T.accent, "log");
-  };
-
   const dismissOnboarding = () => {
     setShowOnboarding(false);
     setTutorialStep(0);
@@ -301,6 +288,7 @@ const [page, setPage] = useState(1);
   const confirmDeleteExec = async () => {
     const { id } = confirmDelete;
     setConfirmDelete(null);
+    if (id === "__ALL__") { await clearAllExec(); return; }
     setTrades((p) => p.filter((tr) => tr.id !== id));
     if (selected?.id === id) setSelected(null);
     showToast("Deleted", T.danger, "delete");
@@ -325,12 +313,14 @@ const importTrades = async (incoming) => {
     showToast(`Imported ${toImport.length} trades`, T.accent, "log");
 };
   const clearAll = () => {
-    if (window.confirm("Clear all trades?")) {
-      setTrades([]);
-      setSelected(null);
-      localStorage.removeItem(STORAGE_KEY);
-      showToast("All trades cleared", T.danger, "delete");
-    }
+    setConfirmDelete({ id: "__ALL__", ticker: "all trades", isPlan: false });
+  };
+  const clearAllExec = async () => {
+    setTrades([]);
+    setSelected(null);
+    localStorage.removeItem(STORAGE_KEY);
+    showToast("All trades cleared", T.danger, "delete");
+    if (user) await supabase.from("trades").delete().eq("user_id", user.id);
   };
 
 const plList = useMemo(
@@ -1838,7 +1828,7 @@ style={{ display: "block" }}>
       )}
 
       {showOnboarding && (
-        <OnboardingModal onLoadSample={loadSampleTrades} onStartFresh={dismissOnboarding} t={T} />
+        <OnboardingModal onStartFresh={dismissOnboarding} t={T} />
       )}
 
       {/* Tutorial — shown after "Start Fresh" from onboarding */}
