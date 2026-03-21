@@ -58,6 +58,41 @@ export const SUGGESTED_TAGS = [
   "Hedge",
 ];
 
+export const TIMEFRAMES = ["1m", "5m", "15m", "30m", "1h", "4h", "Daily", "Weekly"];
+
+export const CURRENCIES = [
+  { code: "USD", symbol: "$", label: "USD — US Dollar" },
+  { code: "EUR", symbol: "€", label: "EUR — Euro" },
+  { code: "GBP", symbol: "£", label: "GBP — British Pound" },
+  { code: "JPY", symbol: "¥", label: "JPY — Japanese Yen" },
+  { code: "CAD", symbol: "C$", label: "CAD — Canadian Dollar" },
+  { code: "AUD", symbol: "A$", label: "AUD — Australian Dollar" },
+  { code: "CHF", symbol: "Fr", label: "CHF — Swiss Franc" },
+  { code: "HKD", symbol: "HK$", label: "HKD — Hong Kong Dollar" },
+  { code: "SGD", symbol: "S$", label: "SGD — Singapore Dollar" },
+  { code: "NZD", symbol: "NZ$", label: "NZD — New Zealand Dollar" },
+];
+
+export const TIMEZONES = [
+  { value: "America/New_York",    label: "New York (ET)" },
+  { value: "America/Chicago",     label: "Chicago (CT)" },
+  { value: "America/Denver",      label: "Denver (MT)" },
+  { value: "America/Los_Angeles", label: "Los Angeles (PT)" },
+  { value: "America/Toronto",     label: "Toronto (ET)" },
+  { value: "America/Vancouver",   label: "Vancouver (PT)" },
+  { value: "America/Sao_Paulo",   label: "São Paulo (BRT)" },
+  { value: "Europe/London",       label: "London (GMT/BST)" },
+  { value: "Europe/Paris",        label: "Paris (CET)" },
+  { value: "Europe/Berlin",       label: "Berlin (CET)" },
+  { value: "Europe/Zurich",       label: "Zurich (CET)" },
+  { value: "Asia/Dubai",          label: "Dubai (GST)" },
+  { value: "Asia/Singapore",      label: "Singapore (SGT)" },
+  { value: "Asia/Hong_Kong",      label: "Hong Kong (HKT)" },
+  { value: "Asia/Tokyo",          label: "Tokyo (JST)" },
+  { value: "Asia/Shanghai",       label: "Shanghai (CST)" },
+  { value: "Australia/Sydney",    label: "Sydney (AEST)" },
+];
+
 export const STORAGE_KEY = "tradelog_trades";
 export const THEME_KEY = "tradelog_theme";
 export const ONBOARDING_KEY = "logfolio-onboarded";

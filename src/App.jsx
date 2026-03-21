@@ -13,6 +13,8 @@ import {
   saveTrades,
   loadTheme,
   exportCSV,
+  setCurrency,
+  setTimezone,
 } from "./lib/utils";
 import {
   STORAGE_KEY,
@@ -171,6 +173,11 @@ const [page, setPage] = useState(1);
     setTradeDefaults(defaults);
     if (user) supabase.from("profiles").update({ trade_defaults: defaults }).eq("id", user.id).then(() => {});
   };
+
+  useEffect(() => {
+    setCurrency(tradeDefaults.currency);
+    setTimezone(tradeDefaults.timezone);
+  }, [tradeDefaults.currency, tradeDefaults.timezone]);
 
   useEffect(() => {
     const handler = (e) => {
@@ -1672,6 +1679,7 @@ style={{ display: "block" }}>
     onTutorial={openTutorial}
     tradeDefaults={tradeDefaults}
     onSaveDefaults={saveTradeDefaults}
+    trades={trades}
   />
 )}
       {showPlan && (

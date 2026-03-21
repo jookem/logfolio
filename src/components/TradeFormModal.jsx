@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { STOCK_LIKE, SUGGESTED_TAGS, EMOTIONS, MISTAKES } from "../lib/constants";
+import { STOCK_LIKE, SUGGESTED_TAGS, EMOTIONS, MISTAKES, TIMEFRAMES } from "../lib/constants";
 import { todayStr, typeLabels, fmt } from "../lib/utils";
 import Tag from "./Tag";
 import VoiceNote from "./VoiceNote";
@@ -12,6 +12,7 @@ export default function TradeFormModal({ initial, defaults, onClose, onSave, onC
     type: defaults?.type || "stock",
     strategy: defaults?.strategy || "Breakout",
     direction: defaults?.direction || "long",
+    timeframe: defaults?.timeframe || "Daily",
     entryPrice: "",
     exitPrice: "",
     shares: "",
@@ -323,6 +324,12 @@ export default function TradeFormModal({ initial, defaults, onClose, onSave, onC
               ).map((s) => (
                 <option key={s}>{s}</option>
               ))}
+            </select>
+          </div>
+          <div>
+            <label style={lbl}>Timeframe</label>
+            <select style={inp()} value={form.timeframe || "Daily"} onChange={(e) => set("timeframe", e.target.value)}>
+              {TIMEFRAMES.map(tf => <option key={tf}>{tf}</option>)}
             </select>
           </div>
         </div>

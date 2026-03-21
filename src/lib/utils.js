@@ -1,22 +1,31 @@
 import { STOCK_LIKE, STORAGE_KEY, THEME_KEY } from "./constants";
 
+// Module-level preferences — updated by App.jsx via setters below
+let _currency = "USD";
+let _timezone = undefined;
+
+export const setCurrency = (c) => { _currency = c || "USD"; };
+export const setTimezone = (tz) => { _timezone = tz || undefined; };
+
 export const fmt = (n) =>
   new Intl.NumberFormat("en-US", {
     style: "currency",
-    currency: "USD",
+    currency: _currency,
     minimumFractionDigits: 0,
     maximumFractionDigits: 0,
   }).format(n);
 
 export const fmtDate = (d) =>
-  new Date(d).toLocaleDateString("en-US", { month: "short", day: "numeric" });
+  new Date(d + "T12:00:00").toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    ...(_timezone ? { timeZone: _timezone } : {}),
+  });
 
 export const todayStr = () => {
   const t = new Date();
-  return `${t.getFullYear()}-${String(t.getMonth() + 1).padStart(
-    2,
-    "0"
-  )}-${String(t.getDate()).padStart(2, "0")}`;
+  if (_timezone) return t.toLocaleDateString("en-CA", { timeZone: _timezone });
+  return `${t.getFullYear()}-${String(t.getMonth() + 1).padStart(2, "0")}-${String(t.getDate()).padStart(2, "0")}`;
 };
 
 export function calcPL(trade) {
@@ -94,6 +103,16 @@ export function exportCSV(trades) {
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url; a.download = `logfolio-trades-${new Date().toISOString().slice(0,10)}.csv`;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+export function exportJSON(trades) {
+  const json = JSON.stringify(trades, null, 2);
+  const blob = new Blob([json], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = `logfolio-trades-${new Date().toISOString().slice(0,10)}.json`;
   document.body.appendChild(a); a.click(); document.body.removeChild(a);
   URL.revokeObjectURL(url);
 }
