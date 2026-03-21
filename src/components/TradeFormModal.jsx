@@ -368,28 +368,6 @@ export default function TradeFormModal({ initial, onClose, onSave, onCSVImport, 
               {errMsg("exitPrice")}
             </div>
             <div>
-              <label style={lbl}>Stop Loss $</label>
-              <input
-                style={inp("stopLoss")}
-                type="number"
-                value={form.stopLoss || ""}
-                onChange={(e) => { set("stopLoss", e.target.value); setErrors((p) => ({ ...p, stopLoss: undefined })); }}
-                placeholder="185"
-              />
-              {errMsg("stopLoss")}
-            </div>
-            <div>
-              <label style={lbl}>Take Profit $</label>
-              <input
-                style={inp("takeProfit")}
-                type="number"
-                value={form.takeProfit || ""}
-                onChange={(e) => { set("takeProfit", e.target.value); setErrors((p) => ({ ...p, takeProfit: undefined })); }}
-                placeholder="200"
-              />
-              {errMsg("takeProfit")}
-            </div>
-            <div>
               <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 5 }}>
                 Entry Time
                 <svg width="11" height="11" viewBox="0 0 24 24" fill="none" style={{ opacity: 0.7 }}>
@@ -420,6 +398,28 @@ export default function TradeFormModal({ initial, onClose, onSave, onCSVImport, 
                 value={form.exitTime || ""}
                 onChange={(e) => set("exitTime", e.target.value)}
               />
+            </div>
+            <div>
+              <label style={lbl}>Stop Loss $</label>
+              <input
+                style={inp("stopLoss")}
+                type="number"
+                value={form.stopLoss || ""}
+                onChange={(e) => { set("stopLoss", e.target.value); setErrors((p) => ({ ...p, stopLoss: undefined })); }}
+                placeholder="185"
+              />
+              {errMsg("stopLoss")}
+            </div>
+            <div>
+              <label style={lbl}>Take Profit $</label>
+              <input
+                style={inp("takeProfit")}
+                type="number"
+                value={form.takeProfit || ""}
+                onChange={(e) => { set("takeProfit", e.target.value); setErrors((p) => ({ ...p, takeProfit: undefined })); }}
+                placeholder="200"
+              />
+              {errMsg("takeProfit")}
             </div>
           </div>
         ) : (
