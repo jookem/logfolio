@@ -3,7 +3,17 @@ import { useState, useRef } from "react";
 const MAX_IMAGES = 3;
 const MAX_FILE_MB = 5;
 const MAX_WIDTH = 1280;
-const JPEG_QUALITY = 0.8;
+const QUALITY = 0.8;
+
+// Detect best supported format once at module load
+const detectFormat = () => {
+  const canvas = document.createElement("canvas");
+  canvas.width = 1; canvas.height = 1;
+  if (canvas.toDataURL("image/avif").startsWith("data:image/avif")) return "image/avif";
+  if (canvas.toDataURL("image/webp").startsWith("data:image/webp")) return "image/webp";
+  return "image/jpeg";
+};
+const ENCODE_FORMAT = detectFormat();
 
 const compressImage = (file) =>
   new Promise((resolve, reject) => {
@@ -20,7 +30,7 @@ const compressImage = (file) =>
         canvas.width = Math.round(img.width * scale);
         canvas.height = Math.round(img.height * scale);
         canvas.getContext("2d").drawImage(img, 0, 0, canvas.width, canvas.height);
-        resolve(canvas.toDataURL("image/jpeg", JPEG_QUALITY));
+        resolve(canvas.toDataURL(ENCODE_FORMAT, QUALITY));
       };
       img.onerror = () => reject(new Error("Failed to load image"));
       img.src = e.target.result;
@@ -99,7 +109,7 @@ const handleFiles = async (files) => {
           <div style={{ fontSize: 13, color: t.accent, fontFamily: "'Space Mono', monospace" }}>
             Click or drag & drop charts
           </div>
-          <div style={{ fontSize: 11, color: t.text3, marginTop: 2 }}>PNG, JPG, WebP · max {MAX_FILE_MB} MB each · resized to {MAX_WIDTH}px</div>
+          <div style={{ fontSize: 11, color: t.text3, marginTop: 2 }}>PNG, JPG, WebP · max {MAX_FILE_MB} MB · saved as {ENCODE_FORMAT.split("/")[1].toUpperCase()} {MAX_WIDTH}px</div>
           <input
             ref={fileInputRef}
             type="file"

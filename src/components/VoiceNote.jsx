@@ -2,6 +2,14 @@ import { useState, useRef, useEffect } from "react";
 
 const MAX_SECONDS = 120; // 2 minutes
 
+// Prefer Opus (best compression); fall back to browser default
+const PREFERRED_TYPES = [
+  "audio/webm;codecs=opus",
+  "audio/ogg;codecs=opus",
+  "audio/webm",
+];
+const AUDIO_MIME = PREFERRED_TYPES.find(t => MediaRecorder.isTypeSupported(t)) || "";
+
 export default function VoiceNote({ value, onChange, t }) {
   const [recording, setRecording] = useState(false);
   const [mediaRecorder, setMediaRecorder] = useState(null);
@@ -26,12 +34,12 @@ export default function VoiceNote({ value, onChange, t }) {
   const startRecording = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const mr = new MediaRecorder(stream);
+      const mr = new MediaRecorder(stream, AUDIO_MIME ? { mimeType: AUDIO_MIME } : {});
       mrRef.current = mr;
       chunksRef.current = [];
       mr.ondataavailable = (e) => chunksRef.current.push(e.data);
       mr.onstop = () => {
-        const blob = new Blob(chunksRef.current, { type: "audio/webm" });
+        const blob = new Blob(chunksRef.current, { type: mr.mimeType || "audio/webm" });
         const url = URL.createObjectURL(blob);
         setAudioUrl(url);
         const reader = new FileReader();
