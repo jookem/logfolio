@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { STOCK_LIKE, SUGGESTED_TAGS, EMOTIONS, MISTAKES } from "../lib/constants";
-import { todayStr, typeLabels } from "../lib/utils";
+import { todayStr, typeLabels, fmt } from "../lib/utils";
 import Tag from "./Tag";
 import VoiceNote from "./VoiceNote";
 import ScreenshotUpload from "./ScreenshotUpload";
@@ -84,7 +84,7 @@ export default function TradeFormModal({ initial, onClose, onSave, onCSVImport, 
     if (STOCK_LIKE.includes(form.type)) {
       if (!form.shares || +form.shares <= 0) e.shares = "Must be > 0";
       if (!form.entryPrice || +form.entryPrice <= 0) e.entryPrice = "Must be > 0";
-      if (form.exitPrice !== "" && +form.exitPrice < 0) e.exitPrice = "Cannot be negative";
+      if (form.exitPrice !== "" && +form.exitPrice <= 0) e.exitPrice = "Must be > 0";
       if (form.stopLoss && +form.stopLoss <= 0) e.stopLoss = "Must be > 0";
       if (form.takeProfit && +form.takeProfit <= 0) e.takeProfit = "Must be > 0";
     } else {
@@ -366,6 +366,19 @@ export default function TradeFormModal({ initial, onClose, onSave, onCSVImport, 
                 placeholder="196"
               />
               {errMsg("exitPrice")}
+              {(() => {
+                const entry = +form.entryPrice;
+                const exit = +form.exitPrice;
+                const qty = +form.shares;
+                if (!entry || !exit || !qty) return null;
+                const dir = form.direction === "long" ? 1 : -1;
+                const pl = dir * (exit - entry) * qty;
+                return (
+                  <div style={{ fontSize: 11, fontFamily: "'Space Mono',monospace", color: pl >= 0 ? t.accent : t.danger, marginTop: 4 }}>
+                    → {pl >= 0 ? "+" : ""}{fmt(pl)}
+                  </div>
+                );
+              })()}
             </div>
             <div>
               <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 5 }}>

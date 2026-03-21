@@ -5,6 +5,7 @@ import { EditIcon, DeleteIcon } from "../lib/icons";
 export default function TradeRow({ trade, onClick, onEdit, onDelete, t, mobile, isFirst, editLabel }) {
   const pl = calcPL(trade);
   const plDisplay = isNaN(pl) ? null : pl;
+  const isOpen = plDisplay === null;
   return (
     <div
       style={{ padding: "12px 16px", borderTop: isFirst ? "none" : `1px solid ${t.border}`, cursor: "pointer" }}
@@ -14,8 +15,9 @@ export default function TradeRow({ trade, onClick, onEdit, onDelete, t, mobile, 
       {mobile ? (
         <div onClick={onClick}>
           <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
-            <span style={{ fontFamily: "'Space Mono', monospace", fontSize: 15, fontWeight: 700, color: t.text }}>
-              {trade.ticker}
+            <span style={{ display: "flex", alignItems: "center", gap: 7 }}>
+              <span style={{ fontFamily: "'Space Mono', monospace", fontSize: 15, fontWeight: 700, color: t.text }}>{trade.ticker}</span>
+              {isOpen && <span style={{ fontSize: 9, fontFamily: "'Space Mono',monospace", color: "#f59e0b", background: "#f59e0b18", border: "1px solid #f59e0b40", borderRadius: 4, padding: "1px 5px", letterSpacing: 1 }}>OPEN</span>}
             </span>
             <span style={{ fontFamily: "'Space Mono', monospace", fontSize: 15, fontWeight: 700, color: plDisplay == null ? t.text3 : plDisplay >= 0 ? t.accent : t.danger }}>
               {plDisplay == null ? "—" : `${plDisplay >= 0 ? "+" : ""}${fmt(plDisplay)}`}
@@ -51,6 +53,7 @@ export default function TradeRow({ trade, onClick, onEdit, onDelete, t, mobile, 
           <span onClick={onClick} style={{ fontFamily: "'Space Mono', monospace", fontSize: 14, fontWeight: 700, color: t.text }}>{trade.ticker}</span>
           <span onClick={onClick} style={{ fontSize: 13, color: t.text3 }}>
             {trade.strategy}
+            {isOpen && <span style={{ marginLeft: 6, fontSize: 9, fontFamily: "'Space Mono',monospace", color: "#f59e0b", background: "#f59e0b18", border: "1px solid #f59e0b40", borderRadius: 4, padding: "1px 5px", letterSpacing: 1 }}>OPEN</span>}
             {trade.tags?.length > 0 && (
               <span style={{ marginLeft: 6, fontSize: 10, color: t.accent, background: t.accent + "15", borderRadius: 4, padding: "1px 6px" }}>
                 {trade.tags[0]}{trade.tags.length > 1 ? ` +${trade.tags.length - 1}` : ""}
