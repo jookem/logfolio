@@ -2,12 +2,33 @@ import { useState, useEffect } from "react";
 import { supabase } from "../lib/supabase";
 import { useAuth } from "../contexts/AuthContext";
 
+const DAILY_LIMIT = 3;
+const today = () => new Date().toISOString().slice(0, 10);
+
+const getDailyUsage = (userId) => {
+  try {
+    const raw = localStorage.getItem(`ai_daily_${userId}`);
+    if (!raw) return { date: "", count: 0 };
+    return JSON.parse(raw);
+  } catch { return { date: "", count: 0 }; }
+};
+const saveDailyUsage = (userId, data) => {
+  try { localStorage.setItem(`ai_daily_${userId}`, JSON.stringify(data)); } catch {}
+};
+
 export default function AIInsights({ plList, t, mobile }) {
   const { user } = useAuth();
   const [insights, setInsights] = useState(null);
   const [insightsAt, setInsightsAt] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [usedToday, setUsedToday] = useState(0);
+
+  useEffect(() => {
+    if (!user) return;
+    const usage = getDailyUsage(user.id);
+    setUsedToday(usage.date === today() ? usage.count : 0);
+  }, [user]);
 
   useEffect(() => {
     if (!user) return;
@@ -27,6 +48,12 @@ export default function AIInsights({ plList, t, mobile }) {
   const analysePatterns = async () => {
     if (plList.length < 3) {
       setError("Add at least 3 trades to generate insights.");
+      return;
+    }
+    const usage = getDailyUsage(user?.id);
+    const todayCount = usage.date === today() ? usage.count : 0;
+    if (todayCount >= DAILY_LIMIT) {
+      setError(`Daily limit reached (${DAILY_LIMIT} analyses/day). Resets at midnight.`);
       return;
     }
     setLoading(true);
@@ -102,6 +129,9 @@ Provide 4-6 patterns. Be brutally honest but constructive.`,
       const now = new Date().toISOString();
       setInsights(parsed);
       setInsightsAt(now);
+      const newCount = todayCount + 1;
+      saveDailyUsage(user?.id, { date: today(), count: newCount });
+      setUsedToday(newCount);
       if (user) {
         await supabase
           .from("profiles")
@@ -134,13 +164,21 @@ Provide 4-6 patterns. Be brutally honest but constructive.`,
               Last analysed {new Date(insightsAt).toLocaleDateString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}
             </div>
           )}
+          <div style={{ display: "flex", gap: 6, marginTop: 6 }}>
+            {Array.from({ length: DAILY_LIMIT }).map((_, i) => (
+              <div key={i} style={{ width: 8, height: 8, borderRadius: "50%", background: i < usedToday ? t.text3 : t.accent, opacity: i < usedToday ? 0.3 : 1 }} />
+            ))}
+            <span style={{ fontSize: 10, color: t.text3, fontFamily: "'Space Mono',monospace", marginLeft: 4 }}>
+              {DAILY_LIMIT - usedToday}/{DAILY_LIMIT} remaining today
+            </span>
+          </div>
         </div>
         <button
           onClick={analysePatterns}
-          disabled={loading}
-          style={{ background: t.accent, border: "none", color: "#000", borderRadius: 8, padding: "8px 16px", cursor: loading ? "not-allowed" : "pointer", fontSize: 12, fontWeight: 700, fontFamily: "'Space Mono',monospace", opacity: loading ? 0.6 : 1 }}
+          disabled={loading || usedToday >= DAILY_LIMIT}
+          style={{ background: usedToday >= DAILY_LIMIT ? t.card2 : t.accent, border: `1px solid ${usedToday >= DAILY_LIMIT ? t.border : "transparent"}`, color: usedToday >= DAILY_LIMIT ? t.text3 : "#000", borderRadius: 8, padding: "8px 16px", cursor: (loading || usedToday >= DAILY_LIMIT) ? "not-allowed" : "pointer", fontSize: 12, fontWeight: 700, fontFamily: "'Space Mono',monospace", opacity: loading ? 0.6 : 1 }}
         >
-          {loading ? "Analysing..." : "↻ Re-analyse"}
+          {loading ? "Analysing..." : usedToday >= DAILY_LIMIT ? "Limit reached" : "↻ Re-analyse"}
         </button>
       </div>
 
