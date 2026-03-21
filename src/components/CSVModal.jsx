@@ -61,7 +61,8 @@ export default function CSVModal({ onClose, onImport, t }) {
         rows.forEach(row => {
           const ticker = (row.symbol || "").toUpperCase();
           if (!ticker) return;
-          if ((row.status || "").toLowerCase() === "failed") return;
+          const status = (row.status || "").toLowerCase();
+          if (status === "failed" || status === "cancelled") return;
           const timeStr = row["filled time"] || row["placed time"] || "";
           orders.push({
             ticker,
@@ -119,7 +120,8 @@ export default function CSVModal({ onClose, onImport, t }) {
         rows.forEach(row => {
           const ticker = (row.symbol || row.ticker || "").toUpperCase();
           if (!ticker) return;
-          if ((row.status || "").toLowerCase() === "failed") return;
+          const status = (row.status || "").toLowerCase();
+          if (status === "failed" || status === "cancelled") return;
           const side = (row.side || row["buy/sell"] || row.action || "").toLowerCase();
           const timeStr = row.date || row["filled time"] || row["exec time"] || "";
           orders.push({
