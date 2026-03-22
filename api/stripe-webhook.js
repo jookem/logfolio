@@ -40,10 +40,12 @@ export default async function handler(req, res) {
     case "checkout.session.completed": {
       const session = event.data.object;
       const userId = session.metadata?.supabase_user_id;
+      const plan = session.metadata?.plan;
+      const status = plan === "premium_plus" ? "premium_plus" : "premium";
       if (userId) {
         await supabase.from("profiles").update({
           stripe_subscription_id: session.subscription,
-          subscription_status: "active",
+          subscription_status: status,
         }).eq("id", userId);
       }
       break;
@@ -52,8 +54,13 @@ export default async function handler(req, res) {
       const sub = event.data.object;
       const userId = await getSupabaseUserId(sub.customer);
       if (userId) {
+        let newStatus = "free";
+        if (sub.status === "active") {
+          const priceId = sub.items?.data?.[0]?.price?.id;
+          newStatus = priceId === process.env.STRIPE_PRICE_ID_PREMIUM_PLUS ? "premium_plus" : "premium";
+        }
         await supabase.from("profiles").update({
-          subscription_status: sub.status === "active" ? "active" : "free",
+          subscription_status: newStatus,
           stripe_subscription_id: sub.id,
         }).eq("id", userId);
       }

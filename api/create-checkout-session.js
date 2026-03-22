@@ -10,8 +10,12 @@ const supabase = createClient(
 export default async function handler(req, res) {
   if (req.method !== "POST") return res.status(405).end();
 
-  const { userId, email } = req.body;
+  const { userId, email, plan } = req.body;
   if (!userId || !email) return res.status(400).json({ error: "Missing userId or email" });
+
+  const priceId = plan === "premium_plus"
+    ? process.env.STRIPE_PRICE_ID_PREMIUM_PLUS
+    : process.env.STRIPE_PRICE_ID_PREMIUM;
 
   // Get or create Stripe customer
   const { data: profile } = await supabase
@@ -31,10 +35,10 @@ export default async function handler(req, res) {
     customer: customerId,
     mode: "subscription",
     payment_method_types: ["card"],
-    line_items: [{ price: process.env.STRIPE_PRICE_ID, quantity: 1 }],
+    line_items: [{ price: priceId, quantity: 1 }],
     success_url: `${process.env.APP_URL}?upgraded=true`,
     cancel_url: `${process.env.APP_URL}?upgraded=false`,
-    metadata: { supabase_user_id: userId },
+    metadata: { supabase_user_id: userId, plan: plan || "premium" },
   });
 
   res.status(200).json({ url: session.url });

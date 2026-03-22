@@ -46,7 +46,7 @@ import AIInsights from "./views/AIInsights";
 import JournalView from "./views/JournalView";
 
 export default function TradingJournal() {
-  const { user, profile, loading: authLoading, isPro, canUseAI, aiAnalysesLeft, refreshProfile, signOut } = useAuth();
+  const { user, profile, loading: authLoading, isPro, isPremium, canUseAI, aiAnalysesLeft, refreshProfile, signOut } = useAuth();
   const [planSearch, setPlanSearch] = useState("");
   const [planFilter, setPlanFilter] = useState({ type: "all", strategy: "all", tag: "all" });
   const [planPerPage, setPlanPerPage] = useState(30);
@@ -234,7 +234,7 @@ const [page, setPage] = useState(1);
     }, 1500);
   };
   const addTrade = (trade) => {
-    if (freeTierFull) { showToast("Free tier limit reached — upgrade to Pro", "#ff4d6d", "warning"); return; }
+    if (freeTierFull) { showToast("Free tier limit reached — upgrade to Premium", "#ff4d6d", "warning"); return; }
     if (trade.fromPlanId) {
       setTrades((p) => [...p.filter(t => t.id !== trade.fromPlanId), trade]);
       if (user) supabase.from("trades").delete().eq("id", trade.fromPlanId).eq("user_id", user.id).then(() => {});
@@ -278,18 +278,18 @@ const [page, setPage] = useState(1);
     if (user) supabase.from("trades").upsert({ id: trade.id, user_id: user.id, data: trade }).then(() => {});
   };
   const savePlan = (plan) => {
-    if (freeTierPlanFull) { showToast("Free tier limit reached — upgrade to Pro", "#ff4d6d", "warning"); return; }
+    if (freeTierPlanFull) { showToast("Free tier limit reached — upgrade to Premium", "#ff4d6d", "warning"); return; }
     setTrades((p) => [...p, plan]);
     setShowPlan(false);
     showToast("Trade plan saved", T.accent, "log");
     if (user) supabase.from("trades").upsert({ id: plan.id, user_id: user.id, data: plan }).then(() => {});
   };
-  const handleUpgrade = async () => {
+  const handleUpgrade = async (plan = "premium") => {
     if (!user) return;
     const res = await fetch("/api/create-checkout-session", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ userId: user.id, email: user.email }),
+      body: JSON.stringify({ userId: user.id, email: user.email, plan }),
     });
     const { url } = await res.json();
     if (url) window.location.href = url;
@@ -307,8 +307,8 @@ const [page, setPage] = useState(1);
   };
 
   const currentMonth = todayStr().slice(0, 7);
-  const freeTierFull = !isPro && trades.filter(t => t.status !== "planned" && t.date?.startsWith(currentMonth)).length >= 5;
-  const freeTierPlanFull = !isPro && trades.filter(t => t.status === "planned" && t.date?.startsWith(currentMonth)).length >= 5;
+  const freeTierFull = !isPremium && trades.filter(t => t.status !== "planned" && t.date?.startsWith(currentMonth)).length >= 5;
+  const freeTierPlanFull = !isPremium && trades.filter(t => t.status === "planned" && t.date?.startsWith(currentMonth)).length >= 5;
 
   const deleteTrade = (id) => {
     const trade = trades.find((tr) => tr.id === id);
@@ -326,8 +326,8 @@ const [page, setPage] = useState(1);
 const importTrades = (incoming) => {
   const month = new Date().toISOString().slice(0, 7);
   const thisMonthLogs = trades.filter(t => t.status !== "planned" && t.date?.startsWith(month)).length;
-  const toImport = isPro ? incoming : incoming.slice(0, Math.max(0, 5 - thisMonthLogs));
-  if (toImport.length === 0) { handleUpgrade(); return; }
+  const toImport = isPremium ? incoming : incoming.slice(0, Math.max(0, 5 - thisMonthLogs));
+  if (toImport.length === 0) { handleUpgrade("premium"); return; }
   setTrades((p) => [...p, ...toImport]);
   setShowCSV(false);
   setPage(1);
@@ -335,7 +335,7 @@ const importTrades = (incoming) => {
     const rows = toImport.map(t => ({ id: t.id, user_id: user.id, data: t }));
     supabase.from("trades").upsert(rows).then(() => {});
   }
-  if (!isPro && toImport.length < incoming.length)
+  if (!isPremium && toImport.length < incoming.length)
     showToast(`Imported ${toImport.length}/${incoming.length} — free limit reached`, T.accent, "log");
   else
     showToast(`Imported ${toImport.length} trades`, T.accent, "log");
@@ -920,7 +920,7 @@ style={{ display: "block" }}>
           <ErrorBoundary compact>
             {isPro
               ? <AIInsights plList={plList} t={T} mobile={mobile} />
-              : <UpgradePrompt t={T} onUpgrade={handleUpgrade} feature="AI Insights" />
+              : <UpgradePrompt t={T} onUpgrade={() => handleUpgrade("premium_plus")} feature="AI Insights" tier="premium_plus" />
             }
           </ErrorBoundary>
         )}
@@ -1278,10 +1278,10 @@ style={{ display: "block" }}>
           </ErrorBoundary>
         )}
 
-        {tab === "analytics" && !isPro && (
-          <UpgradePrompt t={T} onUpgrade={handleUpgrade} feature="Analytics" />
+        {tab === "analytics" && !isPremium && (
+          <UpgradePrompt t={T} onUpgrade={() => handleUpgrade("premium")} feature="Analytics" tier="premium" />
         )}
-        {tab === "analytics" && isPro && (
+        {tab === "analytics" && isPremium && (
           <ErrorBoundary compact>
           <div>
             {/* All key stats */}
@@ -1600,7 +1600,8 @@ style={{ display: "block" }}>
     user={user}
     onSignOut={() => { setShowSettings(false); signOut(); }}
     isPro={isPro}
-    onUpgrade={() => { setShowSettings(false); handleUpgrade(); }}
+    isPremium={isPremium}
+    onUpgrade={(plan) => { setShowSettings(false); handleUpgrade(plan); }}
     onManageBilling={() => { setShowSettings(false); handleManageBilling(); }}
     onTutorial={openTutorial}
     tradeDefaults={tradeDefaults}

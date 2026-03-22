@@ -47,9 +47,13 @@ export default async function handler(req, res) {
     try {
       const { data: profile } = await admin
         .from("profiles")
-        .select("ai_daily_date, ai_daily_count")
+        .select("ai_daily_date, ai_daily_count, subscription_status")
         .eq("id", userId)
         .single();
+
+      if (profile?.subscription_status !== "premium_plus") {
+        return res.status(403).json({ error: "AI Insights requires a Premium Plus subscription." });
+      }
 
       const todayStr = today();
       const count = profile?.ai_daily_date === todayStr ? (profile.ai_daily_count ?? 0) : 0;

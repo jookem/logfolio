@@ -32,16 +32,18 @@ export function AuthProvider({ children }) {
 
   const refreshProfile = () => user && fetchProfile(user.id);
 
-  const isPro = profile?.subscription_status === "active";
+  const isPremiumPlus = profile?.subscription_status === "premium_plus";
+  const isPremium = profile?.subscription_status === "premium" || isPremiumPlus;
+  const isPro = isPremiumPlus; // AI Insights + full access
 
-  const canUseAI = isPro && (profile?.ai_analyses_used ?? 0) < 10;
+  const canUseAI = isPremiumPlus && (profile?.ai_analyses_used ?? 0) < 10;
 
-  const aiAnalysesLeft = isPro ? Math.max(0, 10 - (profile?.ai_analyses_used ?? 0)) : 0;
+  const aiAnalysesLeft = isPremiumPlus ? Math.max(0, 10 - (profile?.ai_analyses_used ?? 0)) : 0;
 
   const signOut = () => supabase.auth.signOut();
 
   return (
-    <AuthContext.Provider value={{ user, profile, loading, isPro, canUseAI, aiAnalysesLeft, refreshProfile, signOut }}>
+    <AuthContext.Provider value={{ user, profile, loading, isPro, isPremium, isPremiumPlus, canUseAI, aiAnalysesLeft, refreshProfile, signOut }}>
       {children}
     </AuthContext.Provider>
   );
