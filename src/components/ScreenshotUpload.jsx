@@ -1,4 +1,5 @@
 import { useState, useRef } from "react";
+import { ScreenshotIcon, CloseIcon } from "../lib/icons";
 
 const MAX_IMAGES = 3;
 const MAX_FILE_MB = 5;
@@ -101,11 +102,7 @@ const handleFiles = async (files) => {
           }}
         >
           <div style={{ fontSize: 20, marginBottom: 4, color: t.accent }}>
-           <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-              <circle cx="12" cy="13" r="3" stroke="currentColor" strokeWidth="2"/>
-             <path d="M2 13.3636C2 10.2994 2 8.76721 2.74902 7.6666C3.07328 7.19014 3.48995 6.78104 3.97524 6.46268C4.69555 5.99013 5.59733 5.82123 6.978 5.76086C7.63685 5.76086 8.20412 5.27068 8.33333 4.63636C8.52715 3.68489 9.37805 3 10.3663 3H13.6337C14.6219 3 15.4728 3.68489 15.6667 4.63636C15.7959 5.27068 16.3631 5.76086 17.022 5.76086C18.4027 5.82123 19.3044 5.99013 20.0248 6.46268C20.51 6.78104 20.9267 7.19014 21.251 7.6666C22 8.76721 22 10.2994 22 13.3636C22 16.4279 22 17.9601 21.251 19.0607C20.9267 19.5371 20.51 19.9462 20.0248 20.2646C18.9038 21 17.3433 21 14.2222 21H9.77778C6.65675 21 5.09624 21 3.97524 20.2646C3.48995 19.9462 3.07328 19.5371 2.74902 19.0607C2.53746 18.7498 2.38566 18.4045 2.27673 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-  <path d="M19 10H18" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-  </svg></div>
+           <ScreenshotIcon size={20} /></div>
           <div style={{ fontSize: 13, color: t.accent, fontFamily: "'Space Mono', monospace" }}>
             Click or drag & drop charts
           </div>
@@ -166,10 +163,7 @@ const handleFiles = async (files) => {
               color: "#fff", borderRadius: "50%", width: 36, height: 36,
               cursor: "pointer", fontSize: 18,
             }}
-          ><svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" style={{ display: "block" }}>
-<path d="M14.5 9.50002L9.5 14.5M9.49998 9.5L14.5 14.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-<path d="M22 12C22 16.714 22 19.0711 20.5355 20.5355C19.0711 22 16.714 22 12 22C7.28595 22 4.92893 22 3.46447 20.5355C2 19.0711 2 16.714 2 12C2 7.28595 2 4.92893 3.46447 3.46447C4.92893 2 7.28595 2 12 2C16.714 2 19.0711 2 20.5355 3.46447C21.5093 4.43821 21.8356 5.80655 21.9449 8" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-</svg></button>
+          ><CloseIcon size="1em" /></button>
         </div>
       )}
     </div>

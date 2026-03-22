@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import { RecIcon } from "../lib/icons";
 
 const MAX_SECONDS = 120; // 2 minutes
 
@@ -113,13 +114,7 @@ export default function VoiceNote({ value, onChange, t }) {
             </>
           ) : (
             <>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-  <path d="M7 8C7 5.23858 9.23858 3 12 3C14.7614 3 17 5.23858 17 8V11C17 13.7614 14.7614 16 12 16C9.23858 16 7 13.7614 7 11V8Z" stroke="currentColor" strokeWidth="2"/>
-  <path d="M13 8L17 8" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-  <path d="M13 11L17 11" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-  <path d="M12 19V22" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-  <path d="M4 11C4 15.4183 7.58172 19 12 19C16.4183 19 20 15.4183 20 11" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-</svg> Record Voice Note
+              <RecIcon size={20} /> Record Voice Note
               <span style={{ marginLeft: "auto", fontSize: 11, color: t.text3, opacity: 0.7 }}>
                 max {fmtTime(MAX_SECONDS)}
               </span>

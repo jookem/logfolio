@@ -3,6 +3,7 @@ import { fmt, todayStr, typeLabels } from "../lib/utils";
 import { STOCK_LIKE } from "../lib/constants";
 import Tag from "../components/Tag";
 import QuoteOfDay from "./QuoteOfDay";
+import { LogIcon } from "../lib/icons";
 
 export default function DaySession({ plList, plans, onAddTrade, onAddPlan, t, mobile, isDark }) {
   const today = todayStr();
@@ -304,15 +305,7 @@ const timeStr = now.toLocaleTimeString("en-US", {
               gap: 6,
             }}
           >
-            <svg
-  width="1em"
-  height="1em"
-  viewBox="0 0 24 24"
-  fill="none"
-  style={{ display: "block" }}>
-  <path d="M20 14V7C20 5.34315 18.6569 4 17 4H12M20 14L13.5 20M20 14H15.5C14.3954 14 13.5 14.8954 13.5 16V20M13.5 20H7C5.34315 20 4 18.6569 4 17V12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" stroke-linejoin="round"/>
-  <path d="M7 4V7M7 10V7M7 7H4M7 7H10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" stroke-linejoin="round"/>
-</svg> LOG
+            <LogIcon size="1em" /> LOG
           </button>
         </div>
         {todayTrades.length === 0 ? (

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { supabase } from "../lib/supabase";
+import { LogoIcon } from "../lib/icons";
 
 function tk(dark) {
   return dark ? {
@@ -72,17 +73,7 @@ export default function AuthScreen({ isDark }) {
         {/* Logo */}
         <div style={{ textAlign: "center", marginBottom: 28 }}>
           <div style={{ display: "flex", justifyContent: "center", marginBottom: 10 }}>
-            <svg width="100" height="100" viewBox="0 0 35 35" xmlns="http://www.w3.org/2000/svg">
-              <rect x="3.8" y="14.7" fill="#FF1212" width="4.3" height="12"/>
-              <rect x="5.7" y="12.1" fill="#FF1212" width="0.4" height="17.1"/>
-              <rect x="11.3" y="18.2" fill="#12B248" width="4.3" height="7.3"/>
-              <rect x="13.2" y="16.6" fill="#12B248" width="0.4" height="10.5"/>
-              <rect x="20.6" y="7.9" fill="#12B248" width="0.5" height="14.7"/>
-              <rect x="18.7" y="9.4" fill="#12B248" width="4.3" height="10.7"/>
-              <polyline fill="none" stroke="#3B82F6" strokeLinecap="round" strokeMiterlimit="10" points="5.6,30.7 13.7,29.4 21.3,24.5 28.6,22.2"/>
-              <path fill="#87B3F4" d="M30.7,7.2c0-1.2-1-2.2-2.2-2.2c-1.2,0-2.2,1-2.2,2.2l0,0.7c0,0,0,0,0.1,0c0.5,0.2,1.2,0.5,2.1,0.5s1.6-0.2,2.1-0.5c0,0,0,0,0.1,0V7.2z"/>
-              <path fill="#3B82F6" d="M26.4,7.8L26.4,7.8C26.4,7.9,26.4,7.9,26.4,7.8c0.5,0.3,1.3,0.5,2.2,0.5c0.9,0,1.6-0.2,2.1-0.5c0,0,0,0,0.1,0l0,6.6c0,0.4,0,0.7,0,0.9c0,0.3-0.1,0.5-0.2,0.8c-0.1,0.2-0.2,0.4-0.4,0.8l-1.1,2.1c-0.1,0.2-0.3,0.3-0.5,0.3c-0.2,0-0.4-0.1-0.5-0.3L27,17c-0.2-0.4-0.3-0.6-0.4-0.8c-0.1-0.2-0.1-0.5-0.2-0.8c0-0.2,0-0.4,0-0.9L26.4,7.8z"/>
-            </svg>
+            <LogoIcon width={100} height={100} />
           </div>
           <div style={{ fontSize: 18, fontWeight: 700, color: T.accent, letterSpacing: 2, marginBottom: 6, fontFamily: "'Space Mono', monospace" }}>
             LOG-FOLIO
