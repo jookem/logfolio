@@ -59,6 +59,9 @@ create trigger on_auth_user_created
 -- alter table public.profiles add column if not exists ai_insights jsonb;
 -- alter table public.profiles add column if not exists ai_insights_at timestamptz;
 
+-- Migrate existing 'active' subscribers to 'premium_plus' (run once after deploying three-tier pricing):
+-- update public.profiles set subscription_status = 'premium_plus' where subscription_status = 'active';
+
 -- Reset AI analysis counter monthly (run as a cron job in Supabase or pg_cron)
 -- update public.profiles
 -- set ai_analyses_used = 0, ai_analyses_reset_at = date_trunc('month', now())
