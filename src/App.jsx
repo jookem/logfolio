@@ -932,6 +932,7 @@ style={{ display: "block" }}>
               plans={trades.filter(t => t.status === "planned")}
               onAddTrade={() => setShowAdd(true)}
               onAddPlan={() => setShowPlan(true)}
+              journals={journals}
               t={T}
               mobile={mobile}
               isDark={isDark}
