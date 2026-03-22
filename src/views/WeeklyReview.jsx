@@ -1,7 +1,10 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { fmt, fmtDate } from "../lib/utils";
 
+const WEEK_OPTIONS = [4, 8, 12, 26, 52];
+
 export default function WeeklyReview({ plList, t, mobile }) {
+  const [limit, setLimit] = useState(8);
   const getWeekStart = (date) => {
     const d = new Date(date);
     d.setDate(d.getDate() - d.getDay());
@@ -32,9 +35,20 @@ export default function WeeklyReview({ plList, t, mobile }) {
         No trades to review yet.
       </div>
     );
+  const visibleWeeks = limit === "all" ? weeks : weeks.slice(0, limit);
+
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-      {weeks.map(([weekStart, data]) => {
+      <div style={{ display: "flex", justifyContent: "flex-end", alignItems: "center", gap: 8 }}>
+        <span style={{ fontSize: 11, color: t.text3, fontFamily: "'Space Mono', monospace", textTransform: "uppercase", letterSpacing: 1.5 }}>Show</span>
+        <div style={{ display: "flex", gap: 6 }}>
+          {WEEK_OPTIONS.map(n => (
+            <button key={n} onClick={() => setLimit(n)} style={{ background: limit === n ? t.accent + "20" : "none", border: `1px solid ${limit === n ? t.accent : t.border}`, color: limit === n ? t.accent : t.text3, borderRadius: 6, padding: "4px 10px", fontSize: 11, cursor: "pointer", fontFamily: "'Space Mono', monospace" }}>{n}W</button>
+          ))}
+          <button onClick={() => setLimit("all")} style={{ background: limit === "all" ? t.accent + "20" : "none", border: `1px solid ${limit === "all" ? t.accent : t.border}`, color: limit === "all" ? t.accent : t.text3, borderRadius: 6, padding: "4px 10px", fontSize: 11, cursor: "pointer", fontFamily: "'Space Mono', monospace" }}>All</button>
+        </div>
+      </div>
+      {visibleWeeks.map(([weekStart, data]) => {
         const weekEnd = new Date(weekStart);
         weekEnd.setDate(weekEnd.getDate() + 6);
         const label = `${fmtDate(weekStart)} – ${fmtDate(
