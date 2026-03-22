@@ -75,8 +75,8 @@ const handleFiles = async (files) => {
   return (
     <div style={{ background: t.card2, border: `1px solid ${t.border}`, borderRadius: 10, padding: "12px 14px" }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 11, color: t.text3, fontFamily: "'Space Mono', monospace", textTransform: "uppercase", letterSpacing: 1.5 }}>
-          <ScreenshotIcon size={13} /> Chart Screenshots
+        <div style={{ fontSize: 11, color: t.text3, fontFamily: "'Space Mono', monospace", textTransform: "uppercase", letterSpacing: 1.5 }}>
+          Chart Screenshots
         </div>
         <div style={{ fontSize: 11, color: value.length >= MAX_IMAGES ? t.danger : t.text3, fontFamily: "'Space Mono', monospace" }}>
           {value.length}/{MAX_IMAGES}
@@ -101,10 +101,8 @@ const handleFiles = async (files) => {
             background: t.accent + "08", marginBottom: value.length > 0 ? 10 : 0,
           }}
         >
-          <div style={{ fontSize: 20, marginBottom: 4, color: t.accent }}>
-           <ScreenshotIcon size={20} /></div>
-          <div style={{ fontSize: 13, color: t.accent, fontFamily: "'Space Mono', monospace" }}>
-            Click or drag & drop charts
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6, fontSize: 13, color: t.accent, fontFamily: "'Space Mono', monospace", marginBottom: 4 }}>
+            <ScreenshotIcon size={15} /> Click or drag & drop charts
           </div>
           <div style={{ fontSize: 11, color: t.text3, marginTop: 2 }}>PNG, JPG, WebP · max {MAX_FILE_MB} MB · saved as {ENCODE_FORMAT.split("/")[1].toUpperCase()} {MAX_WIDTH}px</div>
           <input
