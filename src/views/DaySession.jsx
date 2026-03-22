@@ -6,16 +6,16 @@ import QuoteOfDay from "./QuoteOfDay";
 import { LogIcon, PlanIcon } from "../lib/icons";
 
 const BADGE_DEFS = [
-  { id: "first_trade", code: "1ST",  label: "First Trade",    desc: "Logged your first trade",                        check: ({ trades }) => trades.length >= 1 },
-  { id: "ten_trades",  code: "10T",  label: "10 Trades",      desc: "Logged 10 trades",                               check: ({ trades }) => trades.length >= 10 },
-  { id: "fifty_trades",code: "50T",  label: "50 Trades",      desc: "Logged 50 trades",                               check: ({ trades }) => trades.length >= 50 },
-  { id: "big_winner",  code: "$$$",  label: "Big Winner",     desc: "Single trade over $500",                         check: ({ trades }) => trades.some(t => t.pl >= 500) },
-  { id: "green_day",   code: "GRN",  label: "Green Day",      desc: "First profitable trading day",                   check: ({ trades }) => { const d = {}; trades.forEach(t => { d[t.date] = (d[t.date] || 0) + t.pl; }); return Object.values(d).some(pl => pl > 0); } },
-  { id: "plan_follower",code: "PLN", label: "Plan Follower",  desc: "Executed 3 or more trade plans",                 check: ({ trades }) => trades.filter(t => t.fromPlanId).length >= 3 },
-  { id: "win_streak",  code: "HOT",  label: "Hot Streak",     desc: "3 consecutive winning trades",                   check: ({ streak }) => streak?.type === "W" && streak?.count >= 3 },
-  { id: "disciplined", code: "ZEN",  label: "Disciplined",    desc: "10 trades in a row with no mistakes",            check: ({ trades }) => { const l = trades.slice(-10); return l.length === 10 && l.every(t => !t.mistake || t.mistake === "None"); } },
-  { id: "journal_week",code: "JNL",  label: "Journal Habit",  desc: "7-day journal writing streak",                   check: ({ journalStreak }) => journalStreak >= 7 },
-  { id: "century",     code: "100",  label: "Century",        desc: "Logged 100 trades",                              check: ({ trades }) => trades.length >= 100 },
+  { id: "first_trade",  emoji: "🏁", label: "First Trade",   desc: "Logged your first trade",                     check: ({ trades }) => trades.length >= 1 },
+  { id: "ten_trades",   emoji: "📊", label: "10 Trades",     desc: "Logged 10 trades",                            check: ({ trades }) => trades.length >= 10 },
+  { id: "fifty_trades", emoji: "📈", label: "50 Trades",     desc: "Logged 50 trades",                            check: ({ trades }) => trades.length >= 50 },
+  { id: "century",      emoji: "💯", label: "Century",       desc: "Logged 100 trades",                           check: ({ trades }) => trades.length >= 100 },
+  { id: "big_winner",   emoji: "💰", label: "Big Winner",    desc: "Single trade over $500",                      check: ({ trades }) => trades.some(t => t.pl >= 500) },
+  { id: "green_day",    emoji: "✅", label: "Green Day",     desc: "First profitable trading day",                check: ({ trades }) => { const d = {}; trades.forEach(t => { d[t.date] = (d[t.date] || 0) + t.pl; }); return Object.values(d).some(pl => pl > 0); } },
+  { id: "plan_follower",emoji: "🎯", label: "Plan Follower", desc: "Executed 3 or more trade plans",              check: ({ trades }) => trades.filter(t => t.fromPlanId).length >= 3 },
+  { id: "win_streak",   emoji: "🔥", label: "Hot Streak",    desc: "3 consecutive winning trades",                check: ({ streak }) => streak?.type === "W" && streak?.count >= 3 },
+  { id: "disciplined",  emoji: "🧘", label: "Disciplined",   desc: "10 trades in a row with no mistakes",         check: ({ trades }) => { const l = trades.slice(-10); return l.length === 10 && l.every(t => !t.mistake || t.mistake === "None"); } },
+  { id: "journal_week", emoji: "📝", label: "Journal Habit", desc: "7-day journal writing streak",                check: ({ journalStreak }) => journalStreak >= 7 },
 ];
 
 export default function DaySession({ plList, plans, onAddTrade, onAddPlan, journals = {}, t, mobile, isDark }) {
@@ -54,14 +54,8 @@ export default function DaySession({ plList, plans, onAddTrade, onAddPlan, journ
 
   // Personal bests
   const bestTrade = plList.length ? plList.reduce((b, tr) => tr.pl > (b?.pl ?? -Infinity) ? tr : b, null) : null;
-  const bestDay = (() => {
-    const byDay = {};
-    plList.forEach(tr => { byDay[tr.date] = (byDay[tr.date] || 0) + tr.pl; });
-    const entries = Object.entries(byDay);
-    if (!entries.length) return null;
-    const [date, pl] = entries.reduce((b, e) => e[1] > b[1] ? e : b);
-    return { date, pl };
-  })();
+  const allTimeWins = plList.filter(tr => tr.pl > 0).length;
+  const winRate = plList.length ? Math.round((allTimeWins / plList.length) * 100) : null;
 
   // Resume banner
   const lastTradeDate = plList.length
@@ -149,26 +143,6 @@ export default function DaySession({ plList, plans, onAddTrade, onAddPlan, journ
           </div>
         </div>
       </div>
-
-      {/* Personal bests */}
-      {(bestTrade?.pl > 0 || bestDay?.pl > 0) && (
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 20 }}>
-          {bestTrade?.pl > 0 && (
-            <div style={{ background: t.surface, border: `1px solid ${t.border}`, borderRadius: 10, padding: "12px 14px" }}>
-              <div style={{ fontSize: 10, color: t.text3, fontFamily: "'Space Mono', monospace", textTransform: "uppercase", letterSpacing: 1.5, marginBottom: 4 }}>Best Trade</div>
-              <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 18, fontWeight: 700, color: t.accent }}>+{fmt(bestTrade.pl)}</div>
-              <div style={{ fontSize: 11, color: t.text3, marginTop: 2 }}>{bestTrade.ticker} · {bestTrade.date}</div>
-            </div>
-          )}
-          {bestDay?.pl > 0 && (
-            <div style={{ background: t.surface, border: `1px solid ${t.border}`, borderRadius: 10, padding: "12px 14px" }}>
-              <div style={{ fontSize: 10, color: t.text3, fontFamily: "'Space Mono', monospace", textTransform: "uppercase", letterSpacing: 1.5, marginBottom: 4 }}>Best Day</div>
-              <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 18, fontWeight: 700, color: t.accent }}>+{fmt(bestDay.pl)}</div>
-              <div style={{ fontSize: 11, color: t.text3, marginTop: 2 }}>{bestDay.date}</div>
-            </div>
-          )}
-        </div>
-      )}
 
       {/* Running P&L */}
       {todayTrades.length > 0 && (
@@ -260,6 +234,28 @@ export default function DaySession({ plList, plans, onAddTrade, onAddPlan, journ
         )}
       </div>
 
+      {/* Personal bests */}
+      {plList.length > 0 && (
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginTop: 20 }}>
+          <div style={{ background: t.surface, border: `1px solid ${t.border}`, borderRadius: 10, padding: "12px 14px" }}>
+            <div style={{ fontSize: 10, color: t.text3, fontFamily: "'Space Mono', monospace", textTransform: "uppercase", letterSpacing: 1.5, marginBottom: 4 }}>Best Trade</div>
+            {bestTrade?.pl > 0 ? (
+              <>
+                <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 18, fontWeight: 700, color: t.accent }}>+{fmt(bestTrade.pl)}</div>
+                <div style={{ fontSize: 11, color: t.text3, marginTop: 2 }}>{bestTrade.ticker} · {bestTrade.date}</div>
+              </>
+            ) : (
+              <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 14, color: t.text4 }}>—</div>
+            )}
+          </div>
+          <div style={{ background: t.surface, border: `1px solid ${t.border}`, borderRadius: 10, padding: "12px 14px" }}>
+            <div style={{ fontSize: 10, color: t.text3, fontFamily: "'Space Mono', monospace", textTransform: "uppercase", letterSpacing: 1.5, marginBottom: 4 }}>Win Rate</div>
+            <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 18, fontWeight: 700, color: t.accent }}>{winRate}%</div>
+            <div style={{ fontSize: 11, color: t.text3, marginTop: 2 }}>{allTimeWins}W of {plList.length} trades</div>
+          </div>
+        </div>
+      )}
+
       {/* Achievement badges */}
       {plList.length > 0 && (
         <div style={{ background: t.surface, border: `1px solid ${t.border}`, borderRadius: 12, padding: "14px 16px", marginTop: 20 }}>
@@ -269,8 +265,8 @@ export default function DaySession({ plList, plans, onAddTrade, onAddPlan, journ
               const earned = earnedIds.has(b.id);
               return (
                 <div key={b.id} title={b.desc} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4, opacity: earned ? 1 : 0.22 }}>
-                  <div style={{ width: 44, height: 44, borderRadius: 10, background: earned ? t.accent + "20" : t.card2, border: `1px solid ${earned ? t.accent + "60" : t.border}`, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Space Mono', monospace", fontSize: 9, fontWeight: 700, color: earned ? t.accent : t.text4 }}>
-                    {b.code}
+                  <div style={{ width: 44, height: 44, borderRadius: 10, background: earned ? t.accent + "20" : t.card2, border: `1px solid ${earned ? t.accent + "60" : t.border}`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20 }}>
+                    {b.emoji}
                   </div>
                   <div style={{ fontSize: 9, color: earned ? t.text3 : t.text4, fontFamily: "'Space Mono', monospace", textAlign: "center", maxWidth: 48, lineHeight: 1.3 }}>{b.label}</div>
                 </div>
