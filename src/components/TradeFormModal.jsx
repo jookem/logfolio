@@ -613,7 +613,7 @@ export default function TradeFormModal({ initial, defaults, onClose, onSave, onC
           </div>
           <div style={{ display: "flex", gap: 8 }}>
             <input
-              style={{ ...inp, flex: 1, padding: "7px 12px", fontSize: 12 }}
+              style={{ ...inp(), flex: 1, padding: "7px 12px", fontSize: 12 }}
               value={emotionInput}
               onChange={(e) => setEmotionInput(e.target.value)}
               onKeyDown={(e) => {
@@ -666,7 +666,7 @@ export default function TradeFormModal({ initial, defaults, onClose, onSave, onC
           </div>
           <div style={{ display: "flex", gap: 8 }}>
             <input
-              style={{ ...inp, flex: 1, padding: "7px 12px", fontSize: 12 }}
+              style={{ ...inp(), flex: 1, padding: "7px 12px", fontSize: 12 }}
               value={mistakeInput}
               onChange={(e) => setMistakeInput(e.target.value)}
               onKeyDown={(e) => {
@@ -727,7 +727,7 @@ export default function TradeFormModal({ initial, defaults, onClose, onSave, onC
           </div>
           <div style={{ display: "flex", gap: 8 }}>
             <input
-              style={{ ...inp, flex: 1, padding: "7px 12px", fontSize: 12 }}
+              style={{ ...inp(), flex: 1, padding: "7px 12px", fontSize: 12 }}
               value={tagInput}
               onChange={(e) => setTagInput(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && addTag(tagInput)}
