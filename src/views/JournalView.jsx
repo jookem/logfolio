@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { todayStr } from "../lib/utils";
+import { DeleteIcon } from "../lib/icons";
 
 export default function JournalView({ journals, onSave, t, mobile }) {
   const [date, setDate] = useState(todayStr());
@@ -59,6 +60,15 @@ export default function JournalView({ journals, onSave, t, mobile }) {
           />
           {saved && (
             <span style={{ fontSize: 11, color: t.accent, fontFamily: "'Space Mono',monospace" }}>✓ Saved</span>
+          )}
+          {text.trim() && (
+            <button
+              onClick={() => { onSave(date, ""); setDate(todayStr()); }}
+              title="Delete entry"
+              style={{ marginLeft: "auto", background: "none", border: `1px solid ${t.danger}40`, color: t.danger, borderRadius: 7, padding: "5px 10px", cursor: "pointer", display: "flex", alignItems: "center", gap: 5, fontSize: 11, fontFamily: "'Space Mono',monospace" }}
+            >
+              <DeleteIcon size={13} /> Delete
+            </button>
           )}
         </div>
         <textarea
