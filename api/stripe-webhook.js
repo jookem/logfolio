@@ -41,7 +41,7 @@ export default async function handler(req, res) {
       const session = event.data.object;
       const userId = session.metadata?.supabase_user_id;
       const plan = session.metadata?.plan;
-      const status = plan === "premium_plus" ? "premium_plus" : "premium";
+      const status = plan === "pro_plus" ? "pro_plus" : "pro";
       if (userId) {
         await supabase.from("profiles").update({
           stripe_subscription_id: session.subscription,
@@ -57,7 +57,7 @@ export default async function handler(req, res) {
         let newStatus = "free";
         if (sub.status === "active") {
           const priceId = sub.items?.data?.[0]?.price?.id;
-          newStatus = priceId === process.env.STRIPE_PRICE_ID_PREMIUM_PLUS ? "premium_plus" : "premium";
+          newStatus = priceId === process.env.STRIPE_PRICE_ID_PRO_PLUS ? "pro_plus" : "pro";
         }
         await supabase.from("profiles").update({
           subscription_status: newStatus,

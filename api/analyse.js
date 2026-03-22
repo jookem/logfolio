@@ -51,8 +51,8 @@ export default async function handler(req, res) {
         .eq("id", userId)
         .single();
 
-      if (profile?.subscription_status !== "premium_plus") {
-        return res.status(403).json({ error: "AI Insights requires a Premium Plus subscription." });
+      if (profile?.subscription_status !== "pro_plus") {
+        return res.status(403).json({ error: "AI Insights requires a Pro Plus subscription." });
       }
 
       const todayStr = today();

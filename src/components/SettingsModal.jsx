@@ -3,7 +3,7 @@ import { STRATEGIES, TIMEFRAMES, CURRENCIES, TIMEZONES } from "../lib/constants"
 import { exportCSV, exportJSON } from "../lib/utils";
 import { SettingsIcon, CloseIcon, LightModeIcon, DarkModeIcon } from "../lib/icons";
 
-export default function SettingsModal({ onClose, isDark, setIsDark, onClear, t, user, onSignOut, isPro, isPremium, onUpgrade, onManageBilling, onTutorial, tradeDefaults, onSaveDefaults, trades }) {
+export default function SettingsModal({ onClose, isDark, setIsDark, onClear, t, user, onSignOut, isPro, isProPlus, onUpgrade, onManageBilling, onTutorial, tradeDefaults, onSaveDefaults, trades }) {
   const sel = { background: t.input, border: `1px solid ${t.inputBorder}`, borderRadius: 7, color: t.text, padding: "6px 10px", fontSize: 13, fontFamily: "inherit", cursor: "pointer", outline: "none" };
   const numInp = { background: t.input, border: `1px solid ${t.inputBorder}`, borderRadius: 7, color: t.text, padding: "6px 10px", fontSize: 13, fontFamily: "inherit", outline: "none", width: 110, textAlign: "right" };
   const row = { display: "flex", justifyContent: "space-between", alignItems: "center" };
@@ -138,13 +138,13 @@ export default function SettingsModal({ onClose, isDark, setIsDark, onClear, t, 
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
             <div>
               <div style={{ fontSize: 14, color: t.text }}>Plan</div>
-              <div style={{ fontSize: 11, color: isPremium ? t.accent : t.text3, marginTop: 2 }}>
-              {isPro ? "Premium Plus — $15/month" : isPremium ? "Premium — $5/month" : "Free — 5 trades/month"}
+              <div style={{ fontSize: 11, color: isPro ? t.accent : t.text3, marginTop: 2 }}>
+              {isProPlus ? "Pro Plus — $15/month" : isPro ? "Pro — $5/month" : "Free — 5 trades/month"}
             </div>
             </div>
-            {isPremium
+            {isPro
               ? <button onClick={onManageBilling} style={{ background: "none", border: `1px solid ${t.border}`, color: t.text3, borderRadius: 7, padding: "6px 14px", cursor: "pointer", fontSize: 12, fontFamily: "'Space Mono', monospace" }}>Manage</button>
-              : <button onClick={() => onUpgrade("premium")} style={{ background: t.accent, border: "none", color: "#000", borderRadius: 7, padding: "6px 14px", cursor: "pointer", fontSize: 12, fontWeight: 700, fontFamily: "'Space Mono', monospace" }}>Upgrade</button>
+              : <button onClick={() => onUpgrade("pro")} style={{ background: t.accent, border: "none", color: "#000", borderRadius: 7, padding: "6px 14px", cursor: "pointer", fontSize: 12, fontWeight: 700, fontFamily: "'Space Mono', monospace" }}>Upgrade</button>
             }
           </div>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>

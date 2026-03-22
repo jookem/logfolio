@@ -1,12 +1,12 @@
 import { ShieldIcon } from "../lib/icons";
 
-export default function UpgradePrompt({ t, onUpgrade, feature, tier = "premium" }) {
-  const isPremiumPlus = tier === "premium_plus";
-  const planName = isPremiumPlus ? "Premium Plus" : "Premium";
-  const price = isPremiumPlus ? 15 : 5;
-  const description = isPremiumPlus
-    ? `Upgrade to Premium Plus for $${price}/month to unlock ${feature}, Analytics, and unlimited trades.`
-    : `Upgrade to Premium for $${price}/month to unlock ${feature} and unlimited trades.`;
+export default function UpgradePrompt({ t, onUpgrade, feature, tier = "pro" }) {
+  const isProPlus = tier === "pro_plus";
+  const planName = isProPlus ? "Pro Plus" : "Pro";
+  const price = isProPlus ? 15 : 5;
+  const description = isProPlus
+    ? `Upgrade to Pro Plus for $${price}/month to unlock ${feature}, Analytics, and unlimited trades.`
+    : `Upgrade to Pro for $${price}/month to unlock ${feature} and unlimited trades.`;
 
   return (
     <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "60px 20px", textAlign: "center" }}>

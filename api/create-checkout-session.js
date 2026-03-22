@@ -13,9 +13,9 @@ export default async function handler(req, res) {
   const { userId, email, plan } = req.body;
   if (!userId || !email) return res.status(400).json({ error: "Missing userId or email" });
 
-  const priceId = plan === "premium_plus"
-    ? process.env.STRIPE_PRICE_ID_PREMIUM_PLUS
-    : process.env.STRIPE_PRICE_ID_PREMIUM;
+  const priceId = plan === "pro_plus"
+    ? process.env.STRIPE_PRICE_ID_PRO_PLUS
+    : process.env.STRIPE_PRICE_ID_PRO;
 
   // Get or create Stripe customer
   const { data: profile } = await supabase
@@ -38,7 +38,7 @@ export default async function handler(req, res) {
     line_items: [{ price: priceId, quantity: 1 }],
     success_url: `${process.env.APP_URL}?upgraded=true`,
     cancel_url: `${process.env.APP_URL}?upgraded=false`,
-    metadata: { supabase_user_id: userId, plan: plan || "premium" },
+    metadata: { supabase_user_id: userId, plan: plan || "pro" },
   });
 
   res.status(200).json({ url: session.url });
