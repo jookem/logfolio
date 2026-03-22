@@ -6,13 +6,15 @@ export default function CSVModal({ onClose, onImport, t }) {
   const [csv, setCsv] = useState("");
   const [preview, setPreview] = useState([]);
   const [error, setError] = useState("");
-  const TEMPLATE = `Supported brokers: Webull, Robinhood, TD Ameritrade, Interactive Brokers\nPaste your exported CSV/TSV directly — broker format is auto-detected.`;
+  const TEMPLATE = `Supported brokers: Webull, Robinhood, TD Ameritrade, Interactive Brokers, Tastytrade, Charles Schwab\nPaste your exported CSV/TSV directly — broker format is auto-detected.`;
 
   const detectBroker = (headers) => {
     if (headers.includes("symbol") && headers.includes("side") && headers.includes("filled time")) return "webull";
     if (headers.includes("symbol") && headers.includes("side") && headers.includes("state")) return "robinhood";
     if (headers.includes("symbol") && headers.includes("buy/sell") && headers.includes("exec time")) return "tdameritrade";
     if (headers.includes("symbol") && headers.includes("buy/sell") && headers.includes("date/time")) return "ibkr";
+    if (headers.includes("action") && headers.includes("instrument type") && headers.includes("underlying symbol")) return "tastytrade";
+    if (headers.includes("symbol") && headers.includes("fees & comm") && headers.includes("amount")) return "schwab";
     return "unknown";
   };
 
@@ -26,7 +28,7 @@ export default function CSVModal({ onClose, onImport, t }) {
       const headers = lines[0].split(delimiter).map(h => h.trim().toLowerCase().replace(/\s+/g, " "));
       const broker = detectBroker(headers);
       if (broker === "unknown") {
-        setError("Broker format not recognised — falling back to generic parsing. Results may be incomplete. Supported formats: Webull, Robinhood, TD Ameritrade, Interactive Brokers.");
+        setError("Broker format not recognised — falling back to generic parsing. Results may be incomplete. Supported formats: Webull, Robinhood, TD Ameritrade, Interactive Brokers, Tastytrade, Charles Schwab.");
       }
 
       const rows = lines.slice(1).map(line => {
@@ -118,6 +120,37 @@ export default function CSVModal({ onClose, onImport, t }) {
             shares: Math.abs(parsePrice(row.quantity)),
             date: parseDate(timeStr),
             time: parseTime(timeStr),
+          });
+        });
+      } else if (broker === "tastytrade") {
+        rows.forEach(row => {
+          if ((row.type || "").toLowerCase() !== "trade") return;
+          const action = (row.action || "").toLowerCase();
+          if (!action.includes("buy") && !action.includes("sell")) return;
+          const ticker = (row["underlying symbol"] || row.symbol || "").toUpperCase();
+          if (!ticker) return;
+          orders.push({
+            ticker,
+            side: action.includes("buy") ? "buy" : "sell",
+            price: parsePrice(row["average price"]),
+            shares: Math.abs(parsePrice(row.quantity)),
+            date: parseDate(row.date),
+            time: parseTime(row.date),
+          });
+        });
+      } else if (broker === "schwab") {
+        rows.forEach(row => {
+          const action = (row.action || "").toLowerCase();
+          if (!action.includes("buy") && !action.includes("sell")) return;
+          const ticker = (row.symbol || "").toUpperCase();
+          if (!ticker) return;
+          orders.push({
+            ticker,
+            side: action.includes("buy") ? "buy" : "sell",
+            price: parsePrice(row.price),
+            shares: Math.abs(parsePrice(row.quantity)),
+            date: parseDate(row.date),
+            time: parseTime(row.date),
           });
         });
       } else {

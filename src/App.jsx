@@ -233,11 +233,11 @@ const [page, setPage] = useState(1);
       if (user) await supabase.from("journals").upsert({ user_id: user.id, data: updated });
     }, 1500);
   };
-  const addTrade = async (trade) => {
+  const addTrade = (trade) => {
     if (freeTierFull) { showToast("Free tier limit reached — upgrade to Pro", "#ff4d6d", "warning"); return; }
     if (trade.fromPlanId) {
       setTrades((p) => [...p.filter(t => t.id !== trade.fromPlanId), trade]);
-      if (user) await supabase.from("trades").delete().eq("id", trade.fromPlanId).eq("user_id", user.id);
+      if (user) supabase.from("trades").delete().eq("id", trade.fromPlanId).eq("user_id", user.id).then(() => {});
     } else {
       setTrades((p) => [...p, trade]);
     }
@@ -245,7 +245,7 @@ const [page, setPage] = useState(1);
     setPlanPrefill(null);
     setTab("trades");
     showToast("Trade saved", T.accent, "log");
-    if (user) await supabase.from("trades").upsert({ id: trade.id, user_id: user.id, data: trade });
+    if (user) supabase.from("trades").upsert({ id: trade.id, user_id: user.id, data: trade }).then(() => {});
   };
   const executePlan = (plan) => {
     const prefill = {
@@ -270,19 +270,19 @@ const [page, setPage] = useState(1);
     setPlanPrefill(prefill);
     setShowAdd(true);
   };
-  const saveTrade = async (trade) => {
+  const saveTrade = (trade) => {
     setTrades((p) => p.map((tr) => (tr.id === trade.id ? trade : tr)));
     setEditTrade(null);
     setSelected(trade);
     showToast("Trade updated", T.accent, "log");
-    if (user) await supabase.from("trades").upsert({ id: trade.id, user_id: user.id, data: trade });
+    if (user) supabase.from("trades").upsert({ id: trade.id, user_id: user.id, data: trade }).then(() => {});
   };
-  const savePlan = async (plan) => {
+  const savePlan = (plan) => {
     if (freeTierPlanFull) { showToast("Free tier limit reached — upgrade to Pro", "#ff4d6d", "warning"); return; }
     setTrades((p) => [...p, plan]);
     setShowPlan(false);
     showToast("Trade plan saved", T.accent, "log");
-    if (user) await supabase.from("trades").upsert({ id: plan.id, user_id: user.id, data: plan });
+    if (user) supabase.from("trades").upsert({ id: plan.id, user_id: user.id, data: plan }).then(() => {});
   };
   const handleUpgrade = async () => {
     if (!user) return;
@@ -314,16 +314,16 @@ const [page, setPage] = useState(1);
     const trade = trades.find((tr) => tr.id === id);
     setConfirmDelete({ id, ticker: trade?.ticker || "this entry", isPlan: trade?.status === "planned" });
   };
-  const confirmDeleteExec = async () => {
+  const confirmDeleteExec = () => {
     const { id } = confirmDelete;
     setConfirmDelete(null);
-    if (id === "__ALL__") { await clearAllExec(); return; }
+    if (id === "__ALL__") { clearAllExec(); return; }
     setTrades((p) => p.filter((tr) => tr.id !== id));
     if (selected?.id === id) setSelected(null);
     showToast("Deleted", T.danger, "delete");
-    if (user) await supabase.from("trades").delete().eq("id", id).eq("user_id", user.id);
+    if (user) supabase.from("trades").delete().eq("id", id).eq("user_id", user.id).then(() => {});
   };
-const importTrades = async (incoming) => {
+const importTrades = (incoming) => {
   const month = new Date().toISOString().slice(0, 7);
   const thisMonthLogs = trades.filter(t => t.status !== "planned" && t.date?.startsWith(month)).length;
   const toImport = isPro ? incoming : incoming.slice(0, Math.max(0, 5 - thisMonthLogs));
@@ -333,8 +333,7 @@ const importTrades = async (incoming) => {
   setPage(1);
   if (user) {
     const rows = toImport.map(t => ({ id: t.id, user_id: user.id, data: t }));
-    const { error } = await supabase.from("trades").upsert(rows);
-    if (error) console.error("CSV import Supabase error:", error);
+    supabase.from("trades").upsert(rows).then(() => {});
   }
   if (!isPro && toImport.length < incoming.length)
     showToast(`Imported ${toImport.length}/${incoming.length} — free limit reached`, T.accent, "log");
@@ -344,12 +343,12 @@ const importTrades = async (incoming) => {
   const clearAll = () => {
     setConfirmDelete({ id: "__ALL__", ticker: "all trades", isPlan: false });
   };
-  const clearAllExec = async () => {
+  const clearAllExec = () => {
     setTrades([]);
     setSelected(null);
     localStorage.removeItem(STORAGE_KEY);
     showToast("All trades cleared", T.danger, "delete");
-    if (user) await supabase.from("trades").delete().eq("user_id", user.id);
+    if (user) supabase.from("trades").delete().eq("user_id", user.id).then(() => {});
   };
 
 const plList = useMemo(
