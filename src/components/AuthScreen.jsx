@@ -24,6 +24,7 @@ export default function AuthScreen({ isDark }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [message, setMessage] = useState(null);
+  const [showPassword, setShowPassword] = useState(false);
 
   const inp = {
     background: T.input, border: `1px solid ${T.inputBorder}`,
@@ -98,7 +99,16 @@ export default function AuthScreen({ isDark }) {
               <div style={{ fontSize: 10, color: T.text3, textTransform: "uppercase", letterSpacing: 1.5, marginBottom: 5 }}>
                 Password
               </div>
-              <input style={inp} type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="••••••••" required minLength={6} />
+              <div style={{ position: "relative" }}>
+                <input style={{ ...inp, paddingRight: 40 }} type={showPassword ? "text" : "password"} value={password} onChange={e => setPassword(e.target.value)} placeholder="••••••••" required minLength={6} />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(s => !s)}
+                  style={{ position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", color: T.text3, fontSize: 13, padding: 0 }}
+                >
+                  {showPassword ? "Hide" : "Show"}
+                </button>
+              </div>
             </div>
           )}
 
