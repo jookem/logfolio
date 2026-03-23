@@ -880,15 +880,7 @@ const paginated = filtered
                   gap:6,
                 }}
               >
-                <svg
-  width="1em"
-  height="1em"
-  viewBox="0 0 24 24"
-  fill="none"
-style={{ display: "block" }}>
-  <path d="M20 14V7C20 5.34315 18.6569 4 17 4H12M20 14L13.5 20M20 14H15.5C14.3954 14 13.5 14.8954 13.5 16V20M13.5 20H7C5.34315 20 4 18.6569 4 17V12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" stroke-linejoin="round"/>
-  <path d="M7 4V7M7 10V7M7 7H4M7 7H10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" stroke-linejoin="round"/>
-</svg> LOG
+                <LogIcon size={16} /> LOG
               </button>
               <button
   onClick={() => setShowPlan(true)}
@@ -1635,9 +1627,7 @@ style={{ display: "block" }}>
         <div style={{ position: "fixed", inset: 0, zIndex: 300, background: "rgba(0,0,0,0.6)", display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>
           <div style={{ background: T.card, border: `1px solid ${T.border}`, borderRadius: 16, padding: "28px 28px 24px", maxWidth: 360, width: "100%", textAlign: "center" }}>
             <div style={{ width: 44, height: 44, borderRadius: "50%", background: T.danger + "15", border: `1px solid ${T.danger}30`, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px" }}>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={T.danger} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M3 6H5H21M8 6V4a1 1 0 011-1h6a1 1 0 011 1v2m3 0v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6h14zM10 11v6M14 11v6" />
-              </svg>
+              <span style={{ color: T.danger }}><DeleteIcon size={20} /></span>
             </div>
             <div style={{ fontSize: 15, fontWeight: 700, color: T.text, marginBottom: 8 }}>
               Delete {confirmDelete.isPlan ? "plan" : "trade"}?

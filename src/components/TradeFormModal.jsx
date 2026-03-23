@@ -4,7 +4,7 @@ import { todayStr, typeLabels, fmt } from "../lib/utils";
 import Tag from "./Tag";
 import VoiceNote from "./VoiceNote";
 import ScreenshotUpload from "./ScreenshotUpload";
-import { EditIcon, LogIcon, CloseIcon, TimeIcon, ExitIcon, EntryPriceIcon } from "../lib/icons";
+import { EditIcon, LogIcon, CloseIcon, TimeIcon, ExitIcon, EntryPriceIcon, TickerIcon, CategoryIcon, StrategyIcon, TimeframeIcon, DirectionIcon, AmountIcon } from "../lib/icons";
 
 export default function TradeFormModal({ initial, defaults, onClose, onSave, onCSVImport, t, editLabel, isDark }) {
   const blank = {
@@ -263,7 +263,7 @@ export default function TradeFormModal({ initial, defaults, onClose, onSave, onC
           }}
         >
           <div>
-            <label style={lbl}>{typeLabels(form.type).ticker}</label>
+            <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><TickerIcon size={14} />{typeLabels(form.type).ticker}</label>
             <input
               style={inp("ticker")}
               value={form.ticker}
@@ -282,7 +282,7 @@ export default function TradeFormModal({ initial, defaults, onClose, onSave, onC
             />
           </div>
           <div>
-            <label style={lbl}>Type</label>
+            <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><CategoryIcon size={14} />Type</label>
             <select
               style={inp()}
               value={form.type}
@@ -295,7 +295,7 @@ export default function TradeFormModal({ initial, defaults, onClose, onSave, onC
             </select>
           </div>
           <div>
-            <label style={lbl}>Strategy</label>
+            <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><StrategyIcon size={14} />Strategy</label>
             <select
               style={inp()}
               value={form.strategy}
@@ -310,7 +310,7 @@ export default function TradeFormModal({ initial, defaults, onClose, onSave, onC
             </select>
           </div>
           <div>
-            <label style={lbl}>Timeframe</label>
+            <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><TimeframeIcon size={14} />Timeframe</label>
             <select style={inp()} value={form.timeframe || "Daily"} onChange={(e) => set("timeframe", e.target.value)}>
               {TIMEFRAMES.map(tf => <option key={tf}>{tf}</option>)}
             </select>
@@ -326,7 +326,7 @@ export default function TradeFormModal({ initial, defaults, onClose, onSave, onC
             }}
           >
             <div>
-              <label style={lbl}>Direction</label>
+              <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><DirectionIcon size={14} />Direction</label>
               <select
                 style={inp()}
                 value={form.direction}
@@ -337,7 +337,7 @@ export default function TradeFormModal({ initial, defaults, onClose, onSave, onC
               </select>
             </div>
             <div>
-              <label style={lbl}>{typeLabels(form.type).units}</label>
+              <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><AmountIcon size={14} />{typeLabels(form.type).units}</label>
               <input
                 style={inp("shares")}
                 type="number"
@@ -348,7 +348,7 @@ export default function TradeFormModal({ initial, defaults, onClose, onSave, onC
               {errMsg("shares")}
             </div>
             <div>
-              <label style={lbl}>Entry $</label>
+              <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><EntryPriceIcon size={14} />Entry $</label>
               <input
                 style={inp("entryPrice")}
                 type="number"
@@ -359,7 +359,7 @@ export default function TradeFormModal({ initial, defaults, onClose, onSave, onC
               {errMsg("entryPrice")}
             </div>
             <div>
-              <label style={lbl}>Exit $</label>
+              <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><ExitIcon size={14} />Exit $</label>
               <input
                 style={inp("exitPrice")}
                 type="number"

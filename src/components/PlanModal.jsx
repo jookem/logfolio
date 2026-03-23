@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { PlanIcon, CloseIcon, WarningIcon, TargetIcon } from "../lib/icons";
+import { PlanIcon, CloseIcon, WarningIcon, TargetIcon, TickerIcon, CategoryIcon, StrategyIcon, TimeframeIcon, DirectionIcon, AmountIcon, EntryPriceIcon, ExitIcon } from "../lib/icons";
 import { supabase } from "../lib/supabase";
 import { STOCK_LIKE, SUGGESTED_TAGS, EMOTIONS } from "../lib/constants";
 import { todayStr, typeLabels, normCDF, bsPrice } from "../lib/utils";
@@ -322,7 +322,7 @@ const base = {
         {/* ── Ticker / Date / Type / Strategy ── */}
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
 <div>
-  <label style={lbl}>{typeLabels(form.type).ticker}</label>
+  <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><TickerIcon size={14} />{typeLabels(form.type).ticker}</label>
   <div style={{ position: "relative" }}>
     <input
       style={{ ...inp, paddingRight: tickerLoading ? 36 : 14 }}
@@ -350,7 +350,7 @@ const base = {
             <input style={inp} type="date" value={form.date} onChange={(e) => set("date", e.target.value)} />
           </div>
           <div>
-            <label style={lbl}>Type</label>
+            <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><CategoryIcon size={14} />Type</label>
             <select style={inp} value={form.type} onChange={(e) => handleTypeChange(e.target.value)}>
               <option value="stock">Stock</option>
               <option value="options">Options</option>
@@ -359,7 +359,7 @@ const base = {
             </select>
           </div>
           <div>
-            <label style={lbl}>Strategy</label>
+            <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><StrategyIcon size={14} />Strategy</label>
             <select style={inp} value={form.strategy} onChange={(e) => handleStrategyChange(e.target.value)}>
               {(form.type === "options" ? OPTION_STRATEGY_NAMES : STOCK_STRATEGIES).map((s) => (
                 <option key={s}>{s}</option>
@@ -385,7 +385,7 @@ const base = {
           {/* Buy / Short toggle — for stock type or covered call */}
           {(STOCK_LIKE.includes(form.type) || optConfig?.stockRequired) && (
             <div>
-              <label style={lbl}>Direction</label>
+              <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><DirectionIcon size={14} />Direction</label>
               <select style={inp} value={form.stockDirection} onChange={(e) => set("stockDirection", e.target.value)}>
                 <option value="buy">Buy</option>
                 <option value="short">Short</option>
@@ -395,7 +395,7 @@ const base = {
 
           {/* Purchase Price */}
           <div>
-            <label style={lbl}>{form.type === "options" ? "Purchase Price" : "Entry Price"}</label>
+            <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><EntryPriceIcon size={14} />{form.type === "options" ? "Purchase Price" : "Entry Price"}</label>
             <div style={{ position: "relative" }}>
               <span style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: t.text3, fontSize: 14 }}>$</span>
               <input style={{ ...inp, paddingLeft: 26 }} type="number" value={form.purchasePrice}
@@ -405,7 +405,7 @@ const base = {
 
           {/* Num Shares */}
           <div>
-            <label style={lbl}>Num. {typeLabels(form.type).units}</label>
+            <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><AmountIcon size={14} />Num. {typeLabels(form.type).units}</label>
             <input style={inp} type="number" value={form.numShares}
               onChange={(e) => set("numShares", e.target.value)} placeholder="100" />
           </div>
@@ -746,7 +746,7 @@ const base = {
 
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
               <div>
-                <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 5 }}>Stop Loss <WarningIcon size={13} /></label>
+                <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><ExitIcon size={14} />Stop Loss</label>
                 <div style={{ position: "relative" }}>
                   <span style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: t.text3, fontSize: 14 }}>$</span>
                   <input style={{ ...inp, paddingLeft: 26, borderColor: form.stopLoss ? t.danger + "80" : t.inputBorder }}
@@ -754,7 +754,7 @@ const base = {
                 </div>
               </div>
               <div>
-                <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 5 }}>Take Profit <TargetIcon size={13} /></label>
+                <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><EntryPriceIcon size={14} />Take Profit</label>
                 <div style={{ position: "relative" }}>
                   <span style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: t.text3, fontSize: 14 }}>$</span>
                   <input style={{ ...inp, paddingLeft: 26, borderColor: form.takeProfit ? t.accent + "80" : t.inputBorder }}
