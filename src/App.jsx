@@ -1592,7 +1592,7 @@ const paginated = filtered
     onClear={clearAll}
     t={T}
     user={user}
-    onSignOut={() => { setShowSettings(false); signOut(); }}
+    onSignOut={() => { setShowSettings(false); saveTrades([]); signOut(); }}
     isPro={isPro}
     isProPlus={isProPlus}
     onUpgrade={(plan) => { setShowSettings(false); handleUpgrade(plan); }}
