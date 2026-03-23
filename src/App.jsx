@@ -106,14 +106,16 @@ const [page, setPage] = useState(1);
       } else {
         const loaded = data.map(row => ({ ...row.data, id: row.id }));
         if (loaded.length === 0) {
-          // Migrate localStorage trades if present; otherwise confirmed new user
+          // Only migrate localStorage if it belongs to this exact user
           const local = loadTrades();
-          if (local?.length) {
+          const localUserId = localStorage.getItem("tradelog_user_id");
+          if (local?.length && localUserId === user.id) {
             const rows = local.map(t => ({ id: t.id, user_id: user.id, data: t }));
             await supabase.from("trades").upsert(rows);
             setTrades(local);
           } else {
             // Supabase confirmed zero trades — show onboarding
+            saveTrades([]);
             setTrades([]);
             setShowOnboarding(true);
           }
@@ -130,6 +132,7 @@ const [page, setPage] = useState(1);
   useEffect(() => {
     if (!user || !tradesLoaded) return;
     saveTrades(trades); // keep localStorage as backup
+    localStorage.setItem("tradelog_user_id", user.id);
     // Supabase sync is done per-operation (add/save/delete) for efficiency
   }, [trades, user, tradesLoaded]);
 
@@ -1592,7 +1595,7 @@ const paginated = filtered
     onClear={clearAll}
     t={T}
     user={user}
-    onSignOut={() => { setShowSettings(false); saveTrades([]); signOut(); }}
+    onSignOut={() => { setShowSettings(false); saveTrades([]); localStorage.removeItem("tradelog_user_id"); signOut(); }}
     isPro={isPro}
     isProPlus={isProPlus}
     onUpgrade={(plan) => { setShowSettings(false); handleUpgrade(plan); }}
