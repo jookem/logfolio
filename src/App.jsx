@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect, useRef } from "react";
 import { LogIcon, PlanIcon, CloseIcon, CheckIcon, WarningIcon, DeleteIcon, SettingsIcon, MenuIcon, LogoIcon } from "./lib/icons";
 import { supabase } from "./lib/supabase";
+import { uploadTradeMedia, deleteTradeMedia, deleteAllUserMedia } from "./lib/media";
 import { useAuth } from "./contexts/AuthContext";
 import AuthScreen from "./components/AuthScreen";
 import {
@@ -240,7 +241,10 @@ const [page, setPage] = useState(1);
     if (freeTierFull) { showToast("Free tier limit reached — upgrade to Pro", "#ff4d6d", "warning"); return; }
     if (trade.fromPlanId) {
       setTrades((p) => [...p.filter(t => t.id !== trade.fromPlanId), trade]);
-      if (user) supabase.from("trades").delete().eq("id", trade.fromPlanId).eq("user_id", user.id).then(() => {});
+      if (user) {
+        supabase.from("trades").delete().eq("id", trade.fromPlanId).eq("user_id", user.id).then(() => {});
+        deleteTradeMedia(user.id, trade.fromPlanId);
+      }
     } else {
       setTrades((p) => [...p, trade]);
     }
@@ -248,7 +252,13 @@ const [page, setPage] = useState(1);
     setPlanPrefill(null);
     setTab("trades");
     showToast("Trade saved", T.accent, "log");
-    if (user) supabase.from("trades").upsert({ id: trade.id, user_id: user.id, data: trade }).then(() => {});
+    if (user) {
+      (async () => {
+        const uploaded = await uploadTradeMedia(user.id, trade);
+        setTrades((p) => p.map((t) => t.id === trade.id ? uploaded : t));
+        supabase.from("trades").upsert({ id: uploaded.id, user_id: user.id, data: uploaded }).then(() => {});
+      })();
+    }
   };
   const executePlan = (plan) => {
     const prefill = {
@@ -278,14 +288,27 @@ const [page, setPage] = useState(1);
     setEditTrade(null);
     setSelected(trade);
     showToast("Trade updated", T.accent, "log");
-    if (user) supabase.from("trades").upsert({ id: trade.id, user_id: user.id, data: trade }).then(() => {});
+    if (user) {
+      (async () => {
+        const uploaded = await uploadTradeMedia(user.id, trade);
+        setTrades((p) => p.map((t) => t.id === trade.id ? uploaded : t));
+        setSelected(uploaded);
+        supabase.from("trades").upsert({ id: uploaded.id, user_id: user.id, data: uploaded }).then(() => {});
+      })();
+    }
   };
   const savePlan = (plan) => {
     if (freeTierPlanFull) { showToast("Free tier limit reached — upgrade to Pro", "#ff4d6d", "warning"); return; }
     setTrades((p) => [...p, plan]);
     setShowPlan(false);
     showToast("Trade plan saved", T.accent, "log");
-    if (user) supabase.from("trades").upsert({ id: plan.id, user_id: user.id, data: plan }).then(() => {});
+    if (user) {
+      (async () => {
+        const uploaded = await uploadTradeMedia(user.id, plan);
+        setTrades((p) => p.map((t) => t.id === plan.id ? uploaded : t));
+        supabase.from("trades").upsert({ id: uploaded.id, user_id: user.id, data: uploaded }).then(() => {});
+      })();
+    }
   };
   const handleUpgrade = async (plan = "pro") => {
     if (!user) return;
@@ -324,7 +347,10 @@ const [page, setPage] = useState(1);
     setTrades((p) => p.filter((tr) => tr.id !== id));
     if (selected?.id === id) setSelected(null);
     showToast("Deleted", T.danger, "delete");
-    if (user) supabase.from("trades").delete().eq("id", id).eq("user_id", user.id).then(() => {});
+    if (user) {
+      supabase.from("trades").delete().eq("id", id).eq("user_id", user.id).then(() => {});
+      deleteTradeMedia(user.id, id);
+    }
   };
 const importTrades = (incoming) => {
   const month = new Date().toISOString().slice(0, 7);
@@ -351,7 +377,10 @@ const importTrades = (incoming) => {
     setSelected(null);
     localStorage.removeItem(STORAGE_KEY);
     showToast("All trades cleared", T.danger, "delete");
-    if (user) supabase.from("trades").delete().eq("user_id", user.id).then(() => {});
+    if (user) {
+      supabase.from("trades").delete().eq("user_id", user.id).then(() => {});
+      deleteAllUserMedia(user.id);
+    }
   };
 
 const plList = useMemo(
