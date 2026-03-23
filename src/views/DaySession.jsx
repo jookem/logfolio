@@ -234,37 +234,6 @@ export default function DaySession({ plList, plans, onAddTrade, onAddPlan, journ
         )}
       </div>
 
-      {/* Personal bests */}
-      {plList.length > 0 && (
-        <>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginTop: 20 }}>
-          <div style={{ background: t.surface, border: `1px solid ${t.border}`, borderRadius: 10, padding: "12px 14px" }}>
-            <div style={{ fontSize: 10, color: t.text3, fontFamily: "'Space Mono', monospace", textTransform: "uppercase", letterSpacing: 1.5, marginBottom: 4 }}>Best Trade</div>
-            {bestTrade?.pl > 0 ? (
-              <>
-                <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 18, fontWeight: 700, color: t.accent }}>+{fmt(bestTrade.pl)}</div>
-                <div style={{ fontSize: 11, color: t.text3, marginTop: 2 }}>{bestTrade.ticker} · {bestTrade.date}</div>
-              </>
-            ) : (
-              <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 14, color: t.text4 }}>—</div>
-            )}
-          </div>
-          <div style={{ background: t.surface, border: `1px solid ${t.border}`, borderRadius: 10, padding: "12px 14px" }}>
-            <div style={{ fontSize: 10, color: t.text3, fontFamily: "'Space Mono', monospace", textTransform: "uppercase", letterSpacing: 1.5, marginBottom: 4 }}>Win Rate</div>
-            <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 18, fontWeight: 700, color: t.accent }}>{winRate}%</div>
-            <div style={{ fontSize: 11, color: t.text3, marginTop: 2 }}>{allTimeWins}W of {plList.length} trades</div>
-          </div>
-        </div>
-        {!isPro && (
-          <div style={{ marginTop: 8, padding: "8px 12px", background: t.accent + "10", border: `1px solid ${t.accent}25`, borderRadius: 8, display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12 }}>
-            <div style={{ fontSize: 11, color: t.text3 }}>Get more statistics like these on the Analytics page — upgrade to Pro.</div>
-            <button onClick={onUpgrade} style={{ background: "none", border: `1px solid ${t.accent}`, color: t.accent, borderRadius: 6, padding: "4px 10px", cursor: "pointer", fontSize: 11, fontWeight: 700, fontFamily: "'Space Mono', monospace", whiteSpace: "nowrap" }}>
-              Go Pro
-            </button>
-          </div>
-        )}
-        </>
-      )}
 
       {/* Achievement badges */}
       {plList.length > 0 && (
