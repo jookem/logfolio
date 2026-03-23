@@ -14,15 +14,14 @@
 	.st6{display:inline;fill:none;stroke:#000000;stroke-width:66;stroke-linecap:round;stroke-miterlimit:10;}
 	.st7{display:inline;fill:none;stroke:#000000;stroke-width:33;stroke-linecap:round;stroke-miterlimit:10;}
 	.st8{display:inline;fill:none;stroke:#000000;stroke-width:66;stroke-miterlimit:133.3333;}
-	.st9{fill:none;stroke:#000000;stroke-width:66;stroke-linecap:round;stroke-miterlimit:133.3333;}
-	.st10{fill:none;stroke:#000000;stroke-width:33;stroke-linecap:round;stroke-miterlimit:133.3333;}
+	.st9{fill:none;stroke:#000000;stroke-width:66;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:133.3333;}
+	.st10{fill:none;stroke:#000000;stroke-width:33;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:133.3333;}
 	.st11{display:inline;}
 	.st12{fill:#020202;}
 	.st13{display:inline;fill:none;stroke:#000000;stroke-width:33;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;}
 	.st14{display:inline;fill:none;stroke:#000000;stroke-width:66;stroke-miterlimit:10;}
 	
 		.st15{display:inline;fill:none;stroke:#000000;stroke-width:66.6667;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:66.6667;}
-	.st16{fill:none;stroke:#000000;stroke-width:66;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:133.3333;}
 </style>
 <g id="calendar" class="st0">
 	<path class="st1" d="M580,699H202.4c-37.3,0-56,0-70.3-7.3c-12.5-6.4-22.7-16.6-29.1-29.1c-7.3-14.3-7.3-32.9-7.3-70.3v-320
@@ -79,19 +78,28 @@
 	<path class="st4" d="M126.4,393.3c0,0,20.7,104.5,89.5,158.6c72.8,57.2,179.9,63.8,179.9,63.8"/>
 	<path class="st4" d="M665.2,375.6c0,0,5.7,72-62.3,149.7c-54.7,62.5-114.1,78.5-114.1,78.5"/>
 </g>
-<g id="share">
-	<path class="st9" d="M132,417.6c0,46,37.3,83.3,83.3,83.3s83.3-37.3,83.3-83.3s-37.3-83.3-83.3-83.3"/>
-	<path class="st10" d="M465.4,234.3L298.7,350.9"/>
-	<path class="st10" d="M465.4,600.9L298.7,484.3"/>
-	<path class="st9" d="M548.7,717.6c46,0,83.3-37.3,83.3-83.3S594.7,551,548.7,551s-83.3,37.3-83.3,83.3"/>
-	<path class="st9" d="M620.9,242.6c-23,39.9-74,53.5-113.8,30.5c-39.9-23-53.5-74-30.5-113.8c23-39.9,74-53.5,113.8-30.5"/>
+<g id="share" class="st0">
+	<path class="st4" d="M132,417.6c0,46,37.3,83.3,83.3,83.3s83.3-37.3,83.3-83.3s-37.3-83.3-83.3-83.3"/>
+	<path class="st5" d="M465.4,234.3L298.7,350.9"/>
+	<path class="st5" d="M465.4,600.9L298.7,484.3"/>
+	<path class="st4" d="M548.7,717.6c46,0,83.3-37.3,83.3-83.3S594.7,551,548.7,551s-83.3,37.3-83.3,83.3"/>
+	<path class="st4" d="M620.9,242.6c-23,39.9-74,53.5-113.8,30.5c-39.9-23-53.5-74-30.5-113.8c23-39.9,74-53.5,113.8-30.5"/>
 </g>
-<g id="premium" class="st0">
-	<path class="st1" d="M379.1,299.8l-50,100h133.3l-50,100 M662.4,399.8c0,148.7-182,256.5-245.3,289.4c-6.8,3.6-10.3,5.3-15,6.3
-		c-3.7,0.7-9,0.7-12.7,0c-4.7-0.9-8.2-2.7-15-6.3c-63.3-33-245.3-140.7-245.3-289.4V273.7c0-26.7,0-40,4.4-51.4
-		c3.9-10.1,10.1-19.1,18.2-26.3c9.2-8.1,21.7-12.8,46.6-22.1l178.7-67c6.9-2.6,10.4-3.9,14-4.4c3.2-0.5,6.4-0.5,9.5,0
-		c3.6,0.5,7,1.8,14,4.4l178.7,67c25,9.4,37.4,14,46.6,22.1c8.1,7.2,14.4,16.2,18.2,26.3c4.4,11.5,4.4,24.8,4.4,51.4V399.8z"/>
-	<path class="st2" d="M508.8,236.4v49 M508.8,334.5v-49 M508.8,285.4h-49 M508.8,285.4h49"/>
+<g id="premium">
+	<path class="st9" d="M663.7,399.8c0,148.7-182,256.5-245.3,289.4c-6.8,3.6-10.3,5.3-15,6.3c-3.7,0.7-9,0.7-12.7,0
+		c-4.7-0.9-8.2-2.7-15-6.3c-63.3-33-245.3-140.7-245.3-289.4V273.7c0-26.7,0-40,4.4-51.4c3.9-10.1,10.1-19.1,18.2-26.3
+		c9.2-8.1,21.7-12.8,46.6-22.1l178.7-67c6.9-2.6,10.4-3.9,14-4.4c3.2-0.5,6.4-0.5,9.5,0c3.6,0.5,7,1.8,14,4.4l178.7,67
+		c25,9.4,37.4,14,46.6,22.1c8.1,7.2,14.4,16.2,18.2,26.3c4.4,11.5,4.4,24.8,4.4,51.4V399.8z"/>
+</g>
+<g id="Layer_30" class="st0">
+	<polyline class="st1" points="379.1,299.8 329.1,399.8 462.4,399.8 412.4,499.8 	"/>
+</g>
+<g id="Layer_32">
+	<polygon class="st10" points="397,292.2 432,363 510.1,374.4 453.6,429.5 466.9,507.4 397,470.6 327.1,507.4 340.4,429.5 
+		283.8,374.4 362,363 	"/>
+</g>
+<g id="Layer_31">
+	<path class="st10" d="M534.7,228.4v49 M534.7,326.4v-49 M534.7,277.4h-49 M534.7,277.4h49"/>
 </g>
 <g id="target" class="st0">
 	<path class="st2" d="M62.4,399h100"/>
@@ -205,14 +213,14 @@
 </g>
 <g id="import_1_" class="st0">
 	<g class="st11">
-		<path class="st16" d="M657.7,169L384.4,442.3"/>
-		<path class="st16" d="M357.7,308v161h161"/>
+		<path class="st9" d="M657.7,169L384.4,442.3"/>
+		<path class="st9" d="M357.7,308v161h161"/>
 	</g>
 </g>
 <g id="export" class="st0">
 	<g class="st11">
-		<path class="st16" d="M398.7,428L672,154.7"/>
-		<path class="st16" d="M698.7,289V128h-161"/>
+		<path class="st9" d="M398.7,428L672,154.7"/>
+		<path class="st9" d="M698.7,289V128h-161"/>
 	</g>
 </g>
 <g id="BG3" class="st0">

@@ -18,7 +18,7 @@ const BADGE_DEFS = [
   { id: "journal_week", emoji: "📝", label: "Journal Habit", desc: "7-day journal writing streak",                check: ({ journalStreak }) => journalStreak >= 7 },
 ];
 
-export default function DaySession({ plList, plans, onAddTrade, onAddPlan, journals = {}, t, mobile, isDark }) {
+export default function DaySession({ plList, plans, onAddTrade, onAddPlan, journals = {}, t, mobile, isDark, isPro, onUpgrade }) {
   const today = todayStr();
   const todayTrades = plList.filter((tr) => tr.date === today);
   const sessionPL = todayTrades.reduce((s, tr) => s + tr.pl, 0);
@@ -236,6 +236,7 @@ export default function DaySession({ plList, plans, onAddTrade, onAddPlan, journ
 
       {/* Personal bests */}
       {plList.length > 0 && (
+        <>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginTop: 20 }}>
           <div style={{ background: t.surface, border: `1px solid ${t.border}`, borderRadius: 10, padding: "12px 14px" }}>
             <div style={{ fontSize: 10, color: t.text3, fontFamily: "'Space Mono', monospace", textTransform: "uppercase", letterSpacing: 1.5, marginBottom: 4 }}>Best Trade</div>
@@ -254,6 +255,15 @@ export default function DaySession({ plList, plans, onAddTrade, onAddPlan, journ
             <div style={{ fontSize: 11, color: t.text3, marginTop: 2 }}>{allTimeWins}W of {plList.length} trades</div>
           </div>
         </div>
+        {!isPro && (
+          <div style={{ marginTop: 8, padding: "8px 12px", background: t.accent + "10", border: `1px solid ${t.accent}25`, borderRadius: 8, display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12 }}>
+            <div style={{ fontSize: 11, color: t.text3 }}>Get more statistics like these on the Analytics page — upgrade to Pro.</div>
+            <button onClick={onUpgrade} style={{ background: "none", border: `1px solid ${t.accent}`, color: t.accent, borderRadius: 6, padding: "4px 10px", cursor: "pointer", fontSize: 11, fontWeight: 700, fontFamily: "'Space Mono', monospace", whiteSpace: "nowrap" }}>
+              Go Pro
+            </button>
+          </div>
+        )}
+        </>
       )}
 
       {/* Achievement badges */}

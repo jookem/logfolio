@@ -4,7 +4,7 @@ import { todayStr, typeLabels, fmt } from "../lib/utils";
 import Tag from "./Tag";
 import VoiceNote from "./VoiceNote";
 import ScreenshotUpload from "./ScreenshotUpload";
-import { EditIcon, LogIcon, CloseIcon, TimeIcon } from "../lib/icons";
+import { EditIcon, LogIcon, CloseIcon, TimeIcon, ExitIcon, EntryPriceIcon } from "../lib/icons";
 
 export default function TradeFormModal({ initial, defaults, onClose, onSave, onCSVImport, t, editLabel, isDark }) {
   const blank = {
@@ -409,7 +409,7 @@ export default function TradeFormModal({ initial, defaults, onClose, onSave, onC
               />
             </div>
             <div>
-              <label style={lbl}>Stop Loss $</label>
+              <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><ExitIcon size={14} />Stop Loss $</label>
               <input
                 style={inp("stopLoss")}
                 type="number"
@@ -420,7 +420,7 @@ export default function TradeFormModal({ initial, defaults, onClose, onSave, onC
               {errMsg("stopLoss")}
             </div>
             <div>
-              <label style={lbl}>Take Profit $</label>
+              <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><EntryPriceIcon size={14} />Take Profit $</label>
               <input
                 style={inp("takeProfit")}
                 type="number"

@@ -385,7 +385,7 @@ const base = {
           {/* Buy / Short toggle — for stock type or covered call */}
           {(STOCK_LIKE.includes(form.type) || optConfig?.stockRequired) && (
             <div>
-              <label style={lbl}>Buy or Short</label>
+              <label style={lbl}>Direction</label>
               <select style={inp} value={form.stockDirection} onChange={(e) => set("stockDirection", e.target.value)}>
                 <option value="buy">Buy</option>
                 <option value="short">Short</option>

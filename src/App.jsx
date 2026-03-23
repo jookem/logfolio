@@ -935,6 +935,8 @@ style={{ display: "block" }}>
               t={T}
               mobile={mobile}
               isDark={isDark}
+              isPro={isPro}
+              onUpgrade={() => handleUpgrade("pro")}
             />
           </ErrorBoundary>
         )}
