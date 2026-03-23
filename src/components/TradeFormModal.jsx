@@ -1,10 +1,10 @@
 import { useState } from "react";
-import { STOCK_LIKE, SUGGESTED_TAGS, EMOTIONS, MISTAKES, TIMEFRAMES } from "../lib/constants";
+import { STOCK_LIKE, SUGGESTED_TAGS, EMOTIONS, MISTAKES } from "../lib/constants";
 import { todayStr, typeLabels, fmt } from "../lib/utils";
 import Tag from "./Tag";
 import VoiceNote from "./VoiceNote";
 import ScreenshotUpload from "./ScreenshotUpload";
-import { EditIcon, LogIcon, CloseIcon, TimeIcon, ExitIcon, EntryPriceIcon, TickerIcon, CategoryIcon, StrategyIcon, TimeframeIcon, DirectionIcon, AmountIcon } from "../lib/icons";
+import { EditIcon, LogIcon, CloseIcon, TodayIcon, ExitIcon, EntryPriceIcon, EntryTimeIcon, ExitTimeIcon, TickerIcon, CategoryIcon, StrategyIcon, DirectionIcon, AmountIcon, WarningIcon, TargetIcon } from "../lib/icons";
 
 export default function TradeFormModal({ initial, defaults, onClose, onSave, onCSVImport, t, editLabel, isDark }) {
   const blank = {
@@ -273,7 +273,7 @@ export default function TradeFormModal({ initial, defaults, onClose, onSave, onC
             {errMsg("ticker")}
           </div>
           <div>
-            <label style={lbl}>Date</label>
+            <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><TodayIcon size={14} />Date</label>
             <input
               style={inp()}
               type="date"
@@ -309,12 +309,6 @@ export default function TradeFormModal({ initial, defaults, onClose, onSave, onC
               ))}
             </select>
           </div>
-          <div>
-            <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><TimeframeIcon size={14} />Timeframe</label>
-            <select style={inp()} value={form.timeframe || "Daily"} onChange={(e) => set("timeframe", e.target.value)}>
-              {TIMEFRAMES.map(tf => <option key={tf}>{tf}</option>)}
-            </select>
-          </div>
         </div>
         {STOCK_LIKE.includes(form.type) ? (
           <div
@@ -348,7 +342,7 @@ export default function TradeFormModal({ initial, defaults, onClose, onSave, onC
               {errMsg("shares")}
             </div>
             <div>
-              <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><EntryPriceIcon size={14} />Entry $</label>
+              <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><EntryPriceIcon size={14} />Entry</label>
               <input
                 style={inp("entryPrice")}
                 type="number"
@@ -359,7 +353,7 @@ export default function TradeFormModal({ initial, defaults, onClose, onSave, onC
               {errMsg("entryPrice")}
             </div>
             <div>
-              <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><ExitIcon size={14} />Exit $</label>
+              <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><ExitIcon size={14} />Exit</label>
               <input
                 style={inp("exitPrice")}
                 type="number"
@@ -383,10 +377,7 @@ export default function TradeFormModal({ initial, defaults, onClose, onSave, onC
               })()}
             </div>
             <div>
-              <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 5 }}>
-                Entry Time
-                <TimeIcon size={11} style={{ opacity: 0.7 }} />
-              </label>
+              <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><EntryTimeIcon size={14} />Entry Time</label>
               <input
                 style={inp()}
                 className={isDark ? "time-dark" : ""}
@@ -396,10 +387,7 @@ export default function TradeFormModal({ initial, defaults, onClose, onSave, onC
               />
             </div>
             <div>
-              <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 5 }}>
-                Exit Time
-                <TimeIcon size={11} style={{ opacity: 0.7 }} />
-              </label>
+              <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><ExitTimeIcon size={14} />Exit Time</label>
               <input
                 style={inp()}
                 className={isDark ? "time-dark" : ""}
@@ -409,7 +397,7 @@ export default function TradeFormModal({ initial, defaults, onClose, onSave, onC
               />
             </div>
             <div>
-              <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><ExitIcon size={14} />Stop Loss $</label>
+              <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><WarningIcon size={14} />Stop Loss</label>
               <input
                 style={inp("stopLoss")}
                 type="number"
@@ -420,7 +408,7 @@ export default function TradeFormModal({ initial, defaults, onClose, onSave, onC
               {errMsg("stopLoss")}
             </div>
             <div>
-              <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><EntryPriceIcon size={14} />Take Profit $</label>
+              <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><TargetIcon size={14} />Take Profit</label>
               <input
                 style={inp("takeProfit")}
                 type="number"
