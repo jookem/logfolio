@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { PlanIcon, CloseIcon, WarningIcon, TargetIcon, TickerIcon, CategoryIcon, StrategyIcon, TodayIcon, DirectionIcon, AmountIcon, EntryPriceIcon } from "../lib/icons";
+import { PlanIcon, CloseIcon, WarningIcon, TargetIcon, TickerIcon, CategoryIcon, StrategyIcon, TodayIcon, DirectionIcon, AmountIcon, EntryPriceIcon, CurrentPriceIcon } from "../lib/icons";
 import { supabase } from "../lib/supabase";
 import { STOCK_LIKE, SUGGESTED_TAGS, EMOTIONS } from "../lib/constants";
 import { todayStr, typeLabels, normCDF, bsPrice } from "../lib/utils";
@@ -374,7 +374,7 @@ const base = {
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
           {/* Current price — always shown */}
           <div>
-            <label style={lbl}>Current Price</label>
+            <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><CurrentPriceIcon size={14} />Current Price</label>
             <div style={{ position: "relative" }}>
               <span style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: t.text3, fontSize: 14 }}>$</span>
               <input style={{ ...inp, paddingLeft: 26 }} type="number" value={form.currentPrice}

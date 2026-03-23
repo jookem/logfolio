@@ -31,7 +31,7 @@ export const LogoIcon = ({ width = 44, height = 44 }) => (
 // Log a trade / Execute plan
 export const LogIcon = ({ size = 24 }) => (
   <SVG size={size}>
-    <path d="M399.1,287.3v112.6 M399.1,512.5V399.9 M399.1,399.9H286.4 M399.1,399.9h112.6" />
+    <path d="M399.1,287.3v112.6 M399.1,512.5V399.9 M399.1,399.9H286.4 M399.1,399.9h112.6" strokeWidth="33" />
     <path d="M729.1,399c0,157.1,0,235.7-48.8,284.5c-48.8,48.8-127.4,48.8-284.5,48.8c-157.1,0-235.7,0-284.5-48.8C62.4,634.7,62.4,556.1,62.4,399c0-157.1,0-235.7,48.8-284.5c48.8-48.8,127.4-48.8,284.5-48.8c157.1,0,235.7,0,284.5,48.8c32.5,32.5,43.3,78.1,47,151.2" />
   </SVG>
 );
@@ -92,7 +92,7 @@ export const QuickIcon = ({ size = 24 }) => (
 // Close (X in rounded square)
 export const CloseIcon = ({ size = 24 }) => (
   <SVG size={size}>
-    <path d="M482.1,316.7L315.4,483.3 M315.4,316.7l166.7,166.7" />
+    <path d="M482.1,316.7L315.4,483.3 M315.4,316.7l166.7,166.7" strokeWidth="33" />
     <path d="M729.1,399c0,157.1,0,235.7-48.8,284.5c-48.8,48.8-127.4,48.8-284.5,48.8c-157.1,0-235.7,0-284.5-48.8C62.4,634.7,62.4,556.1,62.4,399c0-157.1,0-235.7,48.8-284.5c48.8-48.8,127.4-48.8,284.5-48.8c157.1,0,235.7,0,284.5,48.8c32.5,32.5,43.3,78.1,47,151.2" />
   </SVG>
 );
@@ -186,12 +186,12 @@ export const PenIcon = ({ size = 30 }) => (
 // Target / crosshair
 export const TargetIcon = ({ size = 30 }) => (
   <SVG size={size}>
-    <path d="M62.4,399h100" />
-    <path d="M629.1,399h100" />
-    <path d="M395.8,732.3v-100" />
-    <path d="M395.8,165.7v-100" />
-    <path d="M329.1,399h66.7h66.7" />
-    <path d="M395.8,465.7V399v-66.7" />
+    <path d="M62.4,399h100" strokeWidth="33" />
+    <path d="M629.1,399h100" strokeWidth="33" />
+    <path d="M395.8,732.3v-100" strokeWidth="33" />
+    <path d="M395.8,165.7v-100" strokeWidth="33" />
+    <path d="M329.1,399h66.7h66.7" strokeWidth="33" />
+    <path d="M395.8,465.7V399v-66.7" strokeWidth="33" />
     <path d="M229.1,110.3c49-28.4,106-44.6,166.7-44.6c184.1,0,333.3,149.2,333.3,333.3c0,184.1-149.2,333.3-333.3,333.3C211.7,732.3,62.4,583.1,62.4,399c0-60.7,16.2-117.6,44.6-166.7" />
   </SVG>
 );
@@ -199,7 +199,7 @@ export const TargetIcon = ({ size = 30 }) => (
 // Check (checkmark in rounded square)
 export const CheckIcon = ({ size = 30 }) => (
   <SVG size={size}>
-    <path d="M279.1,415.7l66.7,66.7l166.7-166.7" />
+    <path d="M279.1,415.7l66.7,66.7l166.7-166.7" strokeWidth="33" />
     <path d="M729.1,399c0,157.1,0,235.7-48.8,284.5c-48.8,48.8-127.4,48.8-284.5,48.8c-157.1,0-235.7,0-284.5-48.8C62.4,634.7,62.4,556.1,62.4,399c0-157.1,0-235.7,48.8-284.5c48.8-48.8,127.4-48.8,284.5-48.8c157.1,0,235.7,0,284.5,48.8c32.5,32.5,43.3,78.1,47,151.2" />
   </SVG>
 );
@@ -219,7 +219,7 @@ export const SettingsIcon = ({ size = 24 }) => (
 // Time / clock
 export const TimeIcon = ({ size = 24 }) => (
   <SVG size={size}>
-    <path d="M395.8,265.7V399l83.3,83.3" />
+    <path d="M395.8,265.7V399l83.3,83.3" strokeWidth="33" />
     <path d="M229.1,110.3c49-28.4,106-44.6,166.7-44.6c184.1,0,333.3,149.2,333.3,333.3c0,184.1-149.2,333.3-333.3,333.3C211.7,732.3,62.4,583.1,62.4,399c0-60.7,16.2-117.6,44.6-166.7" />
   </SVG>
 );
@@ -245,9 +245,9 @@ export const MenuIcon = ({ size = 24 }) => (
 // Screenshot / camera
 export const ScreenshotIcon = ({ size = 24 }) => (
   <SVG size={size}>
-    <circle cx="400" cy="433.3" r="100" />
+    <circle cx="400" cy="433.3" r="100" strokeWidth="33" />
     <path d="M66.7,445.5c0-102.1,0-153.2,25-189.9c10.8-15.9,24.7-29.5,40.9-40.1c24-15.8,54.1-21.4,100.1-23.4c22,0,40.9-16.3,45.2-37.5c6.5-31.7,34.8-54.5,67.8-54.5h108.9c32.9,0,61.3,22.8,67.8,54.5c4.3,21.1,23.2,37.5,45.2,37.5c46,2,76.1,7.6,100.1,23.4c16.2,10.6,30.1,24.2,40.9,40.1c25,36.7,25,87.8,25,189.9c0,102.1,0,153.2-25,189.9c-10.8,15.9-24.7,29.5-40.9,40.1C630.1,700,578.1,700,474.1,700H325.9c-104,0-156.1,0-193.4-24.5c-16.2-10.6-30.1-24.3-40.9-40.1C84.6,625,79.5,613.5,75.9,600" />
-    <path d="M633.3,333.3H600" />
+    <path d="M633.3,333.3H600" strokeWidth="33" />
   </SVG>
 );
 
@@ -255,14 +255,14 @@ export const ScreenshotIcon = ({ size = 24 }) => (
 export const LightModeIcon = ({ size = 24 }) => (
   <SVG size={size}>
     <path d="M238.6,343.5c-6.1,17.4-9.5,36.1-9.5,55.6c0,92,74.6,166.7,166.7,166.7c92,0,166.7-74.6,166.7-166.7c0-92-74.6-166.7-166.7-166.7c-19.5,0-38.2,3.3-55.6,9.5" />
-    <path d="M395.8,65.7v66.7" />
-    <path d="M395.8,665.7v66.7" />
-    <path d="M129.1,399H62.4" />
-    <path d="M729.1,399h-66.7" />
-    <path d="M655,139.8L581,207.5" />
-    <path d="M136.5,139.8l74.1,67.7" />
-    <path d="M210.6,584.2l-74.1,74.1" />
-    <path d="M655,658.3L581,584.2" />
+    <path d="M395.8,65.7v66.7" strokeWidth="33" />
+    <path d="M395.8,665.7v66.7" strokeWidth="33" />
+    <path d="M129.1,399H62.4" strokeWidth="33" />
+    <path d="M729.1,399h-66.7" strokeWidth="33" />
+    <path d="M655,139.8L581,207.5" strokeWidth="33" />
+    <path d="M136.5,139.8l74.1,67.7" strokeWidth="33" />
+    <path d="M210.6,584.2l-74.1,74.1" strokeWidth="33" />
+    <path d="M655,658.3L581,584.2" strokeWidth="33" />
   </SVG>
 );
 
@@ -279,8 +279,8 @@ export const DarkModeIcon = ({ size = 24 }) => (
 export const RecIcon = ({ size = 24 }) => (
   <SVG size={size}>
     <path d="M229.1,249c0-92,74.6-166.7,166.7-166.7c92,0,166.7,74.6,166.7,166.7v100c0,92-74.6,166.7-166.7,166.7c-92,0-166.7-74.6-166.7-166.7V249z" />
-    <path d="M429.1,249h133.3" />
-    <path d="M429.1,349h133.3" />
+    <path d="M429.1,249h133.3" strokeWidth="33" />
+    <path d="M429.1,349h133.3" strokeWidth="33" />
     <path d="M395.8,615.7v100" />
     <path d="M126.4,393.3c0,0,20.7,104.5,89.5,158.6c72.8,57.2,179.9,63.8,179.9,63.8" />
     <path d="M665.2,375.6c0,0,5.7,72-62.3,149.7c-54.7,62.5-114.1,78.5-114.1,78.5" />
@@ -291,7 +291,7 @@ export const RecIcon = ({ size = 24 }) => (
 
 // Ticker (scatter chart with axes)
 export const TickerIcon = ({ size = 24 }) => (
-  <SVG size={size} strokeWidth="33">
+  <SVG size={size}>
     <path d="M96.3,599.7h44.6 M96.3,483.6h44.6 M96.3,97.3v616.7h616.7 M96.2,142.8h44.6 M96.2,256.7h44.6 M96.2,369.6h44.6" />
     <circle cx="246.5" cy="541.8" r="44.9" />
     <circle cx="355.8" cy="323.8" r="44.9" />
@@ -303,7 +303,7 @@ export const TickerIcon = ({ size = 24 }) => (
 
 // Amount (descending horizontal bars)
 export const AmountIcon = ({ size = 24 }) => (
-  <SVG size={size} strokeWidth="33">
+  <SVG size={size}>
     <line x1="170.9" y1="199.7" x2="630.2" y2="199.7" />
     <line x1="170.9" y1="335" x2="519.7" y2="335" />
     <line x1="170.9" y1="470.4" x2="394.5" y2="470.4" />
@@ -336,7 +336,7 @@ export const StrategyIcon = ({ size = 24 }) => (
 
 // Category (circle + square + triangle + star)
 export const CategoryIcon = ({ size = 24 }) => (
-  <SVG size={size} strokeWidth="33">
+  <SVG size={size}>
     <circle cx="280.6" cy="272.5" r="82" />
     <rect x="466.2" y="196" width="153.2" height="153.2" />
     <polygon points="276.6,438.5 190.7,590.6 362.6,590.6" />
@@ -401,6 +401,18 @@ export const ExitTimeIcon = ({ size = 24 }) => (
     <path d="M395.8,265.7V399l83.3,83.3" strokeWidth="33" />
     <path d="M558.8,270.8l124.1-127.4" strokeWidth="33" />
     <path d="M709.6,277.8v-161h-161" strokeWidth="33" />
+  </SVG>
+);
+
+// Current price (dollar + circle crosshair at top-right)
+export const CurrentPriceIcon = ({ size = 24 }) => (
+  <SVG size={size}>
+    <path d="M266.5,639.7c62.7,0,113.5-42.3,113.5-94.6c0-52.2-50.8-94.6-113.5-94.6S153,408.2,153,356c0-52.2,50.8-94.6,113.5-94.6 M266.5,639.7c-62.7,0-113.5-42.3-113.5-94.6 M266.5,639.7v37.8 M266.5,223.6v37.8 M266.5,261.4c62.7,0,113.5,42.3,113.5,94.6" />
+    <circle cx="602.1" cy="197.6" r="71.2" strokeWidth="33" />
+    <line x1="602.6" y1="83.8" x2="602.6" y2="118.3" strokeWidth="33" />
+    <line x1="602.6" y1="271.6" x2="602.6" y2="306.1" strokeWidth="33" />
+    <line x1="486.4" y1="197" x2="520.9" y2="197" strokeWidth="33" />
+    <line x1="674.2" y1="197" x2="708.7" y2="197" strokeWidth="33" />
   </SVG>
 );
 

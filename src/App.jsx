@@ -737,7 +737,7 @@ const paginated = filtered
                   gap: 6,
                 }}
               >
-                <LogIcon size="1em" /> LOG
+                <LogIcon size={16} /> LOG
               </button>
               <button
   onClick={() => setShowPlan(true)}
@@ -757,7 +757,7 @@ const paginated = filtered
                   gap:6,
                 }}
 >
-<PlanIcon size="1em" /> PLAN
+<PlanIcon size={16} /> PLAN
 </button>
 </div>
             {menuOpen && (
@@ -859,7 +859,7 @@ const paginated = filtered
                   gap:6,
                 }}
               >
-                <SettingsIcon size="1em" /> SETTINGS
+                <SettingsIcon size={16} /> SETTINGS
               </button>
 
 
@@ -900,7 +900,7 @@ const paginated = filtered
                 }}
                >
 
-<PlanIcon size="1em" /> PLAN
+<PlanIcon size={16} /> PLAN
 </button>
             </div>
           </>
