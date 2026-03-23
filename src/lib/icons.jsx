@@ -309,12 +309,15 @@ export const AmountIcon = ({ size = 24 }) => (
   </SVG>
 );
 
-// Direction (up arrow)
+// Direction (up arrow + down arrow)
 export const DirectionIcon = ({ size = 24 }) => (
   <SVG size={size}>
     <line x1="283.5" y1="234.4" x2="283.5" y2="574.2" />
     <line x1="282.6" y1="235" x2="214.6" y2="302.9" />
     <line x1="284.6" y1="235" x2="352.6" y2="302.9" />
+    <line x1="530.1" y1="574.2" x2="530.1" y2="234.4" />
+    <line x1="531.1" y1="573.6" x2="599" y2="505.7" />
+    <line x1="529" y1="573.6" x2="461.1" y2="505.7" />
   </SVG>
 );
 

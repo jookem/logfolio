@@ -17,12 +17,15 @@
 	.st9{display:inline;}
 	.st10{fill:#020202;}
 	.st11{fill:none;stroke:#000000;stroke-width:66;stroke-linecap:round;stroke-miterlimit:133.3333;}
-	.st12{fill:none;stroke:#000000;stroke-width:33;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;}
+	.st12{fill:none;stroke:#000000;stroke-width:66;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;}
 	.st13{display:inline;fill:none;stroke:#000000;stroke-width:33;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;}
 	.st14{display:inline;fill:none;stroke:#000000;stroke-width:66;stroke-miterlimit:10;}
 	
 		.st15{display:inline;fill:none;stroke:#000000;stroke-width:66.6667;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:66.6667;}
 	.st16{fill:none;stroke:#000000;stroke-width:66;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:133.3333;}
+	.st17{display:inline;fill:none;stroke:#000000;stroke-width:66;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;}
+	.st18{fill-opacity:0;stroke:#000000;stroke-width:66;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:25;}
+	.st19{fill:none;stroke:#000000;stroke-width:66;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:25;}
 </style>
 <g id="calendar" class="st0">
 	<path class="st1" d="M580,699H202.4c-37.3,0-56,0-70.3-7.3c-12.5-6.4-22.7-16.6-29.1-29.1c-7.3-14.3-7.3-32.9-7.3-70.3v-320
@@ -164,8 +167,8 @@
 </g>
 <g id="time" class="st0">
 	<path class="st2" d="M395.8,265.7V399l83.3,83.3"/>
-	<path class="st1" d="M229.1,110.3c49-28.4,106-44.6,166.7-44.6c184.1,0,333.3,149.2,333.3,333.3c0,184.1-149.2,333.3-333.3,333.3
-		C211.7,732.3,62.4,583.1,62.4,399c0-60.7,16.2-117.6,44.6-166.7"/>
+	<path class="st1" d="M690.2,238c28.4,49,44.6,106,44.6,166.7c0,184.1-149.2,333.3-333.3,333.3C217.3,738,68.1,588.8,68.1,404.7
+		c0-184.1,149.2-333.3,333.3-333.3c60.7,0,117.6,16.2,166.7,44.6"/>
 </g>
 <g id="BG1">
 	<path class="st11" d="M729.1,399c0,157.1,0,235.7-48.8,284.5c-48.8,48.8-127.4,48.8-284.5,48.8c-157.1,0-235.7,0-284.5-48.8
@@ -184,7 +187,7 @@
 	<path class="st4" d="M215.8,563.7h360"/>
 </g>
 <g id="log" class="st0">
-	<path class="st2" d="M399.1,287.3v112.6 M399.1,512.5V399.9 M399.1,399.9H286.4 M399.1,399.9h112.6"/>
+	<path class="st1" d="M399.1,287.3v112.6 M399.1,512.5V399.9 M399.1,399.9H286.4 M399.1,399.9h112.6"/>
 </g>
 <g id="close">
 	<path class="st12" d="M482.1,316.7L315.4,483.3 M315.4,316.7l166.7,166.7"/>
@@ -222,6 +225,89 @@
 	<g class="st9">
 		<path class="st16" d="M398.7,428L672,154.7"/>
 		<path class="st16" d="M698.7,289V128h-161"/>
+	</g>
+</g>
+<g id="dollar" class="st0">
+	<path class="st4" d="M326.9,583.7c62.7,0,113.5-42.3,113.5-94.6c0-52.2-50.8-94.6-113.5-94.6s-113.5-42.3-113.5-94.6
+		c0-52.2,50.8-94.6,113.5-94.6 M326.9,583.7c-62.7,0-113.5-42.3-113.5-94.6 M326.9,583.7v37.8 M326.9,167.5v37.8 M326.9,205.4
+		c62.7,0,113.5,42.3,113.5,94.6"/>
+</g>
+<g id="currentprice" class="st0">
+	<circle class="st2" cx="602.1" cy="197.6" r="71.2"/>
+	<line class="st2" x1="602.6" y1="83.8" x2="602.6" y2="118.3"/>
+	<line class="st2" x1="602.6" y1="271.6" x2="602.6" y2="306.1"/>
+	<line class="st2" x1="486.4" y1="197" x2="520.9" y2="197"/>
+	<line class="st2" x1="674.2" y1="197" x2="708.7" y2="197"/>
+</g>
+<g id="entryclock" class="st0">
+	<path class="st1" d="M734.8,404.7c0,184.1-149.2,333.3-333.3,333.3C217.3,738,68.1,588.8,68.1,404.7
+		c0-184.1,149.2-333.3,333.3-333.3"/>
+	<path class="st2" d="M395.8,265.7V399l83.3,83.3"/>
+</g>
+<g id="entry" class="st0">
+	<g class="st9">
+		<path class="st16" d="M697.5,124.8L573.4,252.1"/>
+		<path class="st16" d="M546.7,117.8v161h161"/>
+	</g>
+</g>
+<g id="exit" class="st0">
+	<g class="st9">
+		<path class="st16" d="M558.8,270.8l124.1-127.4"/>
+		<path class="st16" d="M709.6,277.8v-161h-161"/>
+	</g>
+</g>
+<g id="timeframe" class="st0">
+	<circle class="st14" cx="406.7" cy="406.2" r="221.1"/>
+	<line class="st17" x1="243.4" y1="583.2" x2="157.7" y2="700.8"/>
+	<line class="st17" x1="653.4" y1="700.8" x2="567.7" y2="583.2"/>
+	<line class="st17" x1="373.1" y1="329.4" x2="373.1" y2="439.5"/>
+	<line class="st17" x1="472.7" y1="439.7" x2="374" y2="439.7"/>
+	<path class="st17" d="M113.7,197.8c0,0,1.6-32.1,31.3-59.1s64.2-29.9,64.2-29.9"/>
+	<path class="st17" d="M686.2,197.8c0,0-1.6-32.1-31.3-59.1s-64.2-29.9-64.2-29.9"/>
+</g>
+<g id="category" class="st0">
+	<circle class="st17" cx="248" cy="243.1" r="96.9"/>
+	<rect x="467.2" y="152.6" class="st17" width="181" height="181"/>
+	<polygon class="st17" points="243.3,439.2 141.7,618.9 344.9,618.9 	"/>
+	<polygon class="st17" points="557.7,426.6 591,494 665.4,504.9 611.6,557.4 624.3,631.5 557.7,596.5 491.1,631.5 503.8,557.4 
+		450,504.9 524.4,494 	"/>
+</g>
+<g id="strategy" class="st0">
+	<path class="st17" d="M310.8,189.7L179,321.6 M179,189.7l131.9,131.9"/>
+	<circle class="st17" cx="553.5" cy="542.7" r="83.1"/>
+	<path class="st17" d="M152.3,508.2c0,0,154.8-20,262.1-93.8S588,227.8,588,227.8"/>
+	<line class="st17" x1="592.9" y1="222.2" x2="489.3" y2="246"/>
+	<line class="st17" x1="592.9" y1="223.7" x2="598.1" y2="329.7"/>
+</g>
+<g id="direction" class="st0">
+	<g class="st9">
+		<line class="st12" x1="283.5" y1="234.4" x2="283.5" y2="574.2"/>
+		<line class="st12" x1="282.6" y1="235" x2="214.6" y2="302.9"/>
+		<line class="st12" x1="284.6" y1="235" x2="352.6" y2="302.9"/>
+	</g>
+	<g class="st9">
+		<line class="st12" x1="530.1" y1="574.2" x2="530.1" y2="234.4"/>
+		<line class="st12" x1="531.1" y1="573.6" x2="599" y2="505.7"/>
+		<line class="st12" x1="529" y1="573.6" x2="461.1" y2="505.7"/>
+	</g>
+</g>
+<g id="amount" class="st0">
+	<line class="st1" x1="170.9" y1="605.8" x2="299.9" y2="605.8"/>
+	<line class="st1" x1="170.9" y1="470.4" x2="394.5" y2="470.4"/>
+	<line class="st1" x1="170.9" y1="335" x2="519.7" y2="335"/>
+	<line class="st1" x1="170.9" y1="199.7" x2="630.2" y2="199.7"/>
+</g>
+<g id="ticker" class="st0">
+	<g class="st9">
+		<path class="st18" d="M96.3,599.7h44.6 M96.3,483.6h44.6 M96.3,97.3v616.7h616.7 M96.2,142.8h44.6 M96.2,256.7h44.6 M96.2,369.6
+			h44.6"/>
+		<path class="st19" d="M291.4,541.8c0,24.8-20.1,44.9-44.9,44.9c-24.8,0-44.9-20.1-44.9-44.9c0-24.8,20.1-44.9,44.9-44.9
+			C271.3,496.9,291.4,517,291.4,541.8z M400.7,323.8c0,24.8-20.1,44.9-44.9,44.9c0,0,0,0,0,0c-24.8,0-44.9-20.1-44.9-44.9
+			s20.1-44.9,44.9-44.9C380.6,278.8,400.7,298.9,400.7,323.8L400.7,323.8z M582.2,475.4c0,24.8-20.1,44.9-44.9,44.9
+			c-24.8,0-44.9-20.1-44.9-44.9c0-24.8,20.1-44.9,44.9-44.9C562.1,430.5,582.2,450.6,582.2,475.4z M672.3,169.6
+			c0,24.8-20.1,44.9-44.9,44.9c-24.8,0-44.9-20.1-44.9-44.9c0-24.8,20.1-44.9,44.9-44.9C652.1,124.7,672.2,144.8,672.3,169.6
+			L672.3,169.6z"/>
+		<path class="st18" d="M272.8,498.1l58.8-130.7 M394.5,357.3l101.4,88 M552.8,428.4l63.1-212.2"/>
 	</g>
 </g>
 <g id="BG3" class="st0">
