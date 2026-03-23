@@ -282,8 +282,8 @@ const base = {
     display: "block",
     fontFamily: "'Space Mono', monospace",
   };
-  const sectionHeader = (title) => (
-    <div style={{
+  const sectionHeader = (title, id) => (
+    <div id={id} style={{
       fontFamily: "'Space Mono', monospace",
       fontSize: 10,
       color: t.accent,
@@ -320,7 +320,7 @@ const base = {
 </div>
 
         {/* ── Ticker / Date / Type / Strategy ── */}
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+        <div id="tut-plan-strategy" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
 <div>
   <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><TickerIcon size={14} />{typeLabels(form.type).ticker}</label>
   <div style={{ position: "relative" }}>
@@ -369,7 +369,7 @@ const base = {
         </div>
 
         {/* ══ STOCK SECTION ══ */}
-        {sectionHeader(form.type === "options" ? (optConfig?.stockLabel || "Underlying Stock") : typeLabels(form.type).section)}
+        {sectionHeader(form.type === "options" ? (optConfig?.stockLabel || "Underlying Stock") : typeLabels(form.type).section, "tut-plan-details")}
 
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
           {/* Current price — always shown */}
@@ -719,7 +719,7 @@ const base = {
         {/* ══  SECTION (stock-like only) ══ */}
         {STOCK_LIKE.includes(form.type) && (
           <>
-            {sectionHeader("Risk Plan")}
+            {sectionHeader("Risk Plan", "tut-plan-risk")}
 
             {/* Live R preview */}
             {plannedR !== null && (
@@ -815,7 +815,7 @@ const base = {
           </>
         )}
 {/* ══ PRE-TRADE CHECKLIST ══ */}
-        {sectionHeader("Pre-Trade Checklist")}
+        {sectionHeader("Pre-Trade Checklist", "tut-plan-checklist")}
 
         {/* Progress bar */}
         <div style={{ marginBottom: 14 }}>
@@ -899,7 +899,7 @@ const base = {
           }}>+ Add</button>
         </div>
 {/* ══ EMOTION ══ */}
-        {sectionHeader("Mindset")}
+        {sectionHeader("Mindset", "tut-plan-mindset")}
         <div style={{ marginBottom: 14 }}>
           <label style={lbl}>Emotion</label>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 4, marginBottom: 8 }}>
@@ -954,7 +954,7 @@ const base = {
           </div>
         </div>
 {/* ══ TAGS + THESIS ══ */}
-        {sectionHeader("Notes")}
+        {sectionHeader("Notes", "tut-plan-notes")}
         <div style={{ marginBottom: 12 }}>
           <label style={lbl}>Tags</label>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 8 }}>

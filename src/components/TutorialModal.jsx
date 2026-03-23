@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   LogoIcon, LogIcon, PlanIcon, TodayIcon, WeekIcon, CalendarIcon,
   AnalysisIcon, RobotIcon, ArrowsIcon, DollarIcon, ShieldIcon,
@@ -92,31 +92,37 @@ const TRADE_WALKTHROUGH = [
     icon: <LogIcon size={44} />,
     title: "Ticker, Type & Strategy",
     desc: "Enter the ticker (e.g. AAPL), the Date, the Type (Stock, Options, Forex, Crypto), and the Strategy (Breakout, Pullback, etc.). The form adapts based on Type.",
+    target: "tut-trade-basic",
   },
   {
     icon: <ArrowsIcon size={44} />,
     title: "Direction & Shares",
     desc: "Choose Long or Short, then enter the number of Shares (or contracts for options). This number is multiplied by your price difference to calculate P&L.",
+    target: "tut-trade-direction",
   },
   {
     icon: <DollarIcon size={44} />,
     title: "Entry $ & Exit $",
     desc: "Enter the Entry $ — the price you opened the trade at — and the Exit $ — the price you closed at. Logfolio calculates your P&L from these automatically.",
+    target: "tut-trade-prices",
   },
   {
     icon: <ShieldIcon size={44} />,
     title: "Stop Loss $ & Take Profit $",
     desc: "Add your Stop Loss $ and Take Profit $ to calculate your R-value — how much you made or lost relative to your planned risk. Also log your Entry Time and Exit Time to unlock the Best Time to Trade chart.",
+    target: "tut-trade-risk",
   },
   {
     icon: <MindIcon size={44} />,
     title: "Mindset",
     desc: "Select your Emotion at the time of the trade (Calm, FOMO, Anxious…) and flag any Mistakes made. This section is what powers AI pattern analysis — be honest here.",
+    target: "tut-trade-mindset",
   },
   {
     icon: <PenIcon size={44} />,
     title: "Notes",
     desc: "Add Tags for filtering, attach Chart Screenshots, record a Voice Note, and write your trade Notes. When you're done, hit Save Trade.",
+    target: "tut-trade-notes",
   },
 ];
 
@@ -125,81 +131,101 @@ const PLAN_WALKTHROUGH = [
     icon: <TargetIcon size={44} />,
     title: "Strategy Type",
     desc: "Choose a Stock strategy (Breakout, Pullback…) or an Options strategy (Iron Condor, Bull Call Spread…). The form sections below update to match your selection.",
+    target: "tut-plan-strategy",
   },
   {
     icon: <LogIcon size={44} />,
     title: "Stock Details / Option",
     desc: "Enter the Ticker and direction. For options, each leg shows Strike, Expiry, Entry Premium, Contracts, and IV. You can look up the live options chain directly from this section.",
+    target: "tut-plan-details",
   },
   {
     icon: <ShieldIcon size={44} />,
     title: "Risk Plan",
     desc: "Set your Stop Loss $, Take Profit $, and Entry Target. Logfolio shows you your risk/reward ratio in real time so you can confirm the trade is worth taking before you enter.",
+    target: "tut-plan-risk",
   },
   {
     icon: <CheckIcon size={44} />,
     title: "Pre-Trade Checklist",
     desc: "Run through the Pre-Trade Checklist — a set of conditions to confirm before entering. Check off each item to make sure you're not entering on impulse.",
+    target: "tut-plan-checklist",
   },
   {
     icon: <MindIcon size={44} />,
     title: "Mindset",
     desc: "Record your Emotion going into the trade. Setting this before you enter (not after) gives the most honest data for pattern analysis.",
+    target: "tut-plan-mindset",
   },
   {
     icon: <PenIcon size={44} />,
     title: "Notes",
     desc: "Write your trade thesis — why you're taking this trade. Add Tags, Chart Screenshots, and a Voice Note. When you're ready, hit Save Plan.",
+    target: "tut-plan-notes",
   },
 ];
 
-// ── Component ──────────────────────────────────────────────────────────────────
+// ── Highlight overlay ──────────────────────────────────────────────────────────
 
-export default function TutorialModal({ step, onNext, onPrev, onClose, onOpenLog, onOpenPlan, onSetTab, t }) {
-  const [subMode, setSubMode] = useState(null); // null | "log" | "plan"
+function HighlightOverlay({ targetId, t }) {
+  const [rect, setRect] = useState(null);
+
+  useEffect(() => {
+    if (!targetId) { setRect(null); return; }
+    const el = document.getElementById(targetId);
+    if (!el) { setRect(null); return; }
+
+    el.scrollIntoView({ behavior: "smooth", block: "center" });
+
+    const timer = setTimeout(() => {
+      const r = el.getBoundingClientRect();
+      setRect({ top: r.top, left: r.left, width: r.width, height: r.height });
+    }, 350);
+
+    return () => clearTimeout(timer);
+  }, [targetId]);
+
+  if (!rect) return null;
+
+  const pad = 6;
+  return (
+    <div
+      style={{
+        position: "fixed",
+        top: rect.top - pad,
+        left: rect.left - pad,
+        width: rect.width + pad * 2,
+        height: rect.height + pad * 2,
+        border: `2px solid ${t.accent}`,
+        borderRadius: 12,
+        background: t.accent + "0d",
+        pointerEvents: "none",
+        zIndex: 199,
+        boxShadow: `0 0 0 3px ${t.accent}25`,
+        animation: "tut-pulse 2s ease-in-out infinite",
+      }}
+    />
+  );
+}
+
+// ── Sub-walkthrough ────────────────────────────────────────────────────────────
+
+function SubWalkthrough({ mode, onClose, t }) {
   const [subStep, setSubStep] = useState(0);
+  const steps = mode === "log" ? TRADE_WALKTHROUGH : PLAN_WALKTHROUGH;
+  const sub = steps[subStep];
+  const isSubLast = subStep === steps.length - 1;
 
-  const s = TUTORIAL_STEPS[step];
-  const total = TUTORIAL_STEPS.length;
-  const isLast = step === total - 1;
-
-  const handleCTA = (action) => {
-    if (action === "openLog") {
-      onOpenLog();
-      setSubStep(0);
-      setSubMode("log");
-    } else {
-      onOpenPlan();
-      setSubStep(0);
-      setSubMode("plan");
-    }
-  };
-
-  const handleNext = () => {
-    if (isLast) { onClose(); return; }
-    const nextStep = TUTORIAL_STEPS[step + 1];
-    if (nextStep.tab) onSetTab(nextStep.tab);
-    onNext();
-  };
-  const handlePrev = () => {
-    const prevStep = TUTORIAL_STEPS[step - 1];
-    if (prevStep.tab) onSetTab(prevStep.tab);
-    onPrev();
-  };
-
-  // ── Sub-walkthrough mode ───────────────────────────────────────────────────
-  if (subMode) {
-    const steps = subMode === "log" ? TRADE_WALKTHROUGH : PLAN_WALKTHROUGH;
-    const sub = steps[subStep];
-    const isSubLast = subStep === steps.length - 1;
-
-    return (
+  return (
+    <>
+      <style>{`@keyframes tut-pulse { 0%,100%{opacity:1} 50%{opacity:0.5} }`}</style>
+      <HighlightOverlay targetId={sub.target} t={t} />
       <div style={{ position: "fixed", inset: 0, zIndex: 200, display: "flex", alignItems: "flex-end", justifyContent: "center", padding: "0 16px 28px", pointerEvents: "none" }}>
         <div className="modal-enter" style={{ background: t.card, border: `1px solid ${t.accent}40`, borderRadius: 20, width: "100%", maxWidth: 460, padding: 28, boxShadow: "0 16px 48px rgba(0,0,0,0.5)", pointerEvents: "all" }}>
           {/* sub-header */}
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
             <div style={{ fontSize: 10, fontFamily: "'Space Mono',monospace", color: t.accent, textTransform: "uppercase", letterSpacing: 1.5 }}>
-              {subMode === "log" ? "Trade Form Guide" : "Plan Form Guide"}
+              {mode === "log" ? "Trade Form Guide" : "Plan Form Guide"}
             </div>
             <div style={{ display: "flex", gap: 5 }}>
               {steps.map((_, i) => (
@@ -216,10 +242,10 @@ export default function TutorialModal({ step, onNext, onPrev, onClose, onOpenLog
             {subStep > 0 ? (
               <button onClick={() => setSubStep(s => s - 1)} style={{ flex: "0 0 80px", background: t.card2, border: `1px solid ${t.border}`, borderRadius: 10, padding: "10px 0", color: t.text3, fontSize: 13, cursor: "pointer", fontFamily: "inherit" }}>← Back</button>
             ) : (
-              <button onClick={() => setSubMode(null)} style={{ flex: "0 0 80px", background: t.card2, border: `1px solid ${t.border}`, borderRadius: 10, padding: "10px 0", color: t.text3, fontSize: 13, cursor: "pointer", fontFamily: "inherit" }}>← Guide</button>
+              <button onClick={onClose} style={{ flex: "0 0 80px", background: t.card2, border: `1px solid ${t.border}`, borderRadius: 10, padding: "10px 0", color: t.text3, fontSize: 13, cursor: "pointer", fontFamily: "inherit" }}>← Guide</button>
             )}
             <button
-              onClick={() => isSubLast ? setSubMode(null) : setSubStep(s => s + 1)}
+              onClick={() => isSubLast ? onClose() : setSubStep(s => s + 1)}
               style={{ flex: 1, background: isSubLast ? t.accent : t.card2, border: `1px solid ${isSubLast ? t.accent : t.border}`, borderRadius: 10, padding: "10px 16px", color: isSubLast ? "#000" : t.text, fontSize: 13, fontWeight: isSubLast ? 700 : 400, cursor: "pointer", fontFamily: "inherit" }}
             >
               {isSubLast ? "Got it ✓" : "Next →"}
@@ -228,10 +254,45 @@ export default function TutorialModal({ step, onNext, onPrev, onClose, onOpenLog
           <div style={{ fontSize: 10, color: t.text4, textAlign: "center", marginTop: 14, fontFamily: "'Space Mono',monospace" }}>{subStep + 1} / {steps.length}</div>
         </div>
       </div>
-    );
+    </>
+  );
+}
+
+// ── Main component ─────────────────────────────────────────────────────────────
+
+export default function TutorialModal({ step, onNext, onPrev, onClose, onOpenLog, onOpenPlan, onSetTab, t }) {
+  const [subMode, setSubMode] = useState(null); // null | "log" | "plan"
+
+  const s = TUTORIAL_STEPS[step];
+  const total = TUTORIAL_STEPS.length;
+  const isLast = step === total - 1;
+
+  const handleCTA = (action) => {
+    if (action === "openLog") {
+      onOpenLog();
+      setSubMode("log");
+    } else {
+      onOpenPlan();
+      setSubMode("plan");
+    }
+  };
+
+  const handleNext = () => {
+    if (isLast) { onClose(); return; }
+    const nextStep = TUTORIAL_STEPS[step + 1];
+    if (nextStep.tab) onSetTab(nextStep.tab);
+    onNext();
+  };
+  const handlePrev = () => {
+    const prevStep = TUTORIAL_STEPS[step - 1];
+    if (prevStep.tab) onSetTab(prevStep.tab);
+    onPrev();
+  };
+
+  if (subMode) {
+    return <SubWalkthrough mode={subMode} onClose={() => setSubMode(null)} t={t} />;
   }
 
-  // ── Main tutorial ──────────────────────────────────────────────────────────
   return (
     <div style={{ position: "fixed", inset: 0, zIndex: 200, display: "flex", alignItems: "flex-end", justifyContent: "center", padding: "0 16px 28px", pointerEvents: "none" }}>
       <div className="modal-enter" style={{ background: t.card, border: `1px solid ${t.border}`, borderRadius: 20, width: "100%", maxWidth: 460, padding: 28, boxShadow: "0 16px 48px rgba(0,0,0,0.5)", pointerEvents: "all" }}>

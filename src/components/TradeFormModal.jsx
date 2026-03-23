@@ -169,8 +169,8 @@ export default function TradeFormModal({ initial, defaults, onClose, onSave, onC
     display: "block",
     fontFamily: "'Space Mono', monospace",
   };
-  const sectionHeader = (title) => (
-    <div style={{
+  const sectionHeader = (title, id) => (
+    <div id={id} style={{
       fontFamily: "'Space Mono', monospace",
       fontSize: 10,
       color: t.accent,
@@ -255,6 +255,7 @@ export default function TradeFormModal({ initial, defaults, onClose, onSave, onC
           </button>
         </div>
         <div
+          id="tut-trade-basic"
           style={{
             display: "grid",
             gridTemplateColumns: "1fr 1fr",
@@ -311,114 +312,113 @@ export default function TradeFormModal({ initial, defaults, onClose, onSave, onC
           </div>
         </div>
         {STOCK_LIKE.includes(form.type) ? (
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "1fr 1fr",
-              gap: 12,
-              marginBottom: 12,
-            }}
-          >
-            <div>
-              <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><DirectionIcon size={14} />Direction</label>
-              <select
-                style={inp()}
-                value={form.direction}
-                onChange={(e) => set("direction", e.target.value)}
-              >
-                <option value="long">Long</option>
-                <option value="short">Short</option>
-              </select>
+          <>
+            <div id="tut-trade-direction" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 12 }}>
+              <div>
+                <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><DirectionIcon size={14} />Direction</label>
+                <select
+                  style={inp()}
+                  value={form.direction}
+                  onChange={(e) => set("direction", e.target.value)}
+                >
+                  <option value="long">Long</option>
+                  <option value="short">Short</option>
+                </select>
+              </div>
+              <div>
+                <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><AmountIcon size={14} />{typeLabels(form.type).units}</label>
+                <input
+                  style={inp("shares")}
+                  type="number"
+                  value={form.shares}
+                  onChange={(e) => { set("shares", e.target.value); setErrors((p) => ({ ...p, shares: undefined })); }}
+                  placeholder="100"
+                />
+                {errMsg("shares")}
+              </div>
             </div>
-            <div>
-              <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><AmountIcon size={14} />{typeLabels(form.type).units}</label>
-              <input
-                style={inp("shares")}
-                type="number"
-                value={form.shares}
-                onChange={(e) => { set("shares", e.target.value); setErrors((p) => ({ ...p, shares: undefined })); }}
-                placeholder="100"
-              />
-              {errMsg("shares")}
+            <div id="tut-trade-prices" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 12 }}>
+              <div>
+                <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><EntryPriceIcon size={14} />Entry</label>
+                <input
+                  style={inp("entryPrice")}
+                  type="number"
+                  value={form.entryPrice}
+                  onChange={(e) => { set("entryPrice", e.target.value); setErrors((p) => ({ ...p, entryPrice: undefined })); }}
+                  placeholder="190"
+                />
+                {errMsg("entryPrice")}
+              </div>
+              <div>
+                <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><ExitIcon size={14} />Exit</label>
+                <input
+                  style={inp("exitPrice")}
+                  type="number"
+                  value={form.exitPrice}
+                  onChange={(e) => { set("exitPrice", e.target.value); setErrors((p) => ({ ...p, exitPrice: undefined })); }}
+                  placeholder="196"
+                />
+                {errMsg("exitPrice")}
+                {(() => {
+                  const entry = +form.entryPrice;
+                  const exit = +form.exitPrice;
+                  const qty = +form.shares;
+                  if (!entry || !exit || !qty) return null;
+                  const dir = form.direction === "long" ? 1 : -1;
+                  const pl = dir * (exit - entry) * qty;
+                  return (
+                    <div style={{ fontSize: 11, fontFamily: "'Space Mono',monospace", color: pl >= 0 ? t.accent : t.danger, marginTop: 4 }}>
+                      → {pl >= 0 ? "+" : ""}{fmt(pl)}
+                    </div>
+                  );
+                })()}
+              </div>
             </div>
-            <div>
-              <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><EntryPriceIcon size={14} />Entry</label>
-              <input
-                style={inp("entryPrice")}
-                type="number"
-                value={form.entryPrice}
-                onChange={(e) => { set("entryPrice", e.target.value); setErrors((p) => ({ ...p, entryPrice: undefined })); }}
-                placeholder="190"
-              />
-              {errMsg("entryPrice")}
+            <div id="tut-trade-risk" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 12 }}>
+              <div>
+                <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><EntryTimeIcon size={14} />Entry Time</label>
+                <input
+                  style={inp()}
+                  className={isDark ? "time-dark" : ""}
+                  type="time"
+                  value={form.entryTime || ""}
+                  onChange={(e) => set("entryTime", e.target.value)}
+                />
+              </div>
+              <div>
+                <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><ExitTimeIcon size={14} />Exit Time</label>
+                <input
+                  style={inp()}
+                  className={isDark ? "time-dark" : ""}
+                  type="time"
+                  value={form.exitTime || ""}
+                  onChange={(e) => set("exitTime", e.target.value)}
+                />
+              </div>
+              <div>
+                <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><WarningIcon size={14} />Stop Loss</label>
+                <input
+                  style={inp("stopLoss")}
+                  type="number"
+                  value={form.stopLoss || ""}
+                  onChange={(e) => { set("stopLoss", e.target.value); setErrors((p) => ({ ...p, stopLoss: undefined })); }}
+                  placeholder="185"
+                />
+                {errMsg("stopLoss")}
+              </div>
+              <div>
+                <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><TargetIcon size={14} />Take Profit</label>
+                <input
+                  style={inp("takeProfit")}
+                  type="number"
+                  value={form.takeProfit || ""}
+                  onChange={(e) => { set("takeProfit", e.target.value); setErrors((p) => ({ ...p, takeProfit: undefined })); }}
+                  placeholder="200"
+                />
+                {errMsg("takeProfit")}
+              </div>
             </div>
-            <div>
-              <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><ExitIcon size={14} />Exit</label>
-              <input
-                style={inp("exitPrice")}
-                type="number"
-                value={form.exitPrice}
-                onChange={(e) => { set("exitPrice", e.target.value); setErrors((p) => ({ ...p, exitPrice: undefined })); }}
-                placeholder="196"
-              />
-              {errMsg("exitPrice")}
-              {(() => {
-                const entry = +form.entryPrice;
-                const exit = +form.exitPrice;
-                const qty = +form.shares;
-                if (!entry || !exit || !qty) return null;
-                const dir = form.direction === "long" ? 1 : -1;
-                const pl = dir * (exit - entry) * qty;
-                return (
-                  <div style={{ fontSize: 11, fontFamily: "'Space Mono',monospace", color: pl >= 0 ? t.accent : t.danger, marginTop: 4 }}>
-                    → {pl >= 0 ? "+" : ""}{fmt(pl)}
-                  </div>
-                );
-              })()}
-            </div>
-            <div>
-              <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><EntryTimeIcon size={14} />Entry Time</label>
-              <input
-                style={inp()}
-                className={isDark ? "time-dark" : ""}
-                type="time"
-                value={form.entryTime || ""}
-                onChange={(e) => set("entryTime", e.target.value)}
-              />
-            </div>
-            <div>
-              <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><ExitTimeIcon size={14} />Exit Time</label>
-              <input
-                style={inp()}
-                className={isDark ? "time-dark" : ""}
-                type="time"
-                value={form.exitTime || ""}
-                onChange={(e) => set("exitTime", e.target.value)}
-              />
-            </div>
-            <div>
-              <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><WarningIcon size={14} />Stop Loss</label>
-              <input
-                style={inp("stopLoss")}
-                type="number"
-                value={form.stopLoss || ""}
-                onChange={(e) => { set("stopLoss", e.target.value); setErrors((p) => ({ ...p, stopLoss: undefined })); }}
-                placeholder="185"
-              />
-              {errMsg("stopLoss")}
-            </div>
-            <div>
-              <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><TargetIcon size={14} />Take Profit</label>
-              <input
-                style={inp("takeProfit")}
-                type="number"
-                value={form.takeProfit || ""}
-                onChange={(e) => { set("takeProfit", e.target.value); setErrors((p) => ({ ...p, takeProfit: undefined })); }}
-                placeholder="200"
-              />
-              {errMsg("takeProfit")}
-            </div>
-          </div>
+          </>
         ) : (
           <div style={{ marginBottom: 12 }}>
             <div
@@ -549,7 +549,7 @@ export default function TradeFormModal({ initial, defaults, onClose, onSave, onC
             ))}
           </div>
         )}
-        {sectionHeader("Mindset")}
+        {sectionHeader("Mindset", "tut-trade-mindset")}
         <div style={{ marginBottom: 14 }}>
           <label style={lbl}>Emotion</label>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 4, marginBottom: 8 }}>
@@ -656,7 +656,7 @@ export default function TradeFormModal({ initial, defaults, onClose, onSave, onC
             >+ Add</button>
           </div>
         </div>
-        {sectionHeader("Notes")}
+        {sectionHeader("Notes", "tut-trade-notes")}
         <div style={{ marginBottom: 12 }}>
           <label style={lbl}>Tags</label>
           <div
