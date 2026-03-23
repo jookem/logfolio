@@ -115,10 +115,12 @@ const [page, setPage] = useState(1);
             await supabase.from("trades").upsert(rows);
             setTrades(local);
           } else {
-            // Supabase confirmed zero trades — show onboarding
+            // Supabase confirmed zero trades — show onboarding (only if not already dismissed)
             saveTrades([]);
             setTrades([]);
-            setShowOnboarding(true);
+            if (!localStorage.getItem(`tradelog_onboarding_done_${user.id}`)) {
+              setShowOnboarding(true);
+            }
           }
         } else {
           setTrades(loaded);
@@ -138,12 +140,14 @@ const [page, setPage] = useState(1);
   }, [trades, user, tradesLoaded]);
 
   const dismissOnboarding = () => {
+    if (user) localStorage.setItem(`tradelog_onboarding_done_${user.id}`, "1");
     setShowOnboarding(false);
     setTutorialStep(0);
     setShowTutorial(true);
   };
 
   const loadSeedTrades = async () => {
+    if (user) localStorage.setItem(`tradelog_onboarding_done_${user.id}`, "1");
     setShowOnboarding(false);
     const seeded = SEED_TRADES.map(t => ({ ...t, id: Date.now() + Math.random() }));
     setTrades(seeded);
@@ -256,7 +260,12 @@ const [page, setPage] = useState(1);
       (async () => {
         const uploaded = await uploadTradeMedia(user.id, trade);
         setTrades((p) => p.map((t) => t.id === trade.id ? uploaded : t));
-        supabase.from("trades").upsert({ id: uploaded.id, user_id: user.id, data: uploaded }).then(() => {});
+        const { error } = await supabase.from("trades").upsert({ id: uploaded.id, user_id: user.id, data: uploaded });
+        if (error) {
+          // Server rejected — roll back optimistic update
+          setTrades((p) => p.filter((t) => t.id !== trade.id));
+          showToast("Save failed — free tier limit reached", "#ff4d6d", "warning");
+        }
       })();
     }
   };
@@ -306,7 +315,11 @@ const [page, setPage] = useState(1);
       (async () => {
         const uploaded = await uploadTradeMedia(user.id, plan);
         setTrades((p) => p.map((t) => t.id === plan.id ? uploaded : t));
-        supabase.from("trades").upsert({ id: uploaded.id, user_id: user.id, data: uploaded }).then(() => {});
+        const { error } = await supabase.from("trades").upsert({ id: uploaded.id, user_id: user.id, data: uploaded });
+        if (error) {
+          setTrades((p) => p.filter((t) => t.id !== plan.id));
+          showToast("Save failed — free tier limit reached", "#ff4d6d", "warning");
+        }
       })();
     }
   };
