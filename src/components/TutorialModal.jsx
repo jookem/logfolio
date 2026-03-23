@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   LogoIcon, LogIcon, PlanIcon, TodayIcon, WeekIcon, CalendarIcon,
   AnalysisIcon, RobotIcon, ArrowsIcon, DollarIcon, ShieldIcon,
@@ -87,42 +87,51 @@ const TUTORIAL_STEPS = [
   },
 ];
 
+// panelPos: "bottom" = tutorial below, element scrolled to top of modal (out of tutorial's way)
+//           "top"    = tutorial above, element scrolled to bottom of modal
+
 const TRADE_WALKTHROUGH = [
   {
     icon: <LogIcon size={44} />,
     title: "Ticker, Type & Strategy",
     desc: "Enter the ticker (e.g. AAPL), the Date, the Type (Stock, Options, Forex, Crypto), and the Strategy (Breakout, Pullback, etc.). The form adapts based on Type.",
     target: "tut-trade-basic",
+    panelPos: "bottom",
   },
   {
     icon: <ArrowsIcon size={44} />,
     title: "Direction & Shares",
     desc: "Choose Long or Short, then enter the number of Shares (or contracts for options). This number is multiplied by your price difference to calculate P&L.",
     target: "tut-trade-direction",
+    panelPos: "bottom",
   },
   {
     icon: <DollarIcon size={44} />,
     title: "Entry $ & Exit $",
     desc: "Enter the Entry $ — the price you opened the trade at — and the Exit $ — the price you closed at. Logfolio calculates your P&L from these automatically.",
     target: "tut-trade-prices",
+    panelPos: "bottom",
   },
   {
     icon: <ShieldIcon size={44} />,
     title: "Stop Loss $ & Take Profit $",
     desc: "Add your Stop Loss $ and Take Profit $ to calculate your R-value — how much you made or lost relative to your planned risk. Also log your Entry Time and Exit Time to unlock the Best Time to Trade chart.",
     target: "tut-trade-risk",
+    panelPos: "bottom",
   },
   {
     icon: <MindIcon size={44} />,
     title: "Mindset",
     desc: "Select your Emotion at the time of the trade (Calm, FOMO, Anxious…) and flag any Mistakes made. This section is what powers AI pattern analysis — be honest here.",
     target: "tut-trade-mindset",
+    panelPos: "top",
   },
   {
     icon: <PenIcon size={44} />,
     title: "Notes",
     desc: "Add Tags for filtering, attach Chart Screenshots, record a Voice Note, and write your trade Notes. When you're done, hit Save Trade.",
     target: "tut-trade-notes",
+    panelPos: "top",
   },
 ];
 
@@ -132,95 +141,135 @@ const PLAN_WALKTHROUGH = [
     title: "Strategy Type",
     desc: "Choose a Stock strategy (Breakout, Pullback…) or an Options strategy (Iron Condor, Bull Call Spread…). The form sections below update to match your selection.",
     target: "tut-plan-strategy",
+    panelPos: "bottom",
   },
   {
     icon: <LogIcon size={44} />,
     title: "Stock Details / Option",
     desc: "Enter the Ticker and direction. For options, each leg shows Strike, Expiry, Entry Premium, Contracts, and IV. You can look up the live options chain directly from this section.",
     target: "tut-plan-details",
+    panelPos: "bottom",
   },
   {
     icon: <ShieldIcon size={44} />,
     title: "Risk Plan",
     desc: "Set your Stop Loss $, Take Profit $, and Entry Target. Logfolio shows you your risk/reward ratio in real time so you can confirm the trade is worth taking before you enter.",
     target: "tut-plan-risk",
+    panelPos: "top",
   },
   {
     icon: <CheckIcon size={44} />,
     title: "Pre-Trade Checklist",
     desc: "Run through the Pre-Trade Checklist — a set of conditions to confirm before entering. Check off each item to make sure you're not entering on impulse.",
     target: "tut-plan-checklist",
+    panelPos: "top",
   },
   {
     icon: <MindIcon size={44} />,
     title: "Mindset",
     desc: "Record your Emotion going into the trade. Setting this before you enter (not after) gives the most honest data for pattern analysis.",
     target: "tut-plan-mindset",
+    panelPos: "top",
   },
   {
     icon: <PenIcon size={44} />,
     title: "Notes",
     desc: "Write your trade thesis — why you're taking this trade. Add Tags, Chart Screenshots, and a Voice Note. When you're ready, hit Save Plan.",
     target: "tut-plan-notes",
+    panelPos: "top",
   },
 ];
-
-// ── Highlight overlay ──────────────────────────────────────────────────────────
-
-function HighlightOverlay({ targetId, t }) {
-  const [rect, setRect] = useState(null);
-
-  useEffect(() => {
-    if (!targetId) { setRect(null); return; }
-    const el = document.getElementById(targetId);
-    if (!el) { setRect(null); return; }
-
-    el.scrollIntoView({ behavior: "smooth", block: "center" });
-
-    const timer = setTimeout(() => {
-      const r = el.getBoundingClientRect();
-      setRect({ top: r.top, left: r.left, width: r.width, height: r.height });
-    }, 350);
-
-    return () => clearTimeout(timer);
-  }, [targetId]);
-
-  if (!rect) return null;
-
-  const pad = 6;
-  return (
-    <div
-      style={{
-        position: "fixed",
-        top: rect.top - pad,
-        left: rect.left - pad,
-        width: rect.width + pad * 2,
-        height: rect.height + pad * 2,
-        border: `2px solid ${t.accent}`,
-        borderRadius: 12,
-        background: t.accent + "0d",
-        pointerEvents: "none",
-        zIndex: 199,
-        boxShadow: `0 0 0 3px ${t.accent}25`,
-        animation: "tut-pulse 2s ease-in-out infinite",
-      }}
-    />
-  );
-}
 
 // ── Sub-walkthrough ────────────────────────────────────────────────────────────
 
 function SubWalkthrough({ mode, onClose, t }) {
   const [subStep, setSubStep] = useState(0);
+  const [highlightRect, setHighlightRect] = useState(null);
+  const pollRef = useRef(null);
+
   const steps = mode === "log" ? TRADE_WALKTHROUGH : PLAN_WALKTHROUGH;
   const sub = steps[subStep];
   const isSubLast = subStep === steps.length - 1;
+  const panelPos = sub.panelPos ?? "bottom";
+
+  // Scroll block: when panel is bottom, scroll element to top of container (away from panel).
+  // When panel is top, scroll element to end of container (below panel).
+  const scrollBlock = panelPos === "bottom" ? "start" : "end";
+
+  useEffect(() => {
+    setHighlightRect(null);
+    if (pollRef.current) clearInterval(pollRef.current);
+
+    const el = document.getElementById(sub.target);
+    if (!el) return;
+
+    el.scrollIntoView({ behavior: "smooth", block: scrollBlock });
+
+    // Poll until the element stops moving, then lock in the rect
+    let lastTop = null;
+    let stableCount = 0;
+    pollRef.current = setInterval(() => {
+      const r = el.getBoundingClientRect();
+      if (lastTop !== null && Math.abs(r.top - lastTop) < 0.5) {
+        stableCount++;
+        if (stableCount >= 4) { // stable for ~80ms
+          clearInterval(pollRef.current);
+          const pad = 6;
+          setHighlightRect({
+            top: r.top - pad,
+            left: r.left - pad,
+            width: r.width + pad * 2,
+            height: r.height + pad * 2,
+          });
+        }
+      } else {
+        stableCount = 0;
+      }
+      lastTop = r.top;
+    }, 20);
+
+    // Hard fallback in case scroll never fires
+    const fallback = setTimeout(() => {
+      clearInterval(pollRef.current);
+      const r = el.getBoundingClientRect();
+      const pad = 6;
+      setHighlightRect({ top: r.top - pad, left: r.left - pad, width: r.width + pad * 2, height: r.height + pad * 2 });
+    }, 900);
+
+    return () => {
+      clearInterval(pollRef.current);
+      clearTimeout(fallback);
+    };
+  }, [subStep, sub.target, scrollBlock]);
+
+  const panelStyle = panelPos === "top"
+    ? { alignItems: "flex-start", padding: "28px 16px 0" }
+    : { alignItems: "flex-end", padding: "0 16px 28px" };
 
   return (
     <>
-      <style>{`@keyframes tut-pulse { 0%,100%{opacity:1} 50%{opacity:0.5} }`}</style>
-      <HighlightOverlay targetId={sub.target} t={t} />
-      <div style={{ position: "fixed", inset: 0, zIndex: 200, display: "flex", alignItems: "flex-end", justifyContent: "center", padding: "0 16px 28px", pointerEvents: "none" }}>
+      <style>{`@keyframes tut-pulse { 0%,100%{opacity:1} 50%{opacity:0.45} }`}</style>
+
+      {/* Highlight overlay */}
+      {highlightRect && (
+        <div style={{
+          position: "fixed",
+          top: highlightRect.top,
+          left: highlightRect.left,
+          width: highlightRect.width,
+          height: highlightRect.height,
+          border: `2px solid ${t.accent}`,
+          borderRadius: 12,
+          background: t.accent + "0d",
+          pointerEvents: "none",
+          zIndex: 199,
+          boxShadow: `0 0 0 3px ${t.accent}25`,
+          animation: "tut-pulse 2s ease-in-out infinite",
+        }} />
+      )}
+
+      {/* Tutorial panel */}
+      <div style={{ position: "fixed", inset: 0, zIndex: 200, display: "flex", justifyContent: "center", pointerEvents: "none", ...panelStyle }}>
         <div className="modal-enter" style={{ background: t.card, border: `1px solid ${t.accent}40`, borderRadius: 20, width: "100%", maxWidth: 460, padding: 28, boxShadow: "0 16px 48px rgba(0,0,0,0.5)", pointerEvents: "all" }}>
           {/* sub-header */}
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
