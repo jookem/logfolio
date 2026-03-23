@@ -550,7 +550,7 @@ export default function TradeFormModal({ initial, defaults, onClose, onSave, onC
           </div>
         )}
         {sectionHeader("Mindset", "tut-trade-mindset")}
-        <div style={{ marginBottom: 14 }}>
+        <div id="tut-trade-emotion" style={{ marginBottom: 14 }}>
           <label style={lbl}>Emotion</label>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 4, marginBottom: 8 }}>
             {[...EMOTIONS.filter((e) => e !== "None"), ...customEmotions].map((e) => {
@@ -603,7 +603,7 @@ export default function TradeFormModal({ initial, defaults, onClose, onSave, onC
             >+ Add</button>
           </div>
         </div>
-        <div style={{ marginBottom: 14 }}>
+        <div id="tut-trade-mistake" style={{ marginBottom: 14 }}>
           <label style={lbl}>Mistake</label>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 4, marginBottom: 8 }}>
             {[...MISTAKES.filter((m) => m !== "None"), ...customMistakes].map((m) => {
@@ -715,13 +715,15 @@ export default function TradeFormModal({ initial, defaults, onClose, onSave, onC
             </button>
           </div>
         </div>
-        <div style={{ marginBottom: 12 }}>
-          <VoiceNote value={form.voiceNote} onChange={(v) => set("voiceNote", v)} t={t} />
+        <div id="tut-trade-media">
+          <div style={{ marginBottom: 12 }}>
+            <VoiceNote value={form.voiceNote} onChange={(v) => set("voiceNote", v)} t={t} />
+          </div>
+          <div style={{ marginBottom: 12 }}>
+            <ScreenshotUpload value={form.screenshots || []} onChange={(v) => set("screenshots", v)} t={t} />
+          </div>
         </div>
-        <div style={{ marginBottom: 12 }}>
-          <ScreenshotUpload value={form.screenshots || []} onChange={(v) => set("screenshots", v)} t={t} />
-        </div>
-        <div style={{ marginBottom: 20 }}>
+        <div id="tut-trade-notes-text" style={{ marginBottom: 20 }}>
           <label style={lbl}>Notes</label>
           <textarea
             style={{ ...inp(), height: 80, resize: "none" }}

@@ -900,7 +900,7 @@ const base = {
         </div>
 {/* ══ EMOTION ══ */}
         {sectionHeader("Mindset", "tut-plan-mindset")}
-        <div style={{ marginBottom: 14 }}>
+        <div id="tut-plan-emotion" style={{ marginBottom: 14 }}>
           <label style={lbl}>Emotion</label>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 4, marginBottom: 8 }}>
             {[...EMOTIONS.filter((e) => e !== "None"), ...customEmotions].map((e) => {
@@ -978,14 +978,16 @@ const base = {
             <button onClick={() => addTag(tagInput)} style={{ background: t.accent + "20", border: `1px solid ${t.accent}40`, color: t.accent, borderRadius: 8, padding: "0 14px", cursor: "pointer", fontSize: 13, whiteSpace: "nowrap" }}>+ Add</button>
           </div>
         </div>
-        <div style={{ marginBottom: 12 }}>
-          <VoiceNote value={form.voiceNote} onChange={(v) => set("voiceNote", v)} t={t} />
-        </div>
-        <div style={{ marginBottom: 12 }}>
-          <ScreenshotUpload value={form.screenshots || []} onChange={(v) => set("screenshots", v)} t={t} />
+        <div id="tut-plan-media">
+          <div style={{ marginBottom: 12 }}>
+            <VoiceNote value={form.voiceNote} onChange={(v) => set("voiceNote", v)} t={t} />
+          </div>
+          <div style={{ marginBottom: 12 }}>
+            <ScreenshotUpload value={form.screenshots || []} onChange={(v) => set("screenshots", v)} t={t} />
+          </div>
         </div>
 
-        <div style={{ marginBottom: 20 }}>
+        <div id="tut-plan-notes-text" style={{ marginBottom: 20 }}>
           <label style={lbl}>Trade Thesis</label>
           <textarea style={{ ...inp, height: 76, resize: "none" }} value={form.notes}
             onChange={(e) => set("notes", e.target.value)} placeholder="Why are you taking this trade? What's your edge?" />

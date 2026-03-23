@@ -1663,7 +1663,9 @@ const paginated = filtered
           onPrev={() => setTutorialStep(s => s - 1)}
           onClose={() => { setShowTutorial(false); setShowGuide(true); }}
           onOpenLog={() => setShowAdd(true)}
+          onCloseLog={() => setShowAdd(false)}
           onOpenPlan={() => setShowPlan(true)}
+          onClosePlan={() => setShowPlan(false)}
           onSetTab={setTab}
           t={T}
         />

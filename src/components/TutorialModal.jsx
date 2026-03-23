@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import {
   LogoIcon, LogIcon, PlanIcon, TodayIcon, WeekIcon, CalendarIcon,
   AnalysisIcon, RobotIcon, ArrowsIcon, DollarIcon, ShieldIcon,
-  MindIcon, PenIcon, TargetIcon, CheckIcon,
+  MindIcon, PenIcon, TargetIcon, CheckIcon, RecIcon,
 } from "../lib/icons";
 
 // ── Step data ──────────────────────────────────────────────────────────────────
@@ -87,9 +87,6 @@ const TUTORIAL_STEPS = [
   },
 ];
 
-// panelPos: "bottom" = tutorial below, element scrolled to top of modal (out of tutorial's way)
-//           "top"    = tutorial above, element scrolled to bottom of modal
-
 const TRADE_WALKTHROUGH = [
   {
     icon: <LogIcon size={44} />,
@@ -115,22 +112,36 @@ const TRADE_WALKTHROUGH = [
   {
     icon: <ShieldIcon size={44} />,
     title: "Stop Loss $ & Take Profit $",
-    desc: "Add your Stop Loss $ and Take Profit $ to calculate your R-value — how much you made or lost relative to your planned risk. Also log your Entry Time and Exit Time to unlock the Best Time to Trade chart.",
+    desc: "Add your Stop Loss $ and Take Profit $ to calculate your R-value. Also log your Entry Time and Exit Time to unlock the Best Time to Trade chart.",
     target: "tut-trade-risk",
     panelPos: "bottom",
   },
   {
     icon: <MindIcon size={44} />,
-    title: "Mindset",
-    desc: "Select your Emotion at the time of the trade (Calm, FOMO, Anxious…) and flag any Mistakes made. This section is what powers AI pattern analysis — be honest here.",
-    target: "tut-trade-mindset",
+    title: "Emotion",
+    desc: "Select your Emotion at the time of the trade — Calm, FOMO, Anxious, and more. This is the most important field for AI pattern analysis. Be honest.",
+    target: "tut-trade-emotion",
+    panelPos: "top",
+  },
+  {
+    icon: <MindIcon size={44} />,
+    title: "Mistake",
+    desc: "Flag any trading mistakes made — Chased Entry, Broke Rules, Over-leveraged, etc. Tracking mistakes over time reveals your most expensive habits.",
+    target: "tut-trade-mistake",
+    panelPos: "top",
+  },
+  {
+    icon: <RecIcon size={44} />,
+    title: "Voice Note & Screenshot",
+    desc: "Record a quick voice note while the trade is fresh, and attach a chart screenshot. Both are stored with the trade for later review.",
+    target: "tut-trade-media",
     panelPos: "top",
   },
   {
     icon: <PenIcon size={44} />,
-    title: "Notes",
-    desc: "Add Tags for filtering, attach Chart Screenshots, record a Voice Note, and write your trade Notes. When you're done, hit Save Trade.",
-    target: "tut-trade-notes",
+    title: "Tags & Notes",
+    desc: "Add Tags for filtering across your log, then write your trade Notes — what happened, what you learned, and what you'd do differently. Hit Save Trade when done.",
+    target: "tut-trade-notes-text",
     panelPos: "top",
   },
 ];
@@ -166,16 +177,23 @@ const PLAN_WALKTHROUGH = [
   },
   {
     icon: <MindIcon size={44} />,
-    title: "Mindset",
-    desc: "Record your Emotion going into the trade. Setting this before you enter (not after) gives the most honest data for pattern analysis.",
-    target: "tut-plan-mindset",
+    title: "Emotion",
+    desc: "Record your Emotion going into the trade. Setting this before you enter (not after) gives the most honest data for AI pattern analysis.",
+    target: "tut-plan-emotion",
+    panelPos: "top",
+  },
+  {
+    icon: <RecIcon size={44} />,
+    title: "Voice Note & Screenshot",
+    desc: "Record a voice note with your trade rationale and attach a chart screenshot. Reviewing these alongside your results is one of the fastest ways to improve.",
+    target: "tut-plan-media",
     panelPos: "top",
   },
   {
     icon: <PenIcon size={44} />,
-    title: "Notes",
-    desc: "Write your trade thesis — why you're taking this trade. Add Tags, Chart Screenshots, and a Voice Note. When you're ready, hit Save Plan.",
-    target: "tut-plan-notes",
+    title: "Trade Thesis",
+    desc: "Write your trade thesis — why you're taking this trade, what your edge is, and what would invalidate the setup. Hit Save Plan when ready.",
+    target: "tut-plan-notes-text",
     panelPos: "top",
   },
 ];
@@ -191,9 +209,6 @@ function SubWalkthrough({ mode, onClose, t }) {
   const sub = steps[subStep];
   const isSubLast = subStep === steps.length - 1;
   const panelPos = sub.panelPos ?? "bottom";
-
-  // Scroll block: when panel is bottom, scroll element to top of container (away from panel).
-  // When panel is top, scroll element to end of container (below panel).
   const scrollBlock = panelPos === "bottom" ? "start" : "end";
 
   useEffect(() => {
@@ -205,14 +220,13 @@ function SubWalkthrough({ mode, onClose, t }) {
 
     el.scrollIntoView({ behavior: "smooth", block: scrollBlock });
 
-    // Poll until the element stops moving, then lock in the rect
     let lastTop = null;
     let stableCount = 0;
     pollRef.current = setInterval(() => {
       const r = el.getBoundingClientRect();
       if (lastTop !== null && Math.abs(r.top - lastTop) < 0.5) {
         stableCount++;
-        if (stableCount >= 4) { // stable for ~80ms
+        if (stableCount >= 4) {
           clearInterval(pollRef.current);
           const pad = 6;
           setHighlightRect({
@@ -228,7 +242,6 @@ function SubWalkthrough({ mode, onClose, t }) {
       lastTop = r.top;
     }, 20);
 
-    // Hard fallback in case scroll never fires
     const fallback = setTimeout(() => {
       clearInterval(pollRef.current);
       const r = el.getBoundingClientRect();
@@ -250,7 +263,6 @@ function SubWalkthrough({ mode, onClose, t }) {
     <>
       <style>{`@keyframes tut-pulse { 0%,100%{opacity:1} 50%{opacity:0.45} }`}</style>
 
-      {/* Highlight overlay */}
       {highlightRect && (
         <div style={{
           position: "fixed",
@@ -268,10 +280,8 @@ function SubWalkthrough({ mode, onClose, t }) {
         }} />
       )}
 
-      {/* Tutorial panel */}
       <div style={{ position: "fixed", inset: 0, zIndex: 200, display: "flex", justifyContent: "center", pointerEvents: "none", ...panelStyle }}>
         <div className="modal-enter" style={{ background: t.card, border: `1px solid ${t.accent}40`, borderRadius: 20, width: "100%", maxWidth: 460, padding: 28, boxShadow: "0 16px 48px rgba(0,0,0,0.5)", pointerEvents: "all" }}>
-          {/* sub-header */}
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
             <div style={{ fontSize: 10, fontFamily: "'Space Mono',monospace", color: t.accent, textTransform: "uppercase", letterSpacing: 1.5 }}>
               {mode === "log" ? "Trade Form Guide" : "Plan Form Guide"}
@@ -282,11 +292,9 @@ function SubWalkthrough({ mode, onClose, t }) {
               ))}
             </div>
           </div>
-          {/* icon */}
           <div style={{ marginBottom: 10, color: t.text }}>{sub.icon}</div>
           <div style={{ fontSize: 16, fontWeight: 700, color: t.text, marginBottom: 8, lineHeight: 1.3 }}>{sub.title}</div>
           <div style={{ fontSize: 13, color: t.text3, lineHeight: 1.75, marginBottom: 22 }}>{sub.desc}</div>
-          {/* nav */}
           <div style={{ display: "flex", gap: 10 }}>
             {subStep > 0 ? (
               <button onClick={() => setSubStep(s => s - 1)} style={{ flex: "0 0 80px", background: t.card2, border: `1px solid ${t.border}`, borderRadius: 10, padding: "10px 0", color: t.text3, fontSize: 13, cursor: "pointer", fontFamily: "inherit" }}>← Back</button>
@@ -309,8 +317,8 @@ function SubWalkthrough({ mode, onClose, t }) {
 
 // ── Main component ─────────────────────────────────────────────────────────────
 
-export default function TutorialModal({ step, onNext, onPrev, onClose, onOpenLog, onOpenPlan, onSetTab, t }) {
-  const [subMode, setSubMode] = useState(null); // null | "log" | "plan"
+export default function TutorialModal({ step, onNext, onPrev, onClose, onOpenLog, onCloseLog, onOpenPlan, onClosePlan, onSetTab, t }) {
+  const [subMode, setSubMode] = useState(null);
 
   const s = TUTORIAL_STEPS[step];
   const total = TUTORIAL_STEPS.length;
@@ -338,14 +346,19 @@ export default function TutorialModal({ step, onNext, onPrev, onClose, onOpenLog
     onPrev();
   };
 
+  const handleSubClose = () => {
+    if (subMode === "log") onCloseLog();
+    else onClosePlan();
+    setSubMode(null);
+  };
+
   if (subMode) {
-    return <SubWalkthrough mode={subMode} onClose={() => setSubMode(null)} t={t} />;
+    return <SubWalkthrough mode={subMode} onClose={handleSubClose} t={t} />;
   }
 
   return (
     <div style={{ position: "fixed", inset: 0, zIndex: 200, display: "flex", alignItems: "flex-end", justifyContent: "center", padding: "0 16px 28px", pointerEvents: "none" }}>
       <div className="modal-enter" style={{ background: t.card, border: `1px solid ${t.border}`, borderRadius: 20, width: "100%", maxWidth: 460, padding: 28, boxShadow: "0 16px 48px rgba(0,0,0,0.5)", pointerEvents: "all" }}>
-        {/* header */}
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 22 }}>
           <div style={{ display: "flex", gap: 5 }}>
             {Array.from({ length: total }).map((_, i) => (
@@ -354,11 +367,9 @@ export default function TutorialModal({ step, onNext, onPrev, onClose, onOpenLog
           </div>
           <button onClick={onClose} style={{ background: "none", border: "none", color: t.text4, cursor: "pointer", fontSize: 11, fontFamily: "'Space Mono',monospace", letterSpacing: 1, padding: "4px 8px" }}>SKIP</button>
         </div>
-        {/* icon */}
         <div style={{ marginBottom: 12, color: t.text }}>{s.icon}</div>
         <div style={{ fontSize: 17, fontWeight: 700, color: t.text, marginBottom: 10, lineHeight: 1.3 }}>{s.title}</div>
         <div style={{ fontSize: 13, color: t.text3, lineHeight: 1.75, marginBottom: 22 }}>{s.desc}</div>
-        {/* optional CTA */}
         {s.cta && (
           <button
             onClick={() => handleCTA(s.cta.action)}
@@ -367,7 +378,6 @@ export default function TutorialModal({ step, onNext, onPrev, onClose, onOpenLog
             {s.cta.label} →
           </button>
         )}
-        {/* nav */}
         <div style={{ display: "flex", gap: 10 }}>
           {step > 0 && (
             <button onClick={handlePrev} style={{ flex: "0 0 80px", background: t.card2, border: `1px solid ${t.border}`, borderRadius: 10, padding: "10px 0", color: t.text3, fontSize: 13, cursor: "pointer", fontFamily: "inherit" }}>← Back</button>
