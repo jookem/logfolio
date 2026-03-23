@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { PlanIcon, CloseIcon, WarningIcon, TargetIcon, TickerIcon, CategoryIcon, StrategyIcon, TimeframeIcon, DirectionIcon, AmountIcon, EntryPriceIcon, ExitIcon } from "../lib/icons";
+import { PlanIcon, CloseIcon, WarningIcon, TargetIcon, TickerIcon, CategoryIcon, StrategyIcon, TodayIcon, DirectionIcon, AmountIcon, EntryPriceIcon } from "../lib/icons";
 import { supabase } from "../lib/supabase";
 import { STOCK_LIKE, SUGGESTED_TAGS, EMOTIONS } from "../lib/constants";
 import { todayStr, typeLabels, normCDF, bsPrice } from "../lib/utils";
@@ -346,7 +346,7 @@ const base = {
   </div>
 </div>
           <div>
-            <label style={lbl}>Date</label>
+            <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><TodayIcon size={14} />Date</label>
             <input style={inp} type="date" value={form.date} onChange={(e) => set("date", e.target.value)} />
           </div>
           <div>
@@ -746,7 +746,7 @@ const base = {
 
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
               <div>
-                <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><ExitIcon size={14} />Stop Loss</label>
+                <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><WarningIcon size={14} />Stop Loss</label>
                 <div style={{ position: "relative" }}>
                   <span style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: t.text3, fontSize: 14 }}>$</span>
                   <input style={{ ...inp, paddingLeft: 26, borderColor: form.stopLoss ? t.danger + "80" : t.inputBorder }}
@@ -754,7 +754,7 @@ const base = {
                 </div>
               </div>
               <div>
-                <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><EntryPriceIcon size={14} />Take Profit</label>
+                <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><TargetIcon size={14} />Take Profit</label>
                 <div style={{ position: "relative" }}>
                   <span style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: t.text3, fontSize: 14 }}>$</span>
                   <input style={{ ...inp, paddingLeft: 26, borderColor: form.takeProfit ? t.accent + "80" : t.inputBorder }}
