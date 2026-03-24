@@ -470,7 +470,8 @@ const base = {
         </div>
 
         {/* ══ STOCK SECTION ══ */}
-        {sectionHeader(form.type === "options" ? (optConfig?.stockLabel || "Underlying Stock") : typeLabels(form.type).section, "tut-plan-details")}
+        <div id="tut-plan-details">
+        {sectionHeader(form.type === "options" ? (optConfig?.stockLabel || "Underlying Stock") : typeLabels(form.type).section)}
 
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
           {/* Current price — always shown */}
@@ -526,6 +527,7 @@ const base = {
             </div>
           )}
         </div>
+        </div>{/* end tut-plan-details */}
 
         {/* ══ OPTION SECTION ══ */}
         {form.type === "options" && (
@@ -836,8 +838,8 @@ const base = {
 
         {/* ══  SECTION (stock-like only) ══ */}
         {STOCK_LIKE.includes(form.type) && (
-          <>
-            {sectionHeader("Risk Plan", "tut-plan-risk")}
+          <div id="tut-plan-risk">
+            {sectionHeader("Risk Plan")}
 
             {/* Live R preview */}
             {plannedR !== null && (
@@ -930,10 +932,11 @@ const base = {
                 </div>
               );
             })()}
-          </>
-        )}
+          </div>
+        )}{/* end tut-plan-risk */}
 {/* ══ PRE-TRADE CHECKLIST ══ */}
-        {sectionHeader("Pre-Trade Checklist", "tut-plan-checklist")}
+        <div id="tut-plan-checklist">
+        {sectionHeader("Pre-Trade Checklist")}
 
         {/* Progress bar */}
         <div style={{ marginBottom: 14 }}>
@@ -1016,6 +1019,7 @@ const base = {
             cursor: "pointer", fontSize: 13, whiteSpace: "nowrap",
           }}>+ Add</button>
         </div>
+        </div>{/* end tut-plan-checklist */}
 {/* ══ EMOTION ══ */}
         {sectionHeader("Mindset", "tut-plan-mindset")}
         <div id="tut-plan-emotion" style={{ marginBottom: 14 }}>
@@ -1073,7 +1077,7 @@ const base = {
         </div>
 {/* ══ TAGS + THESIS ══ */}
         {sectionHeader("Notes", "tut-plan-notes")}
-        <div style={{ marginBottom: 12 }}>
+        <div id="tut-plan-tags" style={{ marginBottom: 12 }}>
           <label style={lbl}>Tags</label>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 8 }}>
             {(form.tags || []).map((tg) => <Tag key={tg} label={tg} t={t} onRemove={() => removeTag(tg)} />)}

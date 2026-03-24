@@ -4,10 +4,14 @@ import {
   AnalysisIcon, RobotIcon, ArrowsIcon, MindIcon, PenIcon, TargetIcon,
   CheckIcon, RecIcon, DirectionIcon, AmountIcon, EntryPriceIcon, ExitIcon,
   WarningIcon, EntryTimeIcon, ExitTimeIcon, ScreenshotIcon, TickerIcon,
+  CategoryIcon, StrategyIcon, CurrentPriceIcon,
 } from "../lib/icons";
 
 const Pair = ({ a, b }) => (
   <div style={{ display: "flex", gap: 10, alignItems: "center" }}>{a}{b}</div>
+);
+const Quad = ({ a, b, c, d }) => (
+  <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>{a}{b}{c}{d}</div>
 );
 
 // ── Step data ──────────────────────────────────────────────────────────────────
@@ -167,31 +171,38 @@ const TRADE_WALKTHROUGH = [
 
 const PLAN_WALKTHROUGH = [
   {
-    icon: <Pair a={<TickerIcon size={44} />} b={<DirectionIcon size={44} />} />,
-    title: "Strategy Type",
-    desc: "Choose a Stock strategy (Breakout, Pullback…) or an Options strategy (Iron Condor, Bull Call Spread…). The form sections below update to match your selection.",
+    icon: <Quad a={<TickerIcon size={38} />} b={<TodayIcon size={38} />} c={<CategoryIcon size={38} />} d={<StrategyIcon size={38} />} />,
+    title: "Ticker, Date, Type & Strategy",
+    desc: "Enter the ticker (e.g. AAPL), the trade date, the asset type (Stock, Options, Forex, Crypto), and the strategy (Breakout, Pullback…). The form adapts to your type selection.",
     target: "tut-plan-strategy",
     panelPos: "bottom",
   },
   {
-    icon: <Pair a={<EntryPriceIcon size={44} />} b={<ExitIcon size={44} />} />,
-    title: "Stock Details / Option",
-    desc: "Enter the Ticker and direction. For options, each leg shows Strike, Expiry, Entry Premium, Contracts, and IV — auto-filled from the live chain. If a strike isn't listed, tap 'Enter manually' to type it in. Note: premium and IV are previous close data — always verify with your broker.",
+    icon: <Quad a={<CurrentPriceIcon size={38} />} b={<DirectionIcon size={38} />} c={<EntryPriceIcon size={38} />} d={<AmountIcon size={38} />} />,
+    title: "Current Price, Direction, Entry & Shares",
+    desc: "Enter the live current price (auto-fetched), your direction (Buy/Short), your planned entry price, and the number of shares. For options, each leg shows Strike, Expiry, Premium, Contracts, and IV from the live chain.",
     target: "tut-plan-details",
     panelPos: "bottom",
   },
   {
     icon: <Pair a={<WarningIcon size={44} />} b={<TargetIcon size={44} />} />,
     title: "Risk Plan",
-    desc: "Set your Stop Loss $, Take Profit $, and Entry Target. Logfolio shows you your risk/reward ratio in real time so you can confirm the trade is worth taking before you enter.",
+    desc: "Set your Stop Loss $ and Take Profit $ — Logfolio shows your planned R-ratio in real time. Use the built-in Position Size Calculator to work out how many shares to take based on your account size and risk percentage.",
     target: "tut-plan-risk",
     panelPos: "top",
   },
   {
     icon: <CheckIcon size={44} />,
     title: "Pre-Trade Checklist",
-    desc: "Run through the Pre-Trade Checklist — a set of conditions to confirm before entering. Check off each item to make sure you're not entering on impulse.",
+    desc: "Run through every item on the Pre-Trade Checklist before entering. Check off each condition to make sure you're not acting on impulse. You can add custom items to build your own process.",
     target: "tut-plan-checklist",
+    panelPos: "top",
+  },
+  {
+    icon: <PenIcon size={44} />,
+    title: "Tags",
+    desc: "Add tags to your plan to group and filter trades later — e.g. earnings, gap-up, overnight. Pick from suggested tags or type your own.",
+    target: "tut-plan-tags",
     panelPos: "top",
   },
   {
