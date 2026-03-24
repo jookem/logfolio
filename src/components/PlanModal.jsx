@@ -214,16 +214,34 @@ const fetchAiAssist = async () => {
         }).join("\n")
       : "No past trades on this ticker";
 
-    // Last 10 SPY closes for market bias
-    const spySummary = spyData?.length
-      ? spyData.slice(-10).map(d => `${d.date}: $${d.close?.toFixed(2)}`).join(", ")
-      : "SPY data unavailable";
+    // Last 10 closes for the planned ticker for market bias
+    let tickerPriceSummary = `${ticker} price data unavailable`;
+    if (ticker) {
+      try {
+        const toTs = Math.floor(Date.now() / 1000);
+        const fromTs = toTs - 86400 * 20; // ~20 trading days back to ensure 10 closes
+        const yfRes = await fetch("/api/yf", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", ...(session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {}) },
+          body: JSON.stringify({ url: `https://query1.finance.yahoo.com/v8/finance/chart/${ticker}?period1=${fromTs}&period2=${toTs}&interval=1d` }),
+        });
+        const yfData = await yfRes.json();
+        const result = yfData?.chart?.result?.[0];
+        const timestamps = result?.timestamp;
+        const closes = result?.indicators?.quote?.[0]?.close;
+        if (timestamps?.length && closes?.length) {
+          const closes10 = timestamps.map((t, i) => ({ date: new Date(t * 1000).toISOString().slice(0, 10), close: closes[i] }))
+            .filter(d => d.close != null).slice(-10);
+          tickerPriceSummary = closes10.map(d => `${d.date}: $${d.close.toFixed(2)}`).join(", ");
+        }
+      } catch (_) { /* keep default unavailable message */ }
+    }
 
     const messages = [{
       role: "user",
       content: `You are a trading coach. Given the following context, provide TWO sections:
 
-1. MARKET_BIAS: One sentence on current market direction based on SPY (bullish/bearish/neutral and why). Be concise.
+1. MARKET_BIAS: One sentence on current price trend for ${ticker} based on its recent closes (bullish/bearish/neutral and why). Be concise.
 2. PERSONAL_CHECKLIST: 2-3 bullet points of personalised warnings or confirmations for this specific trade plan based on the trader's history. Be direct and honest.
 
 Planned trade:
@@ -241,8 +259,8 @@ ${tickerHistory}
 Strategy win rates (all trades):
 ${stratSummary}
 
-SPY last 10 closes:
-${spySummary}
+${ticker} last 10 closes:
+${tickerPriceSummary}
 
 Respond in this exact JSON format:
 {"marketBias":"...", "checklist":["...","...","..."]}`,
