@@ -623,11 +623,6 @@ const base = {
             if (form.ticker) fetchStrikes(form.ticker, e.target.value, leg.type);
           }}
         />
-        {leg.expiration && expiryDates.length > 0 && !expiryDates.includes(leg.expiration) && (
-          <div style={{ fontSize: 10, color: t.danger, marginTop: 4, fontFamily: "'Space Mono', monospace" }}>
-            No contracts found for this date
-          </div>
-        )}
       </div>
 
       {/* Strike — dropdown from chain with manual override */}
@@ -644,7 +639,6 @@ const base = {
             </button>
           )}
         </div>
-        {chainError && <div style={{ fontSize: 10, color: t.danger, marginBottom: 4, fontFamily: "'Space Mono',monospace" }}>{chainError}</div>}
         {strikes.length > 0 && !strikeManual[i] ? (
           <select style={inp} value={leg.strike}
             onChange={(e) => {
