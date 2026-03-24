@@ -31,10 +31,28 @@ export default function EquityCurve({ trades, t, spyData, spyError }) {
     return { val: running, date: tr.date };
   })];
 
+  const RANGES = ["1D", "1W", "1M", "1Y", "ALL"];
+  const rangeSelector = (
+    <div style={{ display: "flex", justifyContent: "flex-end", gap: 4, marginBottom: 8 }}>
+      {RANGES.map(r => (
+        <button key={r} onClick={() => setRange(r)} style={{
+          background: range === r ? t.accent + "25" : "transparent",
+          border: `1px solid ${range === r ? t.accent : t.border}`,
+          color: range === r ? t.accent : t.text3,
+          borderRadius: 5, padding: "2px 8px", fontSize: 10,
+          fontFamily: "'Space Mono',monospace", cursor: "pointer",
+        }}>{r}</button>
+      ))}
+    </div>
+  );
+
   if (points.length < 3)
     return (
-      <div style={{ height: 200, display: "flex", alignItems: "center", justifyContent: "center", color: t.text3, fontSize: 12, fontFamily: "monospace" }}>
-        {range !== "ALL" ? "No trades in this period" : "Add more trades to see curve"}
+      <div>
+        {rangeSelector}
+        <div style={{ height: 200, display: "flex", alignItems: "center", justifyContent: "center", color: t.text3, fontSize: 12, fontFamily: "monospace" }}>
+          {range !== "ALL" ? "No trades in this period" : "Add more trades to see curve"}
+        </div>
       </div>
     );
 
@@ -82,22 +100,10 @@ export default function EquityCurve({ trades, t, spyData, spyError }) {
   const showDateLabels = range !== "1D";
   const fmtDate = d => { const [y, m, dd] = d.split("-"); return `${m}/${dd}/${y.slice(2)}`; };
 
-  const RANGES = ["1D", "1W", "1M", "1Y", "ALL"];
-
   return (
     <div>
       {/* Range selector */}
-      <div style={{ display: "flex", justifyContent: "flex-end", gap: 4, marginBottom: 8 }}>
-        {RANGES.map(r => (
-          <button key={r} onClick={() => setRange(r)} style={{
-            background: range === r ? t.accent + "25" : "transparent",
-            border: `1px solid ${range === r ? t.accent : t.border}`,
-            color: range === r ? t.accent : t.text3,
-            borderRadius: 5, padding: "2px 8px", fontSize: 10,
-            fontFamily: "'Space Mono',monospace", cursor: "pointer",
-          }}>{r}</button>
-        ))}
-      </div>
+      {rangeSelector}
 
       {/* Chart */}
       <svg
