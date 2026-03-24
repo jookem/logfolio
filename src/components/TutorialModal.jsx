@@ -4,7 +4,7 @@ import {
   AnalysisIcon, RobotIcon, ArrowsIcon, MindIcon, PenIcon, TargetIcon,
   CheckIcon, RecIcon, DirectionIcon, AmountIcon, EntryPriceIcon, ExitIcon,
   WarningIcon, EntryTimeIcon, ExitTimeIcon, ScreenshotIcon, TickerIcon,
-  CategoryIcon, StrategyIcon, CurrentPriceIcon,
+  CategoryIcon, StrategyIcon, CurrentPriceIcon, EmotionIcon, TagsIcon,
 } from "../lib/icons";
 
 const Pair = ({ a, b }) => (
@@ -98,8 +98,8 @@ const TUTORIAL_STEPS = [
 
 const TRADE_WALKTHROUGH = [
   {
-    icon: <LogIcon size={44} />,
-    title: "Ticker, Type & Strategy",
+    icon: <Quad a={<TickerIcon size={38} />} b={<TodayIcon size={38} />} c={<CategoryIcon size={38} />} d={<StrategyIcon size={38} />} />,
+    title: "Ticker, Date, Type & Strategy",
     desc: "Enter the ticker (e.g. AAPL), the Date, the Type (Stock, Options, Forex, Crypto), and the Strategy (Breakout, Pullback, etc.). The form adapts based on Type.",
     target: "tut-trade-basic",
     panelPos: "bottom",
@@ -133,7 +133,7 @@ const TRADE_WALKTHROUGH = [
     panelPos: "bottom",
   },
   {
-    icon: <MindIcon size={44} />,
+    icon: <EmotionIcon size={44} />,
     title: "Emotion",
     desc: "Select your Emotion at the time of the trade — Calm, FOMO, Anxious, and more. This is the most important field for AI pattern analysis. Be honest.",
     target: "tut-trade-emotion",
@@ -147,7 +147,7 @@ const TRADE_WALKTHROUGH = [
     panelPos: "top",
   },
   {
-    icon: <PenIcon size={44} />,
+    icon: <TagsIcon size={44} />,
     title: "Tags",
     desc: "Add Tags to categorise your trade — e.g. earnings, gap-up, revenge. Tags let you filter and group trades across your log to spot recurring patterns.",
     target: "tut-trade-tags",
@@ -206,14 +206,14 @@ const PLAN_WALKTHROUGH = [
     panelPos: "top",
   },
   {
-    icon: <MindIcon size={44} />,
+    icon: <EmotionIcon size={44} />,
     title: "Emotion",
     desc: "Record your Emotion going into the trade. Setting this before you enter (not after) gives the most honest data for AI pattern analysis.",
     target: "tut-plan-emotion",
     panelPos: "top",
   },
   {
-    icon: <PenIcon size={44} />,
+    icon: <TagsIcon size={44} />,
     title: "Tags",
     desc: "Add tags to your plan to group and filter trades later — e.g. earnings, gap-up, overnight. Pick from suggested tags or type your own.",
     target: "tut-plan-tags",
