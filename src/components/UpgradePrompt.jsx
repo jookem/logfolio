@@ -1,5 +1,3 @@
-import { ShieldIcon } from "../lib/icons";
-
 export default function UpgradePrompt({ t, onUpgrade, feature, tier = "pro" }) {
   const isProPlus = tier === "pro_plus";
   const planName = isProPlus ? "Pro Plus" : "Pro";
@@ -10,8 +8,8 @@ export default function UpgradePrompt({ t, onUpgrade, feature, tier = "pro" }) {
 
   return (
     <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "60px 20px", textAlign: "center" }}>
-      <div style={{ marginBottom: 12, color: t.accent }}>
-        <ShieldIcon size={48} />
+      <div style={{ marginBottom: 12 }}>
+        <img src={isProPlus ? "/images/proplus.svg" : "/images/pro.svg"} alt={planName} style={{ width: 48, height: 48 }} />
       </div>
       <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 16, fontWeight: 700, color: t.text, marginBottom: 8 }}>
         {feature} is a {planName} feature
