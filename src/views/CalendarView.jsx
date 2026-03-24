@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { LogIcon } from "../lib/icons";
+import { CalendarIcon } from "../lib/icons";
 import { fmt, todayStr, typeLabels } from "../lib/utils";
 import StatCard from "../components/StatCard";
 import Tag from "../components/Tag";
@@ -280,7 +280,7 @@ export default function CalendarView({ plList, t, mobile }) {
               gap: 8,
             }}
           >
-            <LogIcon size={28} />
+            <CalendarIcon size={28} />
 
             <div
               style={{
