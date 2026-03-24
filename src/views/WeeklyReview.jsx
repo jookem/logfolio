@@ -76,9 +76,7 @@ export default function WeeklyReview({ plList, t, mobile }) {
       {visibleWeeks.map(([weekStart, data]) => {
         const weekEnd = new Date(weekStart);
         weekEnd.setDate(weekEnd.getDate() + 6);
-        const label = `${fmtDate(weekStart)} – ${fmtDate(
-          weekEnd.toISOString()
-        )}`;
+        const label = `${fmtDate(weekStart)} – ${fmtDate(weekEnd.toISOString().slice(0, 10))}`;
         const best = data.trades.reduce(
           (b, tr) => (tr.pl > b.pl ? tr : b),
           data.trades[0]
