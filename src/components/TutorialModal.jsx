@@ -1,9 +1,14 @@
 import { useState, useEffect, useRef } from "react";
 import {
   LogoIcon, LogIcon, PlanIcon, TodayIcon, WeekIcon, CalendarIcon,
-  AnalysisIcon, RobotIcon, ArrowsIcon, DollarIcon, ShieldIcon,
-  MindIcon, PenIcon, TargetIcon, CheckIcon, RecIcon,
+  AnalysisIcon, RobotIcon, ArrowsIcon, MindIcon, PenIcon, TargetIcon,
+  CheckIcon, RecIcon, DirectionIcon, AmountIcon, EntryPriceIcon, ExitIcon,
+  WarningIcon, EntryTimeIcon, ExitTimeIcon, ScreenshotIcon, TickerIcon,
 } from "../lib/icons";
+
+const Pair = ({ a, b }) => (
+  <div style={{ display: "flex", gap: 10, alignItems: "center" }}>{a}{b}</div>
+);
 
 // ── Step data ──────────────────────────────────────────────────────────────────
 
@@ -96,23 +101,30 @@ const TRADE_WALKTHROUGH = [
     panelPos: "bottom",
   },
   {
-    icon: <ArrowsIcon size={44} />,
+    icon: <Pair a={<DirectionIcon size={44} />} b={<AmountIcon size={44} />} />,
     title: "Direction & Shares",
     desc: "Choose Long or Short, then enter the number of Shares (or contracts for options). This number is multiplied by your price difference to calculate P&L.",
     target: "tut-trade-direction",
     panelPos: "bottom",
   },
   {
-    icon: <DollarIcon size={44} />,
+    icon: <Pair a={<EntryPriceIcon size={44} />} b={<ExitIcon size={44} />} />,
     title: "Entry $ & Exit $",
     desc: "Enter the Entry $ — the price you opened the trade at — and the Exit $ — the price you closed at. Logfolio calculates your P&L from these automatically.",
     target: "tut-trade-prices",
     panelPos: "bottom",
   },
   {
-    icon: <ShieldIcon size={44} />,
-    title: "Stop Loss $ & Take Profit $",
-    desc: "Add your Stop Loss $ and Take Profit $ to calculate your R-value. Also log your Entry Time and Exit Time to unlock the Best Time to Trade chart.",
+    icon: <Pair a={<EntryTimeIcon size={44} />} b={<ExitTimeIcon size={44} />} />,
+    title: "Entry & Exit Time",
+    desc: "Log your Entry Time and Exit Time to unlock the Best Time to Trade chart in Analytics.",
+    target: "tut-trade-risk",
+    panelPos: "bottom",
+  },
+  {
+    icon: <Pair a={<WarningIcon size={44} />} b={<TargetIcon size={44} />} />,
+    title: "Stop Loss & Take Profit",
+    desc: "Add your Stop Loss $ and Take Profit $ to calculate your R-value — the ratio of potential reward to risk. A good setup should have an R of 2 or higher.",
     target: "tut-trade-risk",
     panelPos: "bottom",
   },
@@ -124,14 +136,14 @@ const TRADE_WALKTHROUGH = [
     panelPos: "top",
   },
   {
-    icon: <MindIcon size={44} />,
+    icon: <WarningIcon size={44} />,
     title: "Mistake",
     desc: "Flag any trading mistakes made — Chased Entry, Broke Rules, Over-leveraged, etc. Tracking mistakes over time reveals your most expensive habits.",
     target: "tut-trade-mistake",
     panelPos: "top",
   },
   {
-    icon: <RecIcon size={44} />,
+    icon: <Pair a={<RecIcon size={44} />} b={<ScreenshotIcon size={44} />} />,
     title: "Voice Note & Screenshot",
     desc: "Record a quick voice note while the trade is fresh, and attach a chart screenshot. Both are stored with the trade for later review.",
     target: "tut-trade-media",
@@ -155,21 +167,21 @@ const TRADE_WALKTHROUGH = [
 
 const PLAN_WALKTHROUGH = [
   {
-    icon: <TargetIcon size={44} />,
+    icon: <Pair a={<TickerIcon size={44} />} b={<DirectionIcon size={44} />} />,
     title: "Strategy Type",
     desc: "Choose a Stock strategy (Breakout, Pullback…) or an Options strategy (Iron Condor, Bull Call Spread…). The form sections below update to match your selection.",
     target: "tut-plan-strategy",
     panelPos: "bottom",
   },
   {
-    icon: <LogIcon size={44} />,
+    icon: <Pair a={<EntryPriceIcon size={44} />} b={<ExitIcon size={44} />} />,
     title: "Stock Details / Option",
     desc: "Enter the Ticker and direction. For options, each leg shows Strike, Expiry, Entry Premium, Contracts, and IV — auto-filled from the live chain. If a strike isn't listed, tap 'Enter manually' to type it in. Note: premium and IV are previous close data — always verify with your broker.",
     target: "tut-plan-details",
     panelPos: "bottom",
   },
   {
-    icon: <ShieldIcon size={44} />,
+    icon: <Pair a={<WarningIcon size={44} />} b={<TargetIcon size={44} />} />,
     title: "Risk Plan",
     desc: "Set your Stop Loss $, Take Profit $, and Entry Target. Logfolio shows you your risk/reward ratio in real time so you can confirm the trade is worth taking before you enter.",
     target: "tut-plan-risk",
@@ -190,7 +202,7 @@ const PLAN_WALKTHROUGH = [
     panelPos: "top",
   },
   {
-    icon: <RecIcon size={44} />,
+    icon: <Pair a={<RecIcon size={44} />} b={<ScreenshotIcon size={44} />} />,
     title: "Voice Note & Screenshot",
     desc: "Record a voice note with your trade rationale and attach a chart screenshot. Reviewing these alongside your results is one of the fastest ways to improve.",
     target: "tut-plan-media",
@@ -214,10 +226,21 @@ const PLAN_WALKTHROUGH = [
 
 // ── Sub-walkthrough ────────────────────────────────────────────────────────────
 
+const getScrollParent = (el) => {
+  let p = el.parentElement;
+  while (p && p !== document.body) {
+    const { overflow, overflowY } = window.getComputedStyle(p);
+    if (/(auto|scroll)/.test(overflow + overflowY)) return p;
+    p = p.parentElement;
+  }
+  return document.documentElement;
+};
+
 function SubWalkthrough({ mode, onClose, t }) {
   const [subStep, setSubStep] = useState(0);
   const [highlightRect, setHighlightRect] = useState(null);
   const pollRef = useRef(null);
+  const rafRef = useRef(null);
 
   const steps = mode === "log" ? TRADE_WALKTHROUGH : PLAN_WALKTHROUGH;
   const sub = steps[subStep];
@@ -228,11 +251,36 @@ function SubWalkthrough({ mode, onClose, t }) {
   useEffect(() => {
     setHighlightRect(null);
     if (pollRef.current) clearInterval(pollRef.current);
+    if (rafRef.current) { cancelAnimationFrame(rafRef.current); rafRef.current = null; }
 
     const el = document.getElementById(sub.target);
     if (!el) return;
 
-    el.scrollIntoView({ behavior: "smooth", block: scrollBlock });
+    // Scroll the modal's own scroll container (not the window) to bring el into view
+    const sp = getScrollParent(el);
+    const elR = el.getBoundingClientRect();
+    const spR = sp === document.documentElement ? { top: 0 } : sp.getBoundingClientRect();
+    const offsetInParent = elR.top - spR.top + sp.scrollTop;
+    const clientH = sp === document.documentElement ? window.innerHeight : sp.clientHeight;
+    const dest = scrollBlock === "start"
+      ? Math.max(0, offsetInParent - 80)
+      : Math.max(0, offsetInParent - clientH + el.offsetHeight + 80);
+    sp.scrollTo({ top: dest, behavior: "smooth" });
+
+    // Once scroll settles, start a continuous RAF loop so the highlight
+    // tracks the element even when the user scrolls manually
+    let rafStarted = false;
+    const startTrack = () => {
+      if (rafStarted) return;
+      rafStarted = true;
+      const tick = () => {
+        const r = el.getBoundingClientRect();
+        const pad = 6;
+        setHighlightRect({ top: r.top - pad, left: r.left - pad, width: r.width + pad * 2, height: r.height + pad * 2 });
+        rafRef.current = requestAnimationFrame(tick);
+      };
+      rafRef.current = requestAnimationFrame(tick);
+    };
 
     let lastTop = null;
     let stableCount = 0;
@@ -240,32 +288,17 @@ function SubWalkthrough({ mode, onClose, t }) {
       const r = el.getBoundingClientRect();
       if (lastTop !== null && Math.abs(r.top - lastTop) < 0.5) {
         stableCount++;
-        if (stableCount >= 4) {
-          clearInterval(pollRef.current);
-          const pad = 6;
-          setHighlightRect({
-            top: r.top - pad,
-            left: r.left - pad,
-            width: r.width + pad * 2,
-            height: r.height + pad * 2,
-          });
-        }
-      } else {
-        stableCount = 0;
-      }
+        if (stableCount >= 4) { clearInterval(pollRef.current); startTrack(); }
+      } else { stableCount = 0; }
       lastTop = r.top;
     }, 20);
 
-    const fallback = setTimeout(() => {
-      clearInterval(pollRef.current);
-      const r = el.getBoundingClientRect();
-      const pad = 6;
-      setHighlightRect({ top: r.top - pad, left: r.left - pad, width: r.width + pad * 2, height: r.height + pad * 2 });
-    }, 900);
+    const fallback = setTimeout(() => { clearInterval(pollRef.current); startTrack(); }, 900);
 
     return () => {
       clearInterval(pollRef.current);
       clearTimeout(fallback);
+      if (rafRef.current) { cancelAnimationFrame(rafRef.current); rafRef.current = null; }
     };
   }, [subStep, sub.target, scrollBlock]);
 
