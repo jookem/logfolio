@@ -122,14 +122,14 @@ const TRADE_WALKTHROUGH = [
     icon: <Pair a={<EntryTimeIcon size={44} />} b={<ExitTimeIcon size={44} />} />,
     title: "Entry & Exit Time",
     desc: "Log your Entry Time and Exit Time to unlock the Best Time to Trade chart in Analytics.",
-    target: "tut-trade-risk",
+    target: "tut-trade-times",
     panelPos: "bottom",
   },
   {
     icon: <Pair a={<WarningIcon size={44} />} b={<TargetIcon size={44} />} />,
     title: "Stop Loss & Take Profit",
     desc: "Add your Stop Loss $ and Take Profit $ to calculate your R-value — the ratio of potential reward to risk. A good setup should have an R of 2 or higher.",
-    target: "tut-trade-risk",
+    target: "tut-trade-stoploss",
     panelPos: "bottom",
   },
   {
@@ -147,6 +147,13 @@ const TRADE_WALKTHROUGH = [
     panelPos: "top",
   },
   {
+    icon: <PenIcon size={44} />,
+    title: "Tags",
+    desc: "Add Tags to categorise your trade — e.g. earnings, gap-up, revenge. Tags let you filter and group trades across your log to spot recurring patterns.",
+    target: "tut-trade-tags",
+    panelPos: "top",
+  },
+  {
     icon: <Pair a={<RecIcon size={44} />} b={<ScreenshotIcon size={44} />} />,
     title: "Voice Note & Screenshot",
     desc: "Record a quick voice note while the trade is fresh, and attach a chart screenshot. Both are stored with the trade for later review.",
@@ -155,8 +162,8 @@ const TRADE_WALKTHROUGH = [
   },
   {
     icon: <PenIcon size={44} />,
-    title: "Tags & Notes",
-    desc: "Add Tags for filtering across your log, then write your trade Notes — what happened, what you learned, and what you'd do differently. Hit Save Trade when done.",
+    title: "Notes",
+    desc: "Write your trade Notes — what happened, what you learned, and what you'd do differently. Hit Save Trade when done.",
     target: "tut-trade-notes-text",
     panelPos: "top",
   },
@@ -192,17 +199,10 @@ const PLAN_WALKTHROUGH = [
     panelPos: "top",
   },
   {
-    icon: <CheckIcon size={44} />,
+    icon: <PlanIcon size={44} />,
     title: "Pre-Trade Checklist",
     desc: "Run through every item on the Pre-Trade Checklist before entering. Check off each condition to make sure you're not acting on impulse. You can add custom items to build your own process.",
     target: "tut-plan-checklist",
-    panelPos: "top",
-  },
-  {
-    icon: <PenIcon size={44} />,
-    title: "Tags",
-    desc: "Add tags to your plan to group and filter trades later — e.g. earnings, gap-up, overnight. Pick from suggested tags or type your own.",
-    target: "tut-plan-tags",
     panelPos: "top",
   },
   {
@@ -210,6 +210,13 @@ const PLAN_WALKTHROUGH = [
     title: "Emotion",
     desc: "Record your Emotion going into the trade. Setting this before you enter (not after) gives the most honest data for AI pattern analysis.",
     target: "tut-plan-emotion",
+    panelPos: "top",
+  },
+  {
+    icon: <PenIcon size={44} />,
+    title: "Tags",
+    desc: "Add tags to your plan to group and filter trades later — e.g. earnings, gap-up, overnight. Pick from suggested tags or type your own.",
+    target: "tut-plan-tags",
     panelPos: "top",
   },
   {

@@ -374,7 +374,7 @@ export default function TradeFormModal({ initial, defaults, onClose, onSave, onC
                 })()}
               </div>
             </div>
-            <div id="tut-trade-risk" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 12 }}>
+            <div id="tut-trade-times" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 12 }}>
               <div>
                 <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><EntryTimeIcon size={14} />Entry Time</label>
                 <input
@@ -395,6 +395,8 @@ export default function TradeFormModal({ initial, defaults, onClose, onSave, onC
                   onChange={(e) => set("exitTime", e.target.value)}
                 />
               </div>
+            </div>
+            <div id="tut-trade-stoploss" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 12 }}>
               <div>
                 <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><WarningIcon size={14} />Stop Loss</label>
                 <input
@@ -657,7 +659,7 @@ export default function TradeFormModal({ initial, defaults, onClose, onSave, onC
           </div>
         </div>
         {sectionHeader("Notes", "tut-trade-notes")}
-        <div style={{ marginBottom: 12 }}>
+        <div id="tut-trade-tags" style={{ marginBottom: 12 }}>
           <label style={lbl}>Tags</label>
           <div
             style={{
