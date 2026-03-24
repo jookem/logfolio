@@ -106,20 +106,29 @@ export default function StatCard({ label, value, sub, color, t, info }) {
             top: pos.top,
             left: pos.left,
             zIndex: 9999,
-            background: t.surface,
-            border: `1px solid ${t.border}`,
+            background: t.card,
+            border: `1px solid ${t.border2}`,
             borderRadius: 10,
             padding: "14px 16px",
             maxWidth: 280,
             width: "max-content",
-            boxShadow: "0 6px 24px rgba(0,0,0,0.35)",
+            boxShadow: "0 8px 28px rgba(0,0,0,0.45)",
             fontSize: 13,
             color: t.text,
             lineHeight: 1.65,
           }}
         >
-          <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 9, color: t.text3, textTransform: "uppercase", letterSpacing: 2, marginBottom: 8 }}>
-            {label}
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8, gap: 12 }}>
+            <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 9, color: t.text3, textTransform: "uppercase", letterSpacing: 2 }}>
+              {label}
+            </div>
+            <button
+              data-statpop
+              onClick={() => setOpen(false)}
+              style={{ background: "none", border: "none", color: t.text3, cursor: "pointer", fontSize: 16, lineHeight: 1, padding: 0, flexShrink: 0 }}
+            >
+              ×
+            </button>
           </div>
           {info}
         </div>
