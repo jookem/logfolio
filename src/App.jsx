@@ -502,6 +502,57 @@ const plList = useMemo(
     };
   }, [plList]);
 
+  // Treynor and Information Ratio — require SPY benchmark data
+  const benchmarkStats = useMemo(() => {
+    if (!spyData || spyData.length < 2 || plList.length < 2) return { treynor: null, infoRatio: null };
+
+    // Build SPY daily return map: date -> pct return vs prior day
+    const spyReturnMap = {};
+    for (let i = 1; i < spyData.length; i++) {
+      const ret = (spyData[i].close - spyData[i - 1].close) / spyData[i - 1].close;
+      spyReturnMap[spyData[i].date] = ret;
+    }
+
+    // Group trade P/L by date
+    const dailyPL = {};
+    plList.forEach((t) => {
+      dailyPL[t.date] = (dailyPL[t.date] || 0) + t.pl;
+    });
+
+    // Use accountSize to convert P/L to % return; fall back to normalising by mean abs P/L
+    const accountSize = tradeDefaults?.accountSize;
+    const tradingDates = Object.keys(dailyPL).filter((d) => spyReturnMap[d] !== undefined);
+    if (tradingDates.length < 2) return { treynor: null, infoRatio: null };
+
+    const portReturns = tradingDates.map((d) =>
+      accountSize ? dailyPL[d] / accountSize : dailyPL[d]
+    );
+    const mktReturns = tradingDates.map((d) => spyReturnMap[d]);
+
+    const n = tradingDates.length;
+    const meanPort = portReturns.reduce((s, v) => s + v, 0) / n;
+    const meanMkt = mktReturns.reduce((s, v) => s + v, 0) / n;
+
+    // Beta = Cov(port, mkt) / Var(mkt)
+    let cov = 0, varMkt = 0;
+    for (let i = 0; i < n; i++) {
+      cov += (portReturns[i] - meanPort) * (mktReturns[i] - meanMkt);
+      varMkt += Math.pow(mktReturns[i] - meanMkt, 2);
+    }
+    cov /= n - 1;
+    varMkt /= n - 1;
+    const beta = varMkt > 0 ? cov / varMkt : null;
+    const treynor = beta !== null && Math.abs(beta) > 0.0001 ? meanPort / beta : null;
+
+    // IR = mean active return / std dev of active returns
+    const activeReturns = portReturns.map((p, i) => p - mktReturns[i]);
+    const meanActive = activeReturns.reduce((s, v) => s + v, 0) / n;
+    const stdActive = Math.sqrt(activeReturns.reduce((s, v) => s + Math.pow(v - meanActive, 2), 0) / (n - 1));
+    const infoRatio = stdActive > 0 ? meanActive / stdActive : null;
+
+    return { treynor, infoRatio };
+  }, [plList, spyData, tradeDefaults?.accountSize]);
+
   const stratStats = useMemo(() => {
     const map = {};
     plList.forEach((t) => {
@@ -1368,6 +1419,8 @@ const paginated = filtered
               <StatCard label="Max Drawdown" value={maxDrawdown.value > 0 ? `-${fmt(maxDrawdown.value)}` : "—"} sub={maxDrawdown.pct > 0 ? `${(maxDrawdown.pct * 100).toFixed(1)}% of peak` : "no drawdown"} color={maxDrawdown.value > 0 ? T.danger : undefined} t={T} info="The largest peak-to-trough decline in your cumulative equity curve — how much your account dropped from its highest point before recovering. It measures the worst losing streak you endured. Smaller drawdowns mean a smoother, more consistent equity curve." />
               <StatCard label="Sharpe Ratio" value={stats.sharpe !== null ? stats.sharpe.toFixed(2) : "—"} sub="return / volatility" color={stats.sharpe !== null ? (stats.sharpe >= 1 ? T.accent : stats.sharpe >= 0 ? undefined : T.danger) : undefined} t={T} info="Measures return relative to total volatility (both up and down swings). Calculated as average P/L divided by the standard deviation of your P/L. Above 1.0 is good, above 2.0 is excellent. A low Sharpe means your returns are inconsistent even if profitable." />
               <StatCard label="Sortino Ratio" value={stats.sortino !== null ? stats.sortino.toFixed(2) : "—"} sub="return / downside risk" color={stats.sortino !== null ? (stats.sortino >= 1 ? T.accent : stats.sortino >= 0 ? undefined : T.danger) : undefined} t={T} info="Like the Sharpe Ratio, but only penalizes downside volatility (losing trades). Calculated as average P/L divided by the standard deviation of losing trades only. Higher is better — a high Sortino with a low Sharpe means your variance comes from big wins, not big losses." />
+              <StatCard label="Treynor Ratio" value={benchmarkStats.treynor !== null ? benchmarkStats.treynor.toFixed(4) : "—"} sub={benchmarkStats.treynor !== null ? "return / market risk" : "needs SPY data"} color={benchmarkStats.treynor !== null ? (benchmarkStats.treynor > 0 ? T.accent : T.danger) : undefined} t={T} info="Measures return per unit of market (systematic) risk, using SPY as the benchmark. Beta captures how much your P/L moves with the overall market. A higher Treynor means you're being well-compensated for the market risk you're taking on. Shows '—' until SPY data loads." />
+              <StatCard label="Info Ratio" value={benchmarkStats.infoRatio !== null ? benchmarkStats.infoRatio.toFixed(2) : "—"} sub={benchmarkStats.infoRatio !== null ? "active return / tracking error" : "needs SPY data"} color={benchmarkStats.infoRatio !== null ? (benchmarkStats.infoRatio >= 0.5 ? T.accent : benchmarkStats.infoRatio >= 0 ? undefined : T.danger) : undefined} t={T} info="Measures how consistently your trading outperforms SPY. Active return is your daily P/L minus what SPY returned that day. Tracking error is the volatility of that difference. Above 0.5 is solid, above 1.0 is exceptional. Shows '—' until SPY data loads." />
             </div>
 
             {/* Equity Curve */}
