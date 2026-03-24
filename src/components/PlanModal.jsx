@@ -28,6 +28,7 @@ const [chainLoading, setChainLoading] = useState(false);
 const [chainError, setChainError] = useState(null);
 const [expiryDates, setExpiryDates] = useState([]);
 const [strikes, setStrikes] = useState([]);
+const [strikeManual, setStrikeManual] = useState({});
 const [pnlMode, setPnlMode] = useState("pct"); // "pct" | "dollar"
 const polyFetch = async (path) => {
   const { data: { session } } = await supabase.auth.getSession();
@@ -75,6 +76,7 @@ const fetchStrikes = async (ticker, expiry, optionType) => {
   if (!ticker || !expiry) return;
   setStrikes([]);
   setChainError(null);
+  setStrikeManual({});
   try {
     const contractType = optionType === "call" ? "call" : "put";
     const data = await polyFetch(`/v3/reference/options/contracts?underlying_ticker=${ticker}&expiration_date=${expiry}&contract_type=${contractType}&limit=250&order=asc&sort=strike_price`);
@@ -590,11 +592,22 @@ const base = {
         )}
       </div>
 
-      {/* Strike — dropdown from chain */}
+      {/* Strike — dropdown from chain with manual override */}
       <div>
-        <label style={lbl}>Strike Price</label>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 4 }}>
+          <label style={{ ...lbl, marginBottom: 0 }}>Strike Price</label>
+          {strikes.length > 0 && (
+            <button
+              type="button"
+              onClick={() => setStrikeManual(prev => ({ ...prev, [i]: !prev[i] }))}
+              style={{ background: "none", border: "none", cursor: "pointer", fontSize: 10, color: t.text3, fontFamily: "'Space Mono', monospace", padding: 0, textDecoration: "underline" }}
+            >
+              {strikeManual[i] ? "Use chain" : "Enter manually"}
+            </button>
+          )}
+        </div>
         {chainError && <div style={{ fontSize: 10, color: t.danger, marginBottom: 4, fontFamily: "'Space Mono',monospace" }}>{chainError}</div>}
-        {strikes.length > 0 ? (
+        {strikes.length > 0 && !strikeManual[i] ? (
           <select style={inp} value={leg.strike}
             onChange={(e) => {
               const selected = strikes.find(s => String(s.strike) === e.target.value);
@@ -640,6 +653,11 @@ const base = {
         <label style={lbl}>IV (Implied Vol.) %</label>
         <input style={inp} type="number"
           value={leg.iv} onChange={(e) => setLeg(i, "iv", e.target.value)} placeholder="30" />
+      </div>
+
+      {/* Disclaimer */}
+      <div style={{ fontSize: 10, color: t.text3, fontFamily: "'Space Mono', monospace", lineHeight: 1.5, padding: "6px 10px", background: t.surface, borderRadius: 6, border: `1px solid ${t.border}` }}>
+        ⚠ Premium prices and IV are sourced from previous close data and may be inaccurate. Always verify with your broker before trading.
       </div>
 
       {/* Total cost */}
