@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { supabase } from "../lib/supabase";
 import { useAuth } from "../contexts/AuthContext";
+import { WarningIcon, CheckIcon, CircleIcon } from "../lib/icons";
 
 const DAILY_LIMIT = 3;
 const today = () => new Date().toISOString().slice(0, 10);
@@ -237,11 +238,15 @@ Provide 4-6 patterns. Be brutally honest but constructive.`,
           <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
             {insights.patterns.map((p, i) => {
               const color = p.type === "warning" ? t.danger : p.type === "strength" ? t.accent : t.text3;
-              const icon = p.type === "warning" ? "⚠" : p.type === "strength" ? "✓" : "○";
+              const icon = p.type === "warning"
+                ? <WarningIcon size={16} />
+                : p.type === "strength"
+                  ? <CheckIcon size={16} />
+                  : <CircleIcon size={16} />;
               return (
                 <div key={i} style={{ background: t.surface, border: `1px solid ${color}25`, borderRadius: 12, overflow: "hidden" }}>
                   <div style={{ padding: "14px 18px", borderBottom: `1px solid ${color}15`, display: "flex", alignItems: "flex-start", gap: 12 }}>
-                    <span style={{ fontSize: 16, marginTop: 1, flexShrink: 0 }}>{icon}</span>
+                    <span style={{ color, marginTop: 1, flexShrink: 0, display: "flex" }}>{icon}</span>
                     <div style={{ flex: 1 }}>
                       <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 13, fontWeight: 700, color, marginBottom: 5 }}>{p.title}</div>
                       <div style={{ fontSize: 13, color: t.text2, lineHeight: 1.6 }}>{p.detail}</div>
