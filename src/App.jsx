@@ -834,16 +834,16 @@ const paginated = filtered
                       width: "100%",
                       background: "none",
                       border: "none",
-                      color: tab === id ? T.accent : T.text2,
+                      borderLeft: tab === id ? `2px solid ${T.accent}` : "2px solid transparent",
+                      color: tab === id ? T.text : T.text3,
                       cursor: "pointer",
-                      fontSize: 15,
-                      padding: "12px 20px",
+                      fontSize: 13,
+                      padding: "0 20px",
+                      height: 54,
                       textAlign: "left",
                       fontFamily: "inherit",
-                      borderLeft:
-                        tab === id
-                          ? `3px solid ${T.accent}`
-                          : "3px solid transparent",
+                      whiteSpace: "nowrap",
+                      transition: "color 0.15s",
                     }}
                   >
                     {label}
