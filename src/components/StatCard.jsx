@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 
-const PADDING = 8; // min gap from viewport edge
+const PADDING = 24; // min gap from viewport edge
 
 export default function StatCard({ label, value, sub, color, t, info }) {
   const c = color || t.accent;
@@ -124,7 +124,7 @@ export default function StatCard({ label, value, sub, color, t, info }) {
             border: `1px solid ${t.border2}`,
             borderRadius: 10,
             padding: "14px 16px",
-            maxWidth: 280,
+            maxWidth: `min(280px, calc(100vw - ${PADDING * 2}px))`,
             width: "max-content",
             boxShadow: "0 8px 28px rgba(0,0,0,0.45)",
             fontSize: 13,
