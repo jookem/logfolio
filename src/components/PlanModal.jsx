@@ -656,8 +656,9 @@ const base = {
       </div>
 
       {/* Disclaimer */}
-      <div style={{ fontSize: 10, color: t.text3, fontFamily: "'Space Mono', monospace", lineHeight: 1.5, padding: "6px 10px", background: t.surface, borderRadius: 6, border: `1px solid ${t.border}` }}>
-        ⚠ Premium prices and IV are sourced from previous close data and may be inaccurate. Always verify with your broker before trading.
+      <div style={{ fontSize: 10, color: t.text3, fontFamily: "'Space Mono', monospace", lineHeight: 1.6, padding: "6px 10px", background: t.surface, borderRadius: 6, border: `1px solid ${t.border}` }}>
+        <div>⚠ Premium prices and IV are sourced from previous close data and may be inaccurate. Always verify with your broker before trading.</div>
+        <div style={{ marginTop: 4 }}>⏱ Market data is delayed 15 minutes · Powered by Polygon.io</div>
       </div>
 
       {/* Total cost */}
@@ -1129,12 +1130,6 @@ const base = {
         )}
 
         {/* Footer buttons */}
-        <div style={{
-  fontSize: 10, color: t.text3, fontFamily: "'Space Mono', monospace",
-  textAlign: "center", marginBottom: 14, letterSpacing: 1,
-}}>
-  ⏱ Market data is delayed 15 minutes · Powered by Polygon.io
-</div>
        <div style={{ display: "flex", gap: 10 }}>
           <button onClick={onClose} style={{ flex: 1, background: "none", border: `1px solid ${t.border}`, color: t.text3, borderRadius: 8, padding: 12, cursor: "pointer", fontSize: 14 }}>Cancel</button>
             <button onClick={() => {
