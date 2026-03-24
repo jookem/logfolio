@@ -1,6 +1,7 @@
 import { calcPL, fmt, fmtDate, typeLabels } from "../lib/utils";
 
 export default function ShareModal({ trade, onClose, t, isDark }) {
+  const sm = window.innerWidth < 400;
   const pl = calcPL(trade);
   const downloadCard = () => {
     const canvas = document.createElement("canvas");
@@ -51,8 +52,8 @@ export default function ShareModal({ trade, onClose, t, isDark }) {
     });
   };
   return (
-    <div className="backdrop-enter" style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.8)", zIndex: 200, display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }}>
-      <div className="modal-enter" style={{ background: t.card, border: `1px solid ${t.border}`, borderRadius: 16, width: "100%", maxWidth: 480, padding: 24 }}>
+    <div className="backdrop-enter" style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.8)", zIndex: 200, display: "flex", alignItems: "center", justifyContent: "center", padding: sm ? 8 : 16 }}>
+      <div className="modal-enter" style={{ background: t.card, border: `1px solid ${t.border}`, borderRadius: sm ? 12 : 16, width: "100%", maxWidth: 480, padding: sm ? 14 : 24 }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 18 }}>
           <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 11, color: t.text3, textTransform: "uppercase", letterSpacing: 2 }}>Share Trade</div>
           <button onClick={onClose} style={{ background: "none", border: "none", color: t.text3, cursor: "pointer", fontSize: 18 }}>✕</button>

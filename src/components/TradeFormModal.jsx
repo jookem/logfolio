@@ -7,6 +7,7 @@ import ScreenshotUpload from "./ScreenshotUpload";
 import { EditIcon, LogIcon, CloseIcon, TodayIcon, ExitIcon, EntryPriceIcon, EntryTimeIcon, ExitTimeIcon, TickerIcon, CategoryIcon, StrategyIcon, DirectionIcon, AmountIcon, WarningIcon, TargetIcon } from "../lib/icons";
 
 export default function TradeFormModal({ initial, defaults, onClose, onSave, onCSVImport, t, editLabel, isDark }) {
+  const sm = window.innerWidth < 400;
   const blank = {
     date: todayStr(),
     ticker: "",
@@ -196,7 +197,7 @@ export default function TradeFormModal({ initial, defaults, onClose, onSave, onC
         display: "flex",
         alignItems: "flex-start",
         justifyContent: "center",
-        padding: 16,
+        padding: sm ? 8 : 16,
       }}
     >
       <div
@@ -204,12 +205,12 @@ export default function TradeFormModal({ initial, defaults, onClose, onSave, onC
         style={{
           background: t.card,
           border: `1px solid ${t.border}`,
-          borderRadius: 16,
+          borderRadius: sm ? 12 : 16,
           width: "100%",
           maxWidth: 560,
           maxHeight: "92vh",
           overflowY: "auto",
-          padding: 24,
+          padding: sm ? 14 : 24,
         }}
       >
         <div
