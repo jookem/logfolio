@@ -747,7 +747,7 @@ const paginated = filtered
                   alignItems: "center",
                 }}
               >
-          <MenuIcon size="1em" />
+          <MenuIcon size={16} />
               </button>
              <button
                 onClick={() => setShowSettings(true)}
