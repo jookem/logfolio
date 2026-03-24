@@ -687,7 +687,7 @@ const base = {
       </div>
 
       {/* IV + Disclaimer */}
-      <div style={{ display: "flex", gap: 10 }}>
+      <div style={{ display: "flex", gap: 10, gridColumn: "span 2" }}>
         <div style={{ flex: "0 0 auto", minWidth: 100 }}>
           <label style={lbl}>IV (Implied Vol.) %</label>
           <input style={inp} type="number"
