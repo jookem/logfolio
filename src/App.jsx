@@ -504,7 +504,7 @@ const plList = useMemo(
 
   // Treynor and Information Ratio — require SPY benchmark data
   const benchmarkStats = useMemo(() => {
-    if (!spyData || spyData.length < 2 || plList.length < 2) return { treynor: null, infoRatio: null };
+    if (!spyData || spyData.length < 2 || plList.length < 2) return { treynor: null, alpha: null, infoRatio: null };
 
     // Build SPY daily return map: date -> pct return vs prior day
     const spyReturnMap = {};
@@ -522,7 +522,7 @@ const plList = useMemo(
     // Use accountSize to convert P/L to % return; fall back to normalising by mean abs P/L
     const accountSize = tradeDefaults?.accountSize;
     const tradingDates = Object.keys(dailyPL).filter((d) => spyReturnMap[d] !== undefined);
-    if (tradingDates.length < 2) return { treynor: null, infoRatio: null };
+    if (tradingDates.length < 2) return { treynor: null, alpha: null, infoRatio: null };
 
     const portReturns = tradingDates.map((d) =>
       accountSize ? dailyPL[d] / accountSize : dailyPL[d]
