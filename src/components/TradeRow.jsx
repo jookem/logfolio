@@ -2,16 +2,24 @@ import { calcPL, fmt, fmtDate, fmtR } from "../lib/utils";
 import Tag from "./Tag";
 import { EditIcon, DeleteIcon, ScreenshotIcon, RecIcon } from "../lib/icons";
 
-export default function TradeRow({ trade, onClick, onEdit, onDelete, t, mobile, isFirst, editLabel }) {
+export default function TradeRow({ trade, onClick, onEdit, onDelete, onSelect, isSelected, t, mobile, isFirst, editLabel }) {
   const pl = calcPL(trade);
   const plDisplay = isNaN(pl) ? null : pl;
   const isOpen = plDisplay === null;
   return (
     <div
-      style={{ padding: "12px 16px", borderTop: isFirst ? "none" : `1px solid ${t.border}`, cursor: "pointer" }}
-      onMouseEnter={(e) => (e.currentTarget.style.background = t.hoverBg)}
-      onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
+      style={{ padding: "12px 16px", borderTop: isFirst ? "none" : `1px solid ${t.border}`, cursor: "pointer", background: isSelected ? t.accent + "10" : "transparent", display: "flex", alignItems: "flex-start", gap: 10 }}
+      onMouseEnter={(e) => { if (!isSelected) e.currentTarget.style.background = t.hoverBg; }}
+      onMouseLeave={(e) => { if (!isSelected) e.currentTarget.style.background = "transparent"; }}
     >
+      {onSelect && (
+        <div onClick={(e) => { e.stopPropagation(); onSelect(); }} style={{ paddingTop: 2, flexShrink: 0 }}>
+          <div style={{ width: 16, height: 16, borderRadius: 4, border: `2px solid ${isSelected ? t.accent : t.border}`, background: isSelected ? t.accent : "transparent", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
+            {isSelected && <div style={{ width: 8, height: 8, borderRadius: 2, background: "#000" }} />}
+          </div>
+        </div>
+      )}
+      <div style={{ flex: 1, minWidth: 0 }}>
       {mobile ? (
         <div onClick={onClick}>
           <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
@@ -77,6 +85,7 @@ export default function TradeRow({ trade, onClick, onEdit, onDelete, t, mobile, 
           </span>
         </div>
       )}
+      </div>
     </div>
   );
 }

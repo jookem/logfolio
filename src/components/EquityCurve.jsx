@@ -3,6 +3,15 @@ import { calcPL } from "../lib/utils";
 
 export default function EquityCurve({ trades, t, spyData, spyError }) {
   const [range, setRange] = useState("ALL");
+  const [annotations, setAnnotations] = useState(() => {
+    try { return JSON.parse(localStorage.getItem("lf_annotations") || "{}"); } catch { return {}; }
+  });
+  const [pendingAnnotation, setPendingAnnotation] = useState(null); // { date, x, y, inputVal }
+
+  const saveAnnotations = (next) => {
+    setAnnotations(next);
+    localStorage.setItem("lf_annotations", JSON.stringify(next));
+  };
   const allSorted = [...trades].sort((a, b) => new Date(a.date) - new Date(b.date));
 
   const cutoffDate = (() => {
@@ -91,7 +100,21 @@ export default function EquityCurve({ trades, t, spyData, spyError }) {
       </div>
 
       {/* Chart */}
-      <svg viewBox={`0 0 ${W} ${H}`} style={{ width: "100%", height: 200 }} preserveAspectRatio="none">
+      <svg
+        viewBox={`0 0 ${W} ${H}`}
+        style={{ width: "100%", height: 200, cursor: "crosshair" }}
+        preserveAspectRatio="none"
+        onClick={(e) => {
+          const rect = e.currentTarget.getBoundingClientRect();
+          const clickX = ((e.clientX - rect.left) / rect.width) * W;
+          const nearestIdx = xs.reduce((best, x, i) => Math.abs(x - clickX) < Math.abs(xs[best] - clickX) ? i : best, 0);
+          if (nearestIdx > 0 && points[nearestIdx]?.date) {
+            const date = points[nearestIdx].date;
+            if (annotations[date]) { const n = { ...annotations }; delete n[date]; saveAnnotations(n); }
+            else setPendingAnnotation({ date, x: xs[nearestIdx], y: ys[nearestIdx], inputVal: "" });
+          }
+        }}
+      >
         <defs>
           <linearGradient id="eg" x1="0" y1="0" x2="0" y2="1">
             <stop offset="0%" stopColor={t.accent} stopOpacity="0.25" />
@@ -113,7 +136,38 @@ export default function EquityCurve({ trades, t, spyData, spyError }) {
         {spyPath && (
           <path d={spyPath} fill="none" stroke="#3B82F6" strokeWidth="1.5" strokeDasharray="5 3" strokeLinejoin="round" opacity="0.7" />
         )}
+        {points.map((p, i) => {
+          if (!p.date || !annotations[p.date]) return null;
+          return (
+            <g key={p.date}>
+              <line x1={xs[i]} y1={ys[i] - 6} x2={xs[i]} y2={ys[i] - 20} stroke={t.accent} strokeWidth="1.5" />
+              <circle cx={xs[i]} cy={ys[i] - 22} r="6" fill={t.accent} opacity="0.9" />
+              <title>{annotations[p.date]}</title>
+            </g>
+          );
+        })}
       </svg>
+
+      {pendingAnnotation && (
+        <div style={{ marginTop: 6, background: t.card, border: `1px solid ${t.accent}50`, borderRadius: 8, padding: "8px 12px", display: "flex", gap: 8, alignItems: "center" }}>
+          <span style={{ fontSize: 11, color: t.text3, fontFamily: "'Space Mono',monospace", whiteSpace: "nowrap" }}>{pendingAnnotation.date}</span>
+          <input
+            autoFocus
+            value={pendingAnnotation.inputVal}
+            onChange={e => setPendingAnnotation(p => ({ ...p, inputVal: e.target.value }))}
+            onKeyDown={e => {
+              if (e.key === "Enter" && pendingAnnotation.inputVal.trim()) {
+                saveAnnotations({ ...annotations, [pendingAnnotation.date]: pendingAnnotation.inputVal.trim() });
+                setPendingAnnotation(null);
+              }
+              if (e.key === "Escape") setPendingAnnotation(null);
+            }}
+            placeholder="Add note… (Enter to save)"
+            style={{ flex: 1, background: t.input, border: `1px solid ${t.inputBorder}`, borderRadius: 6, color: t.text, padding: "4px 8px", fontSize: 12, fontFamily: "inherit", outline: "none" }}
+          />
+          <button onClick={() => setPendingAnnotation(null)} style={{ background: "none", border: "none", color: t.text3, cursor: "pointer", fontSize: 16, lineHeight: 1 }}>×</button>
+        </div>
+      )}
 
       {/* X-axis date labels — hidden on 1D (all same date, no intraday time data) */}
       <div style={{ position: "relative", height: 16, marginTop: 2 }}>
@@ -137,7 +191,7 @@ export default function EquityCurve({ trades, t, spyData, spyError }) {
       </div>
 
       {/* Legend */}
-      <div style={{ display: "flex", gap: 16, justifyContent: "flex-end", marginTop: 6, alignItems: "center" }}>
+      <div style={{ display: "flex", gap: 16, justifyContent: "flex-end", marginTop: 6, alignItems: "center", flexWrap: "wrap" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
           <div style={{ width: 16, height: 2, background: t.accent, borderRadius: 1 }} />
           <span style={{ fontSize: 10, color: t.text3, fontFamily: "'Space Mono',monospace" }}>Your P/L</span>
@@ -154,6 +208,7 @@ export default function EquityCurve({ trades, t, spyData, spyError }) {
             {spyError ? "SPY unavailable" : "Loading SPY..."}
           </span>
         )}
+        <span style={{ fontSize: 10, color: t.text4, fontFamily: "'Space Mono',monospace", marginLeft: "auto" }}>click chart to annotate</span>
       </div>
     </div>
   );

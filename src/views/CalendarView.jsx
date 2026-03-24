@@ -245,29 +245,11 @@ export default function CalendarView({ plList, t, mobile }) {
                       {isGreen ? "+" : ""}
                       {fmt(data.pl)}
                     </div>
-                    {!mobile && (
-                      <div
-                        style={{
-                          display: "flex",
-                          justifyContent: "center",
-                          gap: 2,
-                          marginTop: 2,
-                        }}
-                      >
-                        {data.trades.slice(0, 3).map((_, ti) => (
-                          <div
-                            key={ti}
-                            style={{
-                              width: 3,
-                              height: 3,
-                              borderRadius: "50%",
-                              background: isGreen ? t.accent : t.danger,
-                              opacity: 0.7,
-                            }}
-                          />
-                        ))}
-                      </div>
-                    )}
+                    <div style={{ display: "flex", justifyContent: "center", gap: 2, marginTop: 2 }}>
+                      {data.trades.slice(0, 3).map((_, ti) => (
+                        <div key={ti} style={{ width: mobile ? 2 : 3, height: mobile ? 2 : 3, borderRadius: "50%", background: isGreen ? t.accent : t.danger, opacity: 0.7 }} />
+                      ))}
+                    </div>
                   </>
                 )}
               </div>

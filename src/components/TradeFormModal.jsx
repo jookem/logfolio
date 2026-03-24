@@ -6,7 +6,7 @@ import VoiceNote from "./VoiceNote";
 import ScreenshotUpload from "./ScreenshotUpload";
 import { EditIcon, LogIcon, CloseIcon, TodayIcon, ExitIcon, EntryPriceIcon, EntryTimeIcon, ExitTimeIcon, TickerIcon, CategoryIcon, StrategyIcon, DirectionIcon, AmountIcon, WarningIcon, TargetIcon } from "../lib/icons";
 
-export default function TradeFormModal({ initial, defaults, onClose, onSave, onCSVImport, t, editLabel, isDark }) {
+export default function TradeFormModal({ initial, defaults, onClose, onSave, onCSVImport, t, editLabel, isDark, trades = [] }) {
   const sm = window.innerWidth < 400;
   const blank = {
     date: todayStr(),
@@ -45,6 +45,7 @@ export default function TradeFormModal({ initial, defaults, onClose, onSave, onC
   const [customMistakes, setCustomMistakes] = useState([]);
   const [emotionInput, setEmotionInput] = useState("");
   const [mistakeInput, setMistakeInput] = useState("");
+  const [dupWarning, setDupWarning] = useState(false);
   const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
   const setLeg = (i, k, v) =>
     setForm((f) => {
@@ -112,10 +113,18 @@ export default function TradeFormModal({ initial, defaults, onClose, onSave, onC
     }
     return e;
   };
-  const save = () => {
+  const save = (force = false) => {
     const e = validate();
     if (Object.keys(e).length) { setErrors(e); return; }
     setErrors({});
+    if (!force && !form.id) {
+      const dup = trades.some(tr =>
+        tr.status !== "planned" &&
+        tr.ticker?.toUpperCase() === form.ticker?.toUpperCase() &&
+        tr.date === form.date
+      );
+      if (dup) { setDupWarning(true); return; }
+    }
     const trade = {
       ...form,
       ticker: form.ticker.toUpperCase(),
@@ -783,9 +792,18 @@ export default function TradeFormModal({ initial, defaults, onClose, onSave, onC
               fontFamily: "'Space Mono', monospace",
             }}
           >
-            Save Trade
+            {editLabel || "Save Trade"}
           </button>
     </div>
+    {dupWarning && (
+      <div style={{ marginTop: 10, background: "#f59e0b18", border: "1px solid #f59e0b60", borderRadius: 8, padding: "10px 14px" }}>
+        <div style={{ fontSize: 12, color: "#f59e0b", marginBottom: 8 }}>⚠ A trade for <strong>{form.ticker?.toUpperCase()}</strong> on <strong>{form.date}</strong> already exists. Duplicate?</div>
+        <div style={{ display: "flex", gap: 8 }}>
+          <button onClick={() => setDupWarning(false)} style={{ flex: 1, background: "none", border: `1px solid ${t.border}`, color: t.text3, borderRadius: 6, padding: "6px 0", cursor: "pointer", fontSize: 12, fontFamily: "inherit" }}>Cancel</button>
+          <button onClick={() => { setDupWarning(false); save(true); }} style={{ flex: 1, background: "#f59e0b", border: "none", color: "#000", borderRadius: 6, padding: "6px 0", cursor: "pointer", fontSize: 12, fontWeight: 700, fontFamily: "inherit" }}>Save Anyway</button>
+        </div>
+      </div>
+    )}
     </div>
     </div>
   );

@@ -172,6 +172,7 @@ const [calcAccountSize, setCalcAccountSize] = useState("");
 const [calcRiskPct, setCalcRiskPct] = useState("1");
 const [aiAssist, setAiAssist] = useState(null); // { marketBias, checklist }
 const [aiLoading, setAiLoading] = useState(false);
+const [aiStep, setAiStep] = useState(""); // "price" | "ai"
 const [aiError, setAiError] = useState(null);
 const [assistUsedToday, setAssistUsedToday] = useState(0);
 const ASSIST_DAILY_LIMIT = 3;
@@ -190,7 +191,7 @@ useEffect(() => {
 
 const fetchAiAssist = async () => {
   if (!isProPlus) return;
-  setAiLoading(true); setAiError(null); setAiAssist(null);
+  setAiLoading(true); setAiError(null); setAiAssist(null); setAiStep("price");
   try {
     const { data: { session } } = await supabase.auth.getSession();
     const ticker = form.ticker?.toUpperCase();
@@ -237,6 +238,7 @@ const fetchAiAssist = async () => {
         }
       } catch (_) { /* keep default unavailable message */ }
     }
+    setAiStep("ai");
 
     const messages = [{
       role: "user",
@@ -1147,7 +1149,7 @@ const base = {
                 opacity: aiLoading ? 0.6 : 1,
               }}
             >
-              {aiLoading ? "Analysing..." : "✦ AI Assist"}
+              {aiLoading ? (aiStep === "price" ? "Fetching prices..." : "Analysing...") : "✦ AI Assist"}
             </button>
             {aiError && (
               <div style={{ fontSize: 11, color: t.danger, marginTop: 8 }}>{aiError}</div>

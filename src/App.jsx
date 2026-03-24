@@ -67,6 +67,9 @@ export default function TradingJournal() {
   const [confirmDelete, setConfirmDelete] = useState(null); // { id, ticker, isPlan }
   const [planPrefill, setPlanPrefill] = useState(null);
   const [selected, setSelected] = useState(null);
+  const [bulkSelected, setBulkSelected] = useState(new Set());
+  const toggleBulk = (id) => setBulkSelected(prev => { const n = new Set(prev); n.has(id) ? n.delete(id) : n.add(id); return n; });
+  const clearBulk = () => setBulkSelected(new Set());
   const [filter, setFilter] = useState({
   type: "all",
   strategy: "all",
@@ -368,6 +371,18 @@ const [page, setPage] = useState(1);
       deleteTradeMedia(user.id, id);
     }
   };
+  const bulkDelete = () => {
+    const ids = [...bulkSelected];
+    setTrades(p => p.filter(tr => !ids.includes(tr.id)));
+    if (ids.includes(selected?.id)) setSelected(null);
+    clearBulk();
+    showToast(`Deleted ${ids.length} trade${ids.length > 1 ? "s" : ""}`, T.danger, "delete");
+    if (user) ids.forEach(id => {
+      supabase.from("trades").delete().eq("id", id).eq("user_id", user.id).then(() => {});
+      deleteTradeMedia(user.id, id);
+    });
+  };
+
 const importTrades = (incoming) => {
   const month = new Date().toISOString().slice(0, 7);
   const thisMonthLogs = trades.filter(t => t.status !== "planned" && t.date?.startsWith(month)).length;
@@ -1106,6 +1121,8 @@ const paginated = filtered
               onClick={() => setSelected(tr)}
               onEdit={() => setEditTrade(tr)}
               onDelete={() => deleteTrade(tr.id)}
+              onSelect={() => toggleBulk(tr.id)}
+              isSelected={bulkSelected.has(tr.id)}
               t={T}
               mobile={mobile}
             />
@@ -1124,6 +1141,13 @@ const paginated = filtered
             </div>
           )}
         </div>
+        {bulkSelected.size > 0 && (
+          <div style={{ position: "fixed", bottom: 24, left: "50%", transform: "translateX(-50%)", background: T.card, border: `1px solid ${T.border}`, borderRadius: 12, padding: "10px 16px", display: "flex", alignItems: "center", gap: 12, boxShadow: "0 8px 32px rgba(0,0,0,0.4)", zIndex: 90, whiteSpace: "nowrap" }}>
+            <span style={{ fontSize: 12, color: T.text2, fontFamily: "'Space Mono',monospace" }}>{bulkSelected.size} selected</span>
+            <button onClick={bulkDelete} style={{ background: T.danger + "20", border: `1px solid ${T.danger}50`, color: T.danger, borderRadius: 7, padding: "5px 12px", cursor: "pointer", fontSize: 12, fontWeight: 700, fontFamily: "inherit" }}>Delete</button>
+            <button onClick={clearBulk} style={{ background: "none", border: `1px solid ${T.border}`, color: T.text3, borderRadius: 7, padding: "5px 12px", cursor: "pointer", fontSize: 12, fontFamily: "inherit" }}>Clear</button>
+          </div>
+        )}
         {totalPages > 1 && (
           <div style={{
             display: "flex",
@@ -1596,6 +1620,7 @@ const paginated = filtered
           onCSVImport={() => { setShowAdd(false); setPlanPrefill(null); setShowCSV(true); }}
           t={T}
           isDark={isDark}
+          trades={plList}
         />
       )}
       {editTrade && editTrade.status === "planned" && (
