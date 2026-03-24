@@ -91,6 +91,7 @@ export default function AIInsights({ plList, t, mobile }) {
           userId: user?.id,
           model: "claude-sonnet-4-6",
           max_tokens: 2000,
+          feature: "insights",
           messages: [
             {
               role: "user",

@@ -237,7 +237,7 @@ Respond in this exact JSON format:
     const res = await fetch("/api/analyse", {
       method: "POST",
       headers,
-      body: JSON.stringify({ userId: session?.user?.id, model: "claude-haiku-4-5-20251001", max_tokens: 400, messages }),
+      body: JSON.stringify({ userId: session?.user?.id, model: "claude-haiku-4-5-20251001", max_tokens: 400, messages, feature: "assist" }),
     });
     const data = await res.json();
     if (data.error) throw new Error(typeof data.error === "string" ? data.error : data.error.message);

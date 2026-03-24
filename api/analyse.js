@@ -1,6 +1,7 @@
 import { createClient } from "@supabase/supabase-js";
 
-const DAILY_LIMIT = 3;
+const DAILY_LIMIT_INSIGHTS = 3;
+const DAILY_LIMIT_ASSIST = 3;
 const MAX_TOKENS_CAP = 4000;
 const ALLOWED_MODELS = [
   "claude-haiku-4-5-20251001",
@@ -14,7 +15,12 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: "Method not allowed" });
   }
 
-  const { userId, model, max_tokens, messages, system } = req.body;
+  const { userId, model, max_tokens, messages, system, feature } = req.body;
+  // "insights" = AI Insights page (Sonnet), "assist" = AI Assist in Plan modal (Haiku)
+  const isInsights = feature === "insights";
+  const dailyLimit = isInsights ? DAILY_LIMIT_INSIGHTS : DAILY_LIMIT_ASSIST;
+  const countCol = isInsights ? "ai_insights_daily_count" : "ai_assist_daily_count";
+  const dateCol = isInsights ? "ai_insights_daily_date" : "ai_assist_daily_date";
 
   // Whitelist only known-safe fields to forward to Anthropic
   const anthropicBody = {
@@ -47,7 +53,7 @@ export default async function handler(req, res) {
     try {
       const { data: profile } = await admin
         .from("profiles")
-        .select("ai_daily_date, ai_daily_count, subscription_status")
+        .select(`${dateCol}, ${countCol}, subscription_status`)
         .eq("id", userId)
         .single();
 
@@ -56,16 +62,16 @@ export default async function handler(req, res) {
       }
 
       const todayStr = today();
-      const count = profile?.ai_daily_date === todayStr ? (profile.ai_daily_count ?? 0) : 0;
+      const count = profile?.[dateCol] === todayStr ? (profile[countCol] ?? 0) : 0;
 
-      if (count >= DAILY_LIMIT) {
-        return res.status(429).json({ error: `Daily limit reached (${DAILY_LIMIT} analyses/day). Resets at midnight.` });
+      if (count >= dailyLimit) {
+        return res.status(429).json({ error: `Daily limit reached (${dailyLimit}/day). Resets at midnight.` });
       }
 
       // Increment BEFORE the Anthropic call to prevent race-condition bypass
       await admin
         .from("profiles")
-        .update({ ai_daily_date: todayStr, ai_daily_count: count + 1 })
+        .update({ [dateCol]: todayStr, [countCol]: count + 1 })
         .eq("id", userId);
 
       try {
@@ -85,7 +91,7 @@ export default async function handler(req, res) {
         if (data.error) {
           admin
             .from("profiles")
-            .update({ ai_daily_count: count })
+            .update({ [countCol]: count })
             .eq("id", userId)
             .then(() => {}).catch(() => {});
         }
@@ -95,7 +101,7 @@ export default async function handler(req, res) {
         // Roll back on network error
         admin
           .from("profiles")
-          .update({ ai_daily_count: count })
+          .update({ [countCol]: count })
           .eq("id", userId)
           .then(() => {}).catch(() => {});
         return res.status(500).json({ error: error.message });
