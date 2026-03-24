@@ -687,14 +687,17 @@ const base = {
       </div>
 
       {/* IV + Disclaimer */}
-      <div style={{ display: "flex", gap: 10, alignItems: "flex-end" }}>
+      <div style={{ display: "flex", gap: 10 }}>
         <div style={{ flex: "0 0 auto", minWidth: 100 }}>
           <label style={lbl}>IV (Implied Vol.) %</label>
           <input style={inp} type="number"
             value={leg.iv} onChange={(e) => setLeg(i, "iv", e.target.value)} placeholder="30" />
         </div>
-        <div style={{ flex: 1, fontSize: 10, color: t.text3, fontFamily: "'Space Mono', monospace", lineHeight: 1.5, padding: "6px 10px", background: t.surface, borderRadius: 6, border: `1px solid ${t.border}` }}>
-          ⚠ Data sourced from previous close. Always verify with your broker before trading.
+        <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
+          <div style={{ ...lbl, opacity: 0, pointerEvents: "none" }}>x</div>
+          <div style={{ flex: 1, background: t.surface, border: `1px solid ${t.border}`, borderRadius: 8, padding: "0 10px", fontSize: 10, color: t.text3, fontFamily: "'Space Mono', monospace", lineHeight: 1.4, display: "flex", alignItems: "center" }}>
+            ⚠ Previous close data. Verify with broker.
+          </div>
         </div>
       </div>
 
