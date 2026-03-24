@@ -1098,7 +1098,7 @@ const base = {
 
         {/* AI Assist */}
         {isProPlus && (
-          <div style={{ marginBottom: 16 }}>
+          <div id="tut-plan-ai-assist" style={{ marginBottom: 16 }}>
             <button
               onClick={fetchAiAssist}
               disabled={aiLoading}

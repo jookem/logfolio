@@ -25,7 +25,7 @@ const TUTORIAL_STEPS = [
   {
     icon: <PlanIcon size={44} />,
     title: "Plan a Trade",
-    desc: "Before entering a position, create a plan. Set your thesis, target, stop loss, and look up the options chain. Planning keeps you disciplined and accountable.",
+    desc: "Before entering a position, create a plan. Set your thesis, target, stop loss, and look up the live options chain. Pro Plus members also get AI Assist — personalised market bias and trade warnings based on your history.",
     tab: "plans",
     cta: { label: "Try creating a plan", action: "openPlan" },
   },
@@ -74,7 +74,7 @@ const TUTORIAL_STEPS = [
   {
     icon: <RobotIcon size={44} />,
     title: "AI Insights",
-    desc: "Get AI-powered feedback on your trading patterns, emotional tendencies, and specific areas to improve. Powered by Claude.",
+    desc: "Get AI-powered analysis of your full trading journal — pattern recognition, emotional tendencies, strengths, weaknesses, and a trader score. Pro Plus only, up to 3 analyses per day. Powered by Claude.",
     tab: "ai",
     cta: null,
   },
@@ -157,7 +157,7 @@ const PLAN_WALKTHROUGH = [
   {
     icon: <LogIcon size={44} />,
     title: "Stock Details / Option",
-    desc: "Enter the Ticker and direction. For options, each leg shows Strike, Expiry, Entry Premium, Contracts, and IV. You can look up the live options chain directly from this section.",
+    desc: "Enter the Ticker and direction. For options, each leg shows Strike, Expiry, Entry Premium, Contracts, and IV — auto-filled from the live chain. If a strike isn't listed, tap 'Enter manually' to type it in. Note: premium and IV are previous close data — always verify with your broker.",
     target: "tut-plan-details",
     panelPos: "bottom",
   },
@@ -180,6 +180,13 @@ const PLAN_WALKTHROUGH = [
     title: "Emotion",
     desc: "Record your Emotion going into the trade. Setting this before you enter (not after) gives the most honest data for AI pattern analysis.",
     target: "tut-plan-emotion",
+    panelPos: "top",
+  },
+  {
+    icon: <RobotIcon size={44} />,
+    title: "AI Assist (Pro Plus)",
+    desc: "Tap ✦ AI Assist to get an instant read on market direction from recent SPY data, plus personalised warnings and confirmations based on your own trade history with this ticker. Up to 3 uses per day.",
+    target: "tut-plan-ai-assist",
     panelPos: "top",
   },
   {

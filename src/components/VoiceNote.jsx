@@ -114,7 +114,7 @@ export default function VoiceNote({ value, onChange, t }) {
             </>
           ) : (
             <>
-              <RecIcon size={20} /> Record Voice Note
+              <RecIcon size={15} /> Record Voice Note
               <span style={{ marginLeft: "auto", fontSize: 11, color: t.text3, opacity: 0.7 }}>
                 max {fmtTime(MAX_SECONDS)}
               </span>
