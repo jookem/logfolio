@@ -45,16 +45,14 @@ export default async function handler(req, res) {
     }
 
     try {
-      const { data: profile, error: profileError } = await admin
+      const { data: profile } = await admin
         .from("profiles")
         .select("ai_daily_date, ai_daily_count, subscription_status")
         .eq("id", userId)
         .single();
 
-      console.log("[analyse] userId:", userId, "profileFound:", !!profile, "status:", profile?.subscription_status, "profileError:", profileError?.message);
-
       if (profile?.subscription_status !== "pro_plus") {
-        return res.status(403).json({ error: "AI Insights requires a Pro Plus subscription.", debug: { userId, profileFound: !!profile, status: profile?.subscription_status ?? null } });
+        return res.status(403).json({ error: "AI Insights requires a Pro Plus subscription." });
       }
 
       const todayStr = today();
