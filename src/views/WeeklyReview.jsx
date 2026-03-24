@@ -5,6 +5,8 @@ const WEEK_OPTIONS = [4, 8, 12, 26, 52];
 
 export default function WeeklyReview({ plList, t, mobile }) {
   const [limit, setLimit] = useState(8);
+  const [jumpDate, setJumpDate] = useState("");
+
   const getWeekStart = (date) => {
     const d = new Date(date);
     d.setDate(d.getDate() - d.getDay());
@@ -35,19 +37,42 @@ export default function WeeklyReview({ plList, t, mobile }) {
         No trades to review yet.
       </div>
     );
-  const visibleWeeks = limit === "all" ? weeks : weeks.slice(0, limit);
+
+  const jumpWeekStart = jumpDate ? getWeekStart(jumpDate) : null;
+  const visibleWeeks = jumpWeekStart
+    ? weeks.filter(([ws]) => ws === jumpWeekStart)
+    : limit === "all" ? weeks : weeks.slice(0, limit);
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-      <div style={{ display: "flex", justifyContent: "flex-end", alignItems: "center", gap: 8 }}>
-        <span style={{ fontSize: 11, color: t.text3, fontFamily: "'Space Mono', monospace", textTransform: "uppercase", letterSpacing: 1.5 }}>Show</span>
-        <div style={{ display: "flex", gap: 6 }}>
-          {WEEK_OPTIONS.map(n => (
-            <button key={n} onClick={() => setLimit(n)} style={{ background: limit === n ? t.accent + "20" : "none", border: `1px solid ${limit === n ? t.accent : t.border}`, color: limit === n ? t.accent : t.text3, borderRadius: 6, padding: "4px 10px", fontSize: 11, cursor: "pointer", fontFamily: "'Space Mono', monospace" }}>{n}W</button>
-          ))}
-          <button onClick={() => setLimit("all")} style={{ background: limit === "all" ? t.accent + "20" : "none", border: `1px solid ${limit === "all" ? t.accent : t.border}`, color: limit === "all" ? t.accent : t.text3, borderRadius: 6, padding: "4px 10px", fontSize: 11, cursor: "pointer", fontFamily: "'Space Mono', monospace" }}>All</button>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+          <span style={{ fontSize: 11, color: t.text3, fontFamily: "'Space Mono', monospace", textTransform: "uppercase", letterSpacing: 1.5 }}>Week</span>
+          <input
+            type="date"
+            value={jumpDate}
+            onChange={(e) => { setJumpDate(e.target.value); }}
+            style={{ background: jumpDate ? t.accent + "15" : t.card2, border: `1px solid ${jumpDate ? t.accent : t.border}`, color: jumpDate ? t.accent : t.text3, borderRadius: 6, padding: "4px 8px", fontSize: 11, fontFamily: "'Space Mono', monospace", cursor: "pointer", outline: "none" }}
+          />
+          {jumpDate && (
+            <button onClick={() => setJumpDate("")} style={{ background: "none", border: "none", color: t.text3, cursor: "pointer", fontSize: 13, padding: "0 2px", lineHeight: 1 }}>×</button>
+          )}
+        </div>
+        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+          <span style={{ fontSize: 11, color: t.text3, fontFamily: "'Space Mono', monospace", textTransform: "uppercase", letterSpacing: 1.5 }}>Show</span>
+          <div style={{ display: "flex", gap: 6 }}>
+            {WEEK_OPTIONS.map(n => (
+              <button key={n} onClick={() => { setLimit(n); setJumpDate(""); }} style={{ background: !jumpDate && limit === n ? t.accent + "20" : "none", border: `1px solid ${!jumpDate && limit === n ? t.accent : t.border}`, color: !jumpDate && limit === n ? t.accent : t.text3, borderRadius: 6, padding: "4px 10px", fontSize: 11, cursor: "pointer", fontFamily: "'Space Mono', monospace" }}>{n}W</button>
+            ))}
+            <button onClick={() => { setLimit("all"); setJumpDate(""); }} style={{ background: !jumpDate && limit === "all" ? t.accent + "20" : "none", border: `1px solid ${!jumpDate && limit === "all" ? t.accent : t.border}`, color: !jumpDate && limit === "all" ? t.accent : t.text3, borderRadius: 6, padding: "4px 10px", fontSize: 11, cursor: "pointer", fontFamily: "'Space Mono', monospace" }}>All</button>
+          </div>
         </div>
       </div>
+      {jumpDate && visibleWeeks.length === 0 && (
+        <div style={{ padding: "40px 20px", textAlign: "center", color: t.text4, fontFamily: "'Space Mono', monospace", fontSize: 12 }}>
+          No trades found for the week of {fmtDate(jumpWeekStart)}.
+        </div>
+      )}
       {visibleWeeks.map(([weekStart, data]) => {
         const weekEnd = new Date(weekStart);
         weekEnd.setDate(weekEnd.getDate() + 6);
