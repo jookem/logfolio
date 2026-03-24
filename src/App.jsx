@@ -777,36 +777,28 @@ const paginated = filtered
                   padding: "0 13px",
                   height: 30,
                   cursor: "pointer",
-                  fontSize: 12,
-                  fontWeight: 700,
-                  fontFamily: "'Space Mono',monospace",
                   display: "flex",
                   alignItems: "center",
-                  gap: 6,
                 }}
               >
-                <LogIcon size={16} /> LOG
+                <LogIcon size={16} />
               </button>
               <button
-  onClick={() => setShowPlan(true)}
+                onClick={() => setShowPlan(true)}
                 style={{
                   background: T.accent,
                   border: "none",
                   color: "#000",
                   borderRadius: 8,
-                  padding: "0 16px",
+                  padding: "0 13px",
                   height: 30,
                   cursor: "pointer",
-                  fontSize: 12,
-                  fontWeight: 700,
-                  fontFamily: "'Space Mono',monospace",
                   display: "flex",
                   alignItems: "center",
-                  gap:6,
                 }}
->
-<PlanIcon size={16} /> PLAN
-</button>
+              >
+                <PlanIcon size={16} />
+              </button>
 </div>
             {menuOpen && (
               <div
