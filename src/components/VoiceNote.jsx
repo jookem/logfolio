@@ -88,36 +88,36 @@ export default function VoiceNote({ value, onChange, t }) {
           onClick={recording ? stopRecording : startRecording}
           style={{
             width: "100%",
-            background: recording ? t.danger + "20" : t.accent + "15",
-            border: `1px solid ${recording ? t.danger : t.accent}40`,
+            background: recording ? t.danger + "20" : t.accent + "08",
+            border: `1px dashed ${recording ? t.danger : t.accent}40`,
             color: recording ? t.danger : t.accent,
-            borderRadius: 8, padding: "10px 14px", cursor: "pointer",
+            borderRadius: 8, padding: "14px", cursor: "pointer",
             fontSize: 13, fontFamily: "'Space Mono', monospace",
-            display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+            display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 4,
           }}
         >
           {recording ? (
             <>
-              <span style={{
-                width: 8, height: 8, borderRadius: "50%",
-                background: t.danger, display: "inline-block",
-                animation: "pulse 1s infinite",
-              }} />
-              Stop — {fmtTime(elapsed)}
-              <span style={{
-                marginLeft: "auto", fontSize: 11,
-                color: isNearLimit ? t.danger : t.text3,
-                opacity: 0.8,
-              }}>
-                -{fmtTime(remaining)}
-              </span>
+              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <span style={{
+                  width: 8, height: 8, borderRadius: "50%",
+                  background: t.danger, display: "inline-block",
+                  animation: "pulse 1s infinite",
+                }} />
+                Stop — {fmtTime(elapsed)}
+              </div>
+              <div style={{ fontSize: 11, color: isNearLimit ? t.danger : t.text3, opacity: 0.8 }}>
+                -{fmtTime(remaining)} remaining
+              </div>
             </>
           ) : (
             <>
-              <RecIcon size={15} /> Record Voice Note
-              <span style={{ marginLeft: "auto", fontSize: 11, color: t.text3, opacity: 0.7 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                <RecIcon size={15} /> Record Voice Note
+              </div>
+              <div style={{ fontSize: 11, color: t.text3, opacity: 0.7 }}>
                 max {fmtTime(MAX_SECONDS)}
-              </span>
+              </div>
             </>
           )}
         </button>
