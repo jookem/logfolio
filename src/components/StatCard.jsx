@@ -1,10 +1,13 @@
 import { useState, useRef, useEffect } from "react";
 
+const PADDING = 8; // min gap from viewport edge
+
 export default function StatCard({ label, value, sub, color, t, info }) {
   const c = color || t.accent;
   const [open, setOpen] = useState(false);
   const [pos, setPos] = useState({ top: 0, left: 0 });
   const btnRef = useRef(null);
+  const popRef = useRef(null);
 
   function handleOpen() {
     if (btnRef.current) {
@@ -13,6 +16,16 @@ export default function StatCard({ label, value, sub, color, t, info }) {
     }
     setOpen(true);
   }
+
+  // After popup renders, clamp it inside the viewport horizontally
+  useEffect(() => {
+    if (!open || !popRef.current) return;
+    const pop = popRef.current.getBoundingClientRect();
+    const overflowRight = pop.right - (window.innerWidth - PADDING);
+    if (overflowRight > 0) {
+      setPos(p => ({ ...p, left: Math.max(PADDING, p.left - overflowRight) }));
+    }
+  }, [open]);
 
   // Close on outside click
   useEffect(() => {
@@ -100,6 +113,7 @@ export default function StatCard({ label, value, sub, color, t, info }) {
 
       {open && (
         <div
+          ref={popRef}
           data-statpop
           style={{
             position: "fixed",
