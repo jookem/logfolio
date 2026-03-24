@@ -9,11 +9,21 @@ export default function StatCard({ label, value, sub, color, t, info }) {
   const btnRef = useRef(null);
   const popRef = useRef(null);
 
+  // Close when another StatCard opens
+  useEffect(() => {
+    function handleOther(e) {
+      if (e.detail !== label) setOpen(false);
+    }
+    document.addEventListener("statcard-open", handleOther);
+    return () => document.removeEventListener("statcard-open", handleOther);
+  }, [label]);
+
   function handleOpen() {
     if (btnRef.current) {
       const r = btnRef.current.getBoundingClientRect();
       setPos({ top: r.bottom + 8, left: r.left });
     }
+    document.dispatchEvent(new CustomEvent("statcard-open", { detail: label }));
     setOpen(true);
   }
 
