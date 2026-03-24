@@ -478,6 +478,16 @@ const plList = useMemo(
             losses.reduce((s, t) => s + t.pl, 0)
         )
       : Infinity;
+    const n = plList.length;
+    const meanPL = n ? totalPL / n : 0;
+    const stdDev = n > 1
+      ? Math.sqrt(plList.reduce((s, t) => s + Math.pow(t.pl - meanPL, 2), 0) / (n - 1))
+      : 0;
+    const sharpe = stdDev > 0 ? meanPL / stdDev : null;
+    const downsideDev = n > 1
+      ? Math.sqrt(plList.reduce((s, t) => s + Math.pow(Math.min(t.pl, 0), 2), 0) / (n - 1))
+      : 0;
+    const sortino = downsideDev > 0 ? meanPL / downsideDev : null;
     return {
       totalPL,
       winRate,
@@ -485,6 +495,8 @@ const plList = useMemo(
       avgLoss,
       expectancy,
       profitFactor,
+      sharpe,
+      sortino,
       total: plList.length,
       wins: wins.length,
     };
@@ -1354,6 +1366,8 @@ const paginated = filtered
               <StatCard label="Best Trade" value={plList.length ? fmt(Math.max(...plList.map(t => t.pl))) : "—"} color={T.accent} t={T} info="The single largest profit from one trade in your filtered set. Useful for identifying outlier wins and checking whether your overall P/L is heavily dependent on a few exceptional trades." />
               <StatCard label="Worst Trade" value={plList.length ? fmt(Math.min(...plList.map(t => t.pl))) : "—"} color={T.danger} t={T} info="The single largest loss from one trade in your filtered set. Useful for spotting when you broke your risk rules or got caught in an unexpected move. Large outlier losses often point to position sizing or stop-loss issues." />
               <StatCard label="Max Drawdown" value={maxDrawdown.value > 0 ? `-${fmt(maxDrawdown.value)}` : "—"} sub={maxDrawdown.pct > 0 ? `${(maxDrawdown.pct * 100).toFixed(1)}% of peak` : "no drawdown"} color={maxDrawdown.value > 0 ? T.danger : undefined} t={T} info="The largest peak-to-trough decline in your cumulative equity curve — how much your account dropped from its highest point before recovering. It measures the worst losing streak you endured. Smaller drawdowns mean a smoother, more consistent equity curve." />
+              <StatCard label="Sharpe Ratio" value={stats.sharpe !== null ? stats.sharpe.toFixed(2) : "—"} sub="return / volatility" color={stats.sharpe !== null ? (stats.sharpe >= 1 ? T.accent : stats.sharpe >= 0 ? undefined : T.danger) : undefined} t={T} info="Measures return relative to total volatility (both up and down swings). Calculated as average P/L divided by the standard deviation of your P/L. Above 1.0 is good, above 2.0 is excellent. A low Sharpe means your returns are inconsistent even if profitable." />
+              <StatCard label="Sortino Ratio" value={stats.sortino !== null ? stats.sortino.toFixed(2) : "—"} sub="return / downside risk" color={stats.sortino !== null ? (stats.sortino >= 1 ? T.accent : stats.sortino >= 0 ? undefined : T.danger) : undefined} t={T} info="Like the Sharpe Ratio, but only penalizes downside volatility (losing trades). Calculated as average P/L divided by the standard deviation of losing trades only. Higher is better — a high Sortino with a low Sharpe means your variance comes from big wins, not big losses." />
             </div>
 
             {/* Equity Curve */}
