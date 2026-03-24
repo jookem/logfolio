@@ -47,7 +47,10 @@ import AIInsights from "./views/AIInsights";
 import JournalView from "./views/JournalView";
 
 export default function TradingJournal() {
-  const { user, profile, loading: authLoading, isPro, isProPlus, canUseAI, aiAnalysesLeft, refreshProfile, signOut } = useAuth();
+  const { user, profile, loading: authLoading, isPro, isProPlus, canUseAI, aiAnalysesLeft, refreshProfile, signOut, isPasswordRecovery, setIsPasswordRecovery } = useAuth();
+  const [newPassword, setNewPassword] = useState("");
+  const [pwResetMsg, setPwResetMsg] = useState(null);
+  const [pwResetErr, setPwResetErr] = useState(null);
   const [planSearch, setPlanSearch] = useState("");
   const [planFilter, setPlanFilter] = useState({ type: "all", strategy: "all", tag: "all" });
   const [planPerPage, setPlanPerPage] = useState(30);
@@ -1665,6 +1668,34 @@ const paginated = filtered
 
       {showOnboarding && (
         <OnboardingModal onStartFresh={dismissOnboarding} onLoadSamples={loadSeedTrades} t={T} />
+      )}
+
+      {isPasswordRecovery && (
+        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.85)", zIndex: 400, display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }}>
+          <div style={{ background: T.card, border: `1px solid ${T.border}`, borderRadius: 16, width: "100%", maxWidth: 380, padding: 28, fontFamily: "'Space Mono',monospace" }}>
+            <div style={{ fontSize: 11, color: T.text3, textTransform: "uppercase", letterSpacing: 2, marginBottom: 20 }}>Set New Password</div>
+            <input
+              type="password"
+              placeholder="New password (min 6 chars)"
+              value={newPassword}
+              onChange={e => setNewPassword(e.target.value)}
+              style={{ background: T.surface, border: `1px solid ${T.border}`, borderRadius: 8, color: T.text, padding: "10px 14px", fontSize: 13, width: "100%", boxSizing: "border-box", fontFamily: "'Space Mono',monospace", outline: "none", marginBottom: 12 }}
+            />
+            {pwResetErr && <div style={{ fontSize: 12, color: T.danger, marginBottom: 10 }}>{pwResetErr}</div>}
+            {pwResetMsg && <div style={{ fontSize: 12, color: T.accent, marginBottom: 10 }}>{pwResetMsg}</div>}
+            <button
+              onClick={async () => {
+                if (newPassword.length < 6) { setPwResetErr("Password must be at least 6 characters."); return; }
+                const { error } = await supabase.auth.updateUser({ password: newPassword });
+                if (error) { setPwResetErr(error.message); }
+                else { setPwResetMsg("Password updated!"); setTimeout(() => { setIsPasswordRecovery(false); setNewPassword(""); setPwResetMsg(null); }, 1500); }
+              }}
+              style={{ width: "100%", padding: "11px 14px", background: T.accent, border: "none", borderRadius: 8, color: "#000", fontSize: 12, fontWeight: 700, fontFamily: "'Space Mono',monospace", cursor: "pointer" }}
+            >
+              Update Password
+            </button>
+          </div>
+        </div>
       )}
 
       {/* Tutorial — shown after "Start Fresh" from onboarding */}
