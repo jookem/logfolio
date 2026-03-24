@@ -52,7 +52,7 @@ export default async function handler(req, res) {
         .single();
 
       if (profile?.subscription_status !== "pro_plus") {
-        return res.status(403).json({ error: "AI Insights requires a Pro Plus subscription." });
+        return res.status(403).json({ error: "AI Insights requires a Pro Plus subscription.", debug: { userId, profileFound: !!profile, status: profile?.subscription_status ?? null } });
       }
 
       const todayStr = today();
