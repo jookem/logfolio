@@ -7,7 +7,7 @@ import Tag from "./Tag";
 import VoiceNote from "./VoiceNote";
 import ScreenshotUpload from "./ScreenshotUpload";
 
-export default function PlanModal({ onClose, onSave, t, isDark, initial }) {
+export default function PlanModal({ onClose, onSave, t, isDark, initial, trades = [], spyData = null, isProPlus = false }) {
   const OPTION_STRATEGIES = {
     "Long Call":        { stockLabel: "Underlying Stock (optional)", showStock: true, legs: [{ position: "buy", type: "call" }], writeLocked: true },
     "Long Put":         { stockLabel: "Underlying Stock (optional)", showStock: true, legs: [{ position: "buy", type: "put" }], writeLocked: true },
@@ -167,6 +167,90 @@ const [emotionInput, setEmotionInput] = useState("");
 const [showSizeCalc, setShowSizeCalc] = useState(false);
 const [calcAccountSize, setCalcAccountSize] = useState("");
 const [calcRiskPct, setCalcRiskPct] = useState("1");
+const [aiAssist, setAiAssist] = useState(null); // { marketBias, checklist }
+const [aiLoading, setAiLoading] = useState(false);
+const [aiError, setAiError] = useState(null);
+
+const fetchAiAssist = async () => {
+  if (!isProPlus) return;
+  setAiLoading(true); setAiError(null); setAiAssist(null);
+  try {
+    const { data: { session } } = await supabase.auth.getSession();
+    const ticker = form.ticker?.toUpperCase();
+
+    // Build personal trade history for this ticker + overall stats
+    const pastOnTicker = trades.filter(t => t.ticker?.toUpperCase() === ticker && t.status !== "planned");
+    const stratWins = {};
+    const stratTotal = {};
+    trades.filter(t => t.status !== "planned" && t.strategy).forEach(t => {
+      const pl = (t.exitPrice - t.entryPrice) * (t.shares || 1) * (t.direction === "short" ? -1 : 1);
+      stratTotal[t.strategy] = (stratTotal[t.strategy] || 0) + 1;
+      if (pl > 0) stratWins[t.strategy] = (stratWins[t.strategy] || 0) + 1;
+    });
+    const stratSummary = Object.keys(stratTotal).map(s =>
+      `${s}: ${stratWins[s] || 0}W/${stratTotal[s]}T (${Math.round(((stratWins[s] || 0) / stratTotal[s]) * 100)}% WR)`
+    ).join(", ") || "No strategy data yet";
+
+    const tickerHistory = pastOnTicker.length
+      ? pastOnTicker.slice(-5).map(t => {
+          const pl = (t.exitPrice - t.entryPrice) * (t.shares || 1) * (t.direction === "short" ? -1 : 1);
+          return `${t.date} ${t.direction?.toUpperCase()} ${pl >= 0 ? "WIN" : "LOSS"} $${pl.toFixed(0)} (emotion: ${t.emotion || "None"})`;
+        }).join("\n")
+      : "No past trades on this ticker";
+
+    // Last 10 SPY closes for market bias
+    const spySummary = spyData?.length
+      ? spyData.slice(-10).map(d => `${d.date}: $${d.close?.toFixed(2)}`).join(", ")
+      : "SPY data unavailable";
+
+    const messages = [{
+      role: "user",
+      content: `You are a trading coach. Given the following context, provide TWO sections:
+
+1. MARKET_BIAS: One sentence on current market direction based on SPY (bullish/bearish/neutral and why). Be concise.
+2. PERSONAL_CHECKLIST: 2-3 bullet points of personalised warnings or confirmations for this specific trade plan based on the trader's history. Be direct and honest.
+
+Planned trade:
+- Ticker: ${ticker || "unspecified"}
+- Type: ${form.type}
+- Strategy: ${form.strategy}
+- Direction: ${form.direction}
+- Entry: ${form.currentPrice || "unspecified"}
+- Stop Loss: ${form.stopLoss || "unspecified"}
+- Take Profit: ${form.takeProfit || "unspecified"}
+
+Past trades on ${ticker}:
+${tickerHistory}
+
+Strategy win rates (all trades):
+${stratSummary}
+
+SPY last 10 closes:
+${spySummary}
+
+Respond in this exact JSON format:
+{"marketBias":"...", "checklist":["...","...","..."]}`,
+    }];
+
+    const headers = { "Content-Type": "application/json" };
+    if (session?.access_token) headers["Authorization"] = `Bearer ${session.access_token}`;
+    const res = await fetch("/api/analyse", {
+      method: "POST",
+      headers,
+      body: JSON.stringify({ userId: session?.user?.id, model: "claude-haiku-4-5-20251001", max_tokens: 400, messages }),
+    });
+    const data = await res.json();
+    if (data.error) throw new Error(typeof data.error === "string" ? data.error : data.error.message);
+    const text = data.content?.find(b => b.type === "text")?.text || "";
+    const clean = text.replace(/```json|```/g, "").trim();
+    const parsed = JSON.parse(clean);
+    setAiAssist(parsed);
+  } catch (e) {
+    setAiError(e.message || "AI assist failed");
+  }
+  setAiLoading(false);
+};
+
 const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
 
 const setLeg = (i, k, v) =>
@@ -992,6 +1076,39 @@ const base = {
           <textarea style={{ ...inp, height: 76, resize: "none" }} value={form.notes}
             onChange={(e) => set("notes", e.target.value)} placeholder="Why are you taking this trade? What's your edge?" />
         </div>
+
+        {/* AI Assist */}
+        {isProPlus && (
+          <div style={{ marginBottom: 16 }}>
+            <button
+              onClick={fetchAiAssist}
+              disabled={aiLoading}
+              style={{
+                width: "100%", padding: "10px 14px", borderRadius: 8, cursor: aiLoading ? "not-allowed" : "pointer",
+                background: "transparent", border: `1px solid ${t.accent}`, color: t.accent,
+                fontSize: 12, fontWeight: 700, fontFamily: "'Space Mono',monospace",
+                opacity: aiLoading ? 0.6 : 1,
+              }}
+            >
+              {aiLoading ? "Analysing..." : "✦ AI Assist"}
+            </button>
+            {aiError && (
+              <div style={{ fontSize: 11, color: t.danger, marginTop: 8 }}>{aiError}</div>
+            )}
+            {aiAssist && (
+              <div style={{ marginTop: 10, background: t.surface, border: `1px solid ${t.accent}30`, borderRadius: 10, padding: "14px 16px" }}>
+                <div style={{ fontSize: 10, color: t.accent, fontFamily: "'Space Mono',monospace", textTransform: "uppercase", letterSpacing: 1.5, marginBottom: 8 }}>Market Bias</div>
+                <div style={{ fontSize: 12, color: t.text2, lineHeight: 1.6, marginBottom: 12 }}>{aiAssist.marketBias}</div>
+                <div style={{ fontSize: 10, color: t.accent, fontFamily: "'Space Mono',monospace", textTransform: "uppercase", letterSpacing: 1.5, marginBottom: 8 }}>Personal Checklist</div>
+                <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                  {aiAssist.checklist?.map((item, i) => (
+                    <div key={i} style={{ fontSize: 12, color: t.text2, lineHeight: 1.5, paddingLeft: 12, borderLeft: `2px solid ${t.accent}50` }}>{item}</div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Footer buttons */}
         <div style={{

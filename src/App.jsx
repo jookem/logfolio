@@ -1613,6 +1613,9 @@ const paginated = filtered
           onSave={(plan) => { saveTrade(plan); setEditTrade(null); }}
           t={T}
           isDark={isDark}
+          trades={trades}
+          spyData={spyData}
+          isProPlus={isProPlus}
         />
       )}
       {editTrade && editTrade.status !== "planned" && (
@@ -1657,6 +1660,9 @@ const paginated = filtered
     onSave={savePlan}
     t={T}
     isDark={isDark}
+    trades={trades}
+    spyData={spyData}
+    isProPlus={isProPlus}
   />
 )}
       {showReplay && plList.length > 0 && (
