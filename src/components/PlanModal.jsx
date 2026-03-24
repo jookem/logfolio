@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { PlanIcon, CloseIcon, WarningIcon, TargetIcon, TickerIcon, CategoryIcon, StrategyIcon, TodayIcon, DirectionIcon, AmountIcon, EntryPriceIcon, CurrentPriceIcon } from "../lib/icons";
 import { supabase } from "../lib/supabase";
 import { STOCK_LIKE, SUGGESTED_TAGS, EMOTIONS } from "../lib/constants";
@@ -172,6 +172,20 @@ const [calcRiskPct, setCalcRiskPct] = useState("1");
 const [aiAssist, setAiAssist] = useState(null); // { marketBias, checklist }
 const [aiLoading, setAiLoading] = useState(false);
 const [aiError, setAiError] = useState(null);
+const [assistUsedToday, setAssistUsedToday] = useState(0);
+const ASSIST_DAILY_LIMIT = 3;
+
+useEffect(() => {
+  if (!isProPlus) return;
+  supabase.auth.getSession().then(({ data: { session } }) => {
+    if (!session?.user?.id) return;
+    const today = new Date().toISOString().slice(0, 10);
+    supabase.from("profiles").select("ai_assist_daily_count, ai_assist_daily_date").eq("id", session.user.id).single()
+      .then(({ data }) => {
+        if (data?.ai_assist_daily_date === today) setAssistUsedToday(data.ai_assist_daily_count ?? 0);
+      });
+  });
+}, [isProPlus]);
 
 const fetchAiAssist = async () => {
   if (!isProPlus) return;
@@ -247,6 +261,7 @@ Respond in this exact JSON format:
     const clean = text.replace(/```json|```/g, "").trim();
     const parsed = JSON.parse(clean);
     setAiAssist(parsed);
+    setAssistUsedToday(c => c + 1);
   } catch (e) {
     setAiError(e.message || "AI assist failed");
   }
@@ -1126,6 +1141,9 @@ const base = {
                 </div>
               </div>
             )}
+            <div style={{ marginTop: 6, textAlign: "right", fontSize: 10, fontFamily: "'Space Mono', monospace", color: assistUsedToday >= ASSIST_DAILY_LIMIT ? t.danger : t.text4 }}>
+              {assistUsedToday} / {ASSIST_DAILY_LIMIT} uses today
+            </div>
           </div>
         )}
 

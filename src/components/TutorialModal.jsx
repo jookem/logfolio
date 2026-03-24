@@ -183,13 +183,6 @@ const PLAN_WALKTHROUGH = [
     panelPos: "top",
   },
   {
-    icon: <RobotIcon size={44} />,
-    title: "AI Assist (Pro Plus)",
-    desc: "Tap ✦ AI Assist to get an instant read on market direction from recent SPY data, plus personalised warnings and confirmations based on your own trade history with this ticker. Up to 3 uses per day.",
-    target: "tut-plan-ai-assist",
-    panelPos: "top",
-  },
-  {
     icon: <RecIcon size={44} />,
     title: "Voice Note & Screenshot",
     desc: "Record a voice note with your trade rationale and attach a chart screenshot. Reviewing these alongside your results is one of the fastest ways to improve.",
@@ -201,6 +194,13 @@ const PLAN_WALKTHROUGH = [
     title: "Trade Thesis",
     desc: "Write your trade thesis — why you're taking this trade, what your edge is, and what would invalidate the setup. Hit Save Plan when ready.",
     target: "tut-plan-notes-text",
+    panelPos: "top",
+  },
+  {
+    icon: <RobotIcon size={44} />,
+    title: "AI Assist (Pro Plus)",
+    desc: "Tap ✦ AI Assist to get an instant read on market direction from recent SPY data, plus personalised warnings and confirmations based on your own trade history with this ticker. Up to 3 uses per day.",
+    target: "tut-plan-ai-assist",
     panelPos: "top",
   },
 ];
