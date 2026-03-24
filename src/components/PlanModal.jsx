@@ -686,17 +686,16 @@ const base = {
         </div>
       </div>
 
-      {/* IV */}
-      <div>
-        <label style={lbl}>IV (Implied Vol.) %</label>
-        <input style={inp} type="number"
-          value={leg.iv} onChange={(e) => setLeg(i, "iv", e.target.value)} placeholder="30" />
-      </div>
-
-      {/* Disclaimer */}
-      <div style={{ fontSize: 10, color: t.text3, fontFamily: "'Space Mono', monospace", lineHeight: 1.6, padding: "6px 10px", background: t.surface, borderRadius: 6, border: `1px solid ${t.border}` }}>
-        <div>⚠ Premium prices and IV are sourced from previous close data and may be inaccurate. Always verify with your broker before trading.</div>
-        <div style={{ marginTop: 4 }}>⏱ Market data is delayed 15 minutes · Powered by Polygon.io</div>
+      {/* IV + Disclaimer */}
+      <div style={{ display: "flex", gap: 10, alignItems: "flex-end" }}>
+        <div style={{ flex: "0 0 auto", minWidth: 100 }}>
+          <label style={lbl}>IV (Implied Vol.) %</label>
+          <input style={inp} type="number"
+            value={leg.iv} onChange={(e) => setLeg(i, "iv", e.target.value)} placeholder="30" />
+        </div>
+        <div style={{ flex: 1, fontSize: 10, color: t.text3, fontFamily: "'Space Mono', monospace", lineHeight: 1.5, padding: "6px 10px", background: t.surface, borderRadius: 6, border: `1px solid ${t.border}` }}>
+          ⚠ Data sourced from previous close. Always verify with your broker before trading.
+        </div>
       </div>
 
       {/* Total cost */}
