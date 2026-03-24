@@ -544,13 +544,16 @@ const plList = useMemo(
     const beta = varMkt > 0 ? cov / varMkt : null;
     const treynor = beta !== null && Math.abs(beta) > 0.0001 ? meanPort / beta : null;
 
+    // Alpha (Jensen's) = mean port return - beta × mean market return (risk-free rate = 0)
+    const alpha = beta !== null ? meanPort - beta * meanMkt : null;
+
     // IR = mean active return / std dev of active returns
     const activeReturns = portReturns.map((p, i) => p - mktReturns[i]);
     const meanActive = activeReturns.reduce((s, v) => s + v, 0) / n;
     const stdActive = Math.sqrt(activeReturns.reduce((s, v) => s + Math.pow(v - meanActive, 2), 0) / (n - 1));
     const infoRatio = stdActive > 0 ? meanActive / stdActive : null;
 
-    return { treynor, infoRatio };
+    return { treynor, alpha, infoRatio };
   }, [plList, spyData, tradeDefaults?.accountSize]);
 
   const stratStats = useMemo(() => {
@@ -1421,6 +1424,7 @@ const paginated = filtered
               <StatCard label="Sortino Ratio" value={stats.sortino !== null ? stats.sortino.toFixed(2) : "—"} sub="return / downside risk" color={stats.sortino !== null ? (stats.sortino >= 1 ? T.accent : stats.sortino >= 0 ? undefined : T.danger) : undefined} t={T} info="Like the Sharpe Ratio, but only penalizes downside volatility (losing trades). Calculated as average P/L divided by the standard deviation of losing trades only. Higher is better — a high Sortino with a low Sharpe means your variance comes from big wins, not big losses." />
               <StatCard label="Treynor Ratio" value={benchmarkStats.treynor !== null ? benchmarkStats.treynor.toFixed(4) : "—"} sub={benchmarkStats.treynor !== null ? "return / market risk" : "needs SPY data"} color={benchmarkStats.treynor !== null ? (benchmarkStats.treynor > 0 ? T.accent : T.danger) : undefined} t={T} info="Measures return per unit of market (systematic) risk, using SPY as the benchmark. Beta captures how much your P/L moves with the overall market. A higher Treynor means you're being well-compensated for the market risk you're taking on. Shows '—' until SPY data loads." />
               <StatCard label="Info Ratio" value={benchmarkStats.infoRatio !== null ? benchmarkStats.infoRatio.toFixed(2) : "—"} sub={benchmarkStats.infoRatio !== null ? "active return / tracking error" : "needs SPY data"} color={benchmarkStats.infoRatio !== null ? (benchmarkStats.infoRatio >= 0.5 ? T.accent : benchmarkStats.infoRatio >= 0 ? undefined : T.danger) : undefined} t={T} info="Measures how consistently your trading outperforms SPY. Active return is your daily P/L minus what SPY returned that day. Tracking error is the volatility of that difference. Above 0.5 is solid, above 1.0 is exceptional. Shows '—' until SPY data loads." />
+              <StatCard label="Alpha" value={benchmarkStats.alpha !== null ? benchmarkStats.alpha.toFixed(4) : "—"} sub={benchmarkStats.alpha !== null ? "excess return vs SPY" : "needs SPY data"} color={benchmarkStats.alpha !== null ? (benchmarkStats.alpha > 0 ? T.accent : T.danger) : undefined} t={T} info="Jensen's Alpha — the return your trading generates above what would be expected given your exposure to market movements (beta). Positive alpha means you're adding real skill beyond just riding the market. Negative alpha means the market is outperforming your adjusted returns. Shows '—' until SPY data loads." />
             </div>
 
             {/* Equity Curve */}
