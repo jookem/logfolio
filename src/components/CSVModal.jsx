@@ -6,7 +6,7 @@ export default function CSVModal({ onClose, onImport, t }) {
   const [csv, setCsv] = useState("");
   const [preview, setPreview] = useState([]);
   const [error, setError] = useState("");
-  const TEMPLATE = `Supported brokers: Webull, Robinhood, TD Ameritrade, Interactive Brokers, Tastytrade, Charles Schwab\nPaste your exported CSV/TSV directly — broker format is auto-detected.`;
+  const BROKERS = ["Webull", "Robinhood", "TD Ameritrade", "Interactive Brokers", "Tastytrade", "Charles Schwab"];
 
   const detectBroker = (headers) => {
     if (headers.includes("symbol") && headers.includes("side") && headers.includes("filled time")) return "webull";
@@ -236,8 +236,15 @@ export default function CSVModal({ onClose, onImport, t }) {
           <button onClick={onClose} style={{ background: "none", border: "none", color: t.text3, fontSize: 20, cursor: "pointer" }}><CloseIcon size="1em" /></button>
         </div>
         <div style={{ background: t.card2, border: `1px solid ${t.border}`, borderRadius: 8, padding: 12, marginBottom: 14 }}>
-          <div style={{ fontSize: 10, color: t.text3, fontFamily: "'Space Mono', monospace", textTransform: "uppercase", letterSpacing: 1.5, marginBottom: 6 }}>Format</div>
-          <pre style={{ fontSize: 10, color: t.text2, margin: 0, overflowX: "auto", fontFamily: "monospace", lineHeight: 1.6, whiteSpace: "pre-wrap" }}>{TEMPLATE}</pre>
+          <div style={{ fontSize: 10, color: t.text3, fontFamily: "'Space Mono', monospace", textTransform: "uppercase", letterSpacing: 1.5, marginBottom: 8 }}>Supported Brokers</div>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 10 }}>
+            {BROKERS.map(b => (
+              <span key={b} style={{ fontSize: 11, color: t.accent, background: t.accent + "15", border: `1px solid ${t.accent}30`, borderRadius: 5, padding: "3px 8px", fontFamily: "'Space Mono', monospace" }}>{b}</span>
+            ))}
+          </div>
+          <div style={{ fontSize: 11, color: t.text3, fontFamily: "'Space Mono', monospace", lineHeight: 1.6 }}>
+            Export your order history from your broker and paste the CSV/TSV below — format is auto-detected.
+          </div>
         </div>
         <div style={{ marginBottom: 12 }}>
           <div style={{ display: "flex", gap: 10, marginBottom: 10 }}>

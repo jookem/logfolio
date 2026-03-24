@@ -749,6 +749,7 @@ export default function TradeFormModal({ initial, defaults, onClose, onSave, onC
             Cancel
           </button>
           <button
+            id="tut-trade-csv"
             onClick={onCSVImport}
             style={{
               flex: 1,

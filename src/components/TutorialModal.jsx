@@ -144,6 +144,13 @@ const TRADE_WALKTHROUGH = [
     target: "tut-trade-notes-text",
     panelPos: "top",
   },
+  {
+    icon: <ArrowsIcon size={44} />,
+    title: "CSV Import",
+    desc: "Already have trades elsewhere? Hit CSV to bulk-import directly from your broker. Supported brokers: Webull, Robinhood, TD Ameritrade, Interactive Brokers, Tastytrade, and Charles Schwab. Export your order history, paste the file, and Logfolio auto-detects the format.",
+    target: "tut-trade-csv",
+    panelPos: "top",
+  },
 ];
 
 const PLAN_WALKTHROUGH = [
