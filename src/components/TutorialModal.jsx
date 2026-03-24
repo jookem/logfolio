@@ -326,7 +326,7 @@ function SubWalkthrough({ mode, onClose, t }) {
 
   return (
     <>
-      <style>{`@keyframes tut-pulse { 0%,100%{opacity:1} 50%{opacity:0.45} }`}</style>
+      <style>{`@keyframes tut-pulse { 0%,100% { box-shadow: 0 0 0 9999px rgba(0,0,0,0.65), 0 0 0 4px ${t.accent}35; } 50% { box-shadow: 0 0 0 9999px rgba(0,0,0,0.65), 0 0 0 10px ${t.accent}60; } }`}</style>
 
       {highlightRect && (
         <div style={{
@@ -337,10 +337,9 @@ function SubWalkthrough({ mode, onClose, t }) {
           height: highlightRect.height,
           border: `2px solid ${t.accent}`,
           borderRadius: 12,
-          background: t.accent + "0d",
+          background: t.accent + "12",
           pointerEvents: "none",
           zIndex: 199,
-          boxShadow: `0 0 0 3px ${t.accent}25`,
           animation: "tut-pulse 2s ease-in-out infinite",
         }} />
       )}
