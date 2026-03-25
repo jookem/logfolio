@@ -122,53 +122,62 @@ export default function DaySession({ plList, plans, onAddTrade, onAddPlan, journ
         </div>
       )}
 
-      {/* Main stats card */}
-      <div style={{ background: t.surface, border: `1px solid ${t.border}`, borderRadius: 16, padding: "16px 20px", marginBottom: 24, display: "flex", alignItems: "flex-start", gap: 20 }}>
-        {/* Left: date + time */}
-        <div style={{ flexShrink: 0, alignSelf: "stretch", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
-          <div style={{ fontFamily: "'Space Mono', monospace", fontSize: mobile ? 15 : 18, fontWeight: 700, color: t.text2 }}>{dayName}</div>
-          <div style={{ fontFamily: "'Space Mono', monospace", fontSize: mobile ? 22 : 28, color: t.text3 }}>{timeStr}</div>
-        </div>
-        {/* Divider */}
-        <div style={{ width: 1, alignSelf: "stretch", background: t.border, flexShrink: 0 }} />
-        {/* Right: P&L + stats */}
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontFamily: "'Space Mono', monospace", fontSize: mobile ? 28 : 36, fontWeight: 700, color: sessionPL >= 0 ? t.accent : t.danger, letterSpacing: -1, lineHeight: 1, marginBottom: 4 }}>
-            {sessionPL >= 0 ? "+" : ""}{fmt(sessionPL)}
-          </div>
-          <div style={{ fontSize: 10, color: t.text3, fontFamily: "'Space Mono', monospace", marginBottom: 10 }}>
-            SESSION P&L · {todayTrades.length} TRADES · {wins}W {losses}L
-          </div>
-          {(wins > 0 || losses > 0 || (streak && streak.count >= 2) || journalStreak >= 1) && (
-            <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-              {statCard("WINS", wins, t.accent)}
-              {statCard("LOSSES", losses, t.danger)}
-              {streak && streak.count >= 2 && statCard("STREAK", `${streak.count}${streak.type}`, streak.type === "W" ? t.accent : t.danger)}
-              {journalStreak >= 1 && statCard("JOURNAL", `${journalStreak}D`, "#a78bfa")}
-            </div>
-          )}
-        </div>
-      </div>
+      {/* Session row — stacked on mobile, side-by-side on desktop */}
+      <div style={{ display: mobile ? "block" : "flex", gap: 20, marginBottom: 24, alignItems: "stretch" }}>
 
-      {/* Running P&L */}
-      {todayTrades.length > 0 && (
-        <div style={{ background: t.surface, border: `1px solid ${t.border}`, borderRadius: 12, padding: "14px 16px", marginBottom: 20 }}>
-          <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 10, color: t.text3, textTransform: "uppercase", letterSpacing: 2, marginBottom: 20 }}>Running P&L</div>
-          <div style={{ display: "flex", alignItems: "flex-end", gap: 4, height: 56 }}>
-            {(() => {
-              let running = 0;
-              const runs = todayTrades.map((tr) => { running += tr.pl; return running; });
-              const max = Math.max(...runs.map(Math.abs), 1);
-              return runs.map((val, i) => (
-                <div key={i} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 3 }}>
-                  <div style={{ width: "100%", height: `${(Math.abs(val) / max) * 46 + 10}px`, background: todayTrades[i].pl >= 0 ? t.accent : t.danger, borderRadius: 3, opacity: 0.8 }} />
-                  <div style={{ fontSize: 9, color: t.text3, fontFamily: "'Space Mono', monospace", overflow: "hidden", maxWidth: "100%", textAlign: "center" }}>{todayTrades[i].ticker}</div>
-                </div>
-              ));
-            })()}
+        {/* Main stats card */}
+        <div style={{ background: t.surface, border: `1px solid ${t.border}`, borderRadius: 16, padding: "16px 20px", marginBottom: mobile ? 20 : 0, display: "flex", alignItems: "flex-start", gap: 20, flex: 1 }}>
+          {/* Left: date + time */}
+          <div style={{ flexShrink: 0, alignSelf: "stretch", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+            <div style={{ fontFamily: "'Space Mono', monospace", fontSize: mobile ? 15 : 18, fontWeight: 700, color: t.text2 }}>{dayName}</div>
+            <div style={{ fontFamily: "'Space Mono', monospace", fontSize: mobile ? 22 : 28, color: t.text3 }}>{timeStr}</div>
+          </div>
+          {/* Divider */}
+          <div style={{ width: 1, alignSelf: "stretch", background: t.border, flexShrink: 0 }} />
+          {/* Right: P&L + stats */}
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ fontFamily: "'Space Mono', monospace", fontSize: mobile ? 28 : 36, fontWeight: 700, color: sessionPL >= 0 ? t.accent : t.danger, letterSpacing: -1, lineHeight: 1, marginBottom: 4 }}>
+              {sessionPL >= 0 ? "+" : ""}{fmt(sessionPL)}
+            </div>
+            <div style={{ fontSize: 10, color: t.text3, fontFamily: "'Space Mono', monospace", marginBottom: 10 }}>
+              SESSION P&L · {todayTrades.length} TRADES · {wins}W {losses}L
+            </div>
+            {(wins > 0 || losses > 0 || (streak && streak.count >= 2) || journalStreak >= 1) && (
+              <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                {statCard("WINS", wins, t.accent)}
+                {statCard("LOSSES", losses, t.danger)}
+                {streak && streak.count >= 2 && statCard("STREAK", `${streak.count}${streak.type}`, streak.type === "W" ? t.accent : t.danger)}
+                {journalStreak >= 1 && statCard("JOURNAL", `${journalStreak}D`, "#a78bfa")}
+              </div>
+            )}
           </div>
         </div>
-      )}
+
+        {/* Running P&L */}
+        {todayTrades.length > 0 ? (
+          <div style={{ background: t.surface, border: `1px solid ${t.border}`, borderRadius: 16, padding: "16px 20px", marginBottom: mobile ? 20 : 0, flex: 1, display: "flex", flexDirection: "column" }}>
+            <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 10, color: t.text3, textTransform: "uppercase", letterSpacing: 2, marginBottom: 16 }}>Running P&L</div>
+            <div style={{ display: "flex", alignItems: "flex-end", gap: 4, flex: 1, minHeight: 56 }}>
+              {(() => {
+                let running = 0;
+                const runs = todayTrades.map((tr) => { running += tr.pl; return running; });
+                const max = Math.max(...runs.map(Math.abs), 1);
+                return runs.map((val, i) => (
+                  <div key={i} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 3 }}>
+                    <div style={{ width: "100%", height: `${(Math.abs(val) / max) * 46 + 10}px`, background: todayTrades[i].pl >= 0 ? t.accent : t.danger, borderRadius: 3, opacity: 0.8 }} />
+                    <div style={{ fontSize: 9, color: t.text3, fontFamily: "'Space Mono', monospace", overflow: "hidden", maxWidth: "100%", textAlign: "center" }}>{todayTrades[i].ticker}</div>
+                  </div>
+                ));
+              })()}
+            </div>
+          </div>
+        ) : !mobile && (
+          <div style={{ background: t.surface, border: `1px dashed ${t.border}`, borderRadius: 16, padding: "16px 20px", flex: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 11, color: t.text4, textAlign: "center" }}>No trades logged today</div>
+          </div>
+        )}
+
+      </div>
 
       {/* Today's trades */}
       <div style={{ background: t.surface, border: `1px solid ${t.border}`, borderRadius: 12, overflow: "hidden" }}>
