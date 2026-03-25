@@ -921,7 +921,7 @@ const paginated = filtered
                       transition: "color 0.15s",
                     }}
                   >
-                    {label}{isPremiumTab && <span style={{ fontSize: 9, marginLeft: 5, verticalAlign: "middle", opacity: 0.8 }}>✦ PRO</span>}
+                    {label}{isPremiumTab && <span style={{ fontSize: 9, marginLeft: 5, verticalAlign: "middle", opacity: 0.8 }}>✦ {id === "ai" ? "PRO+" : "PRO"}</span>}
                   </button>
                   );
                 })}
@@ -957,7 +957,7 @@ const paginated = filtered
                   transition: "color 0.15s",
                 }}
               >
-                {label}{isPremiumTab && <span style={{ fontSize: 9, marginLeft: 5, verticalAlign: "middle", opacity: 0.8 }}>✦ PRO</span>}
+                {label}{isPremiumTab && <span style={{ fontSize: 9, marginLeft: 5, verticalAlign: "middle", opacity: 0.8 }}>✦ {id === "ai" ? "PRO+" : "PRO"}</span>}
               </button>
               );
             })}
