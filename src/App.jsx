@@ -1418,7 +1418,7 @@ const paginated = filtered
           <ErrorBoundary compact>
           <div>
             {/* All key stats */}
-            <div style={{ display: "grid", gridTemplateColumns: mobile ? "1fr 1fr" : "repeat(5,1fr)", gap: 12, marginBottom: 20 }}>
+            <div style={{ display: "grid", gridTemplateColumns: mobile ? "1fr 1fr" : "repeat(4,1fr)", gap: 12, marginBottom: 20 }}>
               <StatCard label="Total P/L" value={fmt(stats.totalPL)} sub={`${stats.total} trades`} color={stats.totalPL >= 0 ? T.accent : T.danger} t={T} info="The sum of all realized profits and losses across your filtered trades. Positive means you made money; negative means you lost money over this period." />
               <StatCard label="Win Rate" value={`${(stats.winRate * 100).toFixed(0)}%`} sub={`${stats.wins}W/${stats.total - stats.wins}L`} t={T} info="The percentage of your trades that closed with a profit. A 50% win rate means half your trades were winners. Higher is generally better, but win rate alone doesn't tell the full story — a low win rate can still be profitable with large average wins." />
               <StatCard label="Expectancy" value={fmt(stats.expectancy)} sub="per trade" color={stats.expectancy >= 0 ? T.accent : T.danger} t={T} info="The average amount you can expect to make (or lose) per trade, calculated as: (Win Rate × Avg Win) + (Loss Rate × Avg Loss). A positive expectancy means your edge is working. This is arguably the most important metric for a trader." />
