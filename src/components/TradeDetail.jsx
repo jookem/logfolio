@@ -378,6 +378,42 @@ export default function TradeDetail({ trade, onClose, onEdit, onExecute, onSave,
           </div>
         </div>
       )}
+      {trade.planSnapshot && trade.status !== "planned" && (() => {
+  const snap = trade.planSnapshot;
+  const rows = [];
+  if (snap.entryPrice) {
+    const planned = parseFloat(snap.entryPrice);
+    const actual = parseFloat(trade.entryPrice);
+    const diff = actual && planned ? ((actual - planned) / planned * 100).toFixed(1) : null;
+    rows.push({ label: "Entry Price", planned: `$${planned}`, actual: `$${actual}`, diff: diff !== null ? `${diff > 0 ? "+" : ""}${diff}%` : null, good: diff !== null ? Math.abs(parseFloat(diff)) <= 2 : true });
+  }
+  if (snap.stopLoss) rows.push({ label: "Stop Loss", planned: `$${snap.stopLoss}`, actual: trade.stopLoss ? `$${trade.stopLoss}` : "—", diff: null, good: !!trade.stopLoss });
+  if (snap.takeProfit) rows.push({ label: "Take Profit", planned: `$${snap.takeProfit}`, actual: trade.exitPrice ? `$${trade.exitPrice}` : "—", diff: null, good: trade.exitPrice >= snap.takeProfit });
+  if (snap.shares) rows.push({ label: "Size", planned: snap.shares, actual: trade.shares || "—", diff: null, good: String(snap.shares) === String(trade.shares) });
+  if (snap.emotion) rows.push({ label: "Emotion", planned: snap.emotion, actual: trade.emotion || "—", diff: null, good: snap.emotion === trade.emotion });
+  if (!rows.length) return null;
+  return (
+    <div style={{ background: t.surface, border: `1px solid ${t.border}`, borderRadius: 10, padding: "12px 14px", marginBottom: 10 }}>
+      <div style={{ fontSize: 10, color: t.text3, marginBottom: 10, textTransform: "uppercase", letterSpacing: 1.5 }}>Plan vs Reality</div>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "6px 8px" }}>
+        <div style={{ fontSize: 10, color: t.text4, fontFamily: "'Space Mono',monospace" }}></div>
+        <div style={{ fontSize: 10, color: t.text4, fontFamily: "'Space Mono',monospace" }}>PLANNED</div>
+        <div style={{ fontSize: 10, color: t.text4, fontFamily: "'Space Mono',monospace" }}>ACTUAL</div>
+        {rows.map(({ label, planned, actual, diff, good }) => (
+          <>
+            <div key={label + "l"} style={{ fontSize: 11, color: t.text3 }}>{label}</div>
+            <div key={label + "p"} style={{ fontSize: 12, color: t.text, fontFamily: "'Space Mono',monospace" }}>{planned}</div>
+            <div key={label + "a"} style={{ display: "flex", alignItems: "center", gap: 5 }}>
+              <span style={{ fontSize: 12, color: t.text, fontFamily: "'Space Mono',monospace" }}>{actual}</span>
+              {diff && <span style={{ fontSize: 10, color: good ? t.accent : t.danger }}>{diff}</span>}
+              {!diff && <span style={{ fontSize: 10 }}>{good ? "✓" : "✗"}</span>}
+            </div>
+          </>
+        ))}
+      </div>
+    </div>
+  );
+})()}
       {lightbox && (
         <div
           onClick={() => setLightbox(null)}

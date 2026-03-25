@@ -306,6 +306,16 @@ const [page, setPage] = useState(1);
       mistake: "None",
       legs: plan.legs?.length ? plan.legs.map(l => ({ ...l, exitPremium: "" })) : [{ position:"buy",type:"call",strike:"",expiration:"",entryPremium:"",exitPremium:"",contracts:1 }],
       fromPlanId: plan.id,
+      planSnapshot: {
+        entryPrice: plan.entryPrice || plan.purchasePrice || "",
+        stopLoss: plan.stopLoss || "",
+        takeProfit: plan.takeProfit || "",
+        notes: plan.notes || "",
+        emotion: plan.emotion || "None",
+        shares: plan.shares || plan.numShares || "",
+        direction: plan.direction || "",
+        strategy: plan.strategy || "",
+      },
     };
     setSelectedPlan(null);
     setPlanPrefill(prefill);
@@ -634,10 +644,47 @@ const mistakeBreakdown = useMemo(() => {
       map[t.mistake].count++;
     }
   });
+  const recent10 = plList.slice(-10);
   return Object.entries(map)
-    .map(([mistake, d]) => ({ mistake, ...d }))
+    .map(([mistake, d]) => {
+      const recentCount = recent10.filter(t => t.mistake === mistake).length;
+      const overallRate = d.count / plList.length;
+      const recentRate = recentCount / Math.max(recent10.length, 1);
+      const trending = recent10.length >= 5 ? (recentRate > overallRate * 1.3 ? "up" : recentRate < overallRate * 0.7 ? "down" : "stable") : "stable";
+      return { mistake, ...d, avgCost: d.cost / d.count, recentCount, trending };
+    })
     .sort((a, b) => a.cost - b.cost);
 }, [plList]);
+
+const strategyDecay = useMemo(() => {
+  const RECENT_N = 10;
+  const MIN_TRADES = 6;
+  const map = {};
+  plList.forEach(t => {
+    if (!t.strategy) return;
+    if (!map[t.strategy]) map[t.strategy] = [];
+    map[t.strategy].push(t);
+  });
+  return Object.entries(map)
+    .filter(([, trades]) => trades.length >= MIN_TRADES)
+    .map(([strategy, trades]) => {
+      const allWR = trades.filter(t => t.pl > 0).length / trades.length;
+      const allAvg = trades.reduce((s, t) => s + t.pl, 0) / trades.length;
+      const recent = trades.slice(-RECENT_N);
+      const recentWR = recent.filter(t => t.pl > 0).length / recent.length;
+      const recentAvg = recent.reduce((s, t) => s + t.pl, 0) / recent.length;
+      const wrDrop = allWR - recentWR;
+      let health = "green";
+      if (wrDrop >= 0.2 || (recentAvg < 0 && allAvg > 0)) health = "red";
+      else if (wrDrop >= 0.1 || (recentAvg < allAvg * 0.5 && recentAvg >= 0)) health = "amber";
+      return { strategy, allWR, allAvg, recentWR, recentAvg, wrDrop, health, total: trades.length };
+    })
+    .sort((a, b) => {
+      const order = { red: 0, amber: 1, green: 2 };
+      return order[a.health] - order[b.health];
+    });
+}, [plList]);
+
   const filteredPlans = useMemo(() => {
   const q = planSearch.toLowerCase().trim();
   return trades
@@ -1517,6 +1564,45 @@ const paginated = filtered
               )}
             </div>
 
+            {/* Strategy Health */}
+            {strategyDecay.length > 0 && (
+              <div style={{ background: T.surface, border: `1px solid ${T.border}`, borderRadius: 12, padding: "16px 18px", marginBottom: 16 }}>
+                <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 10, color: T.text3, textTransform: "uppercase", letterSpacing: 2, marginBottom: 8 }}>Strategy Health</div>
+                <div style={{ fontSize: 11, color: T.text3, marginBottom: 14 }}>Compares your last 10 trades per strategy vs all-time baseline. Flags when performance is deteriorating.</div>
+                {strategyDecay.some(s => s.health !== "green") ? (
+                  <div style={{ background: "#f59e0b12", border: "1px solid #f59e0b30", borderRadius: 8, padding: "8px 12px", marginBottom: 12 }}>
+                    <span style={{ fontSize: 11, color: "#f59e0b", fontFamily: "'Space Mono',monospace" }}>
+                      {strategyDecay.filter(s => s.health === "red").length > 0
+                        ? `⚠ ${strategyDecay.filter(s => s.health === "red").map(s => s.strategy).join(", ")} ${strategyDecay.filter(s => s.health === "red").length === 1 ? "is" : "are"} significantly underperforming — consider pausing`
+                        : `${strategyDecay.filter(s => s.health === "amber").map(s => s.strategy).join(", ")} showing early signs of decay`}
+                    </span>
+                  </div>
+                ) : null}
+                <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                  {strategyDecay.map(({ strategy, allWR, recentWR, allAvg, recentAvg, wrDrop, health, total }) => {
+                    const dotColor = health === "green" ? T.accent : health === "amber" ? "#f59e0b" : T.danger;
+                    const label = health === "green" ? "Healthy" : health === "amber" ? "Declining" : "Underperforming";
+                    return (
+                      <div key={strategy} style={{ display: "grid", gridTemplateColumns: "10px 1fr auto", gap: 12, alignItems: "center" }}>
+                        <div style={{ width: 10, height: 10, borderRadius: "50%", background: dotColor, flexShrink: 0 }} />
+                        <div>
+                          <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
+                            <span style={{ fontSize: 13, color: T.text, fontWeight: 600 }}>{strategy}</span>
+                            <span style={{ fontSize: 11, color: dotColor, fontFamily: "'Space Mono',monospace" }}>{label}</span>
+                          </div>
+                          <div style={{ display: "flex", gap: 16 }}>
+                            <span style={{ fontSize: 11, color: T.text3 }}>All-time: <span style={{ color: T.text, fontFamily: "'Space Mono',monospace" }}>{Math.round(allWR * 100)}%WR · {allAvg >= 0 ? "+" : ""}{fmt(allAvg)}</span></span>
+                            <span style={{ fontSize: 11, color: T.text3 }}>Recent 10: <span style={{ color: health === "green" ? T.accent : dotColor, fontFamily: "'Space Mono',monospace" }}>{Math.round(recentWR * 100)}%WR · {recentAvg >= 0 ? "+" : ""}{fmt(recentAvg)}</span></span>
+                          </div>
+                        </div>
+                        <div style={{ fontSize: 10, color: T.text3, textAlign: "right", minWidth: 32 }}>{total}t</div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
             {/* Day of Week + Best Time to Trade — matching row format */}
             <div style={{ display: "grid", gridTemplateColumns: mobile ? "1fr" : "1fr 1fr", gap: 16, marginBottom: 16 }}>
               {/* Day of Week */}
@@ -1699,17 +1785,33 @@ const paginated = filtered
                   <div style={{ fontSize: 13, color: T.text3 }}>No mistakes flagged yet — nice discipline.</div>
                 ) : (
                   <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                    {mistakeBreakdown.map(({ mistake, cost, count }) => {
+                    {(() => {
+                      const worst = [...mistakeBreakdown].sort((a, b) => a.avgCost - b.avgCost)[0];
+                      return worst && worst.avgCost < 0 ? (
+                        <div style={{ background: T.danger + "12", border: `1px solid ${T.danger}30`, borderRadius: 8, padding: "8px 12px", marginBottom: 4 }}>
+                          <span style={{ fontSize: 11, color: T.danger, fontFamily: "'Space Mono',monospace" }}>
+                            Costliest habit: <strong>{worst.mistake}</strong> averaging {fmt(worst.avgCost)}/trade
+                          </span>
+                        </div>
+                      ) : null;
+                    })()}
+                    {mistakeBreakdown.map(({ mistake, cost, count, avgCost, trending }) => {
                       const maxAbs = Math.max(...mistakeBreakdown.map(m => Math.abs(m.cost)), 1);
                       const barWidth = Math.round((Math.abs(cost) / maxAbs) * 100);
+                      const trendIcon = trending === "up" ? "↑" : trending === "down" ? "↓" : null;
+                      const trendColor = trending === "up" ? T.danger : T.accent;
                       return (
                         <div key={mistake}>
                           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 5 }}>
-                            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                               <span style={{ fontSize: 12, color: T.text }}>{mistake}</span>
                               <span style={{ fontSize: 11, color: T.text3 }}>{count}×</span>
+                              {trendIcon && <span style={{ fontSize: 11, color: trendColor, fontWeight: 700 }} title={trending === "up" ? "More frequent recently" : "Less frequent recently"}>{trendIcon}</span>}
                             </div>
-                            <span style={{ fontFamily: "'Space Mono',monospace", fontSize: 12, fontWeight: 700, color: cost >= 0 ? T.accent : T.danger }}>{cost >= 0 ? "+" : ""}{fmt(cost)}</span>
+                            <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end" }}>
+                              <span style={{ fontFamily: "'Space Mono',monospace", fontSize: 12, fontWeight: 700, color: cost >= 0 ? T.accent : T.danger }}>{cost >= 0 ? "+" : ""}{fmt(cost)}</span>
+                              <span style={{ fontFamily: "'Space Mono',monospace", fontSize: 10, color: T.text3 }}>{fmt(avgCost)} avg</span>
+                            </div>
                           </div>
                           <div style={{ height: 5, borderRadius: 3, background: T.border, overflow: "hidden" }}>
                             <div style={{ height: "100%", width: `${barWidth}%`, borderRadius: 3, background: T.danger, transition: "width 0.4s ease" }} />
@@ -1719,6 +1821,7 @@ const paginated = filtered
                     })}
                     <div style={{ fontSize: 11, color: T.text3, marginTop: 4 }}>
                       Total cost: <span style={{ color: T.danger, fontFamily: "'Space Mono',monospace" }}>{fmt(mistakeBreakdown.reduce((s, m) => s + m.cost, 0))}</span>
+                      <span style={{ marginLeft: 8 }}>· ↑↓ = trending vs your baseline</span>
                     </div>
                   </div>
                 )}
