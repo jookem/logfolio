@@ -1141,23 +1141,21 @@ const base = {
         {/* AI Assist */}
         {isProPlus && (
           <div id="tut-plan-ai-assist" style={{ marginBottom: 16 }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
-              <label style={lbl}>AI Analysis</label>
-              <button
-                onClick={fetchAiAssist}
-                disabled={aiLoading}
-                style={{
-                  background: "none", border: `1px solid ${t.accent}60`, color: t.accent,
-                  borderRadius: 20, padding: "4px 12px", cursor: aiLoading ? "not-allowed" : "pointer",
-                  fontSize: 11, fontFamily: "'Space Mono',monospace",
-                  display: "flex", alignItems: "center", gap: 5,
-                  opacity: aiLoading ? 0.6 : 1,
-                }}
-              >
-                {!aiLoading && <RobotIcon size={12} />}
-                {aiLoading ? (aiStep === "price" ? "Fetching..." : "Analysing...") : "Generate →"}
-              </button>
-            </div>
+            <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 6, marginBottom: 8 }}>
+              <RobotIcon size={14} />AI Analysis
+            </label>
+            <button
+              onClick={fetchAiAssist}
+              disabled={aiLoading}
+              style={{
+                width: "100%", padding: "14px", borderRadius: 8, cursor: aiLoading ? "not-allowed" : "pointer",
+                background: t.accent + "08", border: `1px dashed ${t.accent}40`, color: t.accent,
+                fontSize: 13, fontFamily: "'Space Mono',monospace", textAlign: "center",
+                opacity: aiLoading ? 0.6 : 1, marginBottom: 8,
+              }}
+            >
+              {aiLoading ? (aiStep === "price" ? "Fetching prices..." : "Analysing...") : "Generate →"}
+            </button>
             {aiError && (
               <div style={{ fontSize: 11, color: t.danger, marginBottom: 8 }}>{aiError}</div>
             )}
