@@ -70,6 +70,9 @@ export default function TradingJournal() {
   const [bulkSelected, setBulkSelected] = useState(new Set());
   const toggleBulk = (id) => setBulkSelected(prev => { const n = new Set(prev); n.has(id) ? n.delete(id) : n.add(id); return n; });
   const clearBulk = () => setBulkSelected(new Set());
+  const [bulkSelectedPlans, setBulkSelectedPlans] = useState(new Set());
+  const toggleBulkPlan = (id) => setBulkSelectedPlans(prev => { const n = new Set(prev); n.has(id) ? n.delete(id) : n.add(id); return n; });
+  const clearBulkPlans = () => setBulkSelectedPlans(new Set());
   const [filter, setFilter] = useState({
   type: "all",
   strategy: "all",
@@ -387,6 +390,17 @@ const [page, setPage] = useState(1);
     if (ids.includes(selected?.id)) setSelected(null);
     clearBulk();
     showToast(`Deleted ${ids.length} trade${ids.length > 1 ? "s" : ""}`, T.danger, "delete");
+    if (user) ids.forEach(id => {
+      supabase.from("trades").delete().eq("id", id).eq("user_id", user.id).then(() => {});
+      deleteTradeMedia(user.id, id);
+    });
+  };
+  const bulkDeletePlans = () => {
+    const ids = [...bulkSelectedPlans];
+    setTrades(p => p.filter(tr => !ids.includes(tr.id)));
+    if (ids.includes(selectedPlan?.id)) setSelectedPlan(null);
+    clearBulkPlans();
+    showToast(`Deleted ${ids.length} plan${ids.length > 1 ? "s" : ""}`, T.danger, "delete");
     if (user) ids.forEach(id => {
       supabase.from("trades").delete().eq("id", id).eq("user_id", user.id).then(() => {});
       deleteTradeMedia(user.id, id);
@@ -761,6 +775,13 @@ const paginated = filtered
           <span style={{ fontSize: 12, color: T.text2, fontFamily: "'Space Mono',monospace" }}>{bulkSelected.size} selected</span>
           <button onClick={bulkDelete} style={{ background: T.danger + "20", border: `1px solid ${T.danger}50`, color: T.danger, borderRadius: 7, padding: "5px 12px", cursor: "pointer", fontSize: 12, fontWeight: 700, fontFamily: "inherit" }}>Delete</button>
           <button onClick={clearBulk} style={{ background: "none", border: `1px solid ${T.border}`, color: T.text3, borderRadius: 7, padding: "5px 12px", cursor: "pointer", fontSize: 12, fontFamily: "inherit" }}>Clear</button>
+        </div>
+      )}
+      {bulkSelectedPlans.size > 0 && (
+        <div style={{ position: "fixed", bottom: 24, left: "50%", transform: "translateX(-50%)", background: T.card, border: `1px solid ${T.border}`, borderRadius: 12, padding: "10px 16px", display: "flex", alignItems: "center", gap: 12, boxShadow: "0 8px 32px rgba(0,0,0,0.4)", zIndex: 200, whiteSpace: "nowrap" }}>
+          <span style={{ fontSize: 12, color: T.text2, fontFamily: "'Space Mono',monospace" }}>{bulkSelectedPlans.size} selected</span>
+          <button onClick={bulkDeletePlans} style={{ background: T.danger + "20", border: `1px solid ${T.danger}50`, color: T.danger, borderRadius: 7, padding: "5px 12px", cursor: "pointer", fontSize: 12, fontWeight: 700, fontFamily: "inherit" }}>Delete</button>
+          <button onClick={clearBulkPlans} style={{ background: "none", border: `1px solid ${T.border}`, color: T.text3, borderRadius: 7, padding: "5px 12px", cursor: "pointer", fontSize: 12, fontFamily: "inherit" }}>Clear</button>
         </div>
       )}
 
@@ -1385,6 +1406,8 @@ const paginated = filtered
                 onClick={() => setSelectedPlan(plan)}
                 onEdit={() => setEditTrade(plan)}
                 onDelete={() => deleteTrade(plan.id)}
+                onSelect={() => toggleBulkPlan(plan.id)}
+                isSelected={bulkSelectedPlans.has(plan.id)}
                 t={T}
                 mobile={mobile}
               />
