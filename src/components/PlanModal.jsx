@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { PlanIcon, CloseIcon, WarningIcon, TargetIcon, TickerIcon, CategoryIcon, StrategyIcon, TodayIcon, DirectionIcon, AmountIcon, EntryPriceIcon, CurrentPriceIcon, EmotionIcon, TagsIcon, PenIcon, ChecklistIcon } from "../lib/icons";
+import { PlanIcon, CloseIcon, WarningIcon, TargetIcon, TickerIcon, CategoryIcon, StrategyIcon, TodayIcon, DirectionIcon, AmountIcon, EntryPriceIcon, CurrentPriceIcon, EmotionIcon, TagsIcon, PenIcon, ChecklistIcon, RobotIcon } from "../lib/icons";
 import { supabase } from "../lib/supabase";
 import { STOCK_LIKE, SUGGESTED_TAGS, EMOTIONS } from "../lib/constants";
 import { todayStr, typeLabels, normCDF, bsPrice } from "../lib/utils";
@@ -1141,23 +1141,25 @@ const base = {
         {/* AI Assist */}
         {isProPlus && (
           <div id="tut-plan-ai-assist" style={{ marginBottom: 16 }}>
-            <button
-              onClick={fetchAiAssist}
-              disabled={aiLoading}
-              style={{
-                width: "100%", padding: "10px 14px", borderRadius: 8, cursor: aiLoading ? "not-allowed" : "pointer",
-                background: "transparent", border: `1px solid ${t.accent}`, color: t.accent,
-                fontSize: 12, fontWeight: 700, fontFamily: "'Space Mono',monospace",
-                opacity: aiLoading ? 0.6 : 1,
-              }}
-            >
-              <span style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
-                {!aiLoading && <img src="/images/robot.svg" width={14} height={14} alt="" style={{ filter: t.bg === "#000" ? "invert(1)" : "none" }} />}
-                {aiLoading ? (aiStep === "price" ? "Fetching prices..." : "Analysing...") : "AI Assist"}
-              </span>
-            </button>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+              <label style={lbl}>AI Analysis</label>
+              <button
+                onClick={fetchAiAssist}
+                disabled={aiLoading}
+                style={{
+                  background: "none", border: `1px solid ${t.accent}60`, color: t.accent,
+                  borderRadius: 20, padding: "4px 12px", cursor: aiLoading ? "not-allowed" : "pointer",
+                  fontSize: 11, fontFamily: "'Space Mono',monospace",
+                  display: "flex", alignItems: "center", gap: 5,
+                  opacity: aiLoading ? 0.6 : 1,
+                }}
+              >
+                {!aiLoading && <RobotIcon size={12} />}
+                {aiLoading ? (aiStep === "price" ? "Fetching..." : "Analysing...") : "Generate →"}
+              </button>
+            </div>
             {aiError && (
-              <div style={{ fontSize: 11, color: t.danger, marginTop: 8 }}>{aiError}</div>
+              <div style={{ fontSize: 11, color: t.danger, marginBottom: 8 }}>{aiError}</div>
             )}
             {aiAssist && (
               <div style={{ marginTop: 10, background: t.surface, border: `1px solid ${t.accent}30`, borderRadius: 10, padding: "14px 16px" }}>
