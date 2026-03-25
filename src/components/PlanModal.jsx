@@ -1152,9 +1152,13 @@ const base = {
                 background: t.accent + "08", border: `1px dashed ${t.accent}40`, color: t.accent,
                 fontSize: 13, fontFamily: "'Space Mono',monospace", textAlign: "center",
                 opacity: aiLoading ? 0.6 : 1, marginBottom: 8,
+                display: "flex", flexDirection: "column", alignItems: "center", gap: 4,
               }}
             >
-              {aiLoading ? (aiStep === "price" ? "Fetching prices..." : "Analysing...") : "Generate →"}
+              <div>{aiLoading ? (aiStep === "price" ? "Fetching prices..." : "Analysing...") : "Generate"}</div>
+              <div style={{ fontSize: 11, color: assistUsedToday >= ASSIST_DAILY_LIMIT ? t.danger : t.text3, opacity: 0.8 }}>
+                {assistUsedToday} / {ASSIST_DAILY_LIMIT} uses today
+              </div>
             </button>
             {aiError && (
               <div style={{ fontSize: 11, color: t.danger, marginBottom: 8 }}>{aiError}</div>
@@ -1171,9 +1175,6 @@ const base = {
                 </div>
               </div>
             )}
-            <div style={{ marginTop: 6, textAlign: "right", fontSize: 10, fontFamily: "'Space Mono', monospace", color: assistUsedToday >= ASSIST_DAILY_LIMIT ? t.danger : t.text4 }}>
-              {assistUsedToday} / {ASSIST_DAILY_LIMIT} uses today
-            </div>
           </div>
         )}
 
