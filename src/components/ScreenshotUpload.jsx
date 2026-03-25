@@ -73,7 +73,7 @@ const handleFiles = async (files) => {
   const removeImage = (id) => { setError(null); onChange(value.filter((img) => img.id !== id)); };
 
   return (
-    <div style={{ background: t.card2, border: `1px solid ${t.border}`, borderRadius: 10, padding: "12px 14px" }}>
+    <div>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
         <div style={{ fontSize: 11, color: t.text3, fontFamily: "'Space Mono', monospace", textTransform: "uppercase", letterSpacing: 1.5, display: "flex", alignItems: "center", gap: 6 }}>
           <ScreenshotIcon size={13} />Chart Screenshots

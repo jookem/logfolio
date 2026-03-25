@@ -1099,7 +1099,7 @@ const base = {
           </div>
         </div>
 {/* ══ TAGS + THESIS ══ */}
-        {sectionHeader("Notes", "tut-plan-notes", <PenIcon size={12} />)}
+        {sectionHeader("Notes", "tut-plan-notes")}
         <div id="tut-plan-tags" style={{ marginBottom: 12 }}>
           <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><TagsIcon size={14} />Tags</label>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 8 }}>

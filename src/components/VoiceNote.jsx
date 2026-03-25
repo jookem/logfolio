@@ -74,10 +74,7 @@ export default function VoiceNote({ value, onChange, t }) {
   const fmtTime = (s) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
 
   return (
-    <div style={{
-      background: t.card2, border: `1px solid ${t.border}`,
-      borderRadius: 10, padding: "12px 14px",
-    }}>
+    <div>
       <div style={{
         fontSize: 11, color: t.text3, fontFamily: "'Space Mono', monospace",
         textTransform: "uppercase", letterSpacing: 1.5, marginBottom: 10,
