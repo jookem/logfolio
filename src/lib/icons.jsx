@@ -14,7 +14,7 @@ const SVG = ({ size, children, ...props }) => (
 // ── App logo ──────────────────────────────────────────────────────────────────
 export const LogoIcon = ({ width = 44, height = 44 }) => (
   <svg viewBox="0 0 35 35" width={width} height={height} xmlns="http://www.w3.org/2000/svg">
-    <path fill="none" stroke="#3B82F6" strokeLinecap="round" strokeMiterlimit="10" d="M34.5,17.5c0,8,0,12-2.5,14.5c-2.5,2.5-6.5,2.5-14.5,2.5c-8,0-12,0-14.5-2.5c-2.5-2.5-2.5-6.5-2.5-14.5c0-8,0-12,2.5-14.5c2.5-2.5,6.5-2.5,14.5-2.5c8,0,12,0,14.5,2.5c1.7,1.7,2.2,4,2.4,7.7" />
+    <path d="M34.5,17.5c0,8,0,12-2.5,14.5s-6.5,2.5-14.5,2.5S5.5,34.5,3,32s-2.5-6.5-2.5-14.5S0.5,5.5,3,3s6.5-2.5,14.5-2.5s12,0,14.5,2.5c1.7,1.7,2.2,4,2.4,7.7" />
     <rect x="5.3" y="14.9" fill="#FF1212" width="3.9" height="10.9" />
     <rect x="7" y="12.5" fill="#FF1212" width="0.4" height="15.5" />
     <rect x="12.1" y="18" fill="#12B248" width="3.9" height="6.6" />
