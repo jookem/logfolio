@@ -127,7 +127,7 @@ export default function DaySession({ plList, plans, onAddTrade, onAddPlan, journ
         {/* Left: date + time */}
         <div style={{ flexShrink: 0, alignSelf: "stretch", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
           <div style={{ fontFamily: "'Space Mono', monospace", fontSize: mobile ? 15 : 18, fontWeight: 700, color: t.text2 }}>{dayName}</div>
-          <div style={{ fontFamily: "'Space Mono', monospace", fontSize: mobile ? 15 : 18, color: t.text3 }}>{timeStr}</div>
+          <div style={{ fontFamily: "'Space Mono', monospace", fontSize: mobile ? 22 : 28, color: t.text3 }}>{timeStr}</div>
         </div>
         {/* Divider */}
         <div style={{ width: 1, alignSelf: "stretch", background: t.border, flexShrink: 0 }} />
