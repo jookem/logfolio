@@ -419,7 +419,7 @@ const base = {
       alignItems: "center",
       gap: 6,
     }}>
-      {icon && <img src={icon} width={14} height={14} alt="" />}
+      {icon && <img src={icon} width={14} height={14} alt="" style={{ filter: t.bg === "#000" ? "invert(1)" : "none" }} />}
       {title}
     </div>
   );

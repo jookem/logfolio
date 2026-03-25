@@ -771,17 +771,18 @@ export default function TradeFormModal({ initial, defaults, onClose, onSave, onC
             onClick={onCSVImport}
             style={{
               flex: 1,
-              background: t.surface,
-              border: `1px solid ${t.border}`,
-              color: t.text2,
+              background: t.accent,
+              border: `1px solid ${t.accent}`,
+              color: "#000",
               borderRadius: 8,
               padding: 12,
               cursor: "pointer",
               fontSize: 14,
+              fontWeight: 700,
               fontFamily: "'Space Mono', monospace",
             }}
           >
-            CSV
+            CSV Import
           </button>
           <button
             onClick={save}
