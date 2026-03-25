@@ -252,7 +252,7 @@ export default function DaySession({ plList, plans, onAddTrade, onAddPlan, journ
                     border: `1.5px solid ${earned ? b.color : t.border2}`,
                     boxShadow: earned ? `0 0 12px ${b.color}66` : "none",
                     display: "flex", alignItems: "center", justifyContent: "center",
-                    filter: earned ? "none" : "grayscale(40%) brightness(1.4)",
+                    filter: earned ? `drop-shadow(0 0 6px ${b.color})` : "grayscale(40%) brightness(1.4)",
                     opacity: earned ? 1 : 0.6,
                     transition: "all 0.2s ease",
                   }}>

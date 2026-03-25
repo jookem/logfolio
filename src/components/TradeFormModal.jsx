@@ -4,7 +4,7 @@ import { todayStr, typeLabels, fmt } from "../lib/utils";
 import Tag from "./Tag";
 import VoiceNote from "./VoiceNote";
 import ScreenshotUpload from "./ScreenshotUpload";
-import { EditIcon, LogIcon, CloseIcon, TodayIcon, ExitIcon, EntryPriceIcon, EntryTimeIcon, ExitTimeIcon, TickerIcon, CategoryIcon, StrategyIcon, DirectionIcon, AmountIcon, WarningIcon, TargetIcon, EmotionIcon, TagsIcon } from "../lib/icons";
+import { EditIcon, LogIcon, CloseIcon, TodayIcon, ExitIcon, EntryPriceIcon, EntryTimeIcon, ExitTimeIcon, TickerIcon, CategoryIcon, StrategyIcon, DirectionIcon, AmountIcon, WarningIcon, TargetIcon, EmotionIcon, TagsIcon, PenIcon } from "../lib/icons";
 
 export default function TradeFormModal({ initial, defaults, onClose, onSave, onCSVImport, t, editLabel, isDark, trades = [] }) {
   const sm = window.innerWidth < 400;
@@ -179,7 +179,7 @@ export default function TradeFormModal({ initial, defaults, onClose, onSave, onC
     display: "block",
     fontFamily: "'Space Mono', monospace",
   };
-  const sectionHeader = (title, id) => (
+  const sectionHeader = (title, id, icon) => (
     <div id={id} style={{
       fontFamily: "'Space Mono', monospace",
       fontSize: 10,
@@ -190,7 +190,13 @@ export default function TradeFormModal({ initial, defaults, onClose, onSave, onC
       marginTop: 18,
       paddingBottom: 6,
       borderBottom: `1px solid ${t.border}`,
-    }}>{title}</div>
+      display: "flex",
+      alignItems: "center",
+      gap: 6,
+    }}>
+      {icon && icon}
+      {title}
+    </div>
   );
   return (
     <div
@@ -668,7 +674,7 @@ export default function TradeFormModal({ initial, defaults, onClose, onSave, onC
             >+ Add</button>
           </div>
         </div>
-        {sectionHeader("Notes", "tut-trade-notes")}
+        {sectionHeader("Notes", "tut-trade-notes", <PenIcon size={12} />)}
         <div id="tut-trade-tags" style={{ marginBottom: 12 }}>
           <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><TagsIcon size={14} />Tags</label>
           <div

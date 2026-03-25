@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { PlanIcon, CloseIcon, WarningIcon, TargetIcon, TickerIcon, CategoryIcon, StrategyIcon, TodayIcon, DirectionIcon, AmountIcon, EntryPriceIcon, CurrentPriceIcon, EmotionIcon, TagsIcon } from "../lib/icons";
+import { PlanIcon, CloseIcon, WarningIcon, TargetIcon, TickerIcon, CategoryIcon, StrategyIcon, TodayIcon, DirectionIcon, AmountIcon, EntryPriceIcon, CurrentPriceIcon, EmotionIcon, TagsIcon, PenIcon } from "../lib/icons";
 import { supabase } from "../lib/supabase";
 import { STOCK_LIKE, SUGGESTED_TAGS, EMOTIONS } from "../lib/constants";
 import { todayStr, typeLabels, normCDF, bsPrice } from "../lib/utils";
@@ -1099,7 +1099,7 @@ const base = {
           </div>
         </div>
 {/* ══ TAGS + THESIS ══ */}
-        {sectionHeader("Notes", "tut-plan-notes")}
+        {sectionHeader("Notes", "tut-plan-notes", "/images/pen.svg")}
         <div id="tut-plan-tags" style={{ marginBottom: 12 }}>
           <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><TagsIcon size={14} />Tags</label>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 8 }}>
@@ -1133,7 +1133,7 @@ const base = {
         </div>
 
         <div id="tut-plan-notes-text" style={{ marginBottom: 20 }}>
-          <label style={lbl}>Trade Thesis</label>
+          <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><PenIcon size={14} />Trade Thesis</label>
           <textarea style={{ ...inp, height: 76, resize: "none" }} value={form.notes}
             onChange={(e) => set("notes", e.target.value)} placeholder="Why are you taking this trade? What's your edge?" />
         </div>
@@ -1151,7 +1151,7 @@ const base = {
                 opacity: aiLoading ? 0.6 : 1,
               }}
             >
-              {aiLoading ? (aiStep === "price" ? "Fetching prices..." : "Analysing...") : "✦ AI Assist"}
+              {aiLoading ? (aiStep === "price" ? "Fetching prices..." : "Analysing...") : <><img src="/images/robot.svg" width={14} height={14} alt="" style={{ verticalAlign: "middle", marginRight: 6 }} />AI Assist</>}
             </button>
             {aiError && (
               <div style={{ fontSize: 11, color: t.danger, marginTop: 8 }}>{aiError}</div>
