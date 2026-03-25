@@ -123,19 +123,19 @@ export default function DaySession({ plList, plans, onAddTrade, onAddPlan, journ
       )}
 
       {/* Main stats row */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 24, flexWrap: "wrap", gap: 12 }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 24, gap: 12 }}>
         <div>
-          <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 12, color: t.text3, marginBottom: 4 }}>{dayName}</div>
-          <div style={{ fontFamily: "'Space Mono', monospace", fontSize: mobile ? 32 : 42, fontWeight: 700, color: sessionPL >= 0 ? t.accent : t.danger, letterSpacing: -2 }}>
+          <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 12, color: t.text3, marginBottom: 2 }}>{dayName}</div>
+          <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 14, color: t.text3 }}>{timeStr}</div>
+        </div>
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 8 }}>
+          <div style={{ fontFamily: "'Space Mono', monospace", fontSize: mobile ? 28 : 42, fontWeight: 700, color: sessionPL >= 0 ? t.accent : t.danger, letterSpacing: -2 }}>
             {sessionPL >= 0 ? "+" : ""}{fmt(sessionPL)}
           </div>
-          <div style={{ fontSize: 13, color: t.text3, marginTop: 5 }}>
+          <div style={{ fontSize: 11, color: t.text3, textAlign: "right" }}>
             Session P&L · {todayTrades.length} trades · {wins}W {losses}L
           </div>
-        </div>
-        <div style={{ display: "flex", flexDirection: "column", alignItems: mobile ? "flex-start" : "flex-end", gap: 10 }}>
-          <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 20, color: t.text3 }}>{timeStr}</div>
-          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap", justifyContent: "flex-end" }}>
             {statCard("WINS", wins, t.accent)}
             {statCard("LOSSES", losses, t.danger)}
             {streak && streak.count >= 2 && statCard("STREAK", `${streak.count}${streak.type}`, streak.type === "W" ? t.accent : t.danger)}
