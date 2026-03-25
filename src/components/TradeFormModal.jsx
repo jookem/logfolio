@@ -4,7 +4,7 @@ import { todayStr, typeLabels, fmt } from "../lib/utils";
 import Tag from "./Tag";
 import VoiceNote from "./VoiceNote";
 import ScreenshotUpload from "./ScreenshotUpload";
-import { EditIcon, LogIcon, CloseIcon, TodayIcon, ExitIcon, EntryPriceIcon, EntryTimeIcon, ExitTimeIcon, TickerIcon, CategoryIcon, StrategyIcon, DirectionIcon, AmountIcon, WarningIcon, TargetIcon, EmotionIcon, TagsIcon, PenIcon } from "../lib/icons";
+import { EditIcon, LogIcon, CloseIcon, TodayIcon, ExitIcon, EntryPriceIcon, EntryTimeIcon, ExitTimeIcon, TickerIcon, CategoryIcon, StrategyIcon, DirectionIcon, AmountIcon, WarningIcon, TargetIcon, EmotionIcon, TagsIcon, PenIcon, MistakeIcon } from "../lib/icons";
 
 export default function TradeFormModal({ initial, defaults, onClose, onSave, onCSVImport, t, editLabel, isDark, trades = [] }) {
   const sm = window.innerWidth < 400;
@@ -622,7 +622,7 @@ export default function TradeFormModal({ initial, defaults, onClose, onSave, onC
           </div>
         </div>
         <div id="tut-trade-mistake" style={{ marginBottom: 14 }}>
-          <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><WarningIcon size={14} />Mistake</label>
+          <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><MistakeIcon size={14} />Mistake</label>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 4, marginBottom: 8 }}>
             {[...MISTAKES.filter((m) => m !== "None"), ...customMistakes].map((m) => {
               const active = form.mistake === m;

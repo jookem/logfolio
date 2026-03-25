@@ -232,6 +232,13 @@ export const WarningIcon = ({ size = 24 }) => (
   </SVG>
 );
 
+// Mistake (X cross)
+export const MistakeIcon = ({ size = 24 }) => (
+  <SVG size={size}>
+    <path d="M200,200L600,600 M600,200L200,600" />
+  </SVG>
+);
+
 // Menu (3 lines in rounded rect border)
 export const MenuIcon = ({ size = 24 }) => (
   <SVG size={size}>
