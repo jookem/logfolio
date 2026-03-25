@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { PlanIcon, CloseIcon, WarningIcon, TargetIcon, TickerIcon, CategoryIcon, StrategyIcon, TodayIcon, DirectionIcon, AmountIcon, EntryPriceIcon, CurrentPriceIcon, EmotionIcon, TagsIcon, PenIcon } from "../lib/icons";
+import { PlanIcon, CloseIcon, WarningIcon, TargetIcon, TickerIcon, CategoryIcon, StrategyIcon, TodayIcon, DirectionIcon, AmountIcon, EntryPriceIcon, CurrentPriceIcon, EmotionIcon, TagsIcon, PenIcon, ChecklistIcon } from "../lib/icons";
 import { supabase } from "../lib/supabase";
 import { STOCK_LIKE, SUGGESTED_TAGS, EMOTIONS } from "../lib/constants";
 import { todayStr, typeLabels, normCDF, bsPrice } from "../lib/utils";
@@ -419,7 +419,7 @@ const base = {
       alignItems: "center",
       gap: 6,
     }}>
-      {icon && <img src={icon} width={16} height={16} alt="" style={{ filter: t.bg === "#000" ? "brightness(0) invert(1)" : "brightness(0)", flexShrink: 0 }} />}
+      {icon && icon}
       {title}
     </div>
   );
@@ -959,7 +959,7 @@ const base = {
         )}{/* end tut-plan-risk */}
 {/* ══ PRE-TRADE CHECKLIST ══ */}
         <div id="tut-plan-checklist">
-        {sectionHeader("Pre-Trade Checklist", undefined, "/images/checkList.svg")}
+        {sectionHeader("Pre-Trade Checklist", undefined, <ChecklistIcon size={12} />)}
 
         {/* Progress bar */}
         <div style={{ marginBottom: 14 }}>
@@ -1099,7 +1099,7 @@ const base = {
           </div>
         </div>
 {/* ══ TAGS + THESIS ══ */}
-        {sectionHeader("Notes", "tut-plan-notes", "/images/pen.svg")}
+        {sectionHeader("Notes", "tut-plan-notes", <PenIcon size={12} />)}
         <div id="tut-plan-tags" style={{ marginBottom: 12 }}>
           <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><TagsIcon size={14} />Tags</label>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 8 }}>

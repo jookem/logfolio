@@ -444,6 +444,16 @@ export const EmotionIcon = ({ size = 24 }) => (
   </SVG>
 );
 
+// Checklist (two checkmarks + two lines)
+export const ChecklistIcon = ({ size = 24 }) => (
+  <SVG size={size}>
+    <path d="M144.7,551.5l24.7,54.6l157.3-136.5" />
+    <path d="M144.7,246.7l52,54.6l130-136.5" />
+    <path strokeLinecap="butt" d="M463.2,255.8h200.2" />
+    <path strokeLinecap="butt" d="M463.2,560.6h200.2" />
+  </SVG>
+);
+
 // Tags (price tag with dot)
 export const TagsIcon = ({ size = 24 }) => (
   <SVG size={size}>
