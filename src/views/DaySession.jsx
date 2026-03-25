@@ -256,7 +256,7 @@ export default function DaySession({ plList, plans, onAddTrade, onAddPlan, journ
                     opacity: earned ? 1 : 0.6,
                     transition: "all 0.2s ease",
                   }}>
-                    <img src={b.icon} width={32} height={32} alt={b.label} />
+                    <img src={b.icon} width={32} height={32} alt={b.label} style={{ filter: isDark ? "brightness(0) invert(1)" : "none" }} />
                   </div>
                   <div style={{
                     fontSize: 9,
