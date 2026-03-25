@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { todayStr } from "../lib/utils";
-import { CloseIcon, ArrowsIcon } from "../lib/icons";
+import { CloseIcon, ArrowsIcon, WarningIcon, CheckIcon } from "../lib/icons";
 
 export default function CSVModal({ onClose, onImport, t }) {
   const sm = window.innerWidth < 400;
@@ -279,10 +279,10 @@ export default function CSVModal({ onClose, onImport, t }) {
           </div>
           <textarea style={{ ...inp, height: 120, resize: "vertical" }} value={csv} onChange={(e) => setCsv(e.target.value)} placeholder="Or paste CSV/TSV content here..." />
         </div>
-        {error && <div style={{ color: t.danger, fontSize: 13, marginBottom: 10, fontFamily: "monospace" }}>⚠ {error}</div>}
+        {error && <div style={{ color: t.danger, fontSize: 13, marginBottom: 10, fontFamily: "monospace", display: "flex", alignItems: "center", gap: 6 }}><WarningIcon size={14} />{error}</div>}
         {preview.length > 0 && (
           <div style={{ marginBottom: 14 }}>
-            <div style={{ fontSize: 12, color: t.accent, fontFamily: "'Space Mono', monospace", marginBottom: 8 }}>✓ {preview.length} trades ready</div>
+            <div style={{ fontSize: 12, color: t.accent, fontFamily: "'Space Mono', monospace", marginBottom: 8, display: "flex", alignItems: "center", gap: 6 }}><CheckIcon size={14} />{preview.length} trades ready</div>
             <div style={{ background: t.card2, border: `1px solid ${t.border}`, borderRadius: 8, overflow: "hidden" }}>
               {preview.slice(0, 4).map((tr, i) => (
                 <div key={i} style={{ display: "flex", justifyContent: "space-between", padding: "9px 12px", borderBottom: i < preview.length - 1 ? `1px solid ${t.border}` : "none" }}>
