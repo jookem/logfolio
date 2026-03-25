@@ -140,7 +140,7 @@ export default function DaySession({ plList, plans, onAddTrade, onAddPlan, journ
             <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>
               <div style={{ fontSize: 10, color: t.text3, fontFamily: "'Space Mono', monospace" }}>SESSION P&L</div>
               <div style={{ fontSize: 10, color: t.text3, fontFamily: "'Space Mono', monospace" }}>{todayTrades.length} TRADES</div>
-              <div style={{ fontSize: 10, color: t.text3, fontFamily: "'Space Mono', monospace" }}>{wins}W {losses}L</div>
+              <div style={{ fontSize: 10, color: t.text3, fontFamily: "'Space Mono', monospace" }}>{wins} WINS {losses} LOSSES</div>
             </div>
           </div>
           {(wins > 0 || losses > 0 || (streak && streak.count >= 2) || journalStreak >= 1) && (
