@@ -674,7 +674,7 @@ export default function TradeFormModal({ initial, defaults, onClose, onSave, onC
             >+ Add</button>
           </div>
         </div>
-        {sectionHeader("Notes", "tut-trade-notes", <PenIcon size={12} />)}
+        {sectionHeader("Notes", "tut-trade-notes")}
         <div id="tut-trade-tags" style={{ marginBottom: 12 }}>
           <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><TagsIcon size={14} />Tags</label>
           <div
@@ -742,7 +742,7 @@ export default function TradeFormModal({ initial, defaults, onClose, onSave, onC
           </div>
         </div>
         <div id="tut-trade-notes-text" style={{ marginBottom: 20 }}>
-          <label style={lbl}>Notes</label>
+          <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><PenIcon size={14} />Notes</label>
           <textarea
             style={{ ...inp(), height: 80, resize: "none" }}
             value={form.notes}

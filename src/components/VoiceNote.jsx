@@ -113,9 +113,7 @@ export default function VoiceNote({ value, onChange, t }) {
             </>
           ) : (
             <>
-              <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                <RecIcon size={15} /> Record Voice Note
-              </div>
+              <div>Record Voice Note</div>
               <div style={{ fontSize: 11, color: t.text3, opacity: 0.7 }}>
                 max {fmtTime(MAX_SECONDS)}
               </div>

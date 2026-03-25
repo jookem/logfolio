@@ -101,8 +101,8 @@ const handleFiles = async (files) => {
             background: t.accent + "08", marginBottom: value.length > 0 ? 10 : 0,
           }}
         >
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6, fontSize: 13, color: t.accent, fontFamily: "'Space Mono', monospace", marginBottom: 4 }}>
-            <ScreenshotIcon size={15} /> Click or drag & drop charts
+          <div style={{ fontSize: 13, color: t.accent, fontFamily: "'Space Mono', monospace", marginBottom: 4 }}>
+            Click or drag & drop charts
           </div>
           <div style={{ fontSize: 11, color: t.text3, marginTop: 2 }}>PNG, JPG, WebP · max {MAX_FILE_MB} MB · saved as {ENCODE_FORMAT.split("/")[1].toUpperCase()} {MAX_WIDTH}px</div>
           <input

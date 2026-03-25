@@ -6,16 +6,16 @@ import QuoteOfDay from "./QuoteOfDay";
 import { LogIcon, PlanIcon } from "../lib/icons";
 
 const BADGE_DEFS = [
-  { id: "first_trade",  icon: "/images/firstTrade.svg",       color: "#f59e0b", label: "First Trade",   desc: "Logged your first trade",                     check: ({ trades }) => trades.length >= 1 },
+  { id: "first_trade",  icon: "/images/firstTrade.svg",       color: "#e8eaed", label: "First Trade",   desc: "Logged your first trade",                     check: ({ trades }) => trades.length >= 1 },
   { id: "ten_trades",   icon: "/images/tenthTrade.svg",       color: "#3B82F6", label: "10 Trades",     desc: "Logged 10 trades",                            check: ({ trades }) => trades.length >= 10 },
   { id: "fifty_trades", icon: "/images/fiftyTrades.svg",      color: "#8b5cf6", label: "50 Trades",     desc: "Logged 50 trades",                            check: ({ trades }) => trades.length >= 50 },
-  { id: "century",      icon: "/images/onehundrethTrade.svg", color: "#f59e0b", label: "Century",       desc: "Logged 100 trades",                           check: ({ trades }) => trades.length >= 100 },
+  { id: "century",      icon: "/images/onehundrethTrade.svg", color: "#b8860b", label: "Century",       desc: "Logged 100 trades",                           check: ({ trades }) => trades.length >= 100 },
   { id: "big_winner",   icon: "/images/bigWinner.svg",        color: "#f59e0b", label: "Big Winner",    desc: "Single trade over $500",                      check: ({ trades }) => trades.some(t => t.pl >= 500) },
   { id: "green_day",    icon: "/images/greenDay.svg",         color: "#12B248", label: "Green Day",     desc: "First profitable trading day",                check: ({ trades }) => { const d = {}; trades.forEach(t => { d[t.date] = (d[t.date] || 0) + t.pl; }); return Object.values(d).some(pl => pl > 0); } },
   { id: "plan_follower",icon: "/images/planExecuted.svg",     color: "#3B82F6", label: "Plan Follower", desc: "Executed 3 or more trade plans",              check: ({ trades }) => trades.filter(t => t.fromPlanId).length >= 3 },
   { id: "win_streak",   icon: "/images/hotStreak.svg",        color: "#FF1212", label: "Hot Streak",    desc: "3 consecutive winning trades",                check: ({ streak }) => streak?.type === "W" && streak?.count >= 3 },
-  { id: "disciplined",  icon: "/images/discipline.svg",       color: "#00ff87", label: "Disciplined",   desc: "10 trades in a row with no mistakes",         check: ({ trades }) => { const l = trades.slice(-10); return l.length === 10 && l.every(t => !t.mistake || t.mistake === "None"); } },
-  { id: "journal_week", icon: "/images/journalCheck.svg",     color: "#3B82F6", label: "Journal Habit", desc: "7-day journal writing streak",                check: ({ journalStreak }) => journalStreak >= 7 },
+  { id: "disciplined",  icon: "/images/discipline.svg",       color: "#93c5fd", label: "Disciplined",   desc: "10 trades in a row with no mistakes",         check: ({ trades }) => { const l = trades.slice(-10); return l.length === 10 && l.every(t => !t.mistake || t.mistake === "None"); } },
+  { id: "journal_week", icon: "/images/journalCheck.svg",     color: "#f97316", label: "Journal Habit", desc: "7-day journal writing streak",                check: ({ journalStreak }) => journalStreak >= 7 },
 ];
 
 export default function DaySession({ plList, plans, onAddTrade, onAddPlan, journals = {}, t, mobile, isDark, isPro, onUpgrade }) {
