@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { supabase } from "../lib/supabase";
-import { LogoIcon } from "../lib/icons";
 
 function tk(dark) {
   return dark ? {
@@ -74,7 +73,7 @@ export default function AuthScreen({ isDark }) {
         {/* Logo */}
         <div style={{ textAlign: "center", marginBottom: 28 }}>
           <div style={{ display: "flex", justifyContent: "center", marginBottom: 10 }}>
-            <LogoIcon width={100} height={100} />
+            <img src="/images/logfolio.svg" width={100} height={100} alt="Logfolio" />
           </div>
           <div style={{ fontSize: 18, fontWeight: 700, color: T.accent, letterSpacing: 2, marginBottom: 6, fontFamily: "'Space Mono', monospace" }}>
             LOG-FOLIO

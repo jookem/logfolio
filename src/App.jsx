@@ -719,7 +719,10 @@ const paginated = filtered
   if (authLoading || (user && !tradesLoaded)) {
     return (
       <div style={{ minHeight: "100vh", background: isDark ? "#000" : "#f4f5f7", display: "flex", alignItems: "center", justifyContent: "center" }}>
-        <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 13, color: "#666" }}>Loading...</div>
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 16 }}>
+          <img src="/images/logfolio.svg" width={64} height={64} alt="Logfolio" />
+          <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 13, color: "#666" }}>Loading...</div>
+        </div>
       </div>
     );
   }
