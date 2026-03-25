@@ -256,7 +256,7 @@ export default function DaySession({ plList, plans, onAddTrade, onAddPlan, journ
         <div style={{ background: t.surface, border: `1px solid ${t.border}`, borderRadius: 12, padding: "14px 16px", marginTop: 20 }}>
           <style>{`@keyframes sparkle { 0%,100%{box-shadow:0 0 8px 2px #d4af3799,0 0 0 0 #d4af3700} 50%{box-shadow:0 0 18px 6px #d4af37cc,0 0 28px 10px #d4af3744} }`}</style>
           <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 10, color: t.text3, textTransform: "uppercase", letterSpacing: 2, marginBottom: 12 }}>Achievements</div>
-          <div style={{ display: "flex", justifyContent: "space-between" }}>
+          <div style={ mobile ? { display: "grid", gridTemplateColumns: "repeat(5, 1fr)", justifyItems: "center", gap: "12px 0" } : { display: "flex", justifyContent: "space-between" }}>
             {BADGE_DEFS.map(b => {
               const earned = earnedIds.has(b.id);
               const iconColor = earned ? (isDark ? "#fff" : "#000") : isDark ? "rgba(255,255,255,0.4)" : "rgba(0,0,0,0.3)";
