@@ -232,11 +232,12 @@ export const WarningIcon = ({ size = 24 }) => (
   </SVG>
 );
 
-// Mistake (X cross)
+// Mistake (X cross — paths from mistake.svg, viewBox cropped to that region)
 export const MistakeIcon = ({ size = 24 }) => (
-  <SVG size={size}>
-    <path d="M200,200L600,600 M600,200L200,600" />
-  </SVG>
+  <svg viewBox="552 78 198 198" width={size} height={size} fill="none" stroke="currentColor"
+    strokeWidth="66" strokeLinecap="round" strokeLinejoin="round" style={{ display: "block" }}>
+    <path d="M717.4,111.4L585.5,243.3 M585.5,111.4l131.9,131.9" />
+  </svg>
 );
 
 // Menu (3 lines in rounded rect border)
