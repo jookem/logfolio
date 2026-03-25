@@ -123,30 +123,31 @@ export default function DaySession({ plList, plans, onAddTrade, onAddPlan, journ
       )}
 
       {/* Main stats card */}
-      <div style={{ background: t.surface, border: `1px solid ${t.border}`, borderRadius: 16, padding: "16px 20px", marginBottom: 24 }}>
-        {/* Date + time row */}
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
-          <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 11, color: t.text3 }}>{dayName}</div>
-          <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 11, color: t.text3 }}>{timeStr}</div>
+      <div style={{ background: t.surface, border: `1px solid ${t.border}`, borderRadius: 16, padding: "16px 20px", marginBottom: 24, display: "flex", alignItems: "flex-start", gap: 20 }}>
+        {/* Left: date + time */}
+        <div style={{ flexShrink: 0 }}>
+          <div style={{ fontFamily: "'Space Mono', monospace", fontSize: mobile ? 13 : 15, fontWeight: 700, color: t.text2, marginBottom: 4 }}>{dayName}</div>
+          <div style={{ fontFamily: "'Space Mono', monospace", fontSize: mobile ? 13 : 15, color: t.text3 }}>{timeStr}</div>
         </div>
-        {/* P&L centered */}
-        <div style={{ textAlign: "center", marginBottom: 4 }}>
-          <div style={{ fontFamily: "'Space Mono', monospace", fontSize: mobile ? 36 : 48, fontWeight: 700, color: sessionPL >= 0 ? t.accent : t.danger, letterSpacing: -2, lineHeight: 1 }}>
+        {/* Divider */}
+        <div style={{ width: 1, alignSelf: "stretch", background: t.border, flexShrink: 0 }} />
+        {/* Right: P&L + stats */}
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ fontFamily: "'Space Mono', monospace", fontSize: mobile ? 28 : 36, fontWeight: 700, color: sessionPL >= 0 ? t.accent : t.danger, letterSpacing: -1, lineHeight: 1, marginBottom: 4 }}>
             {sessionPL >= 0 ? "+" : ""}{fmt(sessionPL)}
           </div>
-          <div style={{ fontSize: 11, color: t.text3, marginTop: 6, fontFamily: "'Space Mono', monospace" }}>
+          <div style={{ fontSize: 10, color: t.text3, fontFamily: "'Space Mono', monospace", marginBottom: 10 }}>
             SESSION P&L · {todayTrades.length} TRADES · {wins}W {losses}L
           </div>
+          {(wins > 0 || losses > 0 || (streak && streak.count >= 2) || journalStreak >= 1) && (
+            <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+              {statCard("WINS", wins, t.accent)}
+              {statCard("LOSSES", losses, t.danger)}
+              {streak && streak.count >= 2 && statCard("STREAK", `${streak.count}${streak.type}`, streak.type === "W" ? t.accent : t.danger)}
+              {journalStreak >= 1 && statCard("JOURNAL", `${journalStreak}D`, "#a78bfa")}
+            </div>
+          )}
         </div>
-        {/* Stat pills */}
-        {(wins > 0 || losses > 0 || (streak && streak.count >= 2) || journalStreak >= 1) && (
-          <div style={{ display: "flex", gap: 8, marginTop: 14, justifyContent: "center", flexWrap: "wrap" }}>
-            {statCard("WINS", wins, t.accent)}
-            {statCard("LOSSES", losses, t.danger)}
-            {streak && streak.count >= 2 && statCard("STREAK", `${streak.count}${streak.type}`, streak.type === "W" ? t.accent : t.danger)}
-            {journalStreak >= 1 && statCard("JOURNAL", `${journalStreak}D`, "#a78bfa")}
-          </div>
-        )}
       </div>
 
       {/* Running P&L */}
