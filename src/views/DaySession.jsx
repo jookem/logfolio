@@ -6,18 +6,16 @@ import QuoteOfDay from "./QuoteOfDay";
 import { LogIcon, PlanIcon, FirstTradeIcon, GreenDayIcon } from "../lib/icons";
 
 const BADGE_DEFS = [
-  // Progression: bronze → steel → violet → gold
-  { id: "first_trade",  IconCmp: FirstTradeIcon,               color: "#94a3b8", iconColor: "#fcd34d", label: "First Trade",   desc: "Logged your first trade",                     check: ({ trades }) => trades.length >= 1 },
-  { id: "ten_trades",   icon: "/images/tenthTrade.svg",        color: "#3b82f6", iconColor: "#fb923c", label: "10 Trades",     desc: "Logged 10 trades",                            check: ({ trades }) => trades.length >= 10 },
-  { id: "fifty_trades", icon: "/images/fiftyTrades.svg",       color: "#8b5cf6", iconColor: "#a3e635", label: "50 Trades",     desc: "Logged 50 trades",                            check: ({ trades }) => trades.length >= 50 },
-  { id: "century",      icon: "/images/onehundrethTrade.svg",  color: "#b8860b", iconColor: "#c7d2fe", label: "Century",       desc: "Logged 100 trades",                           check: ({ trades }) => trades.length >= 100 },
-  // Others
-  { id: "big_winner",   icon: "/images/bigWinner.svg",         color: "#f59e0b", iconColor: "#6366f1", label: "Big Winner",    desc: "Single trade over $500",                      check: ({ trades }) => trades.some(t => t.pl >= 500) },
-  { id: "green_day",    IconCmp: GreenDayIcon,                  color: "#22c55e", iconColor: "#fde68a", label: "Green Day",     desc: "First profitable trading day",                check: ({ trades }) => { const d = {}; trades.forEach(t => { d[t.date] = (d[t.date] || 0) + t.pl; }); return Object.values(d).some(pl => pl > 0); } },
-  { id: "plan_follower",icon: "/images/planExecuted.svg",      color: "#06b6d4", iconColor: "#fb923c", label: "Plan Follower", desc: "Executed 3 or more trade plans",              check: ({ trades }) => trades.filter(t => t.fromPlanId).length >= 3 },
-  { id: "win_streak",   icon: "/images/hotStreak.svg",         color: "#ef4444", iconColor: "#fbbf24", label: "Hot Streak",    desc: "3 consecutive winning trades",                check: ({ streak }) => streak?.type === "W" && streak?.count >= 3 },
-  { id: "disciplined",  icon: "/images/discipline.svg",        color: "#38bdf8", iconColor: "#fbbf24", label: "Disciplined",   desc: "10 trades in a row with no mistakes",         check: ({ trades }) => { const l = trades.slice(-10); return l.length === 10 && l.every(t => !t.mistake || t.mistake === "None"); } },
-  { id: "journal_week", icon: "/images/journalCheck.svg",      color: "#f97316", iconColor: "#818cf8", label: "Journal Habit", desc: "7-day journal writing streak",                check: ({ journalStreak }) => journalStreak >= 7 },
+  { id: "first_trade",  IconCmp: FirstTradeIcon,               color: "#fbbf24", label: "First Trade",   desc: "Logged your first trade",                     check: ({ trades }) => trades.length >= 1 },
+  { id: "ten_trades",   icon: "/images/tenthTrade.svg",        color: "#f97316", label: "10 Trades",     desc: "Logged 10 trades",                            check: ({ trades }) => trades.length >= 10 },
+  { id: "fifty_trades", icon: "/images/fiftyTrades.svg",       color: "#8b5cf6", label: "50 Trades",     desc: "Logged 50 trades",                            check: ({ trades }) => trades.length >= 50 },
+  { id: "century",      icon: "/images/onehundrethTrade.svg",  color: "#3b82f6", label: "Century",       desc: "Logged 100 trades",                           check: ({ trades }) => trades.length >= 100 },
+  { id: "big_winner",   icon: "/images/bigWinner.svg",         color: "#d4af37", sparkle: true,          label: "Big Winner",    desc: "Single trade over $500",                      check: ({ trades }) => trades.some(t => t.pl >= 500) },
+  { id: "green_day",    IconCmp: GreenDayIcon,                  color: "#22c55e", label: "Green Day",     desc: "First profitable trading day",                check: ({ trades }) => { const d = {}; trades.forEach(t => { d[t.date] = (d[t.date] || 0) + t.pl; }); return Object.values(d).some(pl => pl > 0); } },
+  { id: "plan_follower",icon: "/images/planExecuted.svg",      color: "#92400e", label: "Plan Follower", desc: "Executed 3 or more trade plans",              check: ({ trades }) => trades.filter(t => t.fromPlanId).length >= 3 },
+  { id: "win_streak",   icon: "/images/hotStreak.svg",         color: "#ef4444", label: "Hot Streak",    desc: "3 consecutive winning trades",                check: ({ streak }) => streak?.type === "W" && streak?.count >= 3 },
+  { id: "disciplined",  icon: "/images/discipline.svg",        color: "#db2777", label: "Disciplined",   desc: "10 trades in a row with no mistakes",         check: ({ trades }) => { const l = trades.slice(-10); return l.length === 10 && l.every(t => !t.mistake || t.mistake === "None"); } },
+  { id: "journal_week", icon: "/images/journalCheck.svg",      color: "#14b8a6", label: "Journal Habit", desc: "7-day journal writing streak",                check: ({ journalStreak }) => journalStreak >= 7 },
 ];
 
 export default function DaySession({ plList, plans, onAddTrade, onAddPlan, journals = {}, t, mobile, isDark, isPro, onUpgrade }) {
@@ -256,31 +254,31 @@ export default function DaySession({ plList, plans, onAddTrade, onAddPlan, journ
       {/* Achievement badges */}
       {plList.length > 0 && (
         <div style={{ background: t.surface, border: `1px solid ${t.border}`, borderRadius: 12, padding: "14px 16px", marginTop: 20 }}>
+          <style>{`@keyframes sparkle { 0%,100%{box-shadow:0 0 8px 2px #d4af3799,0 0 0 0 #d4af3700} 50%{box-shadow:0 0 18px 6px #d4af37cc,0 0 28px 10px #d4af3744} }`}</style>
           <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 10, color: t.text3, textTransform: "uppercase", letterSpacing: 2, marginBottom: 12 }}>Achievements</div>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 12 }}>
             {BADGE_DEFS.map(b => {
               const earned = earnedIds.has(b.id);
+              const iconColor = earned ? (isDark ? "#fff" : "#000") : isDark ? "rgba(255,255,255,0.4)" : "rgba(0,0,0,0.3)";
               return (
                 <div key={b.id} title={b.desc} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 5 }}>
                   <div style={{
                     width: 52, height: 52, borderRadius: 12,
-                    background: earned
-                      ? `linear-gradient(135deg, ${b.color}40, ${b.color}15)`
-                      : t.card2,
+                    background: earned ? `linear-gradient(135deg, ${b.color}50, ${b.color}20)` : t.card2,
                     border: `1.5px solid ${earned ? b.color : t.border2}`,
-                    boxShadow: earned ? `0 0 12px ${b.color}66` : "none",
                     display: "flex", alignItems: "center", justifyContent: "center",
-                    filter: earned ? `drop-shadow(0 0 6px ${b.color})` : "grayscale(40%) brightness(1.4)",
-                    opacity: earned ? 1 : 0.6,
+                    animation: earned && b.sparkle ? "sparkle 2s ease-in-out infinite" : "none",
+                    boxShadow: earned && !b.sparkle ? `0 0 10px ${b.color}55` : "none",
+                    opacity: earned ? 1 : 0.5,
                     transition: "all 0.2s ease",
                   }}>
                     {b.IconCmp
-                      ? <div style={{ color: earned ? b.iconColor : isDark ? "rgba(255,255,255,0.4)" : "rgba(0,0,0,0.3)" }}><b.IconCmp size={32} /></div>
-                      : <img src={b.icon} width={32} height={32} alt={b.label} style={{ filter: isDark ? "brightness(0) invert(1)" : "none" }} />}
+                      ? <div style={{ color: iconColor }}><b.IconCmp size={30} /></div>
+                      : <img src={b.icon} width={30} height={30} alt={b.label} style={{ filter: isDark ? "brightness(0) invert(1)" : "brightness(0)" }} />}
                   </div>
                   <div style={{
                     fontSize: 9,
-                    color: earned ? b.color : t.text2,
+                    color: earned ? (isDark ? "#fff" : "#000") : t.text3,
                     fontFamily: "'Space Mono', monospace",
                     textAlign: "center",
                     maxWidth: 52,
