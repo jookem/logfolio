@@ -959,13 +959,13 @@ const base = {
         )}{/* end tut-plan-risk */}
 {/* ══ PRE-TRADE CHECKLIST ══ */}
         <div id="tut-plan-checklist">
-        {sectionHeader("Pre-Trade Checklist", undefined, <ChecklistIcon size={12} />)}
+        {sectionHeader("Pre-Trade Checklist")}
 
         {/* Progress bar */}
         <div style={{ marginBottom: 14 }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
-            <span style={{ fontSize: 11, color: t.text3, fontFamily: "'Space Mono', monospace" }}>
-              {checkedCount}/{checklist.length} completed
+            <span style={{ ...lbl, marginBottom: 0, display: "flex", alignItems: "center", gap: 6 }}>
+              <ChecklistIcon size={12} />{checkedCount}/{checklist.length} completed
             </span>
             {allChecked && (
               <span style={{ fontSize: 11, color: t.accent, fontFamily: "'Space Mono', monospace" }}>✓ Ready to trade</span>
