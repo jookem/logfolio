@@ -1151,7 +1151,10 @@ const base = {
                 opacity: aiLoading ? 0.6 : 1,
               }}
             >
-              {aiLoading ? (aiStep === "price" ? "Fetching prices..." : "Analysing...") : <><img src="/images/robot.svg" width={14} height={14} alt="" style={{ verticalAlign: "middle", marginRight: 6 }} />AI Assist</>}
+              <span style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
+                {!aiLoading && <img src="/images/robot.svg" width={14} height={14} alt="" style={{ filter: t.bg === "#000" ? "invert(1)" : "none" }} />}
+                {aiLoading ? (aiStep === "price" ? "Fetching prices..." : "Analysing...") : "AI Assist"}
+              </span>
             </button>
             {aiError && (
               <div style={{ fontSize: 11, color: t.danger, marginTop: 8 }}>{aiError}</div>

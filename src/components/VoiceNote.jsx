@@ -81,7 +81,8 @@ export default function VoiceNote({ value, onChange, t }) {
       <div style={{
         fontSize: 11, color: t.text3, fontFamily: "'Space Mono', monospace",
         textTransform: "uppercase", letterSpacing: 1.5, marginBottom: 10,
-      }}>Voice Note</div>
+        display: "flex", alignItems: "center", gap: 6,
+      }}><RecIcon size={13} />Voice Note</div>
 
       {!audioUrl ? (
         <button
