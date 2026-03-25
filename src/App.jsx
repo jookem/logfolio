@@ -1550,25 +1550,27 @@ const paginated = filtered
               </div>
               {allTags.length === 0 ? (
                 <div style={{ color: T.text3, fontSize: 13 }}>No tags added yet</div>
-              ) : (
-                allTags.map((tag) => {
+              ) : (() => {
+                const tagRows = allTags.map((tag) => {
                   const tagged = plList.filter((tr) => (tr.tags || []).includes(tag));
                   const tagPL = tagged.reduce((s, tr) => s + tr.pl, 0);
                   const tagWR = tagged.length ? tagged.filter((tr) => tr.pl > 0).length / tagged.length : 0;
-                  return (
-                    <div key={tag} style={{ marginBottom: 12 }}>
-                      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 3 }}>
-                        <span style={{ fontSize: 13, color: T.text2 }}>{tag} <span style={{ fontSize: 10, color: T.text3 }}>({tagged.length})</span></span>
-                        <div style={{ display: "flex", gap: 10 }}>
-                          <span style={{ fontSize: 10, color: T.text3, fontFamily: "monospace" }}>{(tagWR * 100).toFixed(0)}%WR</span>
-                          <span style={{ fontFamily: "'Space Mono',monospace", fontSize: 12, color: tagPL >= 0 ? T.accent : T.danger }}>{tagPL >= 0 ? "+" : ""}{fmt(tagPL)}</span>
-                        </div>
+                  return { tag, tagged, tagPL, tagWR };
+                });
+                const maxTagPL = Math.max(...tagRows.map(r => Math.abs(r.tagPL)), 1);
+                return tagRows.map(({ tag, tagged, tagPL, tagWR }) => (
+                  <div key={tag} style={{ marginBottom: 12 }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 3 }}>
+                      <span style={{ fontSize: 13, color: T.text2 }}>{tag} <span style={{ fontSize: 10, color: T.text3 }}>({tagged.length})</span></span>
+                      <div style={{ display: "flex", gap: 10 }}>
+                        <span style={{ fontSize: 10, color: T.text3, fontFamily: "monospace" }}>{(tagWR * 100).toFixed(0)}%WR</span>
+                        <span style={{ fontFamily: "'Space Mono',monospace", fontSize: 12, color: tagPL >= 0 ? T.accent : T.danger }}>{tagPL >= 0 ? "+" : ""}{fmt(tagPL)}</span>
                       </div>
-                      <MiniBar value={tagPL} max={maxPL} t={T} />
                     </div>
-                  );
-                })
-              )}
+                    <MiniBar value={tagPL} max={maxTagPL} t={T} />
+                  </div>
+                ));
+              })()}
             </div>
 
             {/* Emotion Impact */}
@@ -1578,27 +1580,32 @@ const paginated = filtered
               </div>
               {plList.length === 0 ? (
                 <div style={{ color: T.text3, fontSize: 13 }}>No trades logged yet</div>
-              ) : (
-                Object.entries(
+              ) : (() => {
+                const emotionRows = Object.entries(
                   plList.reduce((acc, tr) => {
                     const em = tr.emotion && tr.emotion !== "None" ? tr.emotion : "None";
                     if (!acc[em]) acc[em] = { pl: 0, count: 0, wins: 0 };
                     acc[em].pl += tr.pl; acc[em].count++; if (tr.pl > 0) acc[em].wins++;
                     return acc;
                   }, {})
-                ).sort((a, b) => b[1].pl - a[1].pl).map(([em, d]) => {
+                ).sort((a, b) => b[1].pl - a[1].pl);
+                const maxEmotionPL = Math.max(...emotionRows.map(([, d]) => Math.abs(d.pl)), 1);
+                return emotionRows.map(([em, d]) => {
                   const winPct = Math.round((d.wins / d.count) * 100);
                   return (
-                    <div key={em} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "8px 0", borderBottom: `1px solid ${T.border}` }}>
-                      <div>
-                        <span style={{ fontSize: 13, color: T.text2 }}>{em}</span>
-                        <span style={{ fontSize: 10, color: T.text3, marginLeft: 8 }}>{d.count} trade{d.count !== 1 ? "s" : ""} · {winPct}%WR</span>
+                    <div key={em} style={{ marginBottom: 12 }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 3 }}>
+                        <div>
+                          <span style={{ fontSize: 13, color: T.text2 }}>{em}</span>
+                          <span style={{ fontSize: 10, color: T.text3, marginLeft: 8 }}>{d.count} trade{d.count !== 1 ? "s" : ""} · {winPct}%WR</span>
+                        </div>
+                        <span style={{ fontFamily: "'Space Mono',monospace", fontSize: 12, fontWeight: 700, color: d.pl >= 0 ? T.accent : T.danger }}>{d.pl >= 0 ? "+" : ""}{fmt(d.pl)}</span>
                       </div>
-                      <span style={{ fontFamily: "'Space Mono',monospace", fontSize: 12, fontWeight: 700, color: d.pl >= 0 ? T.accent : T.danger }}>{d.pl >= 0 ? "+" : ""}{fmt(d.pl)}</span>
+                      <MiniBar value={d.pl} max={maxEmotionPL} t={T} />
                     </div>
                   );
-                })
-              )}
+                });
+              })()}
             </div>
             </div>
 
