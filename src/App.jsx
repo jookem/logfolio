@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect, useRef } from "react";
-import { LogIcon, PlanIcon, CloseIcon, CheckIcon, WarningIcon, DeleteIcon, SettingsIcon, MenuIcon, LogoIcon } from "./lib/icons";
+import { LogIcon, PlanIcon, CloseIcon, CheckIcon, WarningIcon, DeleteIcon, SettingsIcon, MenuIcon } from "./lib/icons";
 import { supabase } from "./lib/supabase";
 import { uploadTradeMedia, deleteTradeMedia, deleteAllUserMedia } from "./lib/media";
 import { useAuth } from "./contexts/AuthContext";
@@ -790,7 +790,7 @@ const paginated = filtered
           overflowY: "hidden",
         }}
       >
-        <LogoIcon width={28} height={28} />
+        <img src="/images/logfolio.svg" width={28} height={28} alt="Logfolio" style={{ marginRight: 8 }} />
         <div
           style={{
             fontFamily: "'Space Mono',monospace",
