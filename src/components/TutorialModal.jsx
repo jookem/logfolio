@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import {
-  LogoIcon, LogIcon, PlanIcon, TodayIcon, WeekIcon, CalendarIcon,
+  LogIcon, PlanIcon, TodayIcon, WeekIcon, CalendarIcon,
   AnalysisIcon, RobotIcon, ArrowsIcon, MindIcon, PenIcon, TargetIcon,
   CheckIcon, RecIcon, DirectionIcon, AmountIcon, EntryPriceIcon, ExitIcon,
   WarningIcon, EntryTimeIcon, ExitTimeIcon, ScreenshotIcon, TickerIcon,
@@ -18,7 +18,7 @@ const Quad = ({ a, b, c, d }) => (
 
 const TUTORIAL_STEPS = [
   {
-    icon: <LogoIcon />,
+    icon: <img src="/images/logfolio.svg" width={44} height={44} alt="Logfolio" />,
     title: "Welcome to Logfolio",
     desc: "A quick tour of the key features. Takes about 2 minutes. You can re-open this anytime from Settings.",
     tab: null,
