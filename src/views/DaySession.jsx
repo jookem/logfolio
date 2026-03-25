@@ -132,18 +132,21 @@ export default function DaySession({ plList, plans, onAddTrade, onAddPlan, journ
         </div>
 
         {/* P&L + stats card */}
-        <div style={{ background: t.surface, border: `1px solid ${t.border}`, borderRadius: 16, padding: "20px 24px", marginBottom: mobile ? 20 : 0, flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", gap: 14 }}>
-          <div style={{ fontFamily: "'Space Mono', monospace", fontSize: mobile ? 32 : 40, fontWeight: 700, color: sessionPL >= 0 ? t.accent : t.danger, letterSpacing: -1, lineHeight: 1 }}>
-            {sessionPL >= 0 ? "+" : ""}{fmt(sessionPL)}
-          </div>
-          {(wins > 0 || losses > 0 || (streak && streak.count >= 2) || journalStreak >= 1) && (
-            <div style={{ display: "flex", gap: 6, flexWrap: "wrap", justifyContent: "center" }}>
-              {statCard("WINS", wins, t.accent)}
-              {statCard("LOSSES", losses, t.danger)}
-              {streak && streak.count >= 2 && statCard("STREAK", `${streak.count}${streak.type}`, streak.type === "W" ? t.accent : t.danger)}
-              {journalStreak >= 1 && statCard("JOURNAL", `${journalStreak}D`, "#a78bfa")}
+        <div style={{ background: t.surface, border: `1px solid ${t.border}`, borderRadius: 16, padding: "16px 20px", marginBottom: mobile ? 20 : 0, flex: 1, display: "flex", flexDirection: "column" }}>
+          <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 10, color: t.text3, textTransform: "uppercase", letterSpacing: 2, marginBottom: 16 }}>Session P&L</div>
+          <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", gap: 14 }}>
+            <div style={{ fontFamily: "'Space Mono', monospace", fontSize: mobile ? 32 : 40, fontWeight: 700, color: sessionPL >= 0 ? t.accent : t.danger, letterSpacing: -1, lineHeight: 1 }}>
+              {sessionPL >= 0 ? "+" : ""}{fmt(sessionPL)}
             </div>
-          )}
+            {(wins > 0 || losses > 0 || (streak && streak.count >= 2) || journalStreak >= 1) && (
+              <div style={{ display: "flex", gap: 6, flexWrap: "wrap", justifyContent: "center" }}>
+                {statCard("WINS", wins, t.accent)}
+                {statCard("LOSSES", losses, t.danger)}
+                {streak && streak.count >= 2 && statCard("STREAK", `${streak.count}${streak.type}`, streak.type === "W" ? t.accent : t.danger)}
+                {journalStreak >= 1 && statCard("JOURNAL", `${journalStreak}D`, "#a78bfa")}
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Running P&L */}
@@ -172,74 +175,79 @@ export default function DaySession({ plList, plans, onAddTrade, onAddPlan, journ
 
       </div>
 
-      {/* Today's trades */}
-      <div style={{ background: t.surface, border: `1px solid ${t.border}`, borderRadius: 12, overflow: "hidden" }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "13px 16px", borderBottom: `1px solid ${t.border}` }}>
-          <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 10, color: t.text3, textTransform: "uppercase", letterSpacing: 2 }}>Today's Trades</div>
-          <button onClick={onAddTrade} style={{ background: t.accent, border: "none", color: "#000", borderRadius: 7, padding: "6px 14px", cursor: "pointer", fontSize: 12, fontWeight: 700, fontFamily: "'Space Mono', monospace", display: "flex", alignItems: "center", gap: 6 }}>
-            <LogIcon size="1em" /> LOG
-          </button>
-        </div>
-        {todayTrades.length === 0 ? (
-          <div style={{ padding: 48, textAlign: "center", color: t.text4, fontFamily: "'Space Mono', monospace", fontSize: 12 }}>No trades logged today yet</div>
-        ) : (
-          [...todayTrades].reverse().map((tr, i) => (
-            <div key={tr.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px 16px", borderBottom: i < todayTrades.length - 1 ? `1px solid ${t.border}` : "none" }}>
-              <div>
-                <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 14, fontWeight: 700, color: t.text, marginBottom: 3 }}>{tr.ticker}</div>
-                <div style={{ fontSize: 12, color: t.text3 }}>
-                  {tr.strategy} · {tr.type === "options" ? `${tr.legs?.length}L options` : `${tr.shares} ${typeLabels(tr.type).units.toLowerCase()}`}
+      {/* Trades + Plans row — stacked on mobile, side-by-side on desktop */}
+      <div style={{ display: mobile ? "block" : "flex", gap: 20, alignItems: "flex-start" }}>
+
+        {/* Today's trades */}
+        <div style={{ flex: 1, background: t.surface, border: `1px solid ${t.border}`, borderRadius: 12, overflow: "hidden", marginBottom: mobile ? 20 : 0 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "13px 16px", borderBottom: `1px solid ${t.border}` }}>
+            <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 10, color: t.text3, textTransform: "uppercase", letterSpacing: 2 }}>Today's Trades</div>
+            <button onClick={onAddTrade} style={{ background: t.accent, border: "none", color: "#000", borderRadius: 7, padding: "6px 14px", cursor: "pointer", fontSize: 12, fontWeight: 700, fontFamily: "'Space Mono', monospace", display: "flex", alignItems: "center", gap: 6 }}>
+              <LogIcon size="1em" /> LOG
+            </button>
+          </div>
+          {todayTrades.length === 0 ? (
+            <div style={{ padding: 48, textAlign: "center", color: t.text4, fontFamily: "'Space Mono', monospace", fontSize: 12 }}>No trades logged today yet</div>
+          ) : (
+            [...todayTrades].reverse().map((tr, i) => (
+              <div key={tr.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px 16px", borderBottom: i < todayTrades.length - 1 ? `1px solid ${t.border}` : "none" }}>
+                <div>
+                  <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 14, fontWeight: 700, color: t.text, marginBottom: 3 }}>{tr.ticker}</div>
+                  <div style={{ fontSize: 12, color: t.text3 }}>
+                    {tr.strategy} · {tr.type === "options" ? `${tr.legs?.length}L options` : `${tr.shares} ${typeLabels(tr.type).units.toLowerCase()}`}
+                  </div>
+                  {tr.tags?.length > 0 && (
+                    <div style={{ display: "flex", gap: 4, marginTop: 4, flexWrap: "wrap" }}>
+                      {tr.tags.map((tg) => <Tag key={tg} label={tg} t={t} />)}
+                    </div>
+                  )}
                 </div>
-                {tr.tags?.length > 0 && (
-                  <div style={{ display: "flex", gap: 4, marginTop: 4, flexWrap: "wrap" }}>
-                    {tr.tags.map((tg) => <Tag key={tg} label={tg} t={t} />)}
+                <div style={{ textAlign: "right" }}>
+                  <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 16, fontWeight: 700, color: tr.pl >= 0 ? t.accent : t.danger }}>
+                    {tr.pl >= 0 ? "+" : ""}{fmt(tr.pl)}
+                  </div>
+                  {tr.mistake !== "None" && <div style={{ fontSize: 11, color: t.danger, marginTop: 2 }}>⚠ {tr.mistake}</div>}
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+
+        {/* Trade plans */}
+        <div style={{ flex: 1, background: t.surface, border: `1px solid ${t.border}`, borderRadius: 12, overflow: "hidden", marginBottom: mobile ? 20 : 0 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "13px 16px", borderBottom: `1px solid ${t.border}` }}>
+            <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 10, color: t.text3, textTransform: "uppercase", letterSpacing: 2 }}>Trade Plans</div>
+            <button onClick={onAddPlan} style={{ background: t.accent, border: "none", color: "#000", borderRadius: 7, padding: "6px 14px", cursor: "pointer", fontSize: 12, fontWeight: 700, fontFamily: "'Space Mono', monospace", display: "flex", alignItems: "center", gap: 6 }}>
+              <PlanIcon size="1em" /> PLAN
+            </button>
+          </div>
+          {plans.map((plan, i) => (
+            <div key={plan.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px 16px", borderBottom: i < plans.length - 1 ? `1px solid ${t.border}` : "none" }}>
+              <div>
+                <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 14, fontWeight: 700, color: t.text, marginBottom: 3 }}>{plan.ticker}</div>
+                <div style={{ fontSize: 12, color: t.text3 }}>
+                  {plan.strategy} · {plan.type === "options" ? `${plan.legs?.length}L options` : `${plan.numShares || plan.shares || "—"} ${typeLabels(plan.type).units.toLowerCase()}`}
+                </div>
+                {plan.checklist?.length > 0 && (
+                  <div style={{ fontSize: 11, color: plan.checklistComplete ? t.accent : "#f59e0b", marginTop: 3, fontFamily: "'Space Mono', monospace" }}>
+                    {plan.checklistComplete ? "✓ Checklist complete" : `⚠ ${(plan.checklist || []).filter(c => c.checked).length}/${plan.checklist.length} checked`}
                   </div>
                 )}
               </div>
               <div style={{ textAlign: "right" }}>
-                <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 16, fontWeight: 700, color: tr.pl >= 0 ? t.accent : t.danger }}>
-                  {tr.pl >= 0 ? "+" : ""}{fmt(tr.pl)}
-                </div>
-                {tr.mistake !== "None" && <div style={{ fontSize: 11, color: t.danger, marginTop: 2 }}>⚠ {tr.mistake}</div>}
+                {STOCK_LIKE.includes(plan.type) && plan.purchasePrice && (
+                  <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 13, color: t.text3 }}>@ ${(+plan.purchasePrice).toFixed(2)}</div>
+                )}
+                {plan.plannedR && <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 13, color: t.accent }}>+{plan.plannedR.toFixed(2)}R</div>}
+                {plan.stopLoss && <div style={{ fontSize: 11, color: t.danger, marginTop: 2 }}>SL ${plan.stopLoss}</div>}
               </div>
             </div>
-          ))
-        )}
-      </div>
-
-      {/* Trade plans */}
-      <div style={{ background: t.surface, border: `1px solid ${t.border}`, borderRadius: 12, overflow: "hidden", marginTop: 20 }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "13px 16px", borderBottom: `1px solid ${t.border}` }}>
-          <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 10, color: t.text3, textTransform: "uppercase", letterSpacing: 2 }}>Trade Plans</div>
-          <button onClick={onAddPlan} style={{ background: t.accent, border: "none", color: "#000", borderRadius: 7, padding: "6px 14px", cursor: "pointer", fontSize: 12, fontWeight: 700, fontFamily: "'Space Mono', monospace", display: "flex", alignItems: "center", gap: 6 }}>
-            <PlanIcon size="1em" /> PLAN
-          </button>
+          ))}
+          {(!plans || plans.length === 0) && (
+            <div style={{ padding: 48, textAlign: "center", color: t.text4, fontFamily: "'Space Mono', monospace", fontSize: 12 }}>No trade plans yet</div>
+          )}
         </div>
-        {plans.map((plan, i) => (
-          <div key={plan.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px 16px", borderBottom: i < plans.length - 1 ? `1px solid ${t.border}` : "none" }}>
-            <div>
-              <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 14, fontWeight: 700, color: t.text, marginBottom: 3 }}>{plan.ticker}</div>
-              <div style={{ fontSize: 12, color: t.text3 }}>
-                {plan.strategy} · {plan.type === "options" ? `${plan.legs?.length}L options` : `${plan.numShares || plan.shares || "—"} ${typeLabels(plan.type).units.toLowerCase()}`}
-              </div>
-              {plan.checklist?.length > 0 && (
-                <div style={{ fontSize: 11, color: plan.checklistComplete ? t.accent : "#f59e0b", marginTop: 3, fontFamily: "'Space Mono', monospace" }}>
-                  {plan.checklistComplete ? "✓ Checklist complete" : `⚠ ${(plan.checklist || []).filter(c => c.checked).length}/${plan.checklist.length} checked`}
-                </div>
-              )}
-            </div>
-            <div style={{ textAlign: "right" }}>
-              {STOCK_LIKE.includes(plan.type) && plan.purchasePrice && (
-                <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 13, color: t.text3 }}>@ ${(+plan.purchasePrice).toFixed(2)}</div>
-              )}
-              {plan.plannedR && <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 13, color: t.accent }}>+{plan.plannedR.toFixed(2)}R</div>}
-              {plan.stopLoss && <div style={{ fontSize: 11, color: t.danger, marginTop: 2 }}>SL ${plan.stopLoss}</div>}
-            </div>
-          </div>
-        ))}
-        {(!plans || plans.length === 0) && (
-          <div style={{ padding: 48, textAlign: "center", color: t.text4, fontFamily: "'Space Mono', monospace", fontSize: 12 }}>No trade plans yet</div>
-        )}
+
       </div>
 
 
