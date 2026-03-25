@@ -1121,6 +1121,7 @@ const paginated = filtered
         onSave={(updated) => { saveTrade(updated); setSelected(updated); }}
         onShare={() => setShareTarget(selected)}
         t={T}
+        mobile={mobile}
       />
     ) : (
       <div>
@@ -1322,6 +1323,7 @@ const paginated = filtered
         onSave={(updated) => { saveTrade(updated); setSelectedPlan(updated); }}
         onShare={() => setShareTarget(selectedPlan)}
         t={T}
+        mobile={mobile}
       />
     ) : (
       <div>

@@ -4,7 +4,7 @@ import { STOCK_LIKE } from "../lib/constants";
 import Tag from "./Tag";
 import { LogIcon, EditIcon, QuickIcon, ShareIcon, CloseIcon } from "../lib/icons";
 
-export default function TradeDetail({ trade, onClose, onEdit, onExecute, onSave, onShare, t }) {
+export default function TradeDetail({ trade, onClose, onEdit, onExecute, onSave, onShare, t, mobile }) {
   const pl = calcPL(trade);
   const [lightbox, setLightbox] = useState(null);
   const [quickEdit, setQuickEdit] = useState(false);
@@ -28,105 +28,100 @@ export default function TradeDetail({ trade, onClose, onEdit, onExecute, onSave,
         padding: 22,
       }}
     >
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "flex-start",
-          marginBottom: 18,
-        }}
-      >
-        <div style={{ flex: 1 }}>
-          <div
-            style={{
-              fontFamily: "'Space Mono', monospace",
-              fontSize: 20,
-              fontWeight: 700,
-              color: t.text,
-            }}
-          >
-            {trade.ticker}
-          </div>
-          <div style={{ fontSize: 12, color: t.text3, marginTop: 3 }}>
-            {trade.strategy} · {fmtDate(trade.date)}
-          </div>
-          {trade.tags?.length > 0 && (
-            <div style={{ display: "flex", gap: 5, marginTop: 7, flexWrap: "wrap" }}>
-              {trade.tags.map((tg) => (
-                <Tag key={tg} label={tg} t={t} />
-              ))}
-            </div>
-          )}
-          <div style={{ display: "flex", gap: 7, marginTop: 10, flexWrap: "wrap" }}>
-            {trade.status === "planned" && onExecute && (
-              <button
-                onClick={onExecute}
-                style={{
-                  background: t.accent, border: "none",
-                  color: "#000", borderRadius: 6, padding: "4px 12px",
-                  cursor: "pointer", fontSize: 12, fontWeight: 700,
-                  fontFamily: "'Space Mono', monospace", display: "flex", alignItems: "center", gap: 5,
-                }}
-              >
-                <LogIcon size="1em" /> Execute Plan
-              </button>
-            )}
-            <button
-              onClick={onEdit}
-              style={{
-                background: "none", border: `1px solid ${t.border}`,
-                color: t.text3, borderRadius: 6, padding: "4px 10px",
-                cursor: "pointer", fontSize: 12, display: "flex", alignItems: "center", gap: 5,
-              }}
-            >
-              <EditIcon size="1em" /> Edit
-            </button>
-            {trade.status !== "planned" && onSave && (
-              <button
-                onClick={() => setQuickEdit(q => !q)}
-                style={{ background: quickEdit ? t.accent+"20" : "none", border: `1px solid ${t.border}`, color: quickEdit ? t.accent : t.text3, borderRadius: 6, padding: "4px 10px", cursor: "pointer", fontSize: 12, display: "flex", alignItems: "center", gap: 5 }}
-              >
-                <QuickIcon size="1em" /> Quick Edit
-              </button>
-            )}
-            {onShare && (
-              <button
-                onClick={onShare}
-                style={{ background: "none", border: `1px solid ${t.border}`, color: t.text3, borderRadius: 6, padding: "4px 10px", cursor: "pointer", fontSize: 12, display: "flex", alignItems: "center", gap: 5 }}
-              >
-                <ShareIcon size="1em" /> Share
-              </button>
-            )}
-            <button
-              onClick={onClose}
-              style={{
-                background: "none", border: `1px solid ${t.border}`,
-                color: t.text3, borderRadius: 6, padding: "4px 10px",
-                cursor: "pointer", fontSize: 12, display: "flex", alignItems: "center", gap: 5,
-              }}
-            >
-              <CloseIcon size="1em" /> Close
-            </button>
-          </div>
-        </div>
-        <div>
-          {!isNaN(pl) ? (
+      <div style={{ marginBottom: 18 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+          <div style={{ flex: 1 }}>
             <div
               style={{
                 fontFamily: "'Space Mono', monospace",
-                fontSize: 22,
+                fontSize: 20,
                 fontWeight: 700,
-                color: pl >= 0 ? t.accent : t.danger,
-                textAlign: "right",
+                color: t.text,
               }}
             >
-              {pl >= 0 ? "+" : ""}{fmt(pl)}
+              {trade.ticker}
             </div>
-          ) : (
-            <span style={{ fontSize: 11, fontFamily: "'Space Mono',monospace", color: "#f59e0b", background: "#f59e0b18", border: "1px solid #f59e0b40", borderRadius: 6, padding: "4px 10px", letterSpacing: 1 }}>
-              OPEN
-            </span>
+            <div style={{ fontSize: 12, color: t.text3, marginTop: 3 }}>
+              {trade.strategy} · {fmtDate(trade.date)}
+            </div>
+            {trade.tags?.length > 0 && (
+              <div style={{ display: "flex", gap: 5, marginTop: 7, flexWrap: "wrap" }}>
+                {trade.tags.map((tg) => (
+                  <Tag key={tg} label={tg} t={t} />
+                ))}
+              </div>
+            )}
+          </div>
+          <div>
+            {!isNaN(pl) ? (
+              <div
+                style={{
+                  fontFamily: "'Space Mono', monospace",
+                  fontSize: 22,
+                  fontWeight: 700,
+                  color: pl >= 0 ? t.accent : t.danger,
+                  textAlign: "right",
+                }}
+              >
+                {pl >= 0 ? "+" : ""}{fmt(pl)}
+              </div>
+            ) : (
+              <span style={{ fontSize: 11, fontFamily: "'Space Mono',monospace", color: "#f59e0b", background: "#f59e0b18", border: "1px solid #f59e0b40", borderRadius: 6, padding: "4px 10px", letterSpacing: 1 }}>
+                OPEN
+              </span>
+            )}
+          </div>
+        </div>
+        <div style={{ display: "flex", gap: 7, marginTop: 10, flexWrap: mobile ? "nowrap" : "wrap", overflowX: mobile ? "auto" : "visible" }}>
+          {trade.status === "planned" && onExecute && (
+            <button
+              onClick={onExecute}
+              style={{
+                background: t.accent, border: "none",
+                color: "#000", borderRadius: 6, padding: "4px 12px",
+                cursor: "pointer", fontSize: 12, fontWeight: 700,
+                fontFamily: "'Space Mono', monospace", display: "flex", alignItems: "center", gap: 5, flexShrink: 0,
+              }}
+            >
+              <LogIcon size="1em" /> Execute Plan
+            </button>
           )}
+          <button
+            onClick={onEdit}
+            style={{
+              background: "none", border: `1px solid ${t.border}`,
+              color: t.text3, borderRadius: 6, padding: "4px 10px",
+              cursor: "pointer", fontSize: 12, display: "flex", alignItems: "center", gap: 5, flexShrink: 0,
+            }}
+          >
+            <EditIcon size="1em" /> Edit
+          </button>
+          {trade.status !== "planned" && onSave && (
+            <button
+              onClick={() => setQuickEdit(q => !q)}
+              style={{ background: quickEdit ? t.accent+"20" : "none", border: `1px solid ${t.border}`, color: quickEdit ? t.accent : t.text3, borderRadius: 6, padding: "4px 10px", cursor: "pointer", fontSize: 12, display: "flex", alignItems: "center", gap: 5, flexShrink: 0 }}
+            >
+              <QuickIcon size="1em" /> Quick Edit
+            </button>
+          )}
+          {onShare && (
+            <button
+              onClick={onShare}
+              style={{ background: "none", border: `1px solid ${t.border}`, color: t.text3, borderRadius: 6, padding: "4px 10px", cursor: "pointer", fontSize: 12, display: "flex", alignItems: "center", gap: 5, flexShrink: 0 }}
+            >
+              <ShareIcon size="1em" /> Share
+            </button>
+          )}
+          <button
+            onClick={onClose}
+            style={{
+              background: "none", border: `1px solid ${t.border}`,
+              color: t.text3, borderRadius: 6, padding: "4px 10px",
+              cursor: "pointer", fontSize: 12, display: "flex", alignItems: "center", gap: 5, flexShrink: 0,
+            }}
+          >
+            <CloseIcon size="1em" /> Close
+          </button>
         </div>
       </div>
       {quickEdit && (
