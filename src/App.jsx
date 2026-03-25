@@ -504,7 +504,7 @@ const plList = useMemo(
 
   // Treynor and Information Ratio — require SPY benchmark data
   const benchmarkStats = useMemo(() => {
-    if (!spyData || spyData.length < 2 || plList.length < 2) return { treynor: null, alpha: null, infoRatio: null };
+    if (!spyData || spyData.length < 2 || plList.length < 2) return { treynor: null, alpha: null, infoRatio: null, beta: null };
 
     // Build SPY daily return map: date -> pct return vs prior day
     const spyReturnMap = {};
@@ -522,7 +522,7 @@ const plList = useMemo(
     // Use accountSize to convert P/L to % return; fall back to normalising by mean abs P/L
     const accountSize = tradeDefaults?.accountSize;
     const tradingDates = Object.keys(dailyPL).filter((d) => spyReturnMap[d] !== undefined);
-    if (tradingDates.length < 2) return { treynor: null, alpha: null, infoRatio: null };
+    if (tradingDates.length < 2) return { treynor: null, alpha: null, infoRatio: null, beta: null };
 
     const portReturns = tradingDates.map((d) =>
       accountSize ? dailyPL[d] / accountSize : dailyPL[d]
@@ -553,7 +553,7 @@ const plList = useMemo(
     const stdActive = Math.sqrt(activeReturns.reduce((s, v) => s + Math.pow(v - meanActive, 2), 0) / (n - 1));
     const infoRatio = stdActive > 0 ? meanActive / stdActive : null;
 
-    return { treynor, alpha, infoRatio };
+    return { treynor, alpha, infoRatio, beta };
   }, [plList, spyData, tradeDefaults?.accountSize]);
 
   const stratStats = useMemo(() => {
@@ -1434,6 +1434,7 @@ const paginated = filtered
               <StatCard label="Treynor Ratio" value={benchmarkStats.treynor !== null ? benchmarkStats.treynor.toFixed(4) : "—"} sub={benchmarkStats.treynor !== null ? "return / market risk" : "needs SPY data"} color={benchmarkStats.treynor !== null ? (benchmarkStats.treynor > 0 ? T.accent : T.danger) : undefined} t={T} info="Measures return per unit of market (systematic) risk, using SPY as the benchmark. Beta captures how much your P/L moves with the overall market. A higher Treynor means you're being well-compensated for the market risk you're taking on. Shows '—' until SPY data loads." />
               <StatCard label="Info Ratio" value={benchmarkStats.infoRatio !== null ? benchmarkStats.infoRatio.toFixed(2) : "—"} sub={benchmarkStats.infoRatio !== null ? "active return / tracking error" : "needs SPY data"} color={benchmarkStats.infoRatio !== null ? (benchmarkStats.infoRatio >= 0.5 ? T.accent : benchmarkStats.infoRatio >= 0 ? undefined : T.danger) : undefined} t={T} info="Measures how consistently your trading outperforms SPY. Active return is your daily P/L minus what SPY returned that day. Tracking error is the volatility of that difference. Above 0.5 is solid, above 1.0 is exceptional. Shows '—' until SPY data loads." />
               <StatCard label="Alpha" value={benchmarkStats.alpha !== null ? benchmarkStats.alpha.toFixed(4) : "—"} sub={benchmarkStats.alpha !== null ? "excess return vs SPY" : "needs SPY data"} color={benchmarkStats.alpha !== null ? (benchmarkStats.alpha > 0 ? T.accent : T.danger) : undefined} t={T} info="Jensen's Alpha — the return your trading generates above what would be expected given your exposure to market movements (beta). Positive alpha means you're adding real skill beyond just riding the market. Negative alpha means the market is outperforming your adjusted returns. Shows '—' until SPY data loads." />
+              <StatCard label="Beta" value={benchmarkStats.beta !== null ? benchmarkStats.beta.toFixed(2) : "—"} sub={benchmarkStats.beta !== null ? "vs SPY" : "needs SPY data"} color={benchmarkStats.beta !== null ? (Math.abs(benchmarkStats.beta) <= 1 ? T.accent : T.danger) : undefined} t={T} info="Measures how much your daily P/L moves in sync with SPY. A Beta of 1.0 means your returns move perfectly with the market; below 1.0 means less correlated (more independent); above 1.0 means amplified market swings. Negative beta means your returns tend to move opposite the market. Closer to 0 generally means your edge is more skill-based than market-driven. Shows '—' until SPY data loads." />
             </div>
 
             {/* Equity Curve */}
