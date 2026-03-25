@@ -6,16 +6,16 @@ import QuoteOfDay from "./QuoteOfDay";
 import { LogIcon, PlanIcon } from "../lib/icons";
 
 const BADGE_DEFS = [
-  { id: "first_trade",  icon: "/images/firstTrade.svg",       label: "First Trade",   desc: "Logged your first trade",                     check: ({ trades }) => trades.length >= 1 },
-  { id: "ten_trades",   icon: "/images/tenthTrade.svg",       label: "10 Trades",     desc: "Logged 10 trades",                            check: ({ trades }) => trades.length >= 10 },
-  { id: "fifty_trades", icon: "/images/fiftyTrades.svg",      label: "50 Trades",     desc: "Logged 50 trades",                            check: ({ trades }) => trades.length >= 50 },
-  { id: "century",      icon: "/images/onehundrethTrade.svg", label: "Century",       desc: "Logged 100 trades",                           check: ({ trades }) => trades.length >= 100 },
-  { id: "big_winner",   icon: "/images/bigWinner.svg",        label: "Big Winner",    desc: "Single trade over $500",                      check: ({ trades }) => trades.some(t => t.pl >= 500) },
-  { id: "green_day",    icon: "/images/greenDay.svg",         label: "Green Day",     desc: "First profitable trading day",                check: ({ trades }) => { const d = {}; trades.forEach(t => { d[t.date] = (d[t.date] || 0) + t.pl; }); return Object.values(d).some(pl => pl > 0); } },
-  { id: "plan_follower",icon: "/images/planExecuted.svg",     label: "Plan Follower", desc: "Executed 3 or more trade plans",              check: ({ trades }) => trades.filter(t => t.fromPlanId).length >= 3 },
-  { id: "win_streak",   icon: "/images/hotStreak.svg",        label: "Hot Streak",    desc: "3 consecutive winning trades",                check: ({ streak }) => streak?.type === "W" && streak?.count >= 3 },
-  { id: "disciplined",  icon: "/images/discipline.svg",       label: "Disciplined",   desc: "10 trades in a row with no mistakes",         check: ({ trades }) => { const l = trades.slice(-10); return l.length === 10 && l.every(t => !t.mistake || t.mistake === "None"); } },
-  { id: "journal_week", icon: "/images/journalCheck.svg",     label: "Journal Habit", desc: "7-day journal writing streak",                check: ({ journalStreak }) => journalStreak >= 7 },
+  { id: "first_trade",  icon: "/images/firstTrade.svg",       color: "#f59e0b", label: "First Trade",   desc: "Logged your first trade",                     check: ({ trades }) => trades.length >= 1 },
+  { id: "ten_trades",   icon: "/images/tenthTrade.svg",       color: "#3B82F6", label: "10 Trades",     desc: "Logged 10 trades",                            check: ({ trades }) => trades.length >= 10 },
+  { id: "fifty_trades", icon: "/images/fiftyTrades.svg",      color: "#8b5cf6", label: "50 Trades",     desc: "Logged 50 trades",                            check: ({ trades }) => trades.length >= 50 },
+  { id: "century",      icon: "/images/onehundrethTrade.svg", color: "#f59e0b", label: "Century",       desc: "Logged 100 trades",                           check: ({ trades }) => trades.length >= 100 },
+  { id: "big_winner",   icon: "/images/bigWinner.svg",        color: "#f59e0b", label: "Big Winner",    desc: "Single trade over $500",                      check: ({ trades }) => trades.some(t => t.pl >= 500) },
+  { id: "green_day",    icon: "/images/greenDay.svg",         color: "#12B248", label: "Green Day",     desc: "First profitable trading day",                check: ({ trades }) => { const d = {}; trades.forEach(t => { d[t.date] = (d[t.date] || 0) + t.pl; }); return Object.values(d).some(pl => pl > 0); } },
+  { id: "plan_follower",icon: "/images/planExecuted.svg",     color: "#3B82F6", label: "Plan Follower", desc: "Executed 3 or more trade plans",              check: ({ trades }) => trades.filter(t => t.fromPlanId).length >= 3 },
+  { id: "win_streak",   icon: "/images/hotStreak.svg",        color: "#FF1212", label: "Hot Streak",    desc: "3 consecutive winning trades",                check: ({ streak }) => streak?.type === "W" && streak?.count >= 3 },
+  { id: "disciplined",  icon: "/images/discipline.svg",       color: "#00ff87", label: "Disciplined",   desc: "10 trades in a row with no mistakes",         check: ({ trades }) => { const l = trades.slice(-10); return l.length === 10 && l.every(t => !t.mistake || t.mistake === "None"); } },
+  { id: "journal_week", icon: "/images/journalCheck.svg",     color: "#3B82F6", label: "Journal Habit", desc: "7-day journal writing streak",                check: ({ journalStreak }) => journalStreak >= 7 },
 ];
 
 export default function DaySession({ plList, plans, onAddTrade, onAddPlan, journals = {}, t, mobile, isDark, isPro, onUpgrade }) {
@@ -247,20 +247,20 @@ export default function DaySession({ plList, plans, onAddTrade, onAddPlan, journ
                   <div style={{
                     width: 52, height: 52, borderRadius: 12,
                     background: earned
-                      ? `linear-gradient(135deg, ${t.accent}40, ${t.accent}15)`
+                      ? `linear-gradient(135deg, ${b.color}40, ${b.color}15)`
                       : t.card2,
-                    border: `1.5px solid ${earned ? t.accent : t.border2}`,
-                    boxShadow: earned ? `0 0 12px ${t.accent}55` : "none",
+                    border: `1.5px solid ${earned ? b.color : t.border2}`,
+                    boxShadow: earned ? `0 0 12px ${b.color}66` : "none",
                     display: "flex", alignItems: "center", justifyContent: "center",
-                    filter: earned ? "none" : "grayscale(60%)",
-                    opacity: earned ? 1 : 0.55,
+                    filter: earned ? "none" : "grayscale(40%) brightness(1.4)",
+                    opacity: earned ? 1 : 0.6,
                     transition: "all 0.2s ease",
                   }}>
                     <img src={b.icon} width={32} height={32} alt={b.label} />
                   </div>
                   <div style={{
                     fontSize: 9,
-                    color: earned ? t.text2 : t.text3,
+                    color: earned ? b.color : t.text2,
                     fontFamily: "'Space Mono', monospace",
                     textAlign: "center",
                     maxWidth: 52,

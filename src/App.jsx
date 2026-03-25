@@ -1159,7 +1159,7 @@ const paginated = filtered
           )}
           <button
             onClick={() => exportCSV(filtered)}
-            style={{ ...sel, background: T.accent + "15", border: `1px solid ${T.accent}40`, color: T.accent, cursor: "pointer", fontFamily: "'Space Mono',monospace", fontSize: 11, whiteSpace: "nowrap", padding: "6px 12px" }}
+            style={{ ...sel, background: T.accent, border: `1px solid ${T.accent}`, color: "#000", cursor: "pointer", fontFamily: "'Space Mono',monospace", fontSize: 11, whiteSpace: "nowrap", padding: "6px 12px", fontWeight: 700 }}
           >
             Export CSV
           </button>

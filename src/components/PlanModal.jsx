@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { PlanIcon, CloseIcon, WarningIcon, TargetIcon, TickerIcon, CategoryIcon, StrategyIcon, TodayIcon, DirectionIcon, AmountIcon, EntryPriceIcon, CurrentPriceIcon } from "../lib/icons";
+import { PlanIcon, CloseIcon, WarningIcon, TargetIcon, TickerIcon, CategoryIcon, StrategyIcon, TodayIcon, DirectionIcon, AmountIcon, EntryPriceIcon, CurrentPriceIcon, EmotionIcon, TagsIcon } from "../lib/icons";
 import { supabase } from "../lib/supabase";
 import { STOCK_LIKE, SUGGESTED_TAGS, EMOTIONS } from "../lib/constants";
 import { todayStr, typeLabels, normCDF, bsPrice } from "../lib/utils";
@@ -404,7 +404,7 @@ const base = {
     display: "block",
     fontFamily: "'Space Mono', monospace",
   };
-  const sectionHeader = (title, id) => (
+  const sectionHeader = (title, id, icon) => (
     <div id={id} style={{
       fontFamily: "'Space Mono', monospace",
       fontSize: 10,
@@ -415,7 +415,13 @@ const base = {
       marginTop: 18,
       paddingBottom: 6,
       borderBottom: `1px solid ${t.border}`,
-    }}>{title}</div>
+      display: "flex",
+      alignItems: "center",
+      gap: 6,
+    }}>
+      {icon && <img src={icon} width={14} height={14} alt="" />}
+      {title}
+    </div>
   );
 
   return (
@@ -953,7 +959,7 @@ const base = {
         )}{/* end tut-plan-risk */}
 {/* ══ PRE-TRADE CHECKLIST ══ */}
         <div id="tut-plan-checklist">
-        {sectionHeader("Pre-Trade Checklist")}
+        {sectionHeader("Pre-Trade Checklist", undefined, "/images/checkList.svg")}
 
         {/* Progress bar */}
         <div style={{ marginBottom: 14 }}>
@@ -1040,7 +1046,7 @@ const base = {
 {/* ══ EMOTION ══ */}
         {sectionHeader("Mindset", "tut-plan-mindset")}
         <div id="tut-plan-emotion" style={{ marginBottom: 14 }}>
-          <label style={lbl}>Emotion</label>
+          <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><EmotionIcon size={14} />Emotion</label>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 4, marginBottom: 8 }}>
             {[...EMOTIONS.filter((e) => e !== "None"), ...customEmotions].map((e) => {
               const active = form.emotion === e;
@@ -1095,7 +1101,7 @@ const base = {
 {/* ══ TAGS + THESIS ══ */}
         {sectionHeader("Notes", "tut-plan-notes")}
         <div id="tut-plan-tags" style={{ marginBottom: 12 }}>
-          <label style={lbl}>Tags</label>
+          <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><TagsIcon size={14} />Tags</label>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 8 }}>
             {(form.tags || []).map((tg) => <Tag key={tg} label={tg} t={t} onRemove={() => removeTag(tg)} />)}
           </div>

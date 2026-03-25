@@ -4,7 +4,7 @@ import { todayStr, typeLabels, fmt } from "../lib/utils";
 import Tag from "./Tag";
 import VoiceNote from "./VoiceNote";
 import ScreenshotUpload from "./ScreenshotUpload";
-import { EditIcon, LogIcon, CloseIcon, TodayIcon, ExitIcon, EntryPriceIcon, EntryTimeIcon, ExitTimeIcon, TickerIcon, CategoryIcon, StrategyIcon, DirectionIcon, AmountIcon, WarningIcon, TargetIcon } from "../lib/icons";
+import { EditIcon, LogIcon, CloseIcon, TodayIcon, ExitIcon, EntryPriceIcon, EntryTimeIcon, ExitTimeIcon, TickerIcon, CategoryIcon, StrategyIcon, DirectionIcon, AmountIcon, WarningIcon, TargetIcon, EmotionIcon, TagsIcon } from "../lib/icons";
 
 export default function TradeFormModal({ initial, defaults, onClose, onSave, onCSVImport, t, editLabel, isDark, trades = [] }) {
   const sm = window.innerWidth < 400;
@@ -563,7 +563,7 @@ export default function TradeFormModal({ initial, defaults, onClose, onSave, onC
         )}
         {sectionHeader("Mindset", "tut-trade-mindset")}
         <div id="tut-trade-emotion" style={{ marginBottom: 14 }}>
-          <label style={lbl}>Emotion</label>
+          <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><EmotionIcon size={14} />Emotion</label>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 4, marginBottom: 8 }}>
             {[...EMOTIONS.filter((e) => e !== "None"), ...customEmotions].map((e) => {
               const active = form.emotion === e;
@@ -616,7 +616,7 @@ export default function TradeFormModal({ initial, defaults, onClose, onSave, onC
           </div>
         </div>
         <div id="tut-trade-mistake" style={{ marginBottom: 14 }}>
-          <label style={lbl}>Mistake</label>
+          <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><WarningIcon size={14} />Mistake</label>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 4, marginBottom: 8 }}>
             {[...MISTAKES.filter((m) => m !== "None"), ...customMistakes].map((m) => {
               const active = form.mistake === m;
@@ -670,7 +670,7 @@ export default function TradeFormModal({ initial, defaults, onClose, onSave, onC
         </div>
         {sectionHeader("Notes", "tut-trade-notes")}
         <div id="tut-trade-tags" style={{ marginBottom: 12 }}>
-          <label style={lbl}>Tags</label>
+          <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><TagsIcon size={14} />Tags</label>
           <div
             style={{
               display: "flex",
