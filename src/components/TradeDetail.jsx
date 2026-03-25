@@ -83,7 +83,7 @@ export default function TradeDetail({ trade, onClose, onEdit, onExecute, onSave,
                 fontFamily: "'Space Mono', monospace", display: "flex", alignItems: "center", gap: 5, flexShrink: 0,
               }}
             >
-              <LogIcon size="1em" /> Execute Plan
+              <LogIcon size="1em" /> Execute
             </button>
           )}
           <button
