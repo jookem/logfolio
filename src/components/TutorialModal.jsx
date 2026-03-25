@@ -94,6 +94,13 @@ const TUTORIAL_STEPS = [
     tab: "journal",
     cta: null,
   },
+  {
+    icon: <Pair a={<AnalysisIcon size={38} />} b={<RobotIcon size={38} />} />,
+    title: "Free, Pro & Pro+",
+    desc: "Free tier: log up to 5 trades per month with access to Today, Weekly, Calendar, Logs, Plans, and Journal.\n\nPro: unlimited trade logging, CSV import, full Analytics, and all core features.\n\nPro+: everything in Pro, plus AI Insights (up to 3 analyses per day) and AI Assist inside trade planning — personalised market bias and trade warnings based on your history.",
+    tab: null,
+    cta: null,
+  },
 ];
 
 const TRADE_WALKTHROUGH = [
@@ -433,7 +440,7 @@ export default function TutorialModal({ step, onNext, onPrev, onClose, onOpenLog
         </div>
         <div style={{ marginBottom: 12, color: t.text }}>{s.icon}</div>
         <div style={{ fontSize: 17, fontWeight: 700, color: t.text, marginBottom: 10, lineHeight: 1.3 }}>{s.title}</div>
-        <div style={{ fontSize: 13, color: t.text3, lineHeight: 1.75, marginBottom: 22 }}>{s.desc}</div>
+        <div style={{ fontSize: 13, color: t.text3, lineHeight: 1.75, marginBottom: 22, whiteSpace: "pre-line" }}>{s.desc}</div>
         {s.cta && (
           <button
             onClick={() => handleCTA(s.cta.action)}
