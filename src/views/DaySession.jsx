@@ -82,6 +82,30 @@ export default function DaySession({ plList, plans, onAddTrade, onAddPlan, journ
   const timeStr = now.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
   const dayName = now.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" });
 
+  const marketCountdown = (() => {
+    const etNow = new Date(now.toLocaleString("en-US", { timeZone: "America/New_York" }));
+    const etDay = etNow.getDay();
+    const totalSec = etNow.getHours() * 3600 + etNow.getMinutes() * 60 + etNow.getSeconds();
+    const openSec = 9 * 3600 + 30 * 60; // 9:30 AM ET
+    const closeSec = 16 * 3600;          // 4:00 PM ET
+    const isWeekday = etDay >= 1 && etDay <= 5;
+    const isOpen = isWeekday && totalSec >= openSec && totalSec < closeSec;
+    const fmt = (s) => {
+      const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), sec = s % 60;
+      return `${String(h).padStart(2,"0")}:${String(m).padStart(2,"0")}:${String(sec).padStart(2,"0")}`;
+    };
+    if (isOpen) return { label: "MARKET CLOSES IN", time: fmt(closeSec - totalSec), open: true };
+    let secsUntilOpen;
+    if (isWeekday && totalSec < openSec) {
+      secsUntilOpen = openSec - totalSec;
+    } else {
+      let daysAhead = 1, checkDay = (etDay + 1) % 7;
+      while (checkDay === 0 || checkDay === 6) { daysAhead++; checkDay = (checkDay + 1) % 7; }
+      secsUntilOpen = daysAhead * 86400 - totalSec + openSec;
+    }
+    return { label: "MARKET OPENS IN", time: fmt(secsUntilOpen), open: false };
+  })();
+
   const statCard = (label, value, color) => (
     <div style={{ background: color + "15", border: `1px solid ${color}30`, borderRadius: 8, padding: "8px 14px", textAlign: "center" }}>
       <div style={{ fontSize: 10, color, fontFamily: "'Space Mono', monospace", marginBottom: 2 }}>{label}</div>
@@ -129,6 +153,10 @@ export default function DaySession({ plList, plans, onAddTrade, onAddPlan, journ
         <div style={{ background: t.surface, border: `1px solid ${t.border}`, borderRadius: 16, padding: "20px 24px", marginBottom: mobile ? 20 : 0, flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", gap: 10 }}>
           <div style={{ fontFamily: "'Space Mono', monospace", fontSize: mobile ? 15 : 18, fontWeight: 700, color: t.text2, textAlign: "center" }}>{dayName}</div>
           <div style={{ fontFamily: "'Space Mono', monospace", fontSize: mobile ? 22 : 28, color: t.text3, textAlign: "center" }}>{timeStr}</div>
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 2, marginTop: 4 }}>
+            <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 9, color: marketCountdown.open ? t.accent : t.text3, textTransform: "uppercase", letterSpacing: 1.5 }}>{marketCountdown.label}</div>
+            <div style={{ fontFamily: "'Space Mono', monospace", fontSize: mobile ? 14 : 16, color: marketCountdown.open ? t.accent : t.text3 }}>{marketCountdown.time}</div>
+          </div>
         </div>
 
         {/* P&L + stats card */}
