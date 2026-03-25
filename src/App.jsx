@@ -1563,7 +1563,7 @@ const paginated = filtered
                     <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 3 }}>
                       <span style={{ fontSize: 13, color: T.text2 }}>{tag} <span style={{ fontSize: 10, color: T.text3 }}>({tagged.length})</span></span>
                       <div style={{ display: "flex", gap: 10 }}>
-                        <span style={{ fontSize: 10, color: T.text3, fontFamily: "monospace" }}>{(tagWR * 100).toFixed(0)}%WR</span>
+                        <span style={{ fontSize: 10, color: T.text3, fontFamily: "'Space Mono',monospace" }}>{(tagWR * 100).toFixed(0)}%WR</span>
                         <span style={{ fontFamily: "'Space Mono',monospace", fontSize: 12, color: tagPL >= 0 ? T.accent : T.danger }}>{tagPL >= 0 ? "+" : ""}{fmt(tagPL)}</span>
                       </div>
                     </div>

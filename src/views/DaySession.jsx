@@ -156,7 +156,7 @@ export default function DaySession({ plList, plans, onAddTrade, onAddPlan, journ
               return runs.map((val, i) => (
                 <div key={i} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 3 }}>
                   <div style={{ width: "100%", height: `${(Math.abs(val) / max) * 46 + 10}px`, background: todayTrades[i].pl >= 0 ? t.accent : t.danger, borderRadius: 3, opacity: 0.8 }} />
-                  <div style={{ fontSize: 9, color: t.text3, fontFamily: "monospace", overflow: "hidden", maxWidth: "100%", textAlign: "center" }}>{todayTrades[i].ticker}</div>
+                  <div style={{ fontSize: 9, color: t.text3, fontFamily: "'Space Mono', monospace", overflow: "hidden", maxWidth: "100%", textAlign: "center" }}>{todayTrades[i].ticker}</div>
                 </div>
               ));
             })()}

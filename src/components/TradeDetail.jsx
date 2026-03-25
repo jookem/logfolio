@@ -239,7 +239,7 @@ export default function TradeDetail({ trade, onClose, onEdit, onExecute, onSave,
                   style={{
                     fontSize: 13,
                     color: t.text,
-                    fontFamily: "monospace",
+                    fontFamily: "'Space Mono', monospace",
                   }}
                 >
                   ${l.strike}
@@ -253,7 +253,7 @@ export default function TradeDetail({ trade, onClose, onEdit, onExecute, onSave,
                   style={{
                     fontSize: 13,
                     color: t.text,
-                    fontFamily: "monospace",
+                    fontFamily: "'Space Mono', monospace",
                   }}
                 >
                   ${l.entryPremium}
@@ -267,7 +267,7 @@ export default function TradeDetail({ trade, onClose, onEdit, onExecute, onSave,
                   style={{
                     fontSize: 13,
                     color: t.text,
-                    fontFamily: "monospace",
+                    fontFamily: "'Space Mono', monospace",
                   }}
                 >
                   ${l.exitPremium}
@@ -281,7 +281,7 @@ export default function TradeDetail({ trade, onClose, onEdit, onExecute, onSave,
                   style={{
                     fontSize: 13,
                     color: t.text,
-                    fontFamily: "monospace",
+                    fontFamily: "'Space Mono', monospace",
                   }}
                 >
                   {l.contracts}

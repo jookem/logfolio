@@ -50,7 +50,7 @@ export default function EquityCurve({ trades, t, spyData, spyError }) {
     return (
       <div>
         {rangeSelector}
-        <div style={{ height: 200, display: "flex", alignItems: "center", justifyContent: "center", color: t.text3, fontSize: 12, fontFamily: "monospace" }}>
+        <div style={{ height: 200, display: "flex", alignItems: "center", justifyContent: "center", color: t.text3, fontSize: 12, fontFamily: "'Space Mono', monospace" }}>
           {range !== "ALL" ? "No trades in this period" : "Add more trades to see curve"}
         </div>
       </div>

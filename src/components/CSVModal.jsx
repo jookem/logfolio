@@ -226,7 +226,7 @@ export default function CSVModal({ onClose, onImport, t }) {
     fontSize: 13,
     width: "100%",
     boxSizing: "border-box",
-    fontFamily: "monospace",
+    fontFamily: "'Space Mono', monospace",
     outline: "none",
   };
   return (
@@ -279,7 +279,7 @@ export default function CSVModal({ onClose, onImport, t }) {
           </div>
           <textarea style={{ ...inp, height: 120, resize: "vertical" }} value={csv} onChange={(e) => setCsv(e.target.value)} placeholder="Or paste CSV/TSV content here..." />
         </div>
-        {error && <div style={{ color: t.danger, fontSize: 13, marginBottom: 10, fontFamily: "monospace", display: "flex", alignItems: "center", gap: 6 }}><WarningIcon size={14} />{error}</div>}
+        {error && <div style={{ color: t.danger, fontSize: 13, marginBottom: 10, fontFamily: "'Space Mono', monospace", display: "flex", alignItems: "center", gap: 6 }}><WarningIcon size={14} />{error}</div>}
         {preview.length > 0 && (
           <div style={{ marginBottom: 14 }}>
             <div style={{ fontSize: 12, color: t.accent, fontFamily: "'Space Mono', monospace", marginBottom: 8, display: "flex", alignItems: "center", gap: 6 }}><CheckIcon size={14} />{preview.length} trades ready</div>
@@ -288,7 +288,7 @@ export default function CSVModal({ onClose, onImport, t }) {
                 <div key={i} style={{ display: "flex", justifyContent: "space-between", padding: "9px 12px", borderBottom: i < preview.length - 1 ? `1px solid ${t.border}` : "none" }}>
                   <span style={{ fontFamily: "'Space Mono', monospace", fontSize: 13, color: t.text }}>{tr.ticker}</span>
                   <span style={{ fontSize: 12, color: t.text3 }}>{tr.notes}</span>
-                  <span style={{ fontFamily: "monospace", fontSize: 12, color: t.text3 }}>{tr.date}</span>
+                  <span style={{ fontFamily: "'Space Mono', monospace", fontSize: 12, color: t.text3 }}>{tr.date}</span>
                 </div>
               ))}
               {preview.length > 4 && <div style={{ padding: "7px 12px", fontSize: 12, color: t.text3 }}>+{preview.length - 4} more...</div>}
