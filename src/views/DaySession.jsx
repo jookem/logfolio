@@ -137,11 +137,13 @@ export default function DaySession({ plList, plans, onAddTrade, onAddPlan, journ
           {/* Right: P&L + stats */}
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 10 }}>
-              <div style={{ fontSize: 10, color: t.text3, fontFamily: "'Space Mono', monospace" }}>
-                SESSION P&L · {todayTrades.length} TRADES · {wins}W {losses}L
-              </div>
               <div style={{ fontFamily: "'Space Mono', monospace", fontSize: mobile ? 28 : 36, fontWeight: 700, color: sessionPL >= 0 ? t.accent : t.danger, letterSpacing: -1, lineHeight: 1, whiteSpace: "nowrap" }}>
                 {sessionPL >= 0 ? "+" : ""}{fmt(sessionPL)}
+              </div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+                <div style={{ fontSize: 10, color: t.text3, fontFamily: "'Space Mono', monospace" }}>SESSION P&L</div>
+                <div style={{ fontSize: 10, color: t.text3, fontFamily: "'Space Mono', monospace" }}>{todayTrades.length} TRADES</div>
+                <div style={{ fontSize: 10, color: t.text3, fontFamily: "'Space Mono', monospace" }}>{wins}W {losses}L</div>
               </div>
             </div>
             {(wins > 0 || losses > 0 || (streak && streak.count >= 2) || journalStreak >= 1) && (
