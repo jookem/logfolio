@@ -225,10 +225,10 @@ Provide 4-6 patterns. Be brutally honest but constructive.`,
             <div style={{ background: t.surface, border: `1px solid ${t.border}`, borderRadius: 12, padding: "20px 24px" }}>
               <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 10, color: t.text3, textTransform: "uppercase", letterSpacing: 2, marginBottom: 12 }}>Pattern Summary</div>
               <div style={{ display: "flex", gap: 16 }}>
-                {[["warning", t.danger, "⚠ Warnings"], ["strength", t.accent, "✓ Strengths"], ["neutral", t.text3, "○ Neutral"]].map(([type, color, label]) => (
+                {[["warning", t.danger, "Warnings", <WarningIcon size={12} />], ["strength", t.accent, "Strengths", <CheckIcon size={12} />], ["neutral", t.text3, "Neutral", <CircleIcon size={12} />]].map(([type, color, label, icon]) => (
                   <div key={type} style={{ textAlign: "center" }}>
                     <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 22, fontWeight: 700, color }}>{insights.patterns.filter((p) => p.type === type).length}</div>
-                    <div style={{ fontSize: 11, color: t.text3 }}>{label}</div>
+                    <div style={{ fontSize: 11, color, display: "flex", alignItems: "center", justifyContent: "center", gap: 4 }}>{icon}{label}</div>
                   </div>
                 ))}
               </div>
