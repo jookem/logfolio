@@ -239,15 +239,34 @@ export default function DaySession({ plList, plans, onAddTrade, onAddPlan, journ
       {plList.length > 0 && (
         <div style={{ background: t.surface, border: `1px solid ${t.border}`, borderRadius: 12, padding: "14px 16px", marginTop: 20 }}>
           <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 10, color: t.text3, textTransform: "uppercase", letterSpacing: 2, marginBottom: 12 }}>Achievements</div>
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 12 }}>
             {BADGE_DEFS.map(b => {
               const earned = earnedIds.has(b.id);
               return (
-                <div key={b.id} title={b.desc} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4, opacity: earned ? 1 : 0.22 }}>
-                  <div style={{ width: 44, height: 44, borderRadius: 10, background: earned ? t.accent + "20" : t.card2, border: `1px solid ${earned ? t.accent + "60" : t.border}`, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                    <img src={b.icon} width={28} height={28} alt={b.label} />
+                <div key={b.id} title={b.desc} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 5 }}>
+                  <div style={{
+                    width: 52, height: 52, borderRadius: 12,
+                    background: earned
+                      ? `linear-gradient(135deg, ${t.accent}40, ${t.accent}15)`
+                      : t.card2,
+                    border: `1.5px solid ${earned ? t.accent : t.border2}`,
+                    boxShadow: earned ? `0 0 12px ${t.accent}55` : "none",
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    filter: earned ? "none" : "grayscale(60%)",
+                    opacity: earned ? 1 : 0.55,
+                    transition: "all 0.2s ease",
+                  }}>
+                    <img src={b.icon} width={32} height={32} alt={b.label} />
                   </div>
-                  <div style={{ fontSize: 9, color: earned ? t.text3 : t.text4, fontFamily: "'Space Mono', monospace", textAlign: "center", maxWidth: 48, lineHeight: 1.3 }}>{b.label}</div>
+                  <div style={{
+                    fontSize: 9,
+                    color: earned ? t.text2 : t.text3,
+                    fontFamily: "'Space Mono', monospace",
+                    textAlign: "center",
+                    maxWidth: 52,
+                    lineHeight: 1.3,
+                    fontWeight: earned ? 700 : 400,
+                  }}>{b.label}</div>
                 </div>
               );
             })}
