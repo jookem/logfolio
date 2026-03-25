@@ -155,7 +155,17 @@ const [page, setPage] = useState(1);
   const loadSeedTrades = async () => {
     if (user) localStorage.setItem(`tradelog_onboarding_done_${user.id}`, "1");
     setShowOnboarding(false);
-    const seeded = SEED_TRADES.map(t => ({ ...t, id: Date.now() + Math.random() }));
+    // Shift seed dates so the most recent trade lands on the signup date (or today)
+    const anchor = user?.created_at ? new Date(user.created_at) : new Date();
+    anchor.setHours(0, 0, 0, 0);
+    const lastSeedDate = new Date(SEED_TRADES[SEED_TRADES.length - 1].date);
+    const dayOffset = Math.round((anchor - lastSeedDate) / 86400000);
+    const shiftDate = (str) => {
+      const d = new Date(str);
+      d.setDate(d.getDate() + dayOffset);
+      return d.toISOString().slice(0, 10);
+    };
+    const seeded = SEED_TRADES.map(t => ({ ...t, id: Date.now() + Math.random(), date: shiftDate(t.date) }));
     setTrades(seeded);
     if (user) {
       const rows = seeded.map(t => ({ id: t.id, user_id: user.id, data: t }));
