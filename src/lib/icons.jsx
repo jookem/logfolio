@@ -345,9 +345,12 @@ export const StrategyIcon = ({ size = 24 }) => (
   </SVG>
 );
 
-// Category (X cross)
+// Category (circle + square + triangle + X)
 export const CategoryIcon = ({ size = 24 }) => (
   <SVG size={size}>
+    <circle cx="214.4" cy="221" r="122.8" />
+    <rect x="482.7" y="106.3" width="229.4" height="229.4" />
+    <polygon points="208.4,476 79.6,703.8 337.2,703.8" />
     <line x1="498.3" y1="490.3" x2="694.3" y2="686.3" />
     <line x1="498.3" y1="686.3" x2="694.3" y2="490.3" />
   </SVG>
