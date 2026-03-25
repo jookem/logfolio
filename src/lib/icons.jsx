@@ -232,10 +232,12 @@ export const WarningIcon = ({ size = 24 }) => (
   </SVG>
 );
 
-// Mistake (X cross)
+// Mistake (rounded square border + X top-right + checkmark)
 export const MistakeIcon = ({ size = 24 }) => (
   <SVG size={size}>
-    <path d="M717.4,111.4L585.5,243.3 M585.5,111.4l131.9,131.9" />
+    <path d="M729.1,399c0,157.1,0,235.7-48.8,284.5s-127.4,48.8-284.5,48.8s-235.7,0-284.5-48.8C62.4,634.7,62.4,556.1,62.4,399s0-235.7,48.8-284.5s127.4-48.8,284.5-48.8c20,0,38.8,0,56.4,0.1" />
+    <path d="M585.5,111.4l131.9,131.9 M585.5,243.3l131.9-131.9" />
+    <path d="M279.1,415.7l66.7,66.7l166.7-166.7" />
   </SVG>
 );
 
