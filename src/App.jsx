@@ -699,9 +699,9 @@ const paginated = filtered
     ["calendar", "Calendar"],
     ["trades", "Logs"],
     ["plans", "Plans"],
+    ["journal", "Journal"],
     ["analytics", "Analytics"],
     ["ai", "AI Insights"],
-    ["journal", "Journal"],
   ];
   const sel = {
     background: T.input,
@@ -894,7 +894,9 @@ const paginated = filtered
                   padding: "8px 0",
                 }}
               >
-                {nav.map(([id, label]) => (
+                {nav.map(([id, label]) => {
+                  const isPremiumTab = !isPro && (id === "analytics" || id === "ai");
+                  return (
                   <button
                     key={id}
                     onClick={() => {
@@ -908,7 +910,7 @@ const paginated = filtered
                       background: "none",
                       border: "none",
                       borderLeft: tab === id ? `2px solid ${T.accent}` : "2px solid transparent",
-                      color: tab === id ? T.text : T.text3,
+                      color: tab === id ? T.text : isPremiumTab ? "#f59e0b" : T.text3,
                       cursor: "pointer",
                       fontSize: 13,
                       padding: "0 20px",
@@ -919,16 +921,19 @@ const paginated = filtered
                       transition: "color 0.15s",
                     }}
                   >
-                    {label}
+                    {label}{isPremiumTab && <span style={{ fontSize: 9, marginLeft: 5, verticalAlign: "middle", opacity: 0.8 }}>✦ PRO</span>}
                   </button>
-                ))}
+                  );
+                })}
 
               </div>
             )}
           </>
         ) : (
           <>
-            {nav.map(([id, label]) => (
+            {nav.map(([id, label]) => {
+              const isPremiumTab = !isPro && (id === "analytics" || id === "ai");
+              return (
               <button
                 key={id}
                 onClick={() => {
@@ -938,23 +943,24 @@ const paginated = filtered
                 style={{
                   background: "none",
                   border: "none",
-                  color: tab === id ? T.text : T.text3,
+                  color: tab === id ? T.text : isPremiumTab ? "#f59e0b" : T.text3,
                   cursor: "pointer",
                   fontSize: 13,
                   padding: "0 10px",
                   borderBottom:
                     tab === id
                       ? `2px solid ${T.accent}`
-                      : "2px solid transparent",
+                      : isPremiumTab ? "2px solid #f59e0b40" : "2px solid transparent",
                   height: 54,
                   fontFamily: "inherit",
                   whiteSpace: "nowrap",
                   transition: "color 0.15s",
                 }}
               >
-                {label}
+                {label}{isPremiumTab && <span style={{ fontSize: 9, marginLeft: 5, verticalAlign: "middle", opacity: 0.8 }}>✦ PRO</span>}
               </button>
-            ))}
+              );
+            })}
             <div
               style={{
                 marginLeft: "auto",
