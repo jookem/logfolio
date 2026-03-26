@@ -36,6 +36,7 @@ import PlanModal from "./components/PlanModal";
 import CSVModal from "./components/CSVModal";
 import SettingsModal from "./components/SettingsModal";
 import UpgradePrompt from "./components/UpgradePrompt";
+import ProTrialModal from "./components/ProTrialModal";
 import ShareModal from "./components/ShareModal";
 import TradeReplay from "./components/TradeReplay";
 import TutorialModal from "./components/TutorialModal";
@@ -49,7 +50,7 @@ import AIInsights from "./views/AIInsights";
 import JournalView from "./views/JournalView";
 
 export default function TradingJournal() {
-  const { user, profile, loading: authLoading, isPro, isProPlus, canUseAI, aiAnalysesLeft, refreshProfile, signOut, isPasswordRecovery, setIsPasswordRecovery } = useAuth();
+  const { user, profile, loading: authLoading, isPro, isProPlus, proTrialActive, canUseAI, aiAnalysesLeft, refreshProfile, signOut, isPasswordRecovery, setIsPasswordRecovery } = useAuth();
   const [newPassword, setNewPassword] = useState("");
   const [pwResetMsg, setPwResetMsg] = useState(null);
   const [pwResetErr, setPwResetErr] = useState(null);
@@ -64,6 +65,7 @@ export default function TradingJournal() {
   useEffect(() => { if (profile?.theme) setIsDark(profile.theme === "dark"); }, [profile?.theme]);
   const [tab, setTab] = useState("today");
   const [showAdd, setShowAdd] = useState(false);
+  const [showTrialModal, setShowTrialModal] = useState(false);
   const [showCSV, setShowCSV] = useState(false);
   const [editTrade, setEditTrade] = useState(null);
   const [confirmDelete, setConfirmDelete] = useState(null); // { id, ticker, isPlan }
@@ -438,7 +440,7 @@ const [page, setPage] = useState(1);
       })();
     }
   };
-  const handleUpgrade = async (plan = "pro") => {
+  const handleStripeCheckout = async (plan = "pro") => {
     if (!user) return;
     const res = await fetch("/api/create-checkout-session", {
       method: "POST",
@@ -447,6 +449,27 @@ const [page, setPage] = useState(1);
     });
     const { url } = await res.json();
     if (url) window.location.href = url;
+  };
+
+  const handleUpgrade = (plan = "pro") => {
+    if (!user) return;
+    if (plan === "pro" && !profile?.pro_trial_until) {
+      setShowTrialModal(true);
+      return;
+    }
+    handleStripeCheckout(plan);
+  };
+
+  const handleStartTrial = async () => {
+    const res = await fetch("/api/start-trial", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ userId: user.id }),
+    });
+    if (res.ok) {
+      await refreshProfile();
+      setShowTrialModal(false);
+    }
   };
 
   const handleManageBilling = async () => {
@@ -1635,7 +1658,7 @@ const paginated = filtered
         )}
 
         {tab === "analytics" && !isPro && (
-          <UpgradePrompt t={T} onUpgrade={() => handleUpgrade("pro")} feature="Analytics" tier="pro" />
+          <UpgradePrompt t={T} onUpgrade={() => handleUpgrade("pro")} feature="Analytics" tier="pro" trialEligible={!profile?.pro_trial_until} />
         )}
         {tab === "analytics" && isPro && (
           <ErrorBoundary compact>
@@ -2127,6 +2150,15 @@ const paginated = filtered
       )}
       {shareTarget && (
         <ShareModal trade={shareTarget} onClose={() => setShareTarget(null)} t={T} isDark={isDark} />
+      )}
+
+      {showTrialModal && (
+        <ProTrialModal
+          t={T}
+          onClose={() => setShowTrialModal(false)}
+          onStartTrial={handleStartTrial}
+          onUpgrade={() => { setShowTrialModal(false); handleStripeCheckout("pro"); }}
+        />
       )}
 
       {showOnboarding && (

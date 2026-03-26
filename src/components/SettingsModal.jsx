@@ -169,18 +169,31 @@ export default function SettingsModal({ onClose, isDark, setIsDark, onClear, t, 
               {user.email}
             </div>
           )}
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
-            <div>
-              <div style={{ fontSize: 14, color: t.text }}>Plan</div>
-              <div style={{ fontSize: 11, color: isPro ? t.accent : t.text3, marginTop: 2 }}>
-              {isProPlus ? "Pro Plus — $15/month" : isPro ? "Pro — $5/month" : "Free — 5 trades/month"}
-            </div>
-            </div>
-            {isPro
-              ? <button onClick={onManageBilling} style={{ background: "none", border: `1px solid ${t.border}`, color: t.text3, borderRadius: 7, padding: "6px 14px", cursor: "pointer", fontSize: 12, fontFamily: "'Space Mono', monospace" }}>Manage</button>
-              : <button onClick={() => onUpgrade("pro")} style={{ background: t.accent, border: "none", color: "#000", borderRadius: 7, padding: "6px 14px", cursor: "pointer", fontSize: 12, fontWeight: 700, fontFamily: "'Space Mono', monospace" }}>Upgrade</button>
-            }
-          </div>
+          {(() => {
+            const trialActive = profile?.pro_trial_until && new Date(profile.pro_trial_until) > new Date();
+            const daysLeft = trialActive ? Math.ceil((new Date(profile.pro_trial_until) - new Date()) / 86400000) : 0;
+            const planLabel = isProPlus
+              ? "Pro Plus — $15/month"
+              : trialActive
+                ? `Pro — Free trial · ${daysLeft}d left`
+                : isPro
+                  ? "Pro — $5/month"
+                  : "Free — 5 trades/month";
+            return (
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+                <div>
+                  <div style={{ fontSize: 14, color: t.text }}>Plan</div>
+                  <div style={{ fontSize: 11, color: trialActive ? t.accent : isPro ? t.accent : t.text3, marginTop: 2 }}>
+                    {planLabel}
+                  </div>
+                </div>
+                {isPro && !trialActive
+                  ? <button onClick={onManageBilling} style={{ background: "none", border: `1px solid ${t.border}`, color: t.text3, borderRadius: 7, padding: "6px 14px", cursor: "pointer", fontSize: 12, fontFamily: "'Space Mono', monospace" }}>Manage</button>
+                  : <button onClick={() => onUpgrade("pro")} style={{ background: t.accent, border: "none", color: "#000", borderRadius: 7, padding: "6px 14px", cursor: "pointer", fontSize: 12, fontWeight: 700, fontFamily: "'Space Mono', monospace" }}>{trialActive ? "Upgrade" : "Upgrade"}</button>
+                }
+              </div>
+            );
+          })()}
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
             <div style={{ fontSize: 14, color: t.text }}>Change Password</div>
             <button onClick={async () => {

@@ -1,10 +1,15 @@
-export default function UpgradePrompt({ t, onUpgrade, feature, tier = "pro" }) {
+export default function UpgradePrompt({ t, onUpgrade, feature, tier = "pro", trialEligible = false }) {
   const isProPlus = tier === "pro_plus";
   const planName = isProPlus ? "Pro Plus" : "Pro";
   const price = isProPlus ? 15 : 5;
+
   const description = isProPlus
     ? `Upgrade to Pro Plus for $${price}/month to unlock ${feature}, Analytics, and unlimited trades.`
-    : `Upgrade to Pro for $${price}/month to unlock ${feature} and unlimited trades.`;
+    : trialEligible
+      ? `Explore all Pro features free for 14 days — no credit card required.`
+      : `Upgrade to Pro for $${price}/month to unlock ${feature} and unlimited trades.`;
+
+  const buttonLabel = !isProPlus && trialEligible ? "Start Free Trial →" : `Upgrade to ${planName}`;
 
   return (
     <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "60px 20px", textAlign: "center" }}>
@@ -21,7 +26,7 @@ export default function UpgradePrompt({ t, onUpgrade, feature, tier = "pro" }) {
         onClick={onUpgrade}
         style={{ background: t.accent, border: "none", color: "#000", borderRadius: 8, padding: "10px 24px", cursor: "pointer", fontSize: 13, fontWeight: 700, fontFamily: "'Space Mono', monospace" }}
       >
-        Upgrade to {planName}
+        {buttonLabel}
       </button>
     </div>
   );

@@ -45,7 +45,7 @@ export function AuthProvider({ children }) {
   const signOut = () => supabase.auth.signOut();
 
   return (
-    <AuthContext.Provider value={{ user, profile, loading, isPro, isProPlus, canUseAI, aiAnalysesLeft, refreshProfile, signOut, isPasswordRecovery, setIsPasswordRecovery }}>
+    <AuthContext.Provider value={{ user, profile, loading, isPro, isProPlus, proTrialActive, canUseAI, aiAnalysesLeft, refreshProfile, signOut, isPasswordRecovery, setIsPasswordRecovery }}>
       {children}
     </AuthContext.Provider>
   );
