@@ -58,9 +58,9 @@ export default function ShareModal({ trade, onClose, t, isDark }) {
     ctx.fillText("LOG-FOLIO", 36, 293);
     ctx.fillStyle = fg3; ctx.font = "9px monospace";
     ctx.fillText("· Trade Smarter ·", 108, 293);
-    const urlW = ctx.measureText("logfolio.app").width;
+    const urlW = ctx.measureText("log-folio.com").width;
     ctx.fillStyle = fg3; ctx.font = "9px monospace";
-    ctx.fillText("logfolio.app", 576 - urlW, 293);
+    ctx.fillText("log-folio.com", 576 - urlW, 293);
     canvas.toBlob(blob => {
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a"); a.href = url;
@@ -100,7 +100,7 @@ export default function ShareModal({ trade, onClose, t, isDark }) {
           )}
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 12, padding: "6px 0 0", borderTop: `1px solid ${isDark ? "#222" : "#dde0e8"}` }}>
             <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 9, fontWeight: 700, color: isDark ? "#00ff87" : "#00b87a", letterSpacing: 1 }}>LOG-FOLIO</div>
-            <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 9, color: t.text3 }}>logfolio.app</div>
+            <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 9, color: t.text3 }}>log-folio.com</div>
           </div>
         </div>
         <div style={{ display: "flex", gap: 10 }}>

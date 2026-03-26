@@ -142,9 +142,9 @@ export default function SettingsModal({ onClose, isDark, setIsDark, onClear, t, 
             <>
               <div style={{ display: "flex", gap: 8, marginBottom: 8, alignItems: "center" }}>
                 <div style={{ flex: 1, fontSize: 11, color: t.text3, fontFamily: "'Space Mono',monospace", background: t.card2, borderRadius: 7, padding: "7px 10px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                  logfolio.app?ref={profile.referral_code}
+                  log-folio.com?ref={profile.referral_code}
                 </div>
-                <button onClick={() => { navigator.clipboard.writeText(`https://logfolio.app?ref=${profile.referral_code}`); setCopied(true); setTimeout(() => setCopied(false), 2000); }}
+                <button onClick={() => { navigator.clipboard.writeText(`https://log-folio.com?ref=${profile.referral_code}`); setCopied(true); setTimeout(() => setCopied(false), 2000); }}
                   style={{ background: copied ? t.accent : "none", border: `1px solid ${copied ? t.accent : t.border}`, color: copied ? "#000" : t.text3, borderRadius: 7, padding: "6px 12px", cursor: "pointer", fontSize: 12, fontFamily: "'Space Mono', monospace", flexShrink: 0, fontWeight: copied ? 700 : 400 }}>
                   {copied ? "Copied!" : "Copy"}
                 </button>
