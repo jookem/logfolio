@@ -11,8 +11,14 @@ create table if not exists public.profiles (
   ai_analyses_reset_at timestamptz default date_trunc('month', now()),
   ai_insights jsonb,
   ai_insights_at timestamptz,
+  pro_trial_until timestamptz,
+  trial_ip text,
   created_at timestamptz default now()
 );
+
+-- Migration: add trial columns if upgrading an existing database
+-- alter table public.profiles add column if not exists pro_trial_until timestamptz;
+-- alter table public.profiles add column if not exists trial_ip text;
 
 alter table public.profiles enable row level security;
 
