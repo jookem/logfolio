@@ -221,7 +221,7 @@ export default function TradeFormModal({ initial, defaults, onClose, onSave, onC
       }}
     >
       <div
-        className={closing ? "modal-minimize" : "modal-maximize"}
+        className={closing ? "modal-minimize modal-scroll" : "modal-maximize modal-scroll"}
         style={{
           background: t.card,
           border: `1px solid ${t.border}`,

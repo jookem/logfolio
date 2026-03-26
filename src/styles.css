@@ -89,6 +89,22 @@ body { margin: 0; padding: 0; }
   animation: tabFade 0.18s ease forwards;
 }
 
+/* Custom scrollbar for modals — thin, rounded, inset */
+.modal-scroll::-webkit-scrollbar {
+  width: 5px;
+}
+.modal-scroll::-webkit-scrollbar-track {
+  background: transparent;
+  margin: 12px 0;
+}
+.modal-scroll::-webkit-scrollbar-thumb {
+  background: rgba(128, 128, 128, 0.35);
+  border-radius: 3px;
+}
+.modal-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(128, 128, 128, 0.55);
+}
+
 input.time-dark::-webkit-calendar-picker-indicator {
   filter: invert(1);
   opacity: 0.6;

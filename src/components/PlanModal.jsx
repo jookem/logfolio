@@ -428,7 +428,7 @@ const base = {
 
   return (
     <div className={closing ? "backdrop-exit" : "backdrop-enter"} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.75)", zIndex: 100, display: "flex", alignItems: "center", justifyContent: "center", padding: sm ? 8 : 16, minHeight: "100vh" }}>
-      <div className={closing ? "modal-minimize" : "modal-maximize"} style={{ background: t.card, border: `1px solid ${t.border}`, borderRadius: sm ? 12 : 16, width: "100%", maxWidth: 540, maxHeight: "93vh", overflowY: "auto", padding: sm ? 14 : 24 }}>
+      <div className={closing ? "modal-minimize modal-scroll" : "modal-maximize modal-scroll"} style={{ background: t.card, border: `1px solid ${t.border}`, borderRadius: sm ? 12 : 16, width: "100%", maxWidth: 540, maxHeight: "93vh", overflowY: "auto", padding: sm ? 14 : 24 }}>
 
        {/* Header */}
 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
