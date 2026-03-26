@@ -1587,7 +1587,7 @@ const paginated = filtered
             {/* Equity Curve */}
             <div style={{ background: T.surface, border: `1px solid ${T.border}`, borderRadius: 12, padding: "16px 18px", marginBottom: 16 }}>
               <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 10, color: T.text3, textTransform: "uppercase", letterSpacing: 2, marginBottom: 12 }}>
-                Equity Curve
+                SPY Equity Curve
               </div>
               <EquityCurve trades={plList} t={T} spyData={spyData} spyError={spyError} />
             </div>

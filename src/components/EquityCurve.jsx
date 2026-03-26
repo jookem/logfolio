@@ -182,11 +182,14 @@ export default function EquityCurve({ trades, t, spyData, spyError }) {
           const ptIdx = points.findIndex(p => p.date === pt.date);
           const xPct = ptIdx >= 0 ? (ptIdx / (points.length - 1)) * 100 : null;
           if (xPct == null) return null;
+          const isFirst = idx === tickIdxs[0];
+          const isLast = idx === tickIdxs[tickIdxs.length - 1];
+          const anchor = isFirst ? "translateX(0%)" : isLast ? "translateX(-100%)" : "translateX(-50%)";
           return (
             <span key={idx} style={{
               position: "absolute",
               left: `${xPct}%`,
-              transform: "translateX(-50%)",
+              transform: anchor,
               fontSize: 9,
               color: t.text3,
               fontFamily: "'Space Mono',monospace",
