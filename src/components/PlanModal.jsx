@@ -697,8 +697,9 @@ const base = {
         </div>
         <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
           <div style={{ ...lbl, opacity: 0, pointerEvents: "none" }}>x</div>
-          <div style={{ flex: 1, background: t.surface, border: `1px solid ${t.border}`, borderRadius: 8, padding: "0 10px", fontSize: 10, color: t.text3, fontFamily: "'Space Mono', monospace", lineHeight: 1.4, display: "flex", alignItems: "center" }}>
-            ⚠ Previous close data. Verify with broker.
+          <div style={{ flex: 1, background: t.surface, border: `1px solid ${t.border}`, borderRadius: 8, padding: "8px 10px", fontSize: 10, color: t.text3, fontFamily: "'Space Mono', monospace", lineHeight: 1.5, display: "flex", alignItems: "flex-start", gap: 6 }}>
+            <span style={{ color: t.danger, flexShrink: 0, marginTop: 1 }}><WarningIcon size={12} /></span>
+            <span>Previous close data.<br />Verify with broker.</span>
           </div>
         </div>
       </div>
