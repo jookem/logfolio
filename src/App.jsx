@@ -236,7 +236,7 @@ const [page, setPage] = useState(1);
         const tpOffset = t.takeProfit ? t.takeProfit - t.entryPrice : null;
         return {
           ...t,
-          id: Date.now() + Math.random(),
+          id: Date.now() + Math.floor(Math.random() * 1000),
           date: shiftedDate,
           entryPrice,
           exitPrice,
@@ -244,7 +244,7 @@ const [page, setPage] = useState(1);
           takeProfit: tpOffset != null ? parseFloat((entryPrice + tpOffset).toFixed(2)) : t.takeProfit,
         };
       }
-      return { ...t, id: Date.now() + Math.random(), date: shiftedDate };
+      return { ...t, id: Date.now() + Math.floor(Math.random() * 1000), date: shiftedDate };
     });
 
     setTrades(seeded);
