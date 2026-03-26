@@ -3,7 +3,7 @@ import { useModalClose } from "../lib/useModalClose";
 import { supabase } from "../lib/supabase";
 import { STRATEGIES, TIMEFRAMES, CURRENCIES, TIMEZONES } from "../lib/constants";
 import { exportCSV, exportJSON } from "../lib/utils";
-import { SettingsIcon, CloseIcon, LightModeIcon, DarkModeIcon } from "../lib/icons";
+import { SettingsIcon, CloseIcon, LightModeIcon, DarkModeIcon, CheckIcon } from "../lib/icons";
 
 export default function SettingsModal({ onClose, isDark, setIsDark, onClear, t, user, profile, onSignOut, isPro, isProPlus, onUpgrade, onManageBilling, onTutorial, tradeDefaults, onSaveDefaults, trades }) {
   const { closing, trigger } = useModalClose();
@@ -205,7 +205,7 @@ export default function SettingsModal({ onClose, isDark, setIsDark, onClear, t, 
                   setTimeout(() => setResetSent(false), 4000);
                 }
               }} style={{ background: resetSent ? t.accent + "15" : "none", border: `1px solid ${resetSent ? t.accent + "40" : t.border}`, color: resetSent ? t.accent : t.text3, borderRadius: 7, padding: "6px 14px", cursor: resetSent ? "default" : "pointer", fontSize: 12, fontFamily: "'Space Mono', monospace", transition: "all 0.2s" }}>
-                {resetSent ? "Email sent ✓" : "Send Reset Email"}
+                {resetSent ? <span style={{ display: "flex", alignItems: "center", gap: 5 }}><CheckIcon size={12} />Email sent</span> : "Send Reset Email"}
               </button>
             </div>
             {resetSent && (

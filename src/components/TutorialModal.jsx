@@ -36,7 +36,7 @@ const TUTORIAL_STEPS = [
   {
     icon: <LogIcon size={44} />,
     title: "Log a Trade",
-    desc: "After a trade closes, tap + (or press N) to log it. Record entry & exit prices, shares, stop loss, emotions, and notes. The more honest you are, the better your insights.",
+    desc: "After a trade closes, tap + (or press L) to log it. Record entry & exit prices, shares, stop loss, emotions, and notes. The more honest you are, the better your insights.",
     tab: "trades",
     cta: { label: "Try logging a trade", action: "openLog" },
   },
