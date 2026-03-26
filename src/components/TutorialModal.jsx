@@ -81,6 +81,13 @@ const TUTORIAL_STEPS = [
     cta: null,
   },
   {
+    icon: <PenIcon size={44} />,
+    title: "Journal",
+    desc: "Write a daily trading journal entry — your thoughts, mindset, and lessons learned. Entries are saved by date and auto-synced. Use it to reflect on the day before you close your charts.",
+    tab: "journal",
+    cta: null,
+  },
+  {
     icon: <AnalysisIcon size={44} />,
     title: "Analytics",
     desc: "Equity curve, P/L breakdown, win rate, R-multiples, SPY benchmark overlay, and strategy performance — everything you need to measure real progress.",
@@ -92,13 +99,6 @@ const TUTORIAL_STEPS = [
     title: "AI Insights",
     desc: "Get AI-powered analysis of your full trading journal — pattern recognition, emotional tendencies, strengths, weaknesses, and a trader score. Pro Plus only, up to 3 analyses per day. Powered by Claude.",
     tab: "ai",
-    cta: null,
-  },
-  {
-    icon: <PenIcon size={44} />,
-    title: "Journal",
-    desc: "Write a daily trading journal entry — your thoughts, mindset, and lessons learned. Entries are saved by date and auto-synced. Use it to reflect on the day before you close your charts.",
-    tab: "journal",
     cta: null,
   },
   {
