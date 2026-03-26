@@ -49,8 +49,16 @@ export default function ShareModal({ trade, onClose, t, isDark }) {
       ctx.fillStyle = fg3; ctx.font = "12px monospace";
       ctx.fillText(trade.strategy, 320, 270);
     }
-    ctx.fillStyle = fg3; ctx.font = "10px monospace";
-    ctx.fillText("logfolio.app", 500, 280);
+    // Branded footer strip
+    ctx.fillStyle = isDark ? "#0a0a0a" : "#d8dbe4";
+    ctx.fillRect(20, 278, 560, 22);
+    ctx.fillStyle = acc; ctx.font = "bold 9px monospace";
+    ctx.fillText("LOG-FOLIO", 36, 293);
+    ctx.fillStyle = fg3; ctx.font = "9px monospace";
+    ctx.fillText("· Trade Smarter ·", 108, 293);
+    const urlW = ctx.measureText("logfolio.app").width;
+    ctx.fillStyle = fg3; ctx.font = "9px monospace";
+    ctx.fillText("logfolio.app", 576 - urlW, 293);
     canvas.toBlob(blob => {
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a"); a.href = url;
@@ -88,7 +96,10 @@ export default function ShareModal({ trade, onClose, t, isDark }) {
           {trade.r != null && (
             <div style={{ fontSize: 11, color: trade.r >= 0 ? t.accent : t.danger, marginTop: 4, fontFamily: "'Space Mono',monospace", fontWeight: 700 }}>{trade.r >= 0 ? "+" : ""}{trade.r.toFixed(2)}R</div>
           )}
-          <div style={{ fontSize: 9, color: t.text4, marginTop: 12, fontFamily: "'Space Mono',monospace", textAlign: "right" }}>LOG-FOLIO</div>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 12, padding: "6px 0 0", borderTop: `1px solid ${isDark ? "#222" : "#dde0e8"}` }}>
+            <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 9, fontWeight: 700, color: isDark ? "#00ff87" : "#00b87a", letterSpacing: 1 }}>LOG-FOLIO</div>
+            <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 9, color: t.text3 }}>logfolio.app</div>
+          </div>
         </div>
         <div style={{ display: "flex", gap: 10 }}>
           <button onClick={downloadCard} style={{ flex: 1, background: t.accent, border: "none", color: "#000", borderRadius: 8, padding: "11px 14px", cursor: "pointer", fontSize: 13, fontWeight: 700, fontFamily: "'Space Mono',monospace" }}>Download PNG</button>

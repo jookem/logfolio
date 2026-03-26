@@ -34,8 +34,9 @@ export function AuthProvider({ children }) {
 
   const refreshProfile = () => user && fetchProfile(user.id);
 
+  const proTrialActive = profile?.pro_trial_until && new Date(profile.pro_trial_until) > new Date();
   const isProPlus = profile?.subscription_status === "pro_plus";
-  const isPro = profile?.subscription_status === "pro" || isProPlus;
+  const isPro = profile?.subscription_status === "pro" || isProPlus || proTrialActive;
 
   const canUseAI = isProPlus && (profile?.ai_analyses_used ?? 0) < 10;
 

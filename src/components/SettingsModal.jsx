@@ -1,10 +1,12 @@
+import { useState } from "react";
 import { supabase } from "../lib/supabase";
 import { STRATEGIES, TIMEFRAMES, CURRENCIES, TIMEZONES } from "../lib/constants";
 import { exportCSV, exportJSON } from "../lib/utils";
 import { SettingsIcon, CloseIcon, LightModeIcon, DarkModeIcon } from "../lib/icons";
 
-export default function SettingsModal({ onClose, isDark, setIsDark, onClear, t, user, onSignOut, isPro, isProPlus, onUpgrade, onManageBilling, onTutorial, tradeDefaults, onSaveDefaults, trades }) {
+export default function SettingsModal({ onClose, isDark, setIsDark, onClear, t, user, profile, onSignOut, isPro, isProPlus, onUpgrade, onManageBilling, onTutorial, tradeDefaults, onSaveDefaults, trades }) {
   const sm = window.innerWidth < 400;
+  const [copied, setCopied] = useState(false);
   const sel = { background: t.input, border: `1px solid ${t.inputBorder}`, borderRadius: 7, color: t.text, padding: "6px 10px", fontSize: 13, fontFamily: "inherit", cursor: "pointer", outline: "none" };
   const numInp = { background: t.input, border: `1px solid ${t.inputBorder}`, borderRadius: 7, color: t.text, padding: "6px 10px", fontSize: 13, fontFamily: "inherit", outline: "none", width: 110, textAlign: "right" };
   const row = { display: "flex", justifyContent: "space-between", alignItems: "center" };
@@ -126,6 +128,35 @@ export default function SettingsModal({ onClose, isDark, setIsDark, onClear, t, 
               </div>
             </div>
           </div>
+        </div>
+
+        {/* Referral */}
+        <div style={{ background: t.surface, border: `1px solid ${t.border}`, borderRadius: 12, padding: "14px 16px", marginBottom: 12 }}>
+          <div style={{ fontSize: 11, color: t.text3, fontFamily: "'Space Mono', monospace", textTransform: "uppercase", letterSpacing: 1.5, marginBottom: 10 }}>Refer a Friend</div>
+          <div style={{ fontSize: 12, color: t.text2, marginBottom: 10, lineHeight: 1.6 }}>
+            Share your link — you both get <span style={{ color: t.accent, fontWeight: 700 }}>30 days free Pro</span> when a friend signs up.
+          </div>
+          {profile?.referral_code ? (
+            <>
+              <div style={{ display: "flex", gap: 8, marginBottom: 8, alignItems: "center" }}>
+                <div style={{ flex: 1, fontSize: 11, color: t.text3, fontFamily: "'Space Mono',monospace", background: t.card2, borderRadius: 7, padding: "7px 10px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                  logfolio.app?ref={profile.referral_code}
+                </div>
+                <button onClick={() => { navigator.clipboard.writeText(`https://logfolio.app?ref=${profile.referral_code}`); setCopied(true); setTimeout(() => setCopied(false), 2000); }}
+                  style={{ background: copied ? t.accent : "none", border: `1px solid ${copied ? t.accent : t.border}`, color: copied ? "#000" : t.text3, borderRadius: 7, padding: "6px 12px", cursor: "pointer", fontSize: 12, fontFamily: "'Space Mono', monospace", flexShrink: 0, fontWeight: copied ? 700 : 400 }}>
+                  {copied ? "Copied!" : "Copy"}
+                </button>
+              </div>
+              <div style={{ fontSize: 12, color: t.text3 }}>
+                {profile.referred_count || 0} friend{(profile.referred_count || 0) !== 1 ? "s" : ""} referred
+                {profile.pro_trial_until && new Date(profile.pro_trial_until) > new Date() && (
+                  <span style={{ color: t.accent, marginLeft: 8 }}>· Trial active until {new Date(profile.pro_trial_until).toLocaleDateString()}</span>
+                )}
+              </div>
+            </>
+          ) : (
+            <div style={{ fontSize: 12, color: t.text3 }}>Referral link unavailable — try signing out and back in.</div>
+          )}
         </div>
 
         {/* Account */}

@@ -39,7 +39,12 @@ export default function AuthScreen({ isDark }) {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) setError(error.message);
     } else if (mode === "signup") {
-      const { error } = await supabase.auth.signUp({ email, password });
+      const refCode = new URLSearchParams(window.location.search).get("ref");
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: refCode ? { data: { referred_by: refCode } } : undefined,
+      });
       if (error) setError(error.message);
       else setMessage("Check your email for a confirmation link.");
     } else {

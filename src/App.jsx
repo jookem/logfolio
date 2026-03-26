@@ -2018,6 +2018,7 @@ const paginated = filtered
     onClear={clearAll}
     t={T}
     user={user}
+    profile={profile}
     onSignOut={() => { setShowSettings(false); saveTrades([]); localStorage.removeItem("tradelog_user_id"); signOut(); }}
     isPro={isPro}
     isProPlus={isProPlus}
