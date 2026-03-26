@@ -742,25 +742,6 @@ const durationAnalysis = useMemo(() => {
   };
 }, [plList]);
 
-const monthlyHeatmap = useMemo(() => {
-  const byDate = {};
-  plList.forEach(t => { byDate[t.date] = (byDate[t.date] || 0) + t.pl; });
-  if (!Object.keys(byDate).length) return null;
-  const dates = Object.keys(byDate).sort();
-  const latestDate = new Date(dates[dates.length - 1]);
-  const year = latestDate.getFullYear();
-  const month = latestDate.getMonth();
-  const daysInMonth = new Date(year, month + 1, 0).getDate();
-  const firstDow = new Date(year, month, 1).getDay();
-  const monthName = new Date(year, month, 1).toLocaleString("default", { month: "long", year: "numeric" });
-  const days = [];
-  for (let d = 1; d <= daysInMonth; d++) {
-    const dateStr = `${year}-${String(month + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
-    days.push({ date: dateStr, pl: byDate[dateStr] ?? null, day: d });
-  }
-  const maxAbs = Math.max(...days.filter(d => d.pl !== null).map(d => Math.abs(d.pl)), 1);
-  return { days, firstDow, monthName, maxAbs };
-}, [plList]);
 
   const filteredPlans = useMemo(() => {
   const q = planSearch.toLowerCase().trim();
@@ -1606,42 +1587,6 @@ const paginated = filtered
               <EquityCurve trades={plList} t={T} spyData={spyData} spyError={spyError} />
             </div>
 
-            {/* Monthly P&L Heatmap */}
-            {monthlyHeatmap && (
-              <div style={{ background: T.surface, border: `1px solid ${T.border}`, borderRadius: 12, padding: "16px 18px", marginBottom: 16 }}>
-                <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 10, color: T.text3, textTransform: "uppercase", letterSpacing: 2, marginBottom: 4 }}>Monthly P&L Heatmap</div>
-                <div style={{ fontSize: 11, color: T.text3, marginBottom: 14 }}>{monthlyHeatmap.monthName} · Most recent month with trades</div>
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: 4 }}>
-                  {["Su","Mo","Tu","We","Th","Fr","Sa"].map(d => (
-                    <div key={d} style={{ textAlign: "center", fontSize: 9, color: T.text4, fontFamily: "'Space Mono',monospace", paddingBottom: 4 }}>{d}</div>
-                  ))}
-                  {Array.from({ length: monthlyHeatmap.firstDow }).map((_, i) => <div key={`e${i}`} />)}
-                  {monthlyHeatmap.days.map(({ date, pl, day }) => {
-                    const intensity = pl !== null ? Math.min(Math.abs(pl) / monthlyHeatmap.maxAbs, 1) : 0;
-                    const bg = pl === null ? T.border + "30"
-                      : pl > 0 ? `rgba(0,255,135,${0.15 + intensity * 0.75})`
-                      : pl < 0 ? `rgba(255,77,109,${0.15 + intensity * 0.75})`
-                      : T.border + "50";
-                    return (
-                      <div key={date} title={pl !== null ? `${date}: ${pl >= 0 ? "+" : ""}${pl.toFixed(2)}` : date} style={{ aspectRatio: "1", background: bg, borderRadius: 4, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                        <span style={{ fontSize: 9, color: pl !== null ? (pl > 0 ? T.accent : pl < 0 ? T.danger : T.text3) : T.text4, fontFamily: "'Space Mono',monospace", fontWeight: pl !== null ? 700 : 400 }}>{day}</span>
-                      </div>
-                    );
-                  })}
-                </div>
-                <div style={{ display: "flex", gap: 16, marginTop: 12, flexWrap: "wrap" }}>
-                  <span style={{ fontSize: 10, color: T.text3 }}>
-                    Green days: <span style={{ color: T.accent, fontFamily: "'Space Mono',monospace" }}>{monthlyHeatmap.days.filter(d => d.pl > 0).length}</span>
-                  </span>
-                  <span style={{ fontSize: 10, color: T.text3 }}>
-                    Red days: <span style={{ color: T.danger, fontFamily: "'Space Mono',monospace" }}>{monthlyHeatmap.days.filter(d => d.pl < 0).length}</span>
-                  </span>
-                  <span style={{ fontSize: 10, color: T.text3 }}>
-                    Month P&L: <span style={{ color: monthlyHeatmap.days.reduce((s, d) => s + (d.pl || 0), 0) >= 0 ? T.accent : T.danger, fontFamily: "'Space Mono',monospace" }}>{(() => { const tot = monthlyHeatmap.days.reduce((s, d) => s + (d.pl || 0), 0); return (tot >= 0 ? "+" : "") + tot.toFixed(2); })()}</span>
-                  </span>
-                </div>
-              </div>
-            )}
 
             {/* R-Multiple Distribution */}
             {rDistribution.some(b => b.count > 0) && (
