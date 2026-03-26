@@ -158,23 +158,25 @@ export default function TradeDetail({ trade, onClose, onEdit, onExecute, onSave,
           {[
             ["Entry", fmt(trade.entryPrice)],
             ...(trade.exitPrice ? [["Exit", fmt(trade.exitPrice)]] : []),
+            ...(trade.date ? [["Entry Date", trade.date]] : []),
+            ...(trade.exitDate ? [["Exit Date", trade.exitDate]] : []),
+            ...(trade.entryTime ? [["Entry Time", trade.entryTime]] : []),
+            ...(trade.exitTime ? [["Exit Time", trade.exitTime]] : []),
             [typeLabels(trade.type).units, trade.shares],
-            ["Direction", trade.direction],...(trade.stopLoss ? [["Stop Loss", fmt(trade.stopLoss)]] : []),
-  ...(trade.takeProfit ? [["Take Profit", fmt(trade.takeProfit)]] : []),
-  ...(trade.plannedR != null ? [["Planned R", `+${trade.plannedR?.toFixed(2)}R`]] : []),
-  ...(trade.r != null ? [["R-Multiple", fmtR(trade.r)]] : []),
-  ...(trade.holdMinutes != null ? [["Hold Time", trade.holdMinutes < 60 ? `${trade.holdMinutes}m` : `${Math.floor(trade.holdMinutes/60)}h ${trade.holdMinutes%60}m`]] : []),
-  ...(trade.date ? [["Entry Date", trade.date]] : []),
-  ...(trade.exitDate ? [["Exit Date", trade.exitDate]] : []),
-  ...(trade.entryTime ? [["Entry Time", trade.entryTime]] : []),
-  ...(trade.exitTime ? [["Exit Time", trade.exitTime]] : []),
-].map(([k, v]) => (
+            ["Direction", trade.direction],
+            ...(trade.stopLoss ? [["Stop Loss", fmt(trade.stopLoss)]] : []),
+            ...(trade.takeProfit ? [["Take Profit", fmt(trade.takeProfit)]] : []),
+            ...(trade.r != null ? [["R-Multiple", fmtR(trade.r), true]] : []),
+            ...(trade.plannedR != null ? [["Planned R", `+${trade.plannedR?.toFixed(2)}R`]] : []),
+            ...(trade.holdMinutes != null ? [["Hold Time", trade.holdMinutes < 60 ? `${trade.holdMinutes}m` : `${Math.floor(trade.holdMinutes/60)}h ${trade.holdMinutes%60}m`]] : []),
+          ].map(([k, v, full]) => (
             <div
               key={k}
               style={{
                 background: t.card2,
                 borderRadius: 8,
                 padding: "11px 14px",
+                ...(full ? { gridColumn: "1 / -1" } : {}),
               }}
             >
               <div
