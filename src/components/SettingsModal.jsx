@@ -73,7 +73,7 @@ export default function SettingsModal({ onClose, isDark, setIsDark, onClear, t, 
             <div style={row}>
               <span style={{ fontSize: 14, color: t.text }}>Strategy</span>
               <select value={tradeDefaults?.strategy || "Breakout"} onChange={(e) => onSaveDefaults({ ...tradeDefaults, strategy: e.target.value })} style={{ ...sel, maxWidth: 160 }}>
-                {STRATEGIES.map(s => <option key={s} value={s}>{s}</option>)}
+                {[...STRATEGIES, ...[...new Set((trades || []).map(tr => tr.strategy).filter(Boolean))].filter(s => !STRATEGIES.includes(s)).sort()].map(s => <option key={s} value={s}>{s}</option>)}
               </select>
             </div>
             <div style={row}>

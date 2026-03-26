@@ -320,12 +320,15 @@ export default function TradeFormModal({ initial, defaults, onClose, onSave, onC
               value={form.strategy}
               onChange={(e) => set("strategy", e.target.value)}
             >
-              {(form.type === "options"
-                ? ["Long Call","Long Put","Bull Call Spread","Bear Put Spread","Iron Condor","Straddle","Strangle","Covered Call","Cash Secured Put","Butterfly","Calendar Spread"]
-                : ["Breakout","Pullback","Reversal","Scalp","Trend Follow","Range","Swing"]
-              ).map((s) => (
-                <option key={s}>{s}</option>
-              ))}
+              {(() => {
+                const baseOptions = ["Long Call","Long Put","Bull Call Spread","Bear Put Spread","Iron Condor","Straddle","Strangle","Covered Call","Cash Secured Put","Butterfly","Calendar Spread"];
+                const baseStock = ["Breakout","Pullback","Reversal","Scalp","Trend Follow","Range","Swing"];
+                const base = form.type === "options" ? baseOptions : baseStock;
+                const used = [...new Set(trades.filter(tr => form.type === "options" ? tr.type === "options" : tr.type !== "options").map(tr => tr.strategy).filter(Boolean))];
+                const custom = used.filter(s => !base.includes(s)).sort();
+                const list = custom.length ? [...base, ...custom] : base;
+                return list.map(s => <option key={s}>{s}</option>);
+              })()}
             </select>
           </div>
         </div>

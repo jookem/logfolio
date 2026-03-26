@@ -2103,7 +2103,7 @@ const paginated = filtered
         />
       )}
       {showBulkEdit && (
-        <BulkEditModal count={bulkSelected.size} onApply={bulkEditApply} onClose={() => setShowBulkEdit(false)} t={T} />
+        <BulkEditModal count={bulkSelected.size} onApply={bulkEditApply} onClose={() => setShowBulkEdit(false)} t={T} trades={trades} />
       )}
       {showSettings && (
   <SettingsModal

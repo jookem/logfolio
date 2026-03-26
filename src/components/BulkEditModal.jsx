@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useModalClose } from "../lib/useModalClose";
 import { STRATEGIES, EMOTIONS, MISTAKES } from "../lib/constants";
 
-export default function BulkEditModal({ count, onApply, onClose, t }) {
+export default function BulkEditModal({ count, onApply, onClose, t, trades = [] }) {
   const { closing, trigger } = useModalClose();
   const [strategy, setStrategy] = useState("");
   const [emotion, setEmotion] = useState("");
@@ -33,7 +33,7 @@ export default function BulkEditModal({ count, onApply, onClose, t }) {
             <div style={{ fontSize: 10, color: t.text3, fontFamily: "'Space Mono',monospace", textTransform: "uppercase", letterSpacing: 1.5, marginBottom: 5 }}>Strategy</div>
             <select style={sel} value={strategy} onChange={e => setStrategy(e.target.value)}>
               <option value="">— keep existing —</option>
-              {STRATEGIES.map(s => <option key={s}>{s}</option>)}
+              {[...STRATEGIES, ...[...new Set(trades.map(tr => tr.strategy).filter(Boolean))].filter(s => !STRATEGIES.includes(s)).sort()].map(s => <option key={s}>{s}</option>)}
             </select>
           </div>
           <div>
