@@ -25,6 +25,13 @@ const TUTORIAL_STEPS = [
     cta: null,
   },
   {
+    icon: <Pair a={<PenIcon size={44} />} b={<AnalysisIcon size={44} />} />,
+    title: "Start Fresh or Load Samples",
+    desc: "When you first sign up you'll see two options:\n\nStart Fresh — jump straight in and log your first real trade from scratch.\n\nLoad Sample Trades — pre-loads 15 example trades so you can explore Analytics, the Calendar, and all features immediately. You can delete them any time from Settings.",
+    tab: null,
+    cta: null,
+  },
+  {
     icon: <LogIcon size={44} />,
     title: "Log a Trade",
     desc: "After a trade closes, tap + (or press N) to log it. Record entry & exit prices, shares, stop loss, emotions, and notes. The more honest you are, the better your insights.",

@@ -172,6 +172,8 @@ const [page, setPage] = useState(1);
     };
     const seeded = SEED_TRADES.map(t => ({ ...t, id: Date.now() + Math.random(), date: shiftDate(t.date) }));
     setTrades(seeded);
+    setTutorialStep(0);
+    setShowTutorial(true);
     if (user) {
       const rows = seeded.map(t => ({ id: t.id, user_id: user.id, data: t }));
       await supabase.from("trades").upsert(rows);
