@@ -2,6 +2,7 @@ import { Resend } from "resend";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 const FROM = "Log-Folio <hello@log-folio.com>";
+const REPLY_TO = "miranda.adrian.irving@gmail.com";
 
 function base(content) {
   return `<!DOCTYPE html>
@@ -29,6 +30,7 @@ export async function sendTrialStarted(email) {
 
   await resend.emails.send({
     from: FROM,
+    reply_to: REPLY_TO,
     to: email,
     subject: "Your 14-day Pro trial has started",
     html: base(`
@@ -53,6 +55,7 @@ export async function sendTrialExpiringSoon(email, daysLeft, expiryDate) {
 
   await resend.emails.send({
     from: FROM,
+    reply_to: REPLY_TO,
     to: email,
     subject: `Your Pro trial expires ${urgency}`,
     html: base(`
@@ -75,6 +78,7 @@ export async function sendPaymentConfirmation(email, plan) {
 
   await resend.emails.send({
     from: FROM,
+    reply_to: REPLY_TO,
     to: email,
     subject: `You're now on Log-Folio ${planName}`,
     html: base(`
