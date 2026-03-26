@@ -9,6 +9,7 @@ export default function SettingsModal({ onClose, isDark, setIsDark, onClear, t, 
   const { closing, trigger } = useModalClose();
   const sm = window.innerWidth < 400;
   const [copied, setCopied] = useState(false);
+  const [resetSent, setResetSent] = useState(false);
   const sel = { background: t.input, border: `1px solid ${t.inputBorder}`, borderRadius: 7, color: t.text, padding: "6px 10px", fontSize: 13, fontFamily: "inherit", cursor: "pointer", outline: "none" };
   const numInp = { background: t.input, border: `1px solid ${t.inputBorder}`, borderRadius: 7, color: t.text, padding: "6px 10px", fontSize: 13, fontFamily: "inherit", outline: "none", width: 110, textAlign: "right" };
   const row = { display: "flex", justifyContent: "space-between", alignItems: "center" };
@@ -194,14 +195,24 @@ export default function SettingsModal({ onClose, isDark, setIsDark, onClear, t, 
               </div>
             );
           })()}
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
-            <div style={{ fontSize: 14, color: t.text }}>Change Password</div>
-            <button onClick={async () => {
-              if (user?.email) {
-                await supabase.auth.resetPasswordForEmail(user.email, { redirectTo: window.location.origin });
-                alert("Password reset email sent to " + user.email);
-              }
-            }} style={{ background: "none", border: `1px solid ${t.border}`, color: t.text3, borderRadius: 7, padding: "6px 14px", cursor: "pointer", fontSize: 12, fontFamily: "'Space Mono', monospace" }}>Send Reset Email</button>
+          <div style={{ marginBottom: 10 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <div style={{ fontSize: 14, color: t.text }}>Change Password</div>
+              <button onClick={async () => {
+                if (user?.email && !resetSent) {
+                  await supabase.auth.resetPasswordForEmail(user.email, { redirectTo: window.location.origin });
+                  setResetSent(true);
+                  setTimeout(() => setResetSent(false), 4000);
+                }
+              }} style={{ background: resetSent ? t.accent + "15" : "none", border: `1px solid ${resetSent ? t.accent + "40" : t.border}`, color: resetSent ? t.accent : t.text3, borderRadius: 7, padding: "6px 14px", cursor: resetSent ? "default" : "pointer", fontSize: 12, fontFamily: "'Space Mono', monospace", transition: "all 0.2s" }}>
+                {resetSent ? "Email sent ✓" : "Send Reset Email"}
+              </button>
+            </div>
+            {resetSent && (
+              <div style={{ fontSize: 11, color: t.text3, marginTop: 6, textAlign: "right" }}>
+                Sent to {user.email}
+              </div>
+            )}
           </div>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
             <div style={{ fontSize: 14, color: t.text }}>Sign Out</div>
