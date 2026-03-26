@@ -40,6 +40,7 @@ import TradeReplay from "./components/TradeReplay";
 import TutorialModal from "./components/TutorialModal";
 import OnboardingModal from "./components/OnboardingModal";
 import ErrorBoundary from "./components/ErrorBoundary";
+import BulkEditModal from "./components/BulkEditModal";
 import CalendarView from "./views/CalendarView";
 import DaySession from "./views/DaySession";
 import WeeklyReview from "./views/WeeklyReview";
@@ -68,6 +69,7 @@ export default function TradingJournal() {
   const [planPrefill, setPlanPrefill] = useState(null);
   const [selected, setSelected] = useState(null);
   const [bulkSelected, setBulkSelected] = useState(new Set());
+  const [showBulkEdit, setShowBulkEdit] = useState(false);
   const toggleBulk = (id) => setBulkSelected(prev => { const n = new Set(prev); n.has(id) ? n.delete(id) : n.add(id); return n; });
   const clearBulk = () => setBulkSelected(new Set());
   const [bulkSelectedPlans, setBulkSelectedPlans] = useState(new Set());
@@ -216,15 +218,17 @@ const [page, setPage] = useState(1);
         setShowAdd(false); setShowPlan(false); setShowCSV(false);
         setShowSettings(false); setSelected(null); setSelectedPlan(null); setEditTrade(null);
       }
-      if (e.key === "n" || e.key === "N") { e.preventDefault(); setShowAdd(true); }
-      if (e.key === "m" || e.key === "M") { e.preventDefault(); setShowPlan(true); }
-      if (e.key === "t" || e.key === "T") { setTab("today"); }
+      if (e.key === "q" || e.key === "Q") { setTab("today"); }
       if (e.key === "w" || e.key === "W") { setTab("weekly"); }
-      if (e.key === "c" || e.key === "C") { setTab("calendar"); }
-      if (e.key === "l" || e.key === "L") { setTab("trades"); setSelected(null); }
-      if (e.key === "p" || e.key === "P") { setTab("plans"); }
-      if (e.key === "a" || e.key === "A") { setTab("analytics"); }
+      if (e.key === "e" || e.key === "E") { setTab("calendar"); }
+      if (e.key === "r" || e.key === "R") { setTab("trades"); setSelected(null); }
+      if (e.key === "t" || e.key === "T") { setTab("plans"); }
+      if (e.key === "y" || e.key === "Y") { setTab("journal"); }
+      if (e.key === "u" || e.key === "U") { setTab("analytics"); }
       if (e.key === "i" || e.key === "I") { setTab("ai"); }
+      if (e.key === "s" || e.key === "S") { e.preventDefault(); setShowSettings(true); }
+      if (e.key === "l" || e.key === "L") { e.preventDefault(); setShowAdd(true); }
+      if (e.key === "p" || e.key === "P") { e.preventDefault(); setShowPlan(true); }
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
@@ -322,14 +326,17 @@ const [page, setPage] = useState(1);
     setShowAdd(true);
   };
   const saveTrade = (trade) => {
-    setTrades((p) => p.map((tr) => (tr.id === trade.id ? trade : tr)));
+    const prev = trades.find(tr => tr.id === trade.id);
+    const historyEntry = { timestamp: new Date().toISOString(), before: prev ? { entryPrice: prev.entryPrice, exitPrice: prev.exitPrice, shares: prev.shares, strategy: prev.strategy, emotion: prev.emotion, mistake: prev.mistake, notes: prev.notes } : null };
+    const tradeWithHistory = { ...trade, history: [...(trade.history || []), historyEntry] };
+    setTrades((p) => p.map((tr) => (tr.id === trade.id ? tradeWithHistory : tr)));
     setEditTrade(null);
-    setSelected(trade);
+    setSelected(tradeWithHistory);
     showToast("Trade updated", T.accent, "log");
     if (user) {
       (async () => {
-        const uploaded = await uploadTradeMedia(user.id, trade);
-        setTrades((p) => p.map((t) => t.id === trade.id ? uploaded : t));
+        const uploaded = await uploadTradeMedia(user.id, tradeWithHistory);
+        setTrades((p) => p.map((t) => t.id === tradeWithHistory.id ? uploaded : t));
         setSelected(uploaded);
         supabase.from("trades").upsert({ id: uploaded.id, user_id: user.id, data: uploaded }).then(() => {});
       })();
@@ -404,6 +411,25 @@ const [page, setPage] = useState(1);
       supabase.from("trades").delete().eq("id", id).eq("user_id", user.id).then(() => {});
       deleteTradeMedia(user.id, id);
     });
+  };
+  const bulkEditApply = (changes) => {
+    const ids = [...bulkSelected];
+    setTrades(p => p.map(tr => {
+      if (!ids.includes(tr.id)) return tr;
+      const updated = { ...tr };
+      if (changes.strategy) updated.strategy = changes.strategy;
+      if (changes.emotion) updated.emotion = changes.emotion;
+      if (changes.mistake) updated.mistake = changes.mistake;
+      if (changes.addTag && !(tr.tags || []).includes(changes.addTag)) updated.tags = [...(tr.tags || []), changes.addTag];
+      return updated;
+    }));
+    setShowBulkEdit(false);
+    clearBulk();
+    showToast(`Updated ${ids.length} trade${ids.length > 1 ? "s" : ""}`, T.accent, "log");
+    if (user) {
+      const updated = trades.filter(tr => ids.includes(tr.id));
+      updated.forEach(tr => supabase.from("trades").upsert({ id: tr.id, user_id: user.id, data: tr }).then(() => {}));
+    }
   };
   const bulkDeletePlans = () => {
     const ids = [...bulkSelectedPlans];
@@ -685,6 +711,57 @@ const strategyDecay = useMemo(() => {
     });
 }, [plList]);
 
+const rDistribution = useMemo(() => {
+  const buckets = [
+    { label: "< -2R", min: -Infinity, max: -2 },
+    { label: "-2 to -1R", min: -2, max: -1 },
+    { label: "-1 to 0R", min: -1, max: 0 },
+    { label: "0 to 1R", min: 0, max: 1 },
+    { label: "1 to 2R", min: 1, max: 2 },
+    { label: "> 2R", min: 2, max: Infinity },
+  ];
+  const trades = plList.filter(t => t.r != null);
+  return buckets.map(b => ({
+    ...b,
+    count: trades.filter(t => t.r > b.min && t.r <= b.max).length,
+    positive: b.min >= 0,
+  }));
+}, [plList]);
+
+const durationAnalysis = useMemo(() => {
+  const winners = plList.filter(t => t.pl > 0 && t.holdMinutes != null);
+  const losers = plList.filter(t => t.pl < 0 && t.holdMinutes != null);
+  const avg = arr => arr.length ? arr.reduce((s, t) => s + t.holdMinutes, 0) / arr.length : null;
+  const fmtMins = m => m == null ? "—" : m < 60 ? `${Math.round(m)}m` : `${Math.floor(m / 60)}h ${Math.round(m % 60)}m`;
+  return {
+    winAvg: avg(winners),
+    lossAvg: avg(losers),
+    winCount: winners.length,
+    lossCount: losers.length,
+    fmtMins,
+  };
+}, [plList]);
+
+const monthlyHeatmap = useMemo(() => {
+  const byDate = {};
+  plList.forEach(t => { byDate[t.date] = (byDate[t.date] || 0) + t.pl; });
+  if (!Object.keys(byDate).length) return null;
+  const dates = Object.keys(byDate).sort();
+  const latestDate = new Date(dates[dates.length - 1]);
+  const year = latestDate.getFullYear();
+  const month = latestDate.getMonth();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const firstDow = new Date(year, month, 1).getDay();
+  const monthName = new Date(year, month, 1).toLocaleString("default", { month: "long", year: "numeric" });
+  const days = [];
+  for (let d = 1; d <= daysInMonth; d++) {
+    const dateStr = `${year}-${String(month + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
+    days.push({ date: dateStr, pl: byDate[dateStr] ?? null, day: d });
+  }
+  const maxAbs = Math.max(...days.filter(d => d.pl !== null).map(d => Math.abs(d.pl)), 1);
+  return { days, firstDow, monthName, maxAbs };
+}, [plList]);
+
   const filteredPlans = useMemo(() => {
   const q = planSearch.toLowerCase().trim();
   return trades
@@ -820,6 +897,7 @@ const paginated = filtered
       {bulkSelected.size > 0 && (
         <div style={{ position: "fixed", bottom: 24, left: "50%", transform: "translateX(-50%)", background: T.card, border: `1px solid ${T.border}`, borderRadius: 12, padding: "10px 16px", display: "flex", alignItems: "center", gap: 12, boxShadow: "0 8px 32px rgba(0,0,0,0.4)", zIndex: 200, whiteSpace: "nowrap" }}>
           <span style={{ fontSize: 12, color: T.text2, fontFamily: "'Space Mono',monospace" }}>{bulkSelected.size} selected</span>
+          <button onClick={() => setShowBulkEdit(true)} style={{ background: T.accent + "20", border: `1px solid ${T.accent}50`, color: T.accent, borderRadius: 7, padding: "5px 12px", cursor: "pointer", fontSize: 12, fontWeight: 700, fontFamily: "inherit" }}>Edit</button>
           <button onClick={bulkDelete} style={{ background: T.danger + "20", border: `1px solid ${T.danger}50`, color: T.danger, borderRadius: 7, padding: "5px 12px", cursor: "pointer", fontSize: 12, fontWeight: 700, fontFamily: "inherit" }}>Delete</button>
           <button onClick={clearBulk} style={{ background: "none", border: `1px solid ${T.border}`, color: T.text3, borderRadius: 7, padding: "5px 12px", cursor: "pointer", fontSize: 12, fontFamily: "inherit" }}>Clear</button>
         </div>
@@ -1528,6 +1606,108 @@ const paginated = filtered
               <EquityCurve trades={plList} t={T} spyData={spyData} spyError={spyError} />
             </div>
 
+            {/* Monthly P&L Heatmap */}
+            {monthlyHeatmap && (
+              <div style={{ background: T.surface, border: `1px solid ${T.border}`, borderRadius: 12, padding: "16px 18px", marginBottom: 16 }}>
+                <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 10, color: T.text3, textTransform: "uppercase", letterSpacing: 2, marginBottom: 4 }}>Monthly P&L Heatmap</div>
+                <div style={{ fontSize: 11, color: T.text3, marginBottom: 14 }}>{monthlyHeatmap.monthName} · Most recent month with trades</div>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: 4 }}>
+                  {["Su","Mo","Tu","We","Th","Fr","Sa"].map(d => (
+                    <div key={d} style={{ textAlign: "center", fontSize: 9, color: T.text4, fontFamily: "'Space Mono',monospace", paddingBottom: 4 }}>{d}</div>
+                  ))}
+                  {Array.from({ length: monthlyHeatmap.firstDow }).map((_, i) => <div key={`e${i}`} />)}
+                  {monthlyHeatmap.days.map(({ date, pl, day }) => {
+                    const intensity = pl !== null ? Math.min(Math.abs(pl) / monthlyHeatmap.maxAbs, 1) : 0;
+                    const bg = pl === null ? T.border + "30"
+                      : pl > 0 ? `rgba(0,255,135,${0.15 + intensity * 0.75})`
+                      : pl < 0 ? `rgba(255,77,109,${0.15 + intensity * 0.75})`
+                      : T.border + "50";
+                    return (
+                      <div key={date} title={pl !== null ? `${date}: ${pl >= 0 ? "+" : ""}${pl.toFixed(2)}` : date} style={{ aspectRatio: "1", background: bg, borderRadius: 4, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                        <span style={{ fontSize: 9, color: pl !== null ? (pl > 0 ? T.accent : pl < 0 ? T.danger : T.text3) : T.text4, fontFamily: "'Space Mono',monospace", fontWeight: pl !== null ? 700 : 400 }}>{day}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+                <div style={{ display: "flex", gap: 16, marginTop: 12, flexWrap: "wrap" }}>
+                  <span style={{ fontSize: 10, color: T.text3 }}>
+                    Green days: <span style={{ color: T.accent, fontFamily: "'Space Mono',monospace" }}>{monthlyHeatmap.days.filter(d => d.pl > 0).length}</span>
+                  </span>
+                  <span style={{ fontSize: 10, color: T.text3 }}>
+                    Red days: <span style={{ color: T.danger, fontFamily: "'Space Mono',monospace" }}>{monthlyHeatmap.days.filter(d => d.pl < 0).length}</span>
+                  </span>
+                  <span style={{ fontSize: 10, color: T.text3 }}>
+                    Month P&L: <span style={{ color: monthlyHeatmap.days.reduce((s, d) => s + (d.pl || 0), 0) >= 0 ? T.accent : T.danger, fontFamily: "'Space Mono',monospace" }}>{(() => { const tot = monthlyHeatmap.days.reduce((s, d) => s + (d.pl || 0), 0); return (tot >= 0 ? "+" : "") + tot.toFixed(2); })()}</span>
+                  </span>
+                </div>
+              </div>
+            )}
+
+            {/* R-Multiple Distribution */}
+            {rDistribution.some(b => b.count > 0) && (
+              <div style={{ background: T.surface, border: `1px solid ${T.border}`, borderRadius: 12, padding: "16px 18px", marginBottom: 16 }}>
+                <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 10, color: T.text3, textTransform: "uppercase", letterSpacing: 2, marginBottom: 4 }}>R-Multiple Distribution</div>
+                <div style={{ fontSize: 11, color: T.text3, marginBottom: 16 }}>How your trades are distributed across R-multiples. A healthy edge clusters towards +1R and beyond.</div>
+                {(() => {
+                  const maxCount = Math.max(...rDistribution.map(b => b.count), 1);
+                  const chartH = 100;
+                  return (
+                    <div style={{ display: "flex", alignItems: "flex-end", gap: 6, height: chartH + 40 }}>
+                      {rDistribution.map((b, i) => {
+                        const barH = b.count === 0 ? 4 : Math.max(8, (b.count / maxCount) * chartH);
+                        const color = b.min >= 0 ? T.accent : T.danger;
+                        return (
+                          <div key={i} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
+                            <div style={{ fontSize: 10, color: T.text3, fontFamily: "'Space Mono',monospace" }}>{b.count > 0 ? b.count : ""}</div>
+                            <div style={{ width: "100%", height: `${barH}px`, background: b.count === 0 ? T.border : color, borderRadius: "3px 3px 0 0", opacity: b.count === 0 ? 0.3 : 0.9, transition: "height 0.4s ease" }} />
+                            <div style={{ fontSize: 9, color: T.text3, fontFamily: "'Space Mono',monospace", textAlign: "center", lineHeight: 1.3 }}>{b.label}</div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  );
+                })()}
+              </div>
+            )}
+
+            {/* Trade Duration Analysis */}
+            {(durationAnalysis.winAvg !== null || durationAnalysis.lossAvg !== null) && (
+              <div style={{ background: T.surface, border: `1px solid ${T.border}`, borderRadius: 12, padding: "16px 18px", marginBottom: 16 }}>
+                <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 10, color: T.text3, textTransform: "uppercase", letterSpacing: 2, marginBottom: 4 }}>Trade Duration Analysis</div>
+                <div style={{ fontSize: 11, color: T.text3, marginBottom: 16 }}>Average hold time for winning vs losing trades. Holding losers longer than winners is a common discipline issue.</div>
+                {(() => {
+                  const { winAvg, lossAvg, winCount, lossCount, fmtMins } = durationAnalysis;
+                  const maxVal = Math.max(winAvg || 0, lossAvg || 0, 1);
+                  const rows = [
+                    { label: "Winners", avg: winAvg, count: winCount, color: T.accent },
+                    { label: "Losers", avg: lossAvg, count: lossCount, color: T.danger },
+                  ];
+                  return (
+                    <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+                      {rows.map(({ label, avg, count, color }) => (
+                        <div key={label}>
+                          <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
+                            <span style={{ fontSize: 12, color: T.text }}>{label} <span style={{ color: T.text3, fontSize: 11 }}>({count} trades)</span></span>
+                            <span style={{ fontFamily: "'Space Mono',monospace", fontSize: 13, fontWeight: 700, color: avg != null ? color : T.text3 }}>{fmtMins(avg)}</span>
+                          </div>
+                          <div style={{ height: 14, borderRadius: 4, background: T.border, overflow: "hidden" }}>
+                            <div style={{ height: "100%", width: avg != null ? `${(avg / maxVal) * 100}%` : "0%", background: color, borderRadius: 4, transition: "width 0.5s ease" }} />
+                          </div>
+                        </div>
+                      ))}
+                      {winAvg !== null && lossAvg !== null && (
+                        <div style={{ fontSize: 11, color: T.text3, marginTop: 2 }}>
+                          {lossAvg > winAvg
+                            ? <span style={{ color: T.danger }}>⚠ You hold losers {durationAnalysis.fmtMins(lossAvg - winAvg)} longer than winners on average</span>
+                            : <span style={{ color: T.accent }}>✓ You cut losers faster than you hold winners</span>}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })()}
+              </div>
+            )}
+
             {/* Strategy Leaderboard */}
             <div style={{ background: T.surface, border: `1px solid ${T.border}`, borderRadius: 12, padding: "16px 18px", marginBottom: 16 }}>
               <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 10, color: T.text3, textTransform: "uppercase", letterSpacing: 2, marginBottom: 16 }}>Strategy Leaderboard</div>
@@ -1876,8 +2056,12 @@ const paginated = filtered
         <CSVModal
           onClose={() => setShowCSV(false)}
           onImport={importTrades}
+          existingTrades={trades}
           t={T}
         />
+      )}
+      {showBulkEdit && (
+        <BulkEditModal count={bulkSelected.size} onApply={bulkEditApply} onClose={() => setShowBulkEdit(false)} t={T} />
       )}
       {showSettings && (
   <SettingsModal

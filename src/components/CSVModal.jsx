@@ -2,7 +2,7 @@ import { useState } from "react";
 import { todayStr } from "../lib/utils";
 import { CloseIcon, ArrowsIcon, WarningIcon, CheckIcon } from "../lib/icons";
 
-export default function CSVModal({ onClose, onImport, t }) {
+export default function CSVModal({ onClose, onImport, existingTrades = [], t }) {
   const sm = window.innerWidth < 400;
   const [csv, setCsv] = useState("");
   const [preview, setPreview] = useState([]);
@@ -211,6 +211,16 @@ export default function CSVModal({ onClose, onImport, t }) {
 
       if (trades.length === 0) { setError("No completed trades found. Only closed trades will be imported."); return; }
       trades.sort((a, b) => new Date(b.date) - new Date(a.date));
+      const duplicates = trades.filter(tr =>
+        existingTrades.some(ex =>
+          ex.ticker === tr.ticker &&
+          ex.date === tr.date &&
+          Math.abs((parseFloat(ex.entryPrice) || 0) - (parseFloat(tr.entryPrice) || 0)) < 0.01
+        )
+      );
+      if (duplicates.length > 0) {
+        setError(`⚠ ${duplicates.length} possible duplicate${duplicates.length > 1 ? "s" : ""} detected (same ticker, date & entry price already in your logs). Review before importing.`);
+      }
       setPreview(trades);
     } catch (e) {
       setError("Could not parse file. " + e.message);

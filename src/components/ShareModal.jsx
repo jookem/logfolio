@@ -41,6 +41,14 @@ export default function ShareModal({ trade, onClose, t, isDark }) {
       ctx.fillStyle = fg3; ctx.font = "12px monospace";
       ctx.fillText(`Emotion: ${trade.emotion}`, 320, 246);
     }
+    if (trade.r != null) {
+      ctx.fillStyle = trade.r >= 0 ? acc : red; ctx.font = "bold 14px monospace";
+      ctx.fillText(`${trade.r >= 0 ? "+" : ""}${trade.r.toFixed(2)}R`, 200, 246);
+    }
+    if (trade.strategy) {
+      ctx.fillStyle = fg3; ctx.font = "12px monospace";
+      ctx.fillText(trade.strategy, 320, 270);
+    }
     ctx.fillStyle = fg3; ctx.font = "10px monospace";
     ctx.fillText("logfolio.app", 500, 280);
     canvas.toBlob(blob => {
@@ -76,6 +84,9 @@ export default function ShareModal({ trade, onClose, t, isDark }) {
           </div>
           {trade.emotion && trade.emotion !== "None" && (
             <div style={{ fontSize: 11, color: t.text3, marginTop: 8 }}>Emotion: {trade.emotion}</div>
+          )}
+          {trade.r != null && (
+            <div style={{ fontSize: 11, color: trade.r >= 0 ? t.accent : t.danger, marginTop: 4, fontFamily: "'Space Mono',monospace", fontWeight: 700 }}>{trade.r >= 0 ? "+" : ""}{trade.r.toFixed(2)}R</div>
           )}
           <div style={{ fontSize: 9, color: t.text4, marginTop: 12, fontFamily: "'Space Mono',monospace", textAlign: "right" }}>LOG-FOLIO</div>
         </div>

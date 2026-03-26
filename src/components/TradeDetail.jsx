@@ -8,6 +8,7 @@ export default function TradeDetail({ trade, onClose, onEdit, onExecute, onSave,
   const pl = calcPL(trade);
   const [lightbox, setLightbox] = useState(null);
   const [quickEdit, setQuickEdit] = useState(false);
+  const [showHistory, setShowHistory] = useState(false);
   const [exitVal, setExitVal] = useState(String(trade.exitPrice ?? ""));
   const [legExits, setLegExits] = useState((trade.legs || []).map(l => String(l.exitPremium ?? "")));
   const qInp = { background: t.input, border: `1px solid ${t.inputBorder}`, borderRadius: 7, color: t.text, padding: "5px 9px", fontSize: 13, width: 90, fontFamily: "inherit", outline: "none" };
@@ -376,6 +377,27 @@ export default function TradeDetail({ trade, onClose, onEdit, onExecute, onSave,
           <div style={{ fontSize: 13, color: t.text2, lineHeight: 1.6 }}>
             {trade.notes}
           </div>
+        </div>
+      )}
+      {trade.history?.length > 0 && (
+        <div style={{ marginTop: 10 }}>
+          <button onClick={() => setShowHistory(h => !h)} style={{ background: "none", border: "none", color: t.text3, cursor: "pointer", fontSize: 11, fontFamily: "'Space Mono',monospace", padding: 0, display: "flex", alignItems: "center", gap: 5 }}>
+            {showHistory ? "▾" : "▸"} Edit History ({trade.history.length})
+          </button>
+          {showHistory && (
+            <div style={{ marginTop: 8, display: "flex", flexDirection: "column", gap: 6 }}>
+              {[...trade.history].reverse().map((h, i) => (
+                <div key={i} style={{ background: t.card2, borderRadius: 7, padding: "8px 12px", fontSize: 11, color: t.text3 }}>
+                  <div style={{ color: t.text4, marginBottom: 4, fontFamily: "'Space Mono',monospace" }}>{new Date(h.timestamp).toLocaleString()}</div>
+                  {h.before && Object.entries(h.before).map(([k, v]) => {
+                    const after = trade[k];
+                    if (String(v) === String(after)) return null;
+                    return <div key={k} style={{ display: "flex", gap: 8 }}><span style={{ color: t.text3, minWidth: 70, textTransform: "capitalize" }}>{k}:</span><span style={{ color: t.danger, textDecoration: "line-through" }}>{String(v) || "—"}</span><span style={{ color: t.text3 }}>→</span><span style={{ color: t.accent }}>{String(after) || "—"}</span></div>;
+                  })}
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
       {trade.planSnapshot && trade.status !== "planned" && (() => {
