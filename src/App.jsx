@@ -161,17 +161,78 @@ const [page, setPage] = useState(1);
   const loadSeedTrades = async () => {
     if (user) localStorage.setItem(`tradelog_onboarding_done_${user.id}`, "1");
     setShowOnboarding(false);
+
     // Shift seed dates so the most recent trade lands on the signup date (or today)
     const anchor = user?.created_at ? new Date(user.created_at) : new Date();
     anchor.setHours(0, 0, 0, 0);
     const lastSeedDate = new Date(SEED_TRADES[SEED_TRADES.length - 1].date);
     const dayOffset = Math.round((anchor - lastSeedDate) / 86400000);
     const shiftDate = (str) => {
-      const d = new Date(str);
-      d.setDate(d.getDate() + dayOffset);
+      const d = new Date(str); d.setDate(d.getDate() + dayOffset);
       return d.toISOString().slice(0, 10);
     };
-    const seeded = SEED_TRADES.map(t => ({ ...t, id: Date.now() + Math.random(), date: shiftDate(t.date) }));
+
+    // Fetch real historical closes from Alpha Vantage for each unique ticker
+    const avFetch = async (ticker) => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        const res = await fetch("/api/alphavantage", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            ...(session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {}),
+          },
+          body: JSON.stringify({ ticker }),
+        });
+        const json = await res.json();
+        return json["Time Series (Daily)"] || {};
+      } catch { return {}; }
+    };
+
+    const tickers = [...new Set(SEED_TRADES.map(t => t.ticker))];
+    const priceMap = {};
+    await Promise.all(tickers.map(async (ticker) => {
+      priceMap[ticker] = await avFetch(ticker);
+    }));
+
+    // Find nearest available date on or before a given date in the series
+    const getClose = (ticker, dateStr) => {
+      const series = priceMap[ticker];
+      if (!series) return null;
+      // Try exact date, then walk back up to 5 days (weekends/holidays)
+      for (let i = 0; i <= 5; i++) {
+        const d = new Date(dateStr);
+        d.setDate(d.getDate() - i);
+        const key = d.toISOString().slice(0, 10);
+        if (series[key]) return parseFloat(series[key]["4. close"]);
+      }
+      return null;
+    };
+
+    const seeded = SEED_TRADES.map(t => {
+      const shiftedDate = shiftDate(t.date);
+      const realClose = getClose(t.ticker, shiftedDate);
+      if (realClose) {
+        // Anchor entryPrice to real close, preserve original P&L delta
+        const delta = t.exitPrice - t.entryPrice;
+        const entryPrice = parseFloat(realClose.toFixed(2));
+        const exitPrice = parseFloat((entryPrice + delta).toFixed(2));
+        // Scale stop/take proportionally
+        const stopOffset = t.stopLoss ? t.stopLoss - t.entryPrice : null;
+        const tpOffset = t.takeProfit ? t.takeProfit - t.entryPrice : null;
+        return {
+          ...t,
+          id: Date.now() + Math.random(),
+          date: shiftedDate,
+          entryPrice,
+          exitPrice,
+          stopLoss: stopOffset != null ? parseFloat((entryPrice + stopOffset).toFixed(2)) : t.stopLoss,
+          takeProfit: tpOffset != null ? parseFloat((entryPrice + tpOffset).toFixed(2)) : t.takeProfit,
+        };
+      }
+      return { ...t, id: Date.now() + Math.random(), date: shiftedDate };
+    });
+
     setTrades(seeded);
     setTutorialStep(0);
     setShowTutorial(true);
