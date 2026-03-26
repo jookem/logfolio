@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useModalClose } from "../lib/useModalClose";
 import { STOCK_LIKE, SUGGESTED_TAGS, EMOTIONS, MISTAKES } from "../lib/constants";
 import { todayStr, typeLabels, fmt } from "../lib/utils";
 import Tag from "./Tag";
@@ -7,6 +8,7 @@ import ScreenshotUpload from "./ScreenshotUpload";
 import { EditIcon, LogIcon, CloseIcon, TodayIcon, ExitIcon, EntryPriceIcon, EntryTimeIcon, ExitTimeIcon, TickerIcon, CategoryIcon, StrategyIcon, DirectionIcon, AmountIcon, WarningIcon, TargetIcon, EmotionIcon, TagsIcon, PenIcon, MistakeIcon } from "../lib/icons";
 
 export default function TradeFormModal({ initial, defaults, onClose, onSave, onCSVImport, t, editLabel, isDark, trades = [] }) {
+  const { closing, trigger } = useModalClose();
   const sm = window.innerWidth < 400;
   const blank = {
     date: todayStr(),
@@ -200,7 +202,7 @@ export default function TradeFormModal({ initial, defaults, onClose, onSave, onC
   );
   return (
     <div
-      className="backdrop-enter"
+      className={closing ? "backdrop-exit" : "backdrop-enter"}
       style={{
         position: "fixed",
         top: 0,
@@ -216,7 +218,7 @@ export default function TradeFormModal({ initial, defaults, onClose, onSave, onC
       }}
     >
       <div
-        className="modal-maximize"
+        className={closing ? "modal-minimize" : "modal-maximize"}
         style={{
           background: t.card,
           border: `1px solid ${t.border}`,
@@ -258,7 +260,7 @@ export default function TradeFormModal({ initial, defaults, onClose, onSave, onC
 )}
           </div>
           <button
-            onClick={onClose}
+            onClick={() => trigger(onClose)}
             style={{
               background: "none",
               border: "none",
@@ -752,7 +754,7 @@ export default function TradeFormModal({ initial, defaults, onClose, onSave, onC
         </div>
         <div style={{ display: "flex", gap: 10 }}>
           <button
-            onClick={onClose}
+            onClick={() => trigger(onClose)}
             style={{
               flex: 1,
               background: "none",

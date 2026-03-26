@@ -1,8 +1,10 @@
 import { useState } from "react";
+import { useModalClose } from "../lib/useModalClose";
 import { todayStr } from "../lib/utils";
 import { CloseIcon, ArrowsIcon, WarningIcon, CheckIcon } from "../lib/icons";
 
 export default function CSVModal({ onClose, onImport, existingTrades = [], t }) {
+  const { closing, trigger } = useModalClose();
   const sm = window.innerWidth < 400;
   const [csv, setCsv] = useState("");
   const [preview, setPreview] = useState([]);
@@ -240,11 +242,11 @@ export default function CSVModal({ onClose, onImport, existingTrades = [], t }) 
     outline: "none",
   };
   return (
-    <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.75)", zIndex: 100, display: "flex", alignItems: "center", justifyContent: "center", padding: sm ? 8 : 16 }}>
-      <div style={{ background: t.card, border: `1px solid ${t.border}`, borderRadius: sm ? 12 : 16, width: "100%", maxWidth: 600, maxHeight: "92vh", overflowY: "auto", padding: sm ? 14 : 24 }}>
+    <div className={closing ? "backdrop-exit" : "backdrop-enter"} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.75)", zIndex: 100, display: "flex", alignItems: "center", justifyContent: "center", padding: sm ? 8 : 16 }}>
+      <div className={closing ? "modal-minimize" : "modal-maximize"} style={{ background: t.card, border: `1px solid ${t.border}`, borderRadius: sm ? 12 : 16, width: "100%", maxWidth: 600, maxHeight: "92vh", overflowY: "auto", padding: sm ? 14 : 24 }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 18 }}>
           <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 16, fontWeight: 700, color: t.accent }}>CSV Import</div>
-          <button onClick={onClose} style={{ background: "none", border: "none", color: t.text3, fontSize: 20, cursor: "pointer" }}><CloseIcon size="1em" /></button>
+          <button onClick={() => trigger(onClose)} style={{ background: "none", border: "none", color: t.text3, fontSize: 20, cursor: "pointer" }}><CloseIcon size="1em" /></button>
         </div>
         <div style={{ background: t.card2, border: `1px solid ${t.border}`, borderRadius: 8, padding: 12, marginBottom: 14 }}>
           <div style={{ fontSize: 10, color: t.text3, fontFamily: "'Space Mono', monospace", textTransform: "uppercase", letterSpacing: 1.5, marginBottom: 8 }}>Supported Brokers</div>
@@ -306,7 +308,7 @@ export default function CSVModal({ onClose, onImport, existingTrades = [], t }) 
           </div>
         )}
         <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-          <button onClick={onClose} style={{ flex: 1, minWidth: 80, background: "none", border: `1px solid ${t.border}`, color: t.text3, borderRadius: 8, padding: 11, cursor: "pointer" }}>Cancel</button>
+          <button onClick={() => trigger(onClose)} style={{ flex: 1, minWidth: 80, background: "none", border: `1px solid ${t.border}`, color: t.text3, borderRadius: 8, padding: 11, cursor: "pointer" }}>Cancel</button>
           <button onClick={parse} style={{ flex: 1, minWidth: 80, background: t.card2, border: `1px solid ${t.border}`, color: t.text, borderRadius: 8, padding: 11, cursor: "pointer" }}>Preview</button>
           {preview.length > 0 && (
             <button onClick={() => onImport(preview)} style={{ flex: 2, minWidth: 120, background: t.accent, border: "none", color: "#000", borderRadius: 8, padding: 11, cursor: "pointer", fontWeight: 700, fontFamily: "'Space Mono', monospace" }}>

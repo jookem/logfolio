@@ -1,8 +1,10 @@
 import { useState, useEffect, useMemo } from "react";
+import { useModalClose } from "../lib/useModalClose";
 import { calcPL, fmt, fmtDate, typeLabels } from "../lib/utils";
 import { STOCK_LIKE } from "../lib/constants";
 
 export default function TradeReplay({ trades, onClose, t }) {
+  const { closing, trigger } = useModalClose();
   const sorted = useMemo(() => [...trades].sort((a, b) => a.date.localeCompare(b.date)), [trades]);
   const [step, setStep] = useState(0);
   const current = sorted[step];
@@ -12,20 +14,20 @@ export default function TradeReplay({ trades, onClose, t }) {
     const handler = (e) => {
       if (e.key === "ArrowRight" || e.key === "ArrowDown") { e.stopPropagation(); setStep(s => Math.min(s + 1, sorted.length - 1)); }
       if (e.key === "ArrowLeft" || e.key === "ArrowUp") { e.stopPropagation(); setStep(s => Math.max(s - 1, 0)); }
-      if (e.key === "Escape") { e.stopPropagation(); onClose(); }
+      if (e.key === "Escape") { e.stopPropagation(); trigger(onClose); }
     };
     window.addEventListener("keydown", handler, true);
     return () => window.removeEventListener("keydown", handler, true);
   }, [sorted.length, onClose]);
   if (!current) return null;
   return (
-    <div className="backdrop-enter" style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.85)", zIndex: 200, display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }}>
-      <div className="modal-enter" style={{ background: t.card, border: `1px solid ${t.border}`, borderRadius: 16, width: "100%", maxWidth: 520, padding: 28 }}>
+    <div className={closing ? "backdrop-exit" : "backdrop-enter"} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.85)", zIndex: 200, display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }}>
+      <div className={closing ? "modal-minimize" : "modal-maximize"} style={{ background: t.card, border: `1px solid ${t.border}`, borderRadius: 16, width: "100%", maxWidth: 520, padding: 28 }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
           <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 11, color: t.text3, textTransform: "uppercase", letterSpacing: 2 }}>
             Trade Replay — {step + 1} / {sorted.length}
           </div>
-          <button onClick={onClose} style={{ background: "none", border: "none", color: t.text3, cursor: "pointer", fontSize: 18 }}>✕</button>
+          <button onClick={() => trigger(onClose)} style={{ background: "none", border: "none", color: t.text3, cursor: "pointer", fontSize: 18 }}>✕</button>
         </div>
         <div style={{ height: 4, background: t.border, borderRadius: 2, marginBottom: 20 }}>
           <div style={{ height: "100%", width: `${((step + 1) / sorted.length) * 100}%`, background: t.accent, borderRadius: 2, transition: "width 0.2s" }} />

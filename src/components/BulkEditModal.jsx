@@ -1,7 +1,9 @@
 import { useState } from "react";
+import { useModalClose } from "../lib/useModalClose";
 import { STRATEGIES, EMOTIONS, MISTAKES } from "../lib/constants";
 
 export default function BulkEditModal({ count, onApply, onClose, t }) {
+  const { closing, trigger } = useModalClose();
   const [strategy, setStrategy] = useState("");
   const [emotion, setEmotion] = useState("");
   const [mistake, setMistake] = useState("");
@@ -15,15 +17,15 @@ export default function BulkEditModal({ count, onApply, onClose, t }) {
     if (emotion) changes.emotion = emotion;
     if (mistake) changes.mistake = mistake;
     if (addTag.trim()) changes.addTag = addTag.trim();
-    onApply(changes);
+    trigger(() => onApply(changes));
   };
 
   return (
-    <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.75)", zIndex: 300, display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }}>
-      <div style={{ background: t.card, border: `1px solid ${t.border}`, borderRadius: 16, width: "100%", maxWidth: 400, padding: 24 }}>
+    <div className={closing ? "backdrop-exit" : "backdrop-enter"} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.75)", zIndex: 300, display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }}>
+      <div className={closing ? "modal-minimize" : "modal-maximize"} style={{ background: t.card, border: `1px solid ${t.border}`, borderRadius: 16, width: "100%", maxWidth: 400, padding: 24 }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 18 }}>
           <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 13, fontWeight: 700, color: t.accent }}>Bulk Edit — {count} trade{count !== 1 ? "s" : ""}</div>
-          <button onClick={onClose} style={{ background: "none", border: "none", color: t.text3, cursor: "pointer", fontSize: 18 }}>✕</button>
+          <button onClick={() => trigger(onClose)} style={{ background: "none", border: "none", color: t.text3, cursor: "pointer", fontSize: 18 }}>✕</button>
         </div>
         <div style={{ fontSize: 11, color: t.text3, marginBottom: 16 }}>Only filled fields will be applied. Leave blank to keep existing values.</div>
         <div style={{ display: "flex", flexDirection: "column", gap: 12, marginBottom: 20 }}>
@@ -54,7 +56,7 @@ export default function BulkEditModal({ count, onApply, onClose, t }) {
           </div>
         </div>
         <div style={{ display: "flex", gap: 10 }}>
-          <button onClick={onClose} style={{ flex: 1, background: "none", border: `1px solid ${t.border}`, color: t.text3, borderRadius: 8, padding: 11, cursor: "pointer", fontSize: 12 }}>Cancel</button>
+          <button onClick={() => trigger(onClose)} style={{ flex: 1, background: "none", border: `1px solid ${t.border}`, color: t.text3, borderRadius: 8, padding: 11, cursor: "pointer", fontSize: 12 }}>Cancel</button>
           <button onClick={apply} style={{ flex: 2, background: t.accent, border: "none", color: "#000", borderRadius: 8, padding: 11, cursor: "pointer", fontSize: 13, fontWeight: 700, fontFamily: "'Space Mono',monospace" }}>Apply to {count} Trade{count !== 1 ? "s" : ""}</button>
         </div>
       </div>

@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { useModalClose } from "../lib/useModalClose";
 import {
   LogIcon, PlanIcon, TodayIcon, WeekIcon, CalendarIcon,
   AnalysisIcon, RobotIcon, ArrowsIcon, MindIcon, PenIcon, TargetIcon,
@@ -396,6 +397,7 @@ function SubWalkthrough({ mode, onClose, t }) {
 // ── Main component ─────────────────────────────────────────────────────────────
 
 export default function TutorialModal({ step, onNext, onPrev, onClose, onOpenLog, onCloseLog, onOpenPlan, onClosePlan, onSetTab, onLoadSamples, t }) {
+  const { closing, trigger } = useModalClose();
   const [subMode, setSubMode] = useState(null);
 
   const s = TUTORIAL_STEPS[step];
@@ -415,7 +417,7 @@ export default function TutorialModal({ step, onNext, onPrev, onClose, onOpenLog
   };
 
   const handleNext = () => {
-    if (isLast) { onClose(); return; }
+    if (isLast) { trigger(onClose); return; }
     const nextStep = TUTORIAL_STEPS[step + 1];
     if (nextStep.tab) onSetTab(nextStep.tab);
     onNext();
@@ -438,14 +440,14 @@ export default function TutorialModal({ step, onNext, onPrev, onClose, onOpenLog
 
   return (
     <div style={{ position: "fixed", inset: 0, zIndex: 200, display: "flex", alignItems: "flex-end", justifyContent: "center", padding: "0 16px 28px", pointerEvents: "none" }}>
-      <div className="modal-enter" style={{ background: t.card, border: `1px solid ${t.border}`, borderRadius: 20, width: "100%", maxWidth: 460, padding: 28, boxShadow: "0 16px 48px rgba(0,0,0,0.5)", pointerEvents: "all" }}>
+      <div className={closing ? "modal-minimize" : "modal-maximize"} style={{ background: t.card, border: `1px solid ${t.border}`, borderRadius: 20, width: "100%", maxWidth: 460, padding: 28, boxShadow: "0 16px 48px rgba(0,0,0,0.5)", pointerEvents: "all" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 22 }}>
           <div style={{ display: "flex", gap: 5 }}>
             {Array.from({ length: total }).map((_, i) => (
               <div key={i} style={{ width: i === step ? 18 : 6, height: 6, borderRadius: 3, background: i === step ? t.accent : t.border, transition: "all 0.25s ease" }} />
             ))}
           </div>
-          <button onClick={onClose} style={{ background: "none", border: "none", color: t.text4, cursor: "pointer", fontSize: 11, fontFamily: "'Space Mono',monospace", letterSpacing: 1, padding: "4px 8px" }}>SKIP</button>
+          <button onClick={() => trigger(onClose)} style={{ background: "none", border: "none", color: t.text4, cursor: "pointer", fontSize: 11, fontFamily: "'Space Mono',monospace", letterSpacing: 1, padding: "4px 8px" }}>SKIP</button>
         </div>
         <div style={{ marginBottom: 12, color: t.text }}>{s.icon}</div>
         <div style={{ fontSize: 17, fontWeight: 700, color: t.text, marginBottom: 10, lineHeight: 1.3 }}>{s.title}</div>

@@ -1,6 +1,8 @@
 import { calcPL, fmt, fmtDate, typeLabels } from "../lib/utils";
+import { useModalClose } from "../lib/useModalClose";
 
 export default function ShareModal({ trade, onClose, t, isDark }) {
+  const { closing, trigger } = useModalClose();
   const sm = window.innerWidth < 400;
   const pl = calcPL(trade);
   const downloadCard = () => {
@@ -68,11 +70,11 @@ export default function ShareModal({ trade, onClose, t, isDark }) {
     });
   };
   return (
-    <div className="backdrop-enter" style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.8)", zIndex: 200, display: "flex", alignItems: "center", justifyContent: "center", padding: sm ? 8 : 16 }}>
-      <div className="modal-enter" style={{ background: t.card, border: `1px solid ${t.border}`, borderRadius: sm ? 12 : 16, width: "100%", maxWidth: 480, padding: sm ? 14 : 24 }}>
+    <div className={closing ? "backdrop-exit" : "backdrop-enter"} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.8)", zIndex: 200, display: "flex", alignItems: "center", justifyContent: "center", padding: sm ? 8 : 16 }}>
+      <div className={closing ? "modal-minimize" : "modal-maximize"} style={{ background: t.card, border: `1px solid ${t.border}`, borderRadius: sm ? 12 : 16, width: "100%", maxWidth: 480, padding: sm ? 14 : 24 }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 18 }}>
           <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 11, color: t.text3, textTransform: "uppercase", letterSpacing: 2 }}>Share Trade</div>
-          <button onClick={onClose} style={{ background: "none", border: "none", color: t.text3, cursor: "pointer", fontSize: 18 }}>✕</button>
+          <button onClick={() => trigger(onClose)} style={{ background: "none", border: "none", color: t.text3, cursor: "pointer", fontSize: 18 }}>✕</button>
         </div>
         <div style={{ background: isDark ? "#111" : "#f4f5f7", borderRadius: 12, padding: "20px 24px", marginBottom: 18 }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 14 }}>
@@ -103,7 +105,7 @@ export default function ShareModal({ trade, onClose, t, isDark }) {
         </div>
         <div style={{ display: "flex", gap: 10 }}>
           <button onClick={downloadCard} style={{ flex: 1, background: t.accent, border: "none", color: "#000", borderRadius: 8, padding: "11px 14px", cursor: "pointer", fontSize: 13, fontWeight: 700, fontFamily: "'Space Mono',monospace" }}>Download PNG</button>
-          <button onClick={onClose} style={{ flex: 1, background: "none", border: `1px solid ${t.border}`, color: t.text3, borderRadius: 8, padding: "11px 14px", cursor: "pointer", fontSize: 13 }}>Close</button>
+          <button onClick={() => trigger(onClose)} style={{ flex: 1, background: "none", border: `1px solid ${t.border}`, color: t.text3, borderRadius: 8, padding: "11px 14px", cursor: "pointer", fontSize: 13 }}>Close</button>
         </div>
       </div>
     </div>

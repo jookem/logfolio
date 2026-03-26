@@ -1,22 +1,24 @@
 import { useState } from "react";
+import { useModalClose } from "../lib/useModalClose";
 import { supabase } from "../lib/supabase";
 import { STRATEGIES, TIMEFRAMES, CURRENCIES, TIMEZONES } from "../lib/constants";
 import { exportCSV, exportJSON } from "../lib/utils";
 import { SettingsIcon, CloseIcon, LightModeIcon, DarkModeIcon } from "../lib/icons";
 
 export default function SettingsModal({ onClose, isDark, setIsDark, onClear, t, user, profile, onSignOut, isPro, isProPlus, onUpgrade, onManageBilling, onTutorial, tradeDefaults, onSaveDefaults, trades }) {
+  const { closing, trigger } = useModalClose();
   const sm = window.innerWidth < 400;
   const [copied, setCopied] = useState(false);
   const sel = { background: t.input, border: `1px solid ${t.inputBorder}`, borderRadius: 7, color: t.text, padding: "6px 10px", fontSize: 13, fontFamily: "inherit", cursor: "pointer", outline: "none" };
   const numInp = { background: t.input, border: `1px solid ${t.inputBorder}`, borderRadius: 7, color: t.text, padding: "6px 10px", fontSize: 13, fontFamily: "inherit", outline: "none", width: 110, textAlign: "right" };
   const row = { display: "flex", justifyContent: "space-between", alignItems: "center" };
   return (
-    <div className="backdrop-enter" style={{ position: "fixed", top: 0, left: 0, right: 0, minHeight: "100%", background: "rgba(0,0,0,0.75)", zIndex: 100, display: "flex", alignItems: "flex-start", justifyContent: "center", padding: sm ? 8 : 16 }}>
-      <div className="modal-enter" style={{ background: t.card, border: `1px solid ${t.border}`, borderRadius: sm ? 12 : 16, width: "100%", maxWidth: 380, maxHeight: "92vh", overflowY: "auto", padding: sm ? 14 : 24, marginTop: 60 }}>
+    <div className={closing ? "backdrop-exit" : "backdrop-enter"} style={{ position: "fixed", top: 0, left: 0, right: 0, minHeight: "100%", background: "rgba(0,0,0,0.75)", zIndex: 100, display: "flex", alignItems: "flex-start", justifyContent: "center", padding: sm ? 8 : 16 }}>
+      <div className={closing ? "modal-minimize" : "modal-maximize"} style={{ background: t.card, border: `1px solid ${t.border}`, borderRadius: sm ? 12 : 16, width: "100%", maxWidth: 380, maxHeight: "92vh", overflowY: "auto", padding: sm ? 14 : 24, marginTop: 60 }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
           <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 16, fontWeight: 700, color: t.accent, display: "flex", alignItems: "center", gap: 6}}>
             <SettingsIcon size="1em" /> Settings</div>
-          <button onClick={onClose} style={{ background: "none", border: "none", color: t.text3, fontSize: 20, cursor: "pointer" }}>
+          <button onClick={() => trigger(onClose)} style={{ background: "none", border: "none", color: t.text3, fontSize: 20, cursor: "pointer" }}>
             <CloseIcon size="1em" />
           </button>
         </div>
@@ -190,14 +192,14 @@ export default function SettingsModal({ onClose, isDark, setIsDark, onClear, t, 
           </div>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
             <div style={{ fontSize: 14, color: t.text }}>Sign Out</div>
-            <button onClick={onSignOut} style={{ background: "none", border: `1px solid ${t.border}`, color: t.text3, borderRadius: 7, padding: "6px 14px", cursor: "pointer", fontSize: 12, fontFamily: "'Space Mono', monospace" }}>Sign Out</button>
+            <button onClick={() => trigger(onSignOut)} style={{ background: "none", border: `1px solid ${t.border}`, color: t.text3, borderRadius: 7, padding: "6px 14px", cursor: "pointer", fontSize: 12, fontFamily: "'Space Mono', monospace" }}>Sign Out</button>
           </div>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
             <div>
               <div style={{ fontSize: 14, color: t.text }}>App Tutorial</div>
               <div style={{ fontSize: 11, color: t.text3, marginTop: 2 }}>Replay the feature walkthrough</div>
             </div>
-            <button onClick={() => { onClose(); onTutorial(); }} style={{ background: "none", border: `1px solid ${t.border}`, color: t.text3, borderRadius: 7, padding: "6px 14px", cursor: "pointer", fontSize: 12, fontFamily: "'Space Mono', monospace" }}>Start</button>
+            <button onClick={() => trigger(() => { onClose(); onTutorial(); })} style={{ background: "none", border: `1px solid ${t.border}`, color: t.text3, borderRadius: 7, padding: "6px 14px", cursor: "pointer", fontSize: 12, fontFamily: "'Space Mono', monospace" }}>Start</button>
           </div>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
             <div>
@@ -214,7 +216,7 @@ export default function SettingsModal({ onClose, isDark, setIsDark, onClear, t, 
               <div style={{ fontSize: 14, color: t.text }}>Clear All Trades</div>
               <div style={{ fontSize: 11, color: t.text3, marginTop: 2 }}>Permanently delete all trade data</div>
             </div>
-            <button onClick={() => { onClear(); onClose(); }} style={{ background: t.danger + "15", border: `1px solid ${t.danger}40`, color: t.danger, borderRadius: 7, padding: "6px 14px", cursor: "pointer", fontSize: 12, fontFamily: "'Space Mono', monospace" }}>Clear</button>
+            <button onClick={() => trigger(() => { onClear(); onClose(); })} style={{ background: t.danger + "15", border: `1px solid ${t.danger}40`, color: t.danger, borderRadius: 7, padding: "6px 14px", cursor: "pointer", fontSize: 12, fontFamily: "'Space Mono', monospace" }}>Clear</button>
           </div>
         </div>
       </div>
