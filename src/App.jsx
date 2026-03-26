@@ -185,15 +185,22 @@ const [page, setPage] = useState(1);
           body: JSON.stringify({ ticker }),
         });
         const json = await res.json();
+        if (!json["Time Series (Daily)"]) console.warn(`[AV] ${ticker} — no time series:`, json);
         return json["Time Series (Daily)"] || {};
-      } catch { return {}; }
+      } catch (e) {
+        console.error(`[AV] ${ticker} fetch error:`, e);
+        return {};
+      }
     };
 
     const tickers = [...new Set(SEED_TRADES.map(t => t.ticker))];
     const priceMap = {};
-    await Promise.all(tickers.map(async (ticker) => {
+    // Sequential with 300ms gap to respect Alpha Vantage 5 req/min free tier limit
+    for (const ticker of tickers) {
       priceMap[ticker] = await avFetch(ticker);
-    }));
+      console.log(`[AV] ${ticker}:`, Object.keys(priceMap[ticker]).slice(0, 3));
+      await new Promise(r => setTimeout(r, 300));
+    }
 
     // Find nearest available date on or before a given date in the series
     const getClose = (ticker, dateStr) => {
