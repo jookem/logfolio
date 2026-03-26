@@ -6,6 +6,7 @@ import {
   CheckIcon, RecIcon, DirectionIcon, AmountIcon, EntryPriceIcon, ExitIcon,
   WarningIcon, EntryTimeIcon, ExitTimeIcon, ScreenshotIcon, TickerIcon,
   CategoryIcon, StrategyIcon, CurrentPriceIcon, EmotionIcon, TagsIcon,
+  KeyboardIcon,
 } from "../lib/icons";
 
 const Pair = ({ a, b }) => (
@@ -100,6 +101,13 @@ const TUTORIAL_STEPS = [
     title: "AI Insights",
     desc: "Get AI-powered analysis of your full trading journal — pattern recognition, emotional tendencies, strengths, weaknesses, and a trader score. Pro Plus only, up to 3 analyses per day. Powered by Claude.",
     tab: "ai",
+    cta: null,
+  },
+  {
+    icon: <KeyboardIcon size={44} />,
+    title: "Keyboard Shortcuts",
+    desc: "Navigate Logfolio without lifting your hands:\n\nQ Today · W Weekly · E Calendar · R Logs · T Plans · Y Journal · U Analytics · I AI\n\nL Log a trade · P Open a plan · S Settings · Esc Close any modal",
+    tab: null,
     cta: null,
   },
   {

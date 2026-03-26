@@ -207,6 +207,14 @@ export const CheckIcon = ({ size = 30 }) => (
 
 // ── Additional icons ──────────────────────────────────────────────────────────
 
+// Keyboard (rounded rect body + three key rows)
+export const KeyboardIcon = ({ size = 24 }) => (
+  <SVG size={size}>
+    <path d="M95,195h610c36,0,65,29,65,65v280c0,36-29,65-65,65H95c-36,0-65-29-65-65V260c0-36,29-65,65-65z" />
+    <path d="M170,320h460 M150,420h500 M220,520h360" />
+  </SVG>
+);
+
 // Settings (gear / cog)
 export const SettingsIcon = ({ size = 24 }) => (
   <SVG size={size}>
