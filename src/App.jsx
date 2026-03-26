@@ -172,46 +172,53 @@ const [page, setPage] = useState(1);
       return d.toISOString().slice(0, 10);
     };
 
-    // Fetch real historical closes from Alpha Vantage for each unique ticker
-    const avFetch = async (ticker) => {
+    // Fetch real historical closes from Yahoo Finance (no API key, no rate limits)
+    const yfFetch = async (ticker) => {
       try {
         const { data: { session } } = await supabase.auth.getSession();
-        const res = await fetch("/api/alphavantage", {
+        const url = `https://query1.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1d&range=1y`;
+        const res = await fetch("/api/yf", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
             ...(session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {}),
           },
-          body: JSON.stringify({ ticker }),
+          body: JSON.stringify({ url }),
         });
         const json = await res.json();
-        if (!json["Time Series (Daily)"]) console.warn(`[AV] ${ticker} — no time series:`, json);
-        return json["Time Series (Daily)"] || {};
+        const result = json?.chart?.result?.[0];
+        if (!result) return {};
+        const timestamps = result.timestamp || [];
+        const closes = result.indicators?.quote?.[0]?.close || [];
+        const map = {};
+        timestamps.forEach((ts, i) => {
+          if (closes[i] != null) {
+            const dateKey = new Date(ts * 1000).toISOString().slice(0, 10);
+            map[dateKey] = closes[i];
+          }
+        });
+        return map;
       } catch (e) {
-        console.error(`[AV] ${ticker} fetch error:`, e);
+        console.error(`[YF] ${ticker} fetch error:`, e);
         return {};
       }
     };
 
     const tickers = [...new Set(SEED_TRADES.map(t => t.ticker))];
     const priceMap = {};
-    // Sequential with 300ms gap to respect Alpha Vantage 5 req/min free tier limit
-    for (const ticker of tickers) {
-      priceMap[ticker] = await avFetch(ticker);
-      console.log(`[AV] ${ticker}:`, Object.keys(priceMap[ticker]).slice(0, 3));
-      await new Promise(r => setTimeout(r, 300));
-    }
+    await Promise.all(tickers.map(async (ticker) => {
+      priceMap[ticker] = await yfFetch(ticker);
+    }));
 
     // Find nearest available date on or before a given date in the series
     const getClose = (ticker, dateStr) => {
       const series = priceMap[ticker];
       if (!series) return null;
-      // Try exact date, then walk back up to 5 days (weekends/holidays)
       for (let i = 0; i <= 5; i++) {
         const d = new Date(dateStr);
         d.setDate(d.getDate() - i);
         const key = d.toISOString().slice(0, 10);
-        if (series[key]) return parseFloat(series[key]["4. close"]);
+        if (series[key]) return series[key];
       }
       return null;
     };
