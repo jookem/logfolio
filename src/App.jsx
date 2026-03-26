@@ -2172,7 +2172,7 @@ const paginated = filtered
               Delete {confirmDelete.isPlan ? "plan" : confirmDelete.id === "__ALL__" ? "trades" : "trade"}?
             </div>
             <div style={{ fontSize: 13, color: T.text3, marginBottom: 24 }}>
-              <span style={{ fontFamily: "'Space Mono',monospace", color: T.text2 }}>{confirmDelete.ticker}</span> will be permanently removed.
+              {confirmDelete.ticker} will be permanently removed.
             </div>
             <div style={{ display: "flex", gap: 10 }}>
               <button
