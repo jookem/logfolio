@@ -79,7 +79,7 @@ export default function ProTrialModal({ t, onClose, onStartTrial, onUpgrade }) {
             onClick={onUpgrade}
             style={{ background: "none", border: "none", color: t.text3, fontSize: 12, cursor: "pointer", fontFamily: "'Space Mono', monospace" }}
           >
-            Upgrade to Pro · $5/mo →
+            Upgrade to Pro · $4.99/mo →
           </button>
         </div>
       </div>

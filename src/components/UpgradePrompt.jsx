@@ -1,7 +1,7 @@
 export default function UpgradePrompt({ t, onUpgrade, feature, tier = "pro", trialEligible = false }) {
   const isProPlus = tier === "pro_plus";
   const planName = isProPlus ? "Pro Plus" : "Pro";
-  const price = isProPlus ? 15 : 5;
+  const price = isProPlus ? 14.99 : 4.99;
 
   const description = isProPlus
     ? `Upgrade to Pro Plus for $${price}/month to unlock ${feature}, Analytics, and unlimited trades.`

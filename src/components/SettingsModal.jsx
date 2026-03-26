@@ -173,11 +173,11 @@ export default function SettingsModal({ onClose, isDark, setIsDark, onClear, t, 
             const trialActive = profile?.pro_trial_until && new Date(profile.pro_trial_until) > new Date();
             const daysLeft = trialActive ? Math.ceil((new Date(profile.pro_trial_until) - new Date()) / 86400000) : 0;
             const planLabel = isProPlus
-              ? "Pro Plus — $15/month"
+              ? "Pro Plus — $14.99/month"
               : trialActive
                 ? `Pro — Free trial · ${daysLeft}d left`
                 : isPro
-                  ? "Pro — $5/month"
+                  ? "Pro — $4.99/month"
                   : "Free — 5 trades/month";
             return (
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
