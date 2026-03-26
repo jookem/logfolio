@@ -359,7 +359,7 @@ function SubWalkthrough({ mode, onClose, t }) {
       )}
 
       <div style={{ position: "fixed", inset: 0, zIndex: 200, display: "flex", justifyContent: "center", pointerEvents: "none", ...panelStyle }}>
-        <div className="modal-enter" style={{ background: t.card, border: `1px solid ${t.accent}40`, borderRadius: 20, width: "100%", maxWidth: 460, padding: 28, boxShadow: "0 16px 48px rgba(0,0,0,0.5)", pointerEvents: "all" }}>
+        <div key={`panel-${subStep}-${panelPos}`} className={`panel-enter-${panelPos}`} style={{ background: t.card, border: `1px solid ${t.accent}40`, borderRadius: 20, width: "100%", maxWidth: 460, padding: 28, boxShadow: "0 16px 48px rgba(0,0,0,0.5)", pointerEvents: "all" }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
             <div style={{ fontSize: 10, fontFamily: "'Space Mono',monospace", color: t.accent, textTransform: "uppercase", letterSpacing: 1.5 }}>
               {mode === "log" ? "Trade Form Guide" : "Plan Form Guide"}

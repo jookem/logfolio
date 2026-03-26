@@ -426,7 +426,7 @@ const base = {
 
   return (
     <div className="backdrop-enter" style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.75)", zIndex: 100, display: "flex", alignItems: "center", justifyContent: "center", padding: sm ? 8 : 16, minHeight: "100vh" }}>
-      <div className="modal-enter" style={{ background: t.card, border: `1px solid ${t.border}`, borderRadius: sm ? 12 : 16, width: "100%", maxWidth: 540, maxHeight: "93vh", overflowY: "auto", padding: sm ? 14 : 24 }}>
+      <div className="modal-maximize" style={{ background: t.card, border: `1px solid ${t.border}`, borderRadius: sm ? 12 : 16, width: "100%", maxWidth: 540, maxHeight: "93vh", overflowY: "auto", padding: sm ? 14 : 24 }}>
 
        {/* Header */}
 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>

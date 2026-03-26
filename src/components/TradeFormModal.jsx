@@ -216,7 +216,7 @@ export default function TradeFormModal({ initial, defaults, onClose, onSave, onC
       }}
     >
       <div
-        className="modal-enter"
+        className="modal-maximize"
         style={{
           background: t.card,
           border: `1px solid ${t.border}`,
