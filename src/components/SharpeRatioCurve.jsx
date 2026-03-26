@@ -84,7 +84,7 @@ export default function SharpeRatioCurve({ trades, t }) {
         ))}
         <div style={{ position: "relative", height: 18, marginTop: 3 }}>
           {xTicks.map((ts, i) => (
-            <span key={i} style={{ position: "absolute", left: `${(i / 4) * 100}%`, transform: "translateX(-50%)", fontSize: 9, color: t.text3, fontFamily: "'Space Mono',monospace", whiteSpace: "nowrap" }}>
+            <span key={i} style={{ position: "absolute", left: `${(i / 4) * 100}%`, transform: i === 0 ? "translateX(0%)" : i === 4 ? "translateX(-100%)" : "translateX(-50%)", fontSize: 9, color: t.text3, fontFamily: "'Space Mono',monospace", whiteSpace: "nowrap" }}>
               {fmtTick(ts)}
             </span>
           ))}
