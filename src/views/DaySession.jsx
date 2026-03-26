@@ -321,9 +321,9 @@ export default function DaySession({ plList, plans, onAddTrade, onAddPlan, journ
                     color: earned ? (isDark ? "#fff" : "#000") : t.text3,
                     fontFamily: "'Space Mono', monospace",
                     textAlign: "center",
-                    maxWidth: 52,
                     lineHeight: 1.3,
                     fontWeight: earned ? 700 : 400,
+                    maxWidth: 60,
                   }}>{b.label}</div>
                 </div>
               );
