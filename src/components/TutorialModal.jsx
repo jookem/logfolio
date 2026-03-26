@@ -129,7 +129,9 @@ const TUTORIAL_STEPS = [
           <Row>
             <K k="L" /><Lbl>Log a trade</Lbl><Sep />
             <K k="P" /><Lbl>Open a plan</Lbl><Sep />
-            <K k="S" /><Lbl>Settings</Lbl><Sep />
+            <K k="S" /><Lbl>Settings</Lbl>
+          </Row>
+          <Row>
             <K k="Esc" /><Lbl>Close modal</Lbl>
           </Row>
         </div>
