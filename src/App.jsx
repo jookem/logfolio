@@ -1607,7 +1607,7 @@ const paginated = filtered
 
             {/* Strategy Equity Curves */}
             {strategyCurves.length >= 1 && (() => {
-              const W = 500; const H = 170; const PAD_T = 16;
+              const W = 500; const H = 210; const PAD_T = 16;
               const iH = H - PAD_T;
               const allDates = strategyCurves.flatMap(s => s.points.map(p => p.date));
               const minTs = Math.min(...allDates.map(d => new Date(d).getTime()));
@@ -1628,41 +1628,36 @@ const paginated = filtered
                 <div style={{ background: T.surface, border: `1px solid ${T.border}`, borderRadius: 12, padding: "16px 18px", marginBottom: 16 }}>
                   <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 10, color: T.text3, textTransform: "uppercase", letterSpacing: 2, marginBottom: 4 }}>Strategy Equity Curves</div>
                   <div style={{ fontSize: 11, color: T.text3, marginBottom: 16 }}>Cumulative P/L per strategy over time. Same slope but less wiggle = better Sharpe ratio.</div>
-                  <div style={{ display: "flex" }}>
-                    {/* Y-axis labels column */}
-                    <div style={{ width: 52, flexShrink: 0, position: "relative" }}>
+                  <div style={{ position: "relative" }}>
+                    <svg width="100%" height={H} viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" style={{ display: "block", overflow: "visible" }}>
                       {yTicks.map((v, i) => (
-                        <span key={i} style={{ position: "absolute", right: 6, top: `${(yS(v) / H) * 100}%`, transform: "translateY(-50%)", fontSize: 9, color: T.text3, fontFamily: "'Space Mono',monospace", whiteSpace: "nowrap" }}>
-                          {v >= 0 ? "+" : ""}{v.toFixed(0)}
+                        <line key={i} x1={0} x2={W} y1={yS(v)} y2={yS(v)} stroke={T.border} strokeWidth={0.5} />
+                      ))}
+                      <line x1={0} x2={W} y1={zeroY} y2={zeroY} stroke={T.text3} strokeWidth={1} strokeDasharray="4 3" />
+                      {strategyCurves.map(({ strategy, points, color }) => {
+                        const d = points.map((p, i) => `${i === 0 ? "M" : "L"} ${xS(p.date).toFixed(1)},${yS(p.cum).toFixed(1)}`).join(" ");
+                        return <path key={strategy} d={d} fill="none" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" opacity={0.85} />;
+                      })}
+                      {strategyCurves.map(({ strategy, points, color }) => {
+                        const last = points[points.length - 1];
+                        return <circle key={strategy} cx={xS(last.date)} cy={yS(last.cum)} r={4} fill={color} />;
+                      })}
+                      <line x1={0} x2={0} y1={PAD_T} y2={H} stroke={T.border} strokeWidth={1} />
+                      <line x1={0} x2={W} y1={H} y2={H} stroke={T.border} strokeWidth={1} />
+                    </svg>
+                    {/* Y-axis labels overlaid on chart left */}
+                    {yTicks.map((v, i) => (
+                      <span key={i} style={{ position: "absolute", left: 4, top: `${(yS(v) / H) * 100}%`, transform: "translateY(-50%)", fontSize: 9, color: T.text3, fontFamily: "'Space Mono',monospace", whiteSpace: "nowrap", pointerEvents: "none" }}>
+                        {v >= 0 ? "+" : ""}{v.toFixed(0)}
+                      </span>
+                    ))}
+                    {/* X-axis labels */}
+                    <div style={{ position: "relative", height: 18, marginTop: 3 }}>
+                      {xTicks.map((ts, i) => (
+                        <span key={i} style={{ position: "absolute", left: `${(i / 4) * 100}%`, transform: "translateX(-50%)", fontSize: 9, color: T.text3, fontFamily: "'Space Mono',monospace", whiteSpace: "nowrap" }}>
+                          {fmtTick(ts)}
                         </span>
                       ))}
-                    </div>
-                    {/* Chart */}
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <svg width="100%" height={H} viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" style={{ display: "block", overflow: "visible" }}>
-                        {yTicks.map((v, i) => (
-                          <line key={i} x1={0} x2={W} y1={yS(v)} y2={yS(v)} stroke={T.border} strokeWidth={0.5} />
-                        ))}
-                        <line x1={0} x2={W} y1={zeroY} y2={zeroY} stroke={T.text3} strokeWidth={1} strokeDasharray="4 3" />
-                        {strategyCurves.map(({ strategy, points, color }) => {
-                          const d = points.map((p, i) => `${i === 0 ? "M" : "L"} ${xS(p.date).toFixed(1)},${yS(p.cum).toFixed(1)}`).join(" ");
-                          return <path key={strategy} d={d} fill="none" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" opacity={0.85} />;
-                        })}
-                        {strategyCurves.map(({ strategy, points, color }) => {
-                          const last = points[points.length - 1];
-                          return <circle key={strategy} cx={xS(last.date)} cy={yS(last.cum)} r={4} fill={color} />;
-                        })}
-                        <line x1={0} x2={0} y1={PAD_T} y2={H} stroke={T.border} strokeWidth={1} />
-                        <line x1={0} x2={W} y1={H} y2={H} stroke={T.border} strokeWidth={1} />
-                      </svg>
-                      {/* X-axis labels */}
-                      <div style={{ position: "relative", height: 18, marginTop: 3 }}>
-                        {xTicks.map((ts, i) => (
-                          <span key={i} style={{ position: "absolute", left: `${(i / 4) * 100}%`, transform: "translateX(-50%)", fontSize: 9, color: T.text3, fontFamily: "'Space Mono',monospace", whiteSpace: "nowrap" }}>
-                            {fmtTick(ts)}
-                          </span>
-                        ))}
-                      </div>
                     </div>
                   </div>
                   <div style={{ display: "flex", flexWrap: "wrap", gap: "6px 16px", marginTop: 10 }}>
