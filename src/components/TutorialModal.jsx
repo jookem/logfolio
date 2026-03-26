@@ -106,7 +106,35 @@ const TUTORIAL_STEPS = [
   {
     icon: <KeyboardIcon size={44} />,
     title: "Keyboard Shortcuts",
-    desc: "Navigate Logfolio without lifting your hands:\n\nQ Today · W Weekly · E Calendar · R Logs · T Plans · Y Journal · U Analytics · I AI\n\nL Log a trade · P Open a plan · S Settings · Esc Close any modal",
+    desc: (t) => {
+      const K = ({ k }) => (
+        <span style={{ display: "inline-block", background: t.card2, border: `1px solid ${t.border}`, borderRadius: 5, padding: "1px 7px", fontFamily: "'Space Mono',monospace", fontSize: 11, color: t.text2, lineHeight: 1.6 }}>{k}</span>
+      );
+      const Row = ({ children }) => <div style={{ display: "flex", flexWrap: "wrap", gap: 6, alignItems: "center", marginTop: 10 }}>{children}</div>;
+      const Sep = () => <span style={{ color: t.text4, fontSize: 11 }}>·</span>;
+      const Lbl = ({ children }) => <span style={{ color: t.text3, fontSize: 12 }}>{children}</span>;
+      return (
+        <div style={{ fontSize: 12, color: t.text3, lineHeight: 1.75 }}>
+          <div>Navigate Logfolio without lifting your hands.</div>
+          <Row>
+            <K k="Q" /><Lbl>Today</Lbl><Sep />
+            <K k="W" /><Lbl>Weekly</Lbl><Sep />
+            <K k="E" /><Lbl>Calendar</Lbl><Sep />
+            <K k="R" /><Lbl>Logs</Lbl><Sep />
+            <K k="T" /><Lbl>Plans</Lbl><Sep />
+            <K k="Y" /><Lbl>Journal</Lbl><Sep />
+            <K k="U" /><Lbl>Analytics</Lbl><Sep />
+            <K k="I" /><Lbl>AI</Lbl>
+          </Row>
+          <Row>
+            <K k="L" /><Lbl>Log a trade</Lbl><Sep />
+            <K k="P" /><Lbl>Open a plan</Lbl><Sep />
+            <K k="S" /><Lbl>Settings</Lbl><Sep />
+            <K k="Esc" /><Lbl>Close modal</Lbl>
+          </Row>
+        </div>
+      );
+    },
     tab: null,
     cta: null,
   },
@@ -459,7 +487,7 @@ export default function TutorialModal({ step, onNext, onPrev, onClose, onOpenLog
         </div>
         <div style={{ marginBottom: 12, color: t.text }}>{s.icon}</div>
         <div style={{ fontSize: 17, fontWeight: 700, color: t.text, marginBottom: 10, lineHeight: 1.3 }}>{s.title}</div>
-        <div style={{ fontSize: 13, color: t.text3, lineHeight: 1.75, marginBottom: 22, whiteSpace: "pre-line" }}>{s.desc}</div>
+        <div style={{ fontSize: 13, color: t.text3, lineHeight: 1.75, marginBottom: 22, whiteSpace: "pre-line" }}>{typeof s.desc === "function" ? s.desc(t) : s.desc}</div>
         {s.cta && (
           <button
             onClick={() => handleCTA(s.cta.action)}
