@@ -226,28 +226,24 @@ const [page, setPage] = useState(1);
       return null;
     };
 
-    const seeded = SEED_TRADES.map(t => {
+    const base = Date.now();
+    const seeded = SEED_TRADES.map((t, i) => {
+      const id = base + i; // guaranteed unique — same ms, different index
       const shiftedDate = shiftDate(t.date);
       const realClose = getClose(t.ticker, shiftedDate);
       if (realClose) {
-        // Anchor entryPrice to real close, preserve original P&L delta
         const delta = t.exitPrice - t.entryPrice;
         const entryPrice = parseFloat(realClose.toFixed(2));
         const exitPrice = parseFloat((entryPrice + delta).toFixed(2));
-        // Scale stop/take proportionally
         const stopOffset = t.stopLoss ? t.stopLoss - t.entryPrice : null;
         const tpOffset = t.takeProfit ? t.takeProfit - t.entryPrice : null;
         return {
-          ...t,
-          id: Date.now() + Math.floor(Math.random() * 1000),
-          date: shiftedDate,
-          entryPrice,
-          exitPrice,
+          ...t, id, date: shiftedDate, entryPrice, exitPrice,
           stopLoss: stopOffset != null ? parseFloat((entryPrice + stopOffset).toFixed(2)) : t.stopLoss,
           takeProfit: tpOffset != null ? parseFloat((entryPrice + tpOffset).toFixed(2)) : t.takeProfit,
         };
       }
-      return { ...t, id: Date.now() + Math.floor(Math.random() * 1000), date: shiftedDate };
+      return { ...t, id, date: shiftedDate };
     });
 
     setTrades(seeded);
@@ -255,7 +251,8 @@ const [page, setPage] = useState(1);
     setShowTutorial(true);
     if (user) {
       const rows = seeded.map(t => ({ id: t.id, user_id: user.id, data: t }));
-      await supabase.from("trades").upsert(rows);
+      const { error } = await supabase.from("trades").upsert(rows);
+      if (error) console.error("[seed upsert error]", error);
     }
   };
 
