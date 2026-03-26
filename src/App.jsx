@@ -230,6 +230,7 @@ const [page, setPage] = useState(1);
     const seeded = SEED_TRADES.map((t, i) => {
       const id = base + i; // guaranteed unique — same ms, different index
       const shiftedDate = shiftDate(t.date);
+      const shiftedExitDate = t.exitDate ? shiftDate(t.exitDate) : undefined;
       const realClose = getClose(t.ticker, shiftedDate);
       if (realClose) {
         const delta = t.exitPrice - t.entryPrice;
@@ -238,12 +239,12 @@ const [page, setPage] = useState(1);
         const stopOffset = t.stopLoss ? t.stopLoss - t.entryPrice : null;
         const tpOffset = t.takeProfit ? t.takeProfit - t.entryPrice : null;
         return {
-          ...t, id, date: shiftedDate, entryPrice, exitPrice,
+          ...t, id, date: shiftedDate, exitDate: shiftedExitDate, entryPrice, exitPrice,
           stopLoss: stopOffset != null ? parseFloat((entryPrice + stopOffset).toFixed(2)) : t.stopLoss,
           takeProfit: tpOffset != null ? parseFloat((entryPrice + tpOffset).toFixed(2)) : t.takeProfit,
         };
       }
-      return { ...t, id, date: shiftedDate };
+      return { ...t, id, date: shiftedDate, exitDate: shiftedExitDate };
     });
 
     setTrades(seeded);

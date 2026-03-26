@@ -398,6 +398,26 @@ export const ExportIcon = ({ size = 24 }) => (
   </SVG>
 );
 
+// Entry date (calendar with day block + import arrow pointing inward)
+export const EntryDateIcon = ({ size = 24 }) => (
+  <SVG size={size}>
+    <path d="M416,699H202.4c-37.3,0-56,0-70.3-7.3c-12.5-6.4-22.7-16.6-29.1-29.1c-7.3-14.3-7.3-32.9-7.3-70.3v-320c0-37.3,0-56,7.3-70.3c6.4-12.5,16.6-22.7,29.1-29.1c14.3-7.3,32.9-7.3,70.3-7.3h386.7c37.3,0,56,0,70.3,7.3c12.5,6.4,22.7,16.6,29.1,29.1c7.3,14.3,7.3,32.9,7.3,70.3v147 M229,99v66.7 M562.4,99v66.7 M95.7,299h600" />
+    <rect x="202.9" y="398.8" width="118.3" height="104.3" />
+    <path d="M673.8,680.6L546.5,556.5" />
+    <path d="M680.8,529.8h-161v161" />
+  </SVG>
+);
+
+// Exit date (calendar with day block + export arrow pointing outward)
+export const ExitDateIcon = ({ size = 24 }) => (
+  <SVG size={size}>
+    <path d="M416,699H202.4c-37.3,0-56,0-70.3-7.3c-12.5-6.4-22.7-16.6-29.1-29.1c-7.3-14.3-7.3-32.9-7.3-70.3v-320c0-37.3,0-56,7.3-70.3c6.4-12.5,16.6-22.7,29.1-29.1c14.3-7.3,32.9-7.3,70.3-7.3h386.7c37.3,0,56,0,70.3,7.3c12.5,6.4,22.7,16.6,29.1,29.1c7.3,14.3,7.3,32.9,7.3,70.3v147 M229,99v66.7 M562.4,99v66.7 M95.7,299h600" />
+    <rect x="202.9" y="398.8" width="118.3" height="104.3" />
+    <path d="M526.8,540l127.4,124.1" />
+    <path d="M519.8,690.8h161v-161" />
+  </SVG>
+);
+
 // Entry time (partial clock + entry arrow)
 export const EntryTimeIcon = ({ size = 24 }) => (
   <SVG size={size}>

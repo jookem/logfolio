@@ -5,7 +5,7 @@ import { todayStr, typeLabels, fmt } from "../lib/utils";
 import Tag from "./Tag";
 import VoiceNote from "./VoiceNote";
 import ScreenshotUpload from "./ScreenshotUpload";
-import { EditIcon, LogIcon, CloseIcon, TodayIcon, ExitIcon, EntryPriceIcon, EntryTimeIcon, ExitTimeIcon, TickerIcon, CategoryIcon, StrategyIcon, DirectionIcon, AmountIcon, WarningIcon, TargetIcon, EmotionIcon, TagsIcon, PenIcon, MistakeIcon } from "../lib/icons";
+import { EditIcon, LogIcon, CloseIcon, TodayIcon, ExitIcon, EntryPriceIcon, EntryTimeIcon, ExitTimeIcon, EntryDateIcon, ExitDateIcon, TickerIcon, CategoryIcon, StrategyIcon, DirectionIcon, AmountIcon, WarningIcon, TargetIcon, EmotionIcon, TagsIcon, PenIcon, MistakeIcon } from "../lib/icons";
 
 export default function TradeFormModal({ initial, defaults, onClose, onSave, onCSVImport, t, editLabel, isDark, trades = [] }) {
   const { closing, trigger } = useModalClose();
@@ -411,11 +411,11 @@ export default function TradeFormModal({ initial, defaults, onClose, onSave, onC
                 />
               </div>
               <div>
-                <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><TodayIcon size={14} />Entry Date</label>
+                <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><EntryDateIcon size={14} />Entry Date</label>
                 <input style={inp()} type="date" value={form.date} onChange={(e) => set("date", e.target.value)} />
               </div>
               <div>
-                <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><TodayIcon size={14} />Exit Date</label>
+                <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><ExitDateIcon size={14} />Exit Date</label>
                 <input style={inp()} type="date" value={form.exitDate || ""} onChange={(e) => set("exitDate", e.target.value)} placeholder={form.date} />
               </div>
             </div>

@@ -192,6 +192,7 @@ export default function CSVModal({ onClose, onImport, existingTrades = [], t }) 
             trades.push({
               id: idBase++,
               date: buy.date,
+              exitDate: sell.date !== buy.date ? sell.date : undefined,
               ticker,
               type: "stock",
               direction: "long",
