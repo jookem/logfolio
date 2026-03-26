@@ -1608,6 +1608,85 @@ const paginated = filtered
               <EquityCurve trades={plList} t={T} spyData={spyData} spyError={spyError} />
             </div>
 
+            {/* Risk / Return Scatter */}
+            {strategyRiskReturn.length >= 2 && (() => {
+              const PAD = { t: 24, r: 16, b: 44, l: 58 };
+              const W = 500; const H = 260;
+              const iW = W - PAD.l - PAD.r;
+              const iH = H - PAD.t - PAD.b;
+              const maxX = Math.max(...strategyRiskReturn.map(d => d.stdDev)) * 1.15;
+              const rawMinY = Math.min(...strategyRiskReturn.map(d => d.mean));
+              const rawMaxY = Math.max(...strategyRiskReturn.map(d => d.mean));
+              const pad = (rawMaxY - rawMinY) * 0.2 || 10;
+              const minY = rawMinY - pad; const maxY = rawMaxY + pad;
+              const xS = v => PAD.l + (v / maxX) * iW;
+              const yS = v => PAD.t + iH - ((v - minY) / (maxY - minY)) * iH;
+              const zeroY = yS(0);
+              const dotR = d => Math.min(Math.max(d.count * 1.5 + 5, 7), 18);
+              const dotColor = d => d.sharpe > 1 ? T.accent : d.sharpe > 0 ? "#f59e0b" : T.danger;
+              const xTicks = 4; const yTicks = 4;
+              return (
+                <div style={{ background: T.surface, border: `1px solid ${T.border}`, borderRadius: 12, padding: "16px 18px", marginBottom: 16 }}>
+                  <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 10, color: T.text3, textTransform: "uppercase", letterSpacing: 2, marginBottom: 4 }}>Risk / Return by Strategy</div>
+                  <div style={{ fontSize: 11, color: T.text3, marginBottom: 14 }}>Each dot is a strategy — top-left = high return, low volatility (best Sharpe). Dot size = trade count.</div>
+                  <div style={{ display: "flex", gap: 16, marginBottom: 12 }}>
+                    {[{ label: "Sharpe > 1", color: T.accent }, { label: "0 – 1", color: "#f59e0b" }, { label: "Negative", color: T.danger }].map(({ label, color }) => (
+                      <div key={label} style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                        <div style={{ width: 8, height: 8, borderRadius: "50%", background: color }} />
+                        <span style={{ fontSize: 10, color: T.text3, fontFamily: "'Space Mono',monospace" }}>{label}</span>
+                      </div>
+                    ))}
+                  </div>
+                  <svg width="100%" viewBox={`0 0 ${W} ${H}`} style={{ overflow: "visible" }}>
+                    <rect x={PAD.l} y={PAD.t} width={iW} height={Math.max(0, zeroY - PAD.t)} fill={T.accent + "08"} />
+                    <rect x={PAD.l} y={zeroY} width={iW} height={Math.max(0, PAD.t + iH - zeroY)} fill={T.danger + "08"} />
+                    {Array.from({ length: yTicks + 1 }).map((_, i) => {
+                      const v = minY + (i / yTicks) * (maxY - minY);
+                      const y = yS(v);
+                      return <line key={i} x1={PAD.l} x2={PAD.l + iW} y1={y} y2={y} stroke={T.border} strokeWidth={0.5} />;
+                    })}
+                    {Array.from({ length: xTicks + 1 }).map((_, i) => {
+                      const v = (i / xTicks) * maxX;
+                      const x = xS(v);
+                      return <line key={i} x1={x} x2={x} y1={PAD.t} y2={PAD.t + iH} stroke={T.border} strokeWidth={0.5} />;
+                    })}
+                    <line x1={PAD.l} x2={PAD.l + iW} y1={zeroY} y2={zeroY} stroke={T.text3} strokeWidth={1} strokeDasharray="4 3" />
+                    {Array.from({ length: yTicks + 1 }).map((_, i) => {
+                      const v = minY + (i / yTicks) * (maxY - minY);
+                      return <text key={i} x={PAD.l - 6} y={yS(v) + 4} textAnchor="end" fontSize={9} fill={T.text3} fontFamily="monospace">{v >= 0 ? "+" : ""}{v.toFixed(0)}</text>;
+                    })}
+                    {Array.from({ length: xTicks + 1 }).map((_, i) => {
+                      const v = (i / xTicks) * maxX;
+                      return <text key={i} x={xS(v)} y={PAD.t + iH + 14} textAnchor="middle" fontSize={9} fill={T.text3} fontFamily="monospace">{v.toFixed(0)}</text>;
+                    })}
+                    <text x={PAD.l + iW / 2} y={H - 4} textAnchor="middle" fontSize={9} fill={T.text3} fontFamily="monospace">VOLATILITY (STD DEV $)</text>
+                    <text x={10} y={PAD.t + iH / 2} textAnchor="middle" fontSize={9} fill={T.text3} fontFamily="monospace" transform={`rotate(-90, 10, ${PAD.t + iH / 2})`}>AVG RETURN $</text>
+                    {strategyRiskReturn.map((d) => {
+                      const cx = xS(d.stdDev);
+                      const cy = yS(d.mean);
+                      const r = dotR(d);
+                      const color = dotColor(d);
+                      const labelY = cy - r - 5 < PAD.t + 10 ? cy + r + 12 : cy - r - 5;
+                      return (
+                        <g key={d.strategy}>
+                          <circle cx={cx} cy={cy} r={r} fill={color + "cc"} stroke={color} strokeWidth={1.5} />
+                          <text x={cx} y={labelY} textAnchor="middle" fontSize={9} fill={T.text} fontFamily="monospace" fontWeight="600">{d.strategy.length > 12 ? d.strategy.slice(0, 11) + "…" : d.strategy}</text>
+                        </g>
+                      );
+                    })}
+                    <line x1={PAD.l} x2={PAD.l} y1={PAD.t} y2={PAD.t + iH} stroke={T.border} strokeWidth={1} />
+                    <line x1={PAD.l} x2={PAD.l + iW} y1={PAD.t + iH} y2={PAD.t + iH} stroke={T.border} strokeWidth={1} />
+                  </svg>
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: "6px 16px", marginTop: 8 }}>
+                    {[...strategyRiskReturn].sort((a, b) => b.sharpe - a.sharpe).map(d => (
+                      <div key={d.strategy} style={{ fontSize: 10, color: T.text3, fontFamily: "'Space Mono',monospace" }}>
+                        <span style={{ color: dotColor(d) }}>●</span> {d.strategy} <span style={{ color: T.text4 }}>({d.sharpe >= 0 ? "+" : ""}{d.sharpe.toFixed(2)})</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              );
+            })()}
 
             {/* R-Multiple Distribution */}
             {rDistribution.some(b => b.count > 0) && (
@@ -1748,94 +1827,6 @@ const paginated = filtered
                 </div>
               </div>
             )}
-
-            {/* Risk / Return Scatter */}
-            {strategyRiskReturn.length >= 2 && (() => {
-              const PAD = { t: 24, r: 16, b: 44, l: 58 };
-              const W = 500; const H = 260;
-              const iW = W - PAD.l - PAD.r;
-              const iH = H - PAD.t - PAD.b;
-              const maxX = Math.max(...strategyRiskReturn.map(d => d.stdDev)) * 1.15;
-              const rawMinY = Math.min(...strategyRiskReturn.map(d => d.mean));
-              const rawMaxY = Math.max(...strategyRiskReturn.map(d => d.mean));
-              const pad = (rawMaxY - rawMinY) * 0.2 || 10;
-              const minY = rawMinY - pad; const maxY = rawMaxY + pad;
-              const xS = v => PAD.l + (v / maxX) * iW;
-              const yS = v => PAD.t + iH - ((v - minY) / (maxY - minY)) * iH;
-              const zeroY = yS(0);
-              const dotR = d => Math.min(Math.max(d.count * 1.5 + 5, 7), 18);
-              const dotColor = d => d.sharpe > 1 ? T.accent : d.sharpe > 0 ? "#f59e0b" : T.danger;
-              const xTicks = 4; const yTicks = 4;
-              return (
-                <div style={{ background: T.surface, border: `1px solid ${T.border}`, borderRadius: 12, padding: "16px 18px", marginBottom: 16 }}>
-                  <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 10, color: T.text3, textTransform: "uppercase", letterSpacing: 2, marginBottom: 4 }}>Risk / Return by Strategy</div>
-                  <div style={{ fontSize: 11, color: T.text3, marginBottom: 14 }}>Each dot is a strategy — top-left = high return, low volatility (best Sharpe). Dot size = trade count.</div>
-                  <div style={{ display: "flex", gap: 16, marginBottom: 12 }}>
-                    {[{ label: "Sharpe > 1", color: T.accent }, { label: "0 – 1", color: "#f59e0b" }, { label: "Negative", color: T.danger }].map(({ label, color }) => (
-                      <div key={label} style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                        <div style={{ width: 8, height: 8, borderRadius: "50%", background: color }} />
-                        <span style={{ fontSize: 10, color: T.text3, fontFamily: "'Space Mono',monospace" }}>{label}</span>
-                      </div>
-                    ))}
-                  </div>
-                  <svg width="100%" viewBox={`0 0 ${W} ${H}`} style={{ overflow: "visible" }}>
-                    {/* Quadrant shading */}
-                    <rect x={PAD.l} y={PAD.t} width={iW} height={Math.max(0, zeroY - PAD.t)} fill={T.accent + "08"} />
-                    <rect x={PAD.l} y={zeroY} width={iW} height={Math.max(0, PAD.t + iH - zeroY)} fill={T.danger + "08"} />
-                    {/* Grid lines */}
-                    {Array.from({ length: yTicks + 1 }).map((_, i) => {
-                      const v = minY + (i / yTicks) * (maxY - minY);
-                      const y = yS(v);
-                      return <line key={i} x1={PAD.l} x2={PAD.l + iW} y1={y} y2={y} stroke={T.border} strokeWidth={0.5} />;
-                    })}
-                    {Array.from({ length: xTicks + 1 }).map((_, i) => {
-                      const v = (i / xTicks) * maxX;
-                      const x = xS(v);
-                      return <line key={i} x1={x} x2={x} y1={PAD.t} y2={PAD.t + iH} stroke={T.border} strokeWidth={0.5} />;
-                    })}
-                    {/* Zero line */}
-                    <line x1={PAD.l} x2={PAD.l + iW} y1={zeroY} y2={zeroY} stroke={T.text3} strokeWidth={1} strokeDasharray="4 3" />
-                    {/* Y axis labels */}
-                    {Array.from({ length: yTicks + 1 }).map((_, i) => {
-                      const v = minY + (i / yTicks) * (maxY - minY);
-                      return <text key={i} x={PAD.l - 6} y={yS(v) + 4} textAnchor="end" fontSize={9} fill={T.text3} fontFamily="monospace">{v >= 0 ? "+" : ""}{v.toFixed(0)}</text>;
-                    })}
-                    {/* X axis labels */}
-                    {Array.from({ length: xTicks + 1 }).map((_, i) => {
-                      const v = (i / xTicks) * maxX;
-                      return <text key={i} x={xS(v)} y={PAD.t + iH + 14} textAnchor="middle" fontSize={9} fill={T.text3} fontFamily="monospace">{v.toFixed(0)}</text>;
-                    })}
-                    {/* Axis titles */}
-                    <text x={PAD.l + iW / 2} y={H - 4} textAnchor="middle" fontSize={9} fill={T.text3} fontFamily="monospace">VOLATILITY (STD DEV $)</text>
-                    <text x={10} y={PAD.t + iH / 2} textAnchor="middle" fontSize={9} fill={T.text3} fontFamily="monospace" transform={`rotate(-90, 10, ${PAD.t + iH / 2})`}>AVG RETURN $</text>
-                    {/* Dots + labels */}
-                    {strategyRiskReturn.map((d) => {
-                      const cx = xS(d.stdDev);
-                      const cy = yS(d.mean);
-                      const r = dotR(d);
-                      const color = dotColor(d);
-                      const labelY = cy - r - 5 < PAD.t + 10 ? cy + r + 12 : cy - r - 5;
-                      return (
-                        <g key={d.strategy}>
-                          <circle cx={cx} cy={cy} r={r} fill={color + "cc"} stroke={color} strokeWidth={1.5} />
-                          <text x={cx} y={labelY} textAnchor="middle" fontSize={9} fill={T.text} fontFamily="monospace" fontWeight="600">{d.strategy.length > 12 ? d.strategy.slice(0, 11) + "…" : d.strategy}</text>
-                        </g>
-                      );
-                    })}
-                    {/* Axes borders */}
-                    <line x1={PAD.l} x2={PAD.l} y1={PAD.t} y2={PAD.t + iH} stroke={T.border} strokeWidth={1} />
-                    <line x1={PAD.l} x2={PAD.l + iW} y1={PAD.t + iH} y2={PAD.t + iH} stroke={T.border} strokeWidth={1} />
-                  </svg>
-                  <div style={{ display: "flex", flexWrap: "wrap", gap: "6px 16px", marginTop: 8 }}>
-                    {[...strategyRiskReturn].sort((a, b) => b.sharpe - a.sharpe).map(d => (
-                      <div key={d.strategy} style={{ fontSize: 10, color: T.text3, fontFamily: "'Space Mono',monospace" }}>
-                        <span style={{ color: dotColor(d) }}>●</span> {d.strategy} <span style={{ color: T.text4 }}>({d.sharpe >= 0 ? "+" : ""}{d.sharpe.toFixed(2)})</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              );
-            })()}
 
             {/* Day of Week + Best Time to Trade — matching row format */}
             <div style={{ display: "grid", gridTemplateColumns: mobile ? "1fr" : "1fr 1fr", gap: 16, marginBottom: 16 }}>
