@@ -206,9 +206,12 @@ const [page, setPage] = useState(1);
 
     const tickers = [...new Set(SEED_TRADES.map(t => t.ticker))];
     const priceMap = {};
+    showToast(`Fetching real market data for ${tickers.length} tickers…`, T.accent, null, 0);
     await Promise.all(tickers.map(async (ticker) => {
       priceMap[ticker] = await yfFetch(ticker);
     }));
+    const loaded = tickers.filter(tk => Object.keys(priceMap[tk]).length > 0).length;
+    showToast(loaded > 0 ? `Loaded real prices for ${loaded}/${tickers.length} tickers` : "Using sample prices — market data unavailable", loaded > 0 ? T.accent : T.text3);
 
     // Find nearest available date on or before a given date in the series
     const getClose = (ticker, dateStr) => {
@@ -312,9 +315,9 @@ const [page, setPage] = useState(1);
     return () => window.removeEventListener("keydown", handler);
   }, []);
 
-  const showToast = (msg, color, icon = null) => {
+  const showToast = (msg, color, icon = null, duration = 2200) => {
     setToast({ msg, color, icon });
-    setTimeout(() => setToast(null), 2200);
+    if (duration > 0) setTimeout(() => setToast(null), duration);
   };
 
   const TAB_ORDER = ["today", "weekly", "calendar", "trades", "plans", "analytics", "ai", "journal"];
