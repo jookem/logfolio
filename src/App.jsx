@@ -28,6 +28,7 @@ import { useIsMobile } from "./hooks/useIsMobile";
 import StatCard from "./components/StatCard";
 import MiniBar from "./components/MiniBar";
 import EquityCurve from "./components/EquityCurve";
+import SharpeRatioCurve from "./components/SharpeRatioCurve";
 import TradeRow from "./components/TradeRow";
 import TradeDetail from "./components/TradeDetail";
 import TradeFormModal from "./components/TradeFormModal";
@@ -745,20 +746,6 @@ const durationAnalysis = useMemo(() => {
 }, [plList]);
 
 
-const strategyCurves = useMemo(() => {
-  const COLORS = ["#10b981","#3b82f6","#f59e0b","#8b5cf6","#ef4444","#06b6d4","#ec4899","#84cc16"];
-  const strategies = [...new Set(plList.map(t => t.strategy).filter(Boolean))];
-  return strategies
-    .map((strategy, si) => {
-      const trades = [...plList.filter(t => t.strategy === strategy)]
-        .sort((a, b) => a.date.localeCompare(b.date));
-      let cum = 0;
-      const points = [{ date: trades[0].date, cum: 0 }];
-      trades.forEach(t => { cum += t.pl; points.push({ date: t.date, cum }); });
-      return { strategy, points, color: COLORS[si % COLORS.length], count: trades.length };
-    })
-    .sort((a, b) => b.count - a.count);
-}, [plList]);
 
 
   const filteredPlans = useMemo(() => {
@@ -1606,76 +1593,7 @@ const paginated = filtered
             </div>
 
             {/* Strategy Equity Curves */}
-            {strategyCurves.length >= 1 && (() => {
-              const W = 500; const H = 210; const PAD_T = 16;
-              const iH = H - PAD_T;
-              const allDates = strategyCurves.flatMap(s => s.points.map(p => p.date));
-              const minTs = Math.min(...allDates.map(d => new Date(d).getTime()));
-              const maxTs = Math.max(...allDates.map(d => new Date(d).getTime()));
-              const tsRange = maxTs - minTs || 1;
-              const allCums = strategyCurves.flatMap(s => s.points.map(p => p.cum));
-              const minCum = Math.min(...allCums, 0);
-              const maxCum = Math.max(...allCums, 0);
-              const cumPad = (maxCum - minCum) * 0.12 || 10;
-              const minY = minCum - cumPad; const maxY = maxCum + cumPad;
-              const xS = dateStr => ((new Date(dateStr).getTime() - minTs) / tsRange) * W;
-              const yS = v => PAD_T + iH - ((v - minY) / (maxY - minY)) * iH;
-              const zeroY = yS(0);
-              const fmtTick = ts => new Date(ts).toLocaleDateString("en-US", { month: "short", year: "2-digit" });
-              const xTicks = Array.from({ length: 5 }, (_, i) => minTs + (i / 4) * tsRange);
-              const yTicks = Array.from({ length: 5 }, (_, i) => minY + (i / 4) * (maxY - minY));
-              return (
-                <div style={{ background: T.surface, border: `1px solid ${T.border}`, borderRadius: 12, padding: "16px 18px", marginBottom: 16 }}>
-                  <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 10, color: T.text3, textTransform: "uppercase", letterSpacing: 2, marginBottom: 4 }}>Strategy Equity Curves</div>
-                  <div style={{ fontSize: 11, color: T.text3, marginBottom: 16 }}>Cumulative P/L per strategy over time. Same slope but less wiggle = better Sharpe ratio.</div>
-                  <div style={{ position: "relative" }}>
-                    <svg width="100%" height={H} viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" style={{ display: "block", overflow: "visible" }}>
-                      {yTicks.map((v, i) => (
-                        <line key={i} x1={0} x2={W} y1={yS(v)} y2={yS(v)} stroke={T.border} strokeWidth={0.5} />
-                      ))}
-                      <line x1={0} x2={W} y1={zeroY} y2={zeroY} stroke={T.text3} strokeWidth={1} strokeDasharray="4 3" />
-                      {strategyCurves.map(({ strategy, points, color }) => {
-                        const d = points.map((p, i) => `${i === 0 ? "M" : "L"} ${xS(p.date).toFixed(1)},${yS(p.cum).toFixed(1)}`).join(" ");
-                        return <path key={strategy} d={d} fill="none" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" opacity={0.85} />;
-                      })}
-                      {strategyCurves.map(({ strategy, points, color }) => {
-                        const last = points[points.length - 1];
-                        return <circle key={strategy} cx={xS(last.date)} cy={yS(last.cum)} r={4} fill={color} />;
-                      })}
-                      <line x1={0} x2={0} y1={PAD_T} y2={H} stroke={T.border} strokeWidth={1} />
-                      <line x1={0} x2={W} y1={H} y2={H} stroke={T.border} strokeWidth={1} />
-                    </svg>
-                    {/* Y-axis labels overlaid on chart left */}
-                    {yTicks.map((v, i) => (
-                      <span key={i} style={{ position: "absolute", left: 4, top: `${(yS(v) / H) * 100}%`, transform: "translateY(-50%)", fontSize: 9, color: T.text3, fontFamily: "'Space Mono',monospace", whiteSpace: "nowrap", pointerEvents: "none" }}>
-                        {v >= 0 ? "+" : ""}{v.toFixed(0)}
-                      </span>
-                    ))}
-                    {/* X-axis labels */}
-                    <div style={{ position: "relative", height: 18, marginTop: 3 }}>
-                      {xTicks.map((ts, i) => (
-                        <span key={i} style={{ position: "absolute", left: `${(i / 4) * 100}%`, transform: "translateX(-50%)", fontSize: 9, color: T.text3, fontFamily: "'Space Mono',monospace", whiteSpace: "nowrap" }}>
-                          {fmtTick(ts)}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                  <div style={{ display: "flex", flexWrap: "wrap", gap: "6px 16px", marginTop: 10 }}>
-                    {strategyCurves.map(({ strategy, color, points }) => {
-                      const finalCum = points[points.length - 1].cum;
-                      return (
-                        <div key={strategy} style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                          <div style={{ width: 20, height: 2, background: color, borderRadius: 1 }} />
-                          <span style={{ fontSize: 10, color: T.text3, fontFamily: "'Space Mono',monospace" }}>
-                            {strategy} <span style={{ color: finalCum >= 0 ? T.accent : T.danger }}>({finalCum >= 0 ? "+" : ""}{fmt(finalCum)})</span>
-                          </span>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              );
-            })()}
+            {plList.length >= 1 && <SharpeRatioCurve trades={plList} t={T} />}
 
             {/* R-Multiple Distribution */}
             {rDistribution.some(b => b.count > 0) && (
