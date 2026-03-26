@@ -690,15 +690,15 @@ const base = {
 
       {/* IV + Disclaimer */}
       <div style={{ display: "flex", gap: 10, gridColumn: "span 2" }}>
-        <div style={{ flex: "0 0 auto", minWidth: 100 }}>
+        <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
           <label style={lbl}>IV (Implied Vol.) %</label>
-          <input style={inp} type="number"
+          <input style={{ ...inp, flex: 1 }} type="number"
             value={leg.iv} onChange={(e) => setLeg(i, "iv", e.target.value)} placeholder="30" />
         </div>
         <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
           <div style={{ ...lbl, opacity: 0, pointerEvents: "none" }}>x</div>
-          <div style={{ flex: 1, background: t.surface, border: `1px solid ${t.border}`, borderRadius: 8, padding: "8px 10px", fontSize: 10, color: t.text3, fontFamily: "'Space Mono', monospace", lineHeight: 1.5, display: "flex", alignItems: "flex-start", gap: 6 }}>
-            <span style={{ color: t.danger, flexShrink: 0, marginTop: 1 }}><WarningIcon size={12} /></span>
+          <div style={{ flex: 1, background: t.surface, border: `1px solid ${t.border}`, borderRadius: 8, padding: "8px 10px", fontSize: 10, color: t.text3, fontFamily: "'Space Mono', monospace", lineHeight: 1.5, display: "flex", alignItems: "center", gap: 6 }}>
+            <span style={{ color: t.danger, flexShrink: 0 }}><WarningIcon size={12} /></span>
             <span>Previous close data.<br />Verify with broker.</span>
           </div>
         </div>
