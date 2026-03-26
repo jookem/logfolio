@@ -164,6 +164,8 @@ export default function TradeDetail({ trade, onClose, onEdit, onExecute, onSave,
   ...(trade.plannedR != null ? [["Planned R", `+${trade.plannedR?.toFixed(2)}R`]] : []),
   ...(trade.r != null ? [["R-Multiple", fmtR(trade.r)]] : []),
   ...(trade.holdMinutes != null ? [["Hold Time", trade.holdMinutes < 60 ? `${trade.holdMinutes}m` : `${Math.floor(trade.holdMinutes/60)}h ${trade.holdMinutes%60}m`]] : []),
+  ...(trade.date ? [["Entry Date", trade.date]] : []),
+  ...(trade.exitDate ? [["Exit Date", trade.exitDate]] : []),
   ...(trade.entryTime ? [["Entry Time", trade.entryTime]] : []),
   ...(trade.exitTime ? [["Exit Time", trade.exitTime]] : []),
 ].map(([k, v]) => (
