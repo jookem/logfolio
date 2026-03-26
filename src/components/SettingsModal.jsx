@@ -134,7 +134,7 @@ export default function SettingsModal({ onClose, isDark, setIsDark, onClear, t, 
         <div style={{ background: t.surface, border: `1px solid ${t.border}`, borderRadius: 12, padding: "14px 16px", marginBottom: 12 }}>
           <div style={{ fontSize: 11, color: t.text3, fontFamily: "'Space Mono', monospace", textTransform: "uppercase", letterSpacing: 1.5, marginBottom: 10 }}>Refer a Friend</div>
           <div style={{ fontSize: 12, color: t.text2, marginBottom: 10, lineHeight: 1.6 }}>
-            Share your link — you both get <span style={{ color: t.accent, fontWeight: 700 }}>30 days free Pro</span> when a friend signs up.
+            Share your link — get <span style={{ color: t.accent, fontWeight: 700 }}>30 days free Pro</span> for every friend who signs up.
           </div>
           {profile?.referral_code ? (
             <>
