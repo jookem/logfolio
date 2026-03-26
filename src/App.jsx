@@ -2121,6 +2121,7 @@ const paginated = filtered
           onOpenPlan={() => setShowPlan(true)}
           onClosePlan={() => setShowPlan(false)}
           onSetTab={setTab}
+          onLoadSamples={loadSeedTrades}
           t={T}
         />
       )}

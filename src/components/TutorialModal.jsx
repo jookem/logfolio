@@ -26,10 +26,10 @@ const TUTORIAL_STEPS = [
   },
   {
     icon: <Pair a={<PenIcon size={44} />} b={<AnalysisIcon size={44} />} />,
-    title: "Start Fresh or Load Samples",
-    desc: "When you first sign up you'll see two options:\n\nStart Fresh — jump straight in and log your first real trade from scratch.\n\nLoad Sample Trades — pre-loads 15 example trades so you can explore Analytics, the Calendar, and all features immediately. You can delete them any time from Settings.",
+    title: "Load Sample Trades",
+    desc: "Want to explore Analytics, the Calendar, and all features with real data? Load 15 example trades to see everything in action — you can delete them any time from Settings.",
     tab: null,
-    cta: null,
+    cta: { label: "Load sample trades", action: "loadSamples" },
   },
   {
     icon: <LogIcon size={44} />,
@@ -395,7 +395,7 @@ function SubWalkthrough({ mode, onClose, t }) {
 
 // ── Main component ─────────────────────────────────────────────────────────────
 
-export default function TutorialModal({ step, onNext, onPrev, onClose, onOpenLog, onCloseLog, onOpenPlan, onClosePlan, onSetTab, t }) {
+export default function TutorialModal({ step, onNext, onPrev, onClose, onOpenLog, onCloseLog, onOpenPlan, onClosePlan, onSetTab, onLoadSamples, t }) {
   const [subMode, setSubMode] = useState(null);
 
   const s = TUTORIAL_STEPS[step];
@@ -406,9 +406,11 @@ export default function TutorialModal({ step, onNext, onPrev, onClose, onOpenLog
     if (action === "openLog") {
       onOpenLog();
       setSubMode("log");
-    } else {
+    } else if (action === "openPlan") {
       onOpenPlan();
       setSubMode("plan");
+    } else if (action === "loadSamples") {
+      onLoadSamples?.();
     }
   };
 
