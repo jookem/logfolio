@@ -52,6 +52,18 @@ export default function DaySession({ plList, plans, onAddTrade, onAddPlan, journ
     return count;
   })();
 
+  // Avg daily P&L (excluding today)
+  const avgDailyPL = (() => {
+    const byDate = {};
+    plList.forEach(tr => {
+      if (tr.date === today) return;
+      byDate[tr.date] = (byDate[tr.date] || 0) + tr.pl;
+    });
+    const days = Object.values(byDate);
+    return days.length ? days.reduce((s, v) => s + v, 0) / days.length : null;
+  })();
+  const vsAvg = avgDailyPL !== null ? sessionPL - avgDailyPL : null;
+
   // Personal bests
   const bestTrade = plList.length ? plList.reduce((b, tr) => tr.pl > (b?.pl ?? -Infinity) ? tr : b, null) : null;
   const allTimeWins = plList.filter(tr => tr.pl > 0).length;
@@ -172,6 +184,7 @@ export default function DaySession({ plList, plans, onAddTrade, onAddPlan, journ
                 {statCard("LOSSES", losses, t.danger)}
                 {streak && streak.count >= 2 && statCard("STREAK", `${streak.count}${streak.type}`, streak.type === "W" ? t.accent : t.danger)}
                 {journalStreak >= 1 && statCard("JOURNAL", `${journalStreak}D`, "#a78bfa")}
+                {vsAvg !== null && todayTrades.length > 0 && statCard("VS AVG", `${vsAvg >= 0 ? "+" : ""}${fmt(vsAvg)}`, vsAvg >= 0 ? t.accent : t.danger)}
               </div>
             )}
           </div>
