@@ -25,7 +25,7 @@ const TUTORIAL_STEPS = [
     cta: null,
   },
   {
-    icon: <Pair a={<PenIcon size={44} />} b={<AnalysisIcon size={44} />} />,
+    icon: <Pair a={<ArrowsIcon size={44} />} b={<CategoryIcon size={44} />} />,
     title: "Load Sample Trades",
     desc: "Want to explore Analytics, the Calendar, and all features with real data? Load 15 example trades to see everything in action — you can delete them any time from Settings.",
     tab: null,
