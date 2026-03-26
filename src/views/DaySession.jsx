@@ -300,22 +300,21 @@ export default function DaySession({ plList, plans, onAddTrade, onAddPlan, journ
           <div style={ mobile ? { display: "grid", gridTemplateColumns: "repeat(5, 1fr)", justifyItems: "center", gap: "12px 0" } : { display: "flex", justifyContent: "space-between" }}>
             {BADGE_DEFS.map(b => {
               const earned = earnedIds.has(b.id);
-              const iconColor = earned ? (isDark ? "#fff" : "#000") : isDark ? "rgba(255,255,255,0.4)" : "rgba(0,0,0,0.3)";
+              const iconColor = earned ? (isDark ? "#fff" : "#000") : t.text3;
               return (
                 <div key={b.id} title={b.desc} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 5 }}>
                   <div style={{
                     width: 52, height: 52, borderRadius: 12,
-                    background: earned ? `linear-gradient(135deg, ${b.color}50, ${b.color}20)` : t.card2,
-                    border: `1.5px solid ${earned ? b.color : t.border2}`,
+                    background: earned ? `linear-gradient(135deg, ${b.color}50, ${b.color}20)` : t.text3 + "12",
+                    border: `1.5px solid ${earned ? b.color : t.text3 + "40"}`,
                     display: "flex", alignItems: "center", justifyContent: "center",
                     animation: earned && b.sparkle ? "sparkle 2s ease-in-out infinite" : "none",
                     boxShadow: earned && !b.sparkle ? `0 0 10px ${b.color}55` : "none",
-                    opacity: earned ? 1 : 0.5,
                     transition: "all 0.2s ease",
                   }}>
                     {b.IconCmp
                       ? <div style={{ color: iconColor }}><b.IconCmp size={30} /></div>
-                      : <img src={b.icon} width={30} height={30} alt={b.label} style={{ filter: isDark ? "brightness(0) invert(1)" : "brightness(0)" }} />}
+                      : <img src={b.icon} width={30} height={30} alt={b.label} style={{ filter: isDark ? "brightness(0) invert(1)" : "brightness(0)", opacity: earned ? 1 : 0.4 }} />}
                   </div>
                   <div style={{
                     fontSize: 9,
