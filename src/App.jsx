@@ -752,15 +752,12 @@ const strategyCurves = useMemo(() => {
     .map((strategy, si) => {
       const trades = [...plList.filter(t => t.strategy === strategy)]
         .sort((a, b) => a.date.localeCompare(b.date));
-      if (trades.length < 3) return null;
       let cum = 0;
       const points = [{ date: trades[0].date, cum: 0 }];
       trades.forEach(t => { cum += t.pl; points.push({ date: t.date, cum }); });
       return { strategy, points, color: COLORS[si % COLORS.length], count: trades.length };
     })
-    .filter(Boolean)
-    .sort((a, b) => b.count - a.count)
-    .slice(0, 8);
+    .sort((a, b) => b.count - a.count);
 }, [plList]);
 
 
@@ -1609,7 +1606,7 @@ const paginated = filtered
             </div>
 
             {/* Strategy Equity Curves */}
-            {strategyCurves.length >= 2 && (() => {
+            {strategyCurves.length >= 1 && (() => {
               const W = 500; const H = 170; const PAD_T = 16;
               const iH = H - PAD_T;
               const allDates = strategyCurves.flatMap(s => s.points.map(p => p.date));
