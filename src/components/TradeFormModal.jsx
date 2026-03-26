@@ -24,6 +24,7 @@ export default function TradeFormModal({ initial, defaults, onClose, onSave, onC
     takeProfit: "",
     entryTime: "",
     exitTime: "",
+    exitDate: "",
     emotion: "None",
     mistake: "None",
     notes: "",
@@ -148,12 +149,14 @@ export default function TradeFormModal({ initial, defaults, onClose, onSave, onC
         contracts: +l.contracts,
       }));
     }
+    if (form.exitDate) trade.exitDate = form.exitDate;
     if (form.entryTime && form.exitTime) {
-      const [eh, em] = form.entryTime.split(":").map(Number);
-      const [xh, xm] = form.exitTime.split(":").map(Number);
-      let mins = (xh * 60 + xm) - (eh * 60 + em);
-      if (mins < 0) mins += 24 * 60;
-      trade.holdMinutes = mins;
+      const entryDate = form.date;
+      const exitDate = form.exitDate || form.date;
+      const entryMs = new Date(`${entryDate}T${form.entryTime}`).getTime();
+      const exitMs = new Date(`${exitDate}T${form.exitTime}`).getTime();
+      const mins = (exitMs - entryMs) / 60000;
+      if (mins > 0) trade.holdMinutes = mins;
     }
     onSave(trade);
   };
@@ -292,15 +295,6 @@ export default function TradeFormModal({ initial, defaults, onClose, onSave, onC
             {errMsg("ticker")}
           </div>
           <div>
-            <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><TodayIcon size={14} />Date</label>
-            <input
-              style={inp()}
-              type="date"
-              value={form.date}
-              onChange={(e) => set("date", e.target.value)}
-            />
-          </div>
-          <div>
             <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><CategoryIcon size={14} />Type</label>
             <select
               style={inp()}
@@ -415,6 +409,14 @@ export default function TradeFormModal({ initial, defaults, onClose, onSave, onC
                   value={form.exitTime || ""}
                   onChange={(e) => set("exitTime", e.target.value)}
                 />
+              </div>
+              <div>
+                <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><TodayIcon size={14} />Entry Date</label>
+                <input style={inp()} type="date" value={form.date} onChange={(e) => set("date", e.target.value)} />
+              </div>
+              <div>
+                <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><TodayIcon size={14} />Exit Date</label>
+                <input style={inp()} type="date" value={form.exitDate || ""} onChange={(e) => set("exitDate", e.target.value)} placeholder={form.date} />
               </div>
             </div>
             <div id="tut-trade-stoploss" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 12 }}>
