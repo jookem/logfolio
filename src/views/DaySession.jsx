@@ -179,7 +179,7 @@ export default function DaySession({ plList, plans, onAddTrade, onAddPlan, journ
               {sessionPL >= 0 ? "+" : ""}{fmt(sessionPL)}
             </div>
             {(wins > 0 || losses > 0 || (streak && streak.count >= 2) || journalStreak >= 1) && (
-              <div style={{ display: "flex", gap: 6, flexWrap: "wrap", justifyContent: "center" }}>
+              <div style={{ display: "flex", gap: 6, flexWrap: mobile ? "wrap" : "nowrap", justifyContent: "center" }}>
                 {statCard("WINS", wins, t.accent)}
                 {statCard("LOSSES", losses, t.danger)}
                 {streak && streak.count >= 2 && statCard("STREAK", `${streak.count}${streak.type}`, streak.type === "W" ? t.accent : t.danger)}
