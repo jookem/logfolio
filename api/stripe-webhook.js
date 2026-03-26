@@ -1,5 +1,6 @@
 import Stripe from "stripe";
 import { createClient } from "@supabase/supabase-js";
+import { sendPaymentConfirmation } from "./lib/email.js";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 const supabase = createClient(
@@ -47,6 +48,8 @@ export default async function handler(req, res) {
           stripe_subscription_id: session.subscription,
           subscription_status: status,
         }).eq("id", userId);
+        const { data: profile } = await supabase.from("profiles").select("email").eq("id", userId).single();
+        if (profile?.email) sendPaymentConfirmation(profile.email, plan).catch(() => {});
       }
       break;
     }

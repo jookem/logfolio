@@ -1,4 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
+import { sendTrialStarted } from "./lib/email.js";
 
 const supabase = createClient(
   process.env.SUPABASE_URL,
@@ -91,6 +92,8 @@ export default async function handler(req, res) {
       trial_ip: clientIP,
     })
     .eq("id", userId);
+
+  sendTrialStarted(email).catch(() => {});
 
   res.status(200).json({ ok: true, pro_trial_until: trialUntil.toISOString() });
 }

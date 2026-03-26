@@ -1,0 +1,94 @@
+import { Resend } from "resend";
+
+const resend = new Resend(process.env.RESEND_API_KEY);
+const FROM = "Log-Folio <hello@log-folio.com>";
+
+function base(content) {
+  return `<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width"></head>
+<body style="margin:0;padding:40px 20px;background:#0a0a0a;font-family:monospace">
+  <div style="max-width:520px;margin:0 auto;background:#111;border:1px solid #1a1a1a;border-radius:16px;padding:40px">
+    <div style="margin-bottom:28px">
+      <span style="color:#00ff87;font-size:13px;font-weight:700;letter-spacing:3px">LOG-FOLIO</span>
+    </div>
+    ${content}
+    <div style="margin-top:36px;padding-top:20px;border-top:1px solid #1a1a1a;font-size:11px;color:#555;line-height:1.8">
+      <a href="https://log-folio.com" style="color:#00ff87;text-decoration:none">log-folio.com</a>
+      &nbsp;·&nbsp; Trade smarter.
+    </div>
+  </div>
+</body>
+</html>`;
+}
+
+export async function sendTrialStarted(email) {
+  const expiryDate = new Date();
+  expiryDate.setDate(expiryDate.getDate() + 14);
+  const formatted = expiryDate.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
+
+  await resend.emails.send({
+    from: FROM,
+    to: email,
+    subject: "Your 14-day Pro trial has started",
+    html: base(`
+      <h1 style="margin:0 0 8px;font-size:22px;font-weight:700;color:#f4f5f7">Your Pro trial is live.</h1>
+      <p style="margin:0 0 24px;font-size:13px;color:#888;line-height:1.7">You have full access to Pro features until <strong style="color:#f4f5f7">${formatted}</strong>.</p>
+      <div style="background:#0d0d0d;border:1px solid #1a1a1a;border-radius:12px;padding:20px 24px;margin-bottom:28px">
+        <div style="font-size:11px;color:#555;letter-spacing:2px;margin-bottom:14px">WHAT'S UNLOCKED</div>
+        ${["Full Analytics dashboard", "Unlimited trade logging", "CSV import"].map(f =>
+          `<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;font-size:13px;color:#ccc">
+            <span style="color:#00ff87;font-weight:700">✓</span> ${f}
+          </div>`
+        ).join("")}
+      </div>
+      <a href="https://log-folio.com" style="display:inline-block;background:#00ff87;color:#000;text-decoration:none;border-radius:8px;padding:12px 28px;font-size:13px;font-weight:700;letter-spacing:0.5px">Open Log-Folio →</a>
+    `),
+  });
+}
+
+export async function sendTrialExpiringSoon(email, daysLeft, expiryDate) {
+  const formatted = new Date(expiryDate).toLocaleDateString("en-US", { month: "long", day: "numeric" });
+  const urgency = daysLeft === 1 ? "tomorrow" : `in ${daysLeft} days`;
+
+  await resend.emails.send({
+    from: FROM,
+    to: email,
+    subject: `Your Pro trial expires ${urgency}`,
+    html: base(`
+      <h1 style="margin:0 0 8px;font-size:22px;font-weight:700;color:#f4f5f7">Your trial ends ${urgency}.</h1>
+      <p style="margin:0 0 24px;font-size:13px;color:#888;line-height:1.7">
+        Your free Pro trial expires on <strong style="color:#f4f5f7">${formatted}</strong>. Upgrade to keep access to Analytics, unlimited trades, and CSV import.
+      </p>
+      <a href="https://log-folio.com" style="display:inline-block;background:#00ff87;color:#000;text-decoration:none;border-radius:8px;padding:12px 28px;font-size:13px;font-weight:700;letter-spacing:0.5px;margin-bottom:16px">Upgrade to Pro · $4.99/mo →</a>
+      <p style="margin:16px 0 0;font-size:12px;color:#555">If you choose not to upgrade, you'll move to the free plan (5 trades/month) on ${formatted}.</p>
+    `),
+  });
+}
+
+export async function sendPaymentConfirmation(email, plan) {
+  const planName = plan === "pro_plus" ? "Pro Plus" : "Pro";
+  const price = plan === "pro_plus" ? "$14.99" : "$4.99";
+  const features = plan === "pro_plus"
+    ? ["Full Analytics dashboard", "Unlimited trade logging", "CSV import", "AI Insights (3/day)", "AI Assist in trade planning (3/day)"]
+    : ["Full Analytics dashboard", "Unlimited trade logging", "CSV import"];
+
+  await resend.emails.send({
+    from: FROM,
+    to: email,
+    subject: `You're now on Log-Folio ${planName}`,
+    html: base(`
+      <h1 style="margin:0 0 8px;font-size:22px;font-weight:700;color:#f4f5f7">Welcome to ${planName}.</h1>
+      <p style="margin:0 0 24px;font-size:13px;color:#888;line-height:1.7">Your subscription is active at <strong style="color:#f4f5f7">${price}/month</strong>. Here's what you have access to:</p>
+      <div style="background:#0d0d0d;border:1px solid #1a1a1a;border-radius:12px;padding:20px 24px;margin-bottom:28px">
+        <div style="font-size:11px;color:#555;letter-spacing:2px;margin-bottom:14px">${planName.toUpperCase()} FEATURES</div>
+        ${features.map(f =>
+          `<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;font-size:13px;color:#ccc">
+            <span style="color:#00ff87;font-weight:700">✓</span> ${f}
+          </div>`
+        ).join("")}
+      </div>
+      <a href="https://log-folio.com" style="display:inline-block;background:#00ff87;color:#000;text-decoration:none;border-radius:8px;padding:12px 28px;font-size:13px;font-weight:700;letter-spacing:0.5px">Open Log-Folio →</a>
+    `),
+  });
+}
