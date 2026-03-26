@@ -1611,7 +1611,7 @@ const paginated = filtered
             {/* Strategy Equity Curves */}
             {strategyCurves.length >= 2 && (() => {
               const PAD = { t: 20, r: 16, b: 36, l: 58 };
-              const W = 500; const H = 240;
+              const W = 500; const H = 200;
               const iW = W - PAD.l - PAD.r; const iH = H - PAD.t - PAD.b;
               const allDates = strategyCurves.flatMap(s => s.points.map(p => p.date));
               const minTs = Math.min(...allDates.map(d => new Date(d).getTime()));
@@ -1631,8 +1631,8 @@ const paginated = filtered
               return (
                 <div style={{ background: T.surface, border: `1px solid ${T.border}`, borderRadius: 12, padding: "16px 18px", marginBottom: 16 }}>
                   <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 10, color: T.text3, textTransform: "uppercase", letterSpacing: 2, marginBottom: 4 }}>Strategy Equity Curves</div>
-                  <div style={{ fontSize: 11, color: T.text3, marginBottom: 14 }}>Cumulative P/L per strategy over time. Same slope but less wiggle = better Sharpe ratio.</div>
-                  <svg width="100%" viewBox={`0 0 ${W} ${H}`} style={{ overflow: "visible" }}>
+                  <div style={{ fontSize: 11, color: T.text3, marginBottom: 16 }}>Cumulative P/L per strategy over time. Same slope but less wiggle = better Sharpe ratio.</div>
+                  <svg width="100%" viewBox={`0 0 ${W} ${H}`} style={{ overflow: "visible", height: 200 }}>
                     {yTicks.map((v, i) => (
                       <line key={i} x1={PAD.l} x2={PAD.l + iW} y1={yS(v)} y2={yS(v)} stroke={T.border} strokeWidth={0.5} />
                     ))}
@@ -1646,10 +1646,10 @@ const paginated = filtered
                       return <circle key={strategy} cx={xS(last.date)} cy={yS(last.cum)} r={4} fill={color} />;
                     })}
                     {yTicks.map((v, i) => (
-                      <text key={i} x={PAD.l - 6} y={yS(v) + 4} textAnchor="end" fontSize={9} fill={T.text3} fontFamily="monospace">{v >= 0 ? "+" : ""}{v.toFixed(0)}</text>
+                      <text key={i} x={PAD.l - 6} y={yS(v) + 4} textAnchor="end" fontSize={9} fill={T.text3} fontFamily="'Space Mono',monospace">{v >= 0 ? "+" : ""}{v.toFixed(0)}</text>
                     ))}
                     {xTicks.map((ts, i) => (
-                      <text key={i} x={PAD.l + (i / 4) * iW} y={PAD.t + iH + 14} textAnchor="middle" fontSize={9} fill={T.text3} fontFamily="monospace">{fmtTick(ts)}</text>
+                      <text key={i} x={PAD.l + (i / 4) * iW} y={PAD.t + iH + 14} textAnchor="middle" fontSize={9} fill={T.text3} fontFamily="'Space Mono',monospace">{fmtTick(ts)}</text>
                     ))}
                     <line x1={PAD.l} x2={PAD.l} y1={PAD.t} y2={PAD.t + iH} stroke={T.border} strokeWidth={1} />
                     <line x1={PAD.l} x2={PAD.l + iW} y1={PAD.t + iH} y2={PAD.t + iH} stroke={T.border} strokeWidth={1} />
