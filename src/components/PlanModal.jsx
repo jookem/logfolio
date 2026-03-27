@@ -779,7 +779,7 @@ const base = {
 
       {/* Price per option — auto-filled */}
       <div>
-        <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><PremiumEntryIcon size={14} />Price per Option</label>
+        <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><PremiumEntryIcon size={14} />Price p/ Option</label>
         <div style={{ position: "relative" }}>
           <span style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: t.text3, fontSize: 14 }}>$</span>
           <input style={{ ...inp, paddingLeft: 26 }} type="number"
@@ -800,7 +800,7 @@ const base = {
       {/* IV + Disclaimer */}
       <div style={{ display: "flex", gap: 10, gridColumn: "span 2" }}>
         <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
-          <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><IVIcon size={14} />IV (Implied Vol.) %</label>
+          <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><IVIcon size={14} />IV</label>
           <input style={{ ...inp, flex: 1 }} type="number"
             value={leg.iv} onChange={(e) => setLeg(i, "iv", e.target.value)} placeholder="30" />
         </div>
