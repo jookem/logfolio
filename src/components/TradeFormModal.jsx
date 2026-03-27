@@ -351,6 +351,19 @@ export default function TradeFormModal({ initial, defaults, onClose, onSave, onC
         </div>
         {STOCK_LIKE.includes(form.type) ? (
           <>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 12 }}>
+              <div>
+                <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><AmountIcon size={14} />{typeLabels(form.type).units}</label>
+                <input
+                  style={inp("shares")}
+                  type="number"
+                  value={form.shares}
+                  onChange={(e) => { set("shares", e.target.value); setErrors((p) => ({ ...p, shares: undefined })); }}
+                  placeholder="100"
+                />
+                {errMsg("shares")}
+              </div>
+            </div>
             <div id="tut-trade-prices" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 12 }}>
               <div>
                 <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><EntryPriceIcon size={14} />Entry</label>
@@ -364,15 +377,28 @@ export default function TradeFormModal({ initial, defaults, onClose, onSave, onC
                 {errMsg("entryPrice")}
               </div>
               <div>
-                <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><AmountIcon size={14} />{typeLabels(form.type).units}</label>
+                <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><ExitIcon size={14} />Exit</label>
                 <input
-                  style={inp("shares")}
+                  style={inp("exitPrice")}
                   type="number"
-                  value={form.shares}
-                  onChange={(e) => { set("shares", e.target.value); setErrors((p) => ({ ...p, shares: undefined })); }}
-                  placeholder="100"
+                  value={form.exitPrice}
+                  onChange={(e) => { set("exitPrice", e.target.value); setErrors((p) => ({ ...p, exitPrice: undefined })); }}
+                  placeholder="196"
                 />
-                {errMsg("shares")}
+                {errMsg("exitPrice")}
+                {(() => {
+                  const entry = +form.entryPrice;
+                  const exit = +form.exitPrice;
+                  const qty = +form.shares;
+                  if (!entry || !exit || !qty) return null;
+                  const dir = form.direction === "long" ? 1 : -1;
+                  const pl = dir * (exit - entry) * qty;
+                  return (
+                    <div style={{ fontSize: 11, fontFamily: "'Space Mono',monospace", color: pl >= 0 ? t.accent : t.danger, marginTop: 4 }}>
+                      → {pl >= 0 ? "+" : ""}{fmt(pl)}
+                    </div>
+                  );
+                })()}
               </div>
             </div>
             <div id="tut-trade-stoploss" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 12 }}>
@@ -397,32 +423,6 @@ export default function TradeFormModal({ initial, defaults, onClose, onSave, onC
                   placeholder="200"
                 />
                 {errMsg("takeProfit")}
-              </div>
-            </div>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 12 }}>
-              <div style={{ gridColumn: "span 1" }}>
-                <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><ExitIcon size={14} />Exit</label>
-                <input
-                  style={inp("exitPrice")}
-                  type="number"
-                  value={form.exitPrice}
-                  onChange={(e) => { set("exitPrice", e.target.value); setErrors((p) => ({ ...p, exitPrice: undefined })); }}
-                  placeholder="196"
-                />
-                {errMsg("exitPrice")}
-                {(() => {
-                  const entry = +form.entryPrice;
-                  const exit = +form.exitPrice;
-                  const qty = +form.shares;
-                  if (!entry || !exit || !qty) return null;
-                  const dir = form.direction === "long" ? 1 : -1;
-                  const pl = dir * (exit - entry) * qty;
-                  return (
-                    <div style={{ fontSize: 11, fontFamily: "'Space Mono',monospace", color: pl >= 0 ? t.accent : t.danger, marginTop: 4 }}>
-                      → {pl >= 0 ? "+" : ""}{fmt(pl)}
-                    </div>
-                  );
-                })()}
               </div>
             </div>
             <div id="tut-trade-times" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 12 }}>

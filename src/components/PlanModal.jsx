@@ -105,7 +105,7 @@ const [form, setForm] = useState(initial ? {
     type: initial.type || "stock",
     strategy: initial.strategy || "Breakout",
     direction: initial.direction || "long",
-    stockDirection: initial.direction === "short" ? "sell" : "buy",
+    stockDirection: initial.direction === "short" ? "short" : "long",
     currentPrice: initial.entryPrice || "",
     purchasePrice: initial.entryPrice || "",
     numShares: initial.shares || "",
@@ -121,7 +121,7 @@ const [form, setForm] = useState(initial ? {
     type: "stock",
     strategy: "Breakout",
     direction: "long",
-    stockDirection: "buy",
+    stockDirection: "long",
     currentPrice: "",
     purchasePrice: "",
     numShares: "",
@@ -341,7 +341,7 @@ const setLeg = (i, k, v) =>
   // R calculation (stock only)
   const plannedR =
     STOCK_LIKE.includes(form.type) && form.purchasePrice && form.stopLoss && form.takeProfit
-      ? ((+form.takeProfit - +form.purchasePrice) * (form.stockDirection === "buy" ? 1 : -1)) /
+      ? ((+form.takeProfit - +form.purchasePrice) * (form.stockDirection === "long" ? 1 : -1)) /
         Math.abs(+form.purchasePrice - +form.stopLoss)
       : null;
 
@@ -361,7 +361,7 @@ const base = {
       base.stopLoss = form.stopLoss ? +form.stopLoss : null;
       base.takeProfit = form.takeProfit ? +form.takeProfit : null;
       base.shares = +form.numShares;
-      base.direction = form.stockDirection === "buy" ? "long" : "short";
+      base.direction = form.stockDirection;
       base.plannedR = plannedR;
       base.legs = [];
     } else {
@@ -500,7 +500,7 @@ const base = {
             <div>
               <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><DirectionIcon size={14} />Direction</label>
               <select style={inp} value={form.stockDirection} onChange={(e) => set("stockDirection", e.target.value)}>
-                <option value="buy">Buy</option>
+                <option value="long">Long</option>
                 <option value="short">Short</option>
               </select>
             </div>
