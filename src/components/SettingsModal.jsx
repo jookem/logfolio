@@ -10,6 +10,11 @@ export default function SettingsModal({ onClose, isDark, setIsDark, onClear, t, 
   const sm = window.innerWidth < 400;
   const [copied, setCopied] = useState(false);
   const [resetSent, setResetSent] = useState(false);
+  const [supportSubject, setSupportSubject] = useState("");
+  const [supportMessage, setSupportMessage] = useState("");
+  const [supportSending, setSupportSending] = useState(false);
+  const [supportSent, setSupportSent] = useState(false);
+  const [supportError, setSupportError] = useState(null);
   const sel = { background: t.input, border: `1px solid ${t.inputBorder}`, borderRadius: 7, color: t.text, padding: "6px 10px", fontSize: 13, fontFamily: "inherit", cursor: "pointer", outline: "none" };
   const numInp = { background: t.input, border: `1px solid ${t.inputBorder}`, borderRadius: 7, color: t.text, padding: "6px 10px", fontSize: 13, fontFamily: "inherit", outline: "none", width: 110, textAlign: "right" };
   const row = { display: "flex", justifyContent: "space-between", alignItems: "center" };
@@ -159,6 +164,52 @@ export default function SettingsModal({ onClose, isDark, setIsDark, onClear, t, 
             </>
           ) : (
             <div style={{ fontSize: 12, color: t.text3 }}>Referral link unavailable — try signing out and back in.</div>
+          )}
+        </div>
+
+        {/* Contact Support */}
+        <div style={{ background: t.surface, border: `1px solid ${t.border}`, borderRadius: 12, padding: "14px 16px", marginBottom: 12 }}>
+          <div style={{ fontSize: 11, color: t.text3, fontFamily: "'Space Mono', monospace", textTransform: "uppercase", letterSpacing: 1.5, marginBottom: 12 }}>Contact Support</div>
+          {supportSent ? (
+            <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, color: t.accent, padding: "8px 0" }}>
+              <CheckIcon size={15} /> Message sent — we'll get back to you shortly.
+            </div>
+          ) : (
+            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              <input
+                type="text"
+                placeholder="Subject"
+                value={supportSubject}
+                onChange={e => setSupportSubject(e.target.value)}
+                style={{ background: t.input, border: `1px solid ${t.inputBorder}`, borderRadius: 7, color: t.text, padding: "7px 10px", fontSize: 13, fontFamily: "inherit", outline: "none" }}
+              />
+              <textarea
+                placeholder="Describe your issue or feedback…"
+                value={supportMessage}
+                onChange={e => setSupportMessage(e.target.value)}
+                rows={4}
+                style={{ background: t.input, border: `1px solid ${t.inputBorder}`, borderRadius: 7, color: t.text, padding: "7px 10px", fontSize: 13, fontFamily: "inherit", outline: "none", resize: "vertical" }}
+              />
+              {supportError && <div style={{ fontSize: 12, color: t.danger }}>{supportError}</div>}
+              <button
+                disabled={supportSending || !supportMessage.trim()}
+                onClick={async () => {
+                  setSupportSending(true);
+                  setSupportError(null);
+                  const res = await fetch("/api/contact", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ subject: supportSubject, message: supportMessage, userEmail: user?.email }),
+                  });
+                  setSupportSending(false);
+                  if (res.ok) { setSupportSent(true); }
+                  else { const b = await res.json().catch(() => ({})); setSupportError(b.error || "Failed to send. Please try again."); }
+                }}
+                style={{ alignSelf: "flex-end", background: t.accent, border: "none", color: "#000", borderRadius: 7, padding: "7px 18px", cursor: supportSending || !supportMessage.trim() ? "not-allowed" : "pointer", fontSize: 12, fontWeight: 700, fontFamily: "'Space Mono', monospace", opacity: supportSending || !supportMessage.trim() ? 0.5 : 1 }}
+              >
+                {supportSending ? "Sending…" : "Send"}
+              </button>
+            </div>
           )}
         </div>
 
