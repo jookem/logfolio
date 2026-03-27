@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import DateInput from "../components/DateInput";
 import { fmt, fmtDate } from "../lib/utils";
 
 const WEEK_OPTIONS = [4, 8, 12, 26, 52];
@@ -48,11 +49,11 @@ export default function WeeklyReview({ plList, t, mobile }) {
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
           <span style={{ fontSize: 11, color: t.text3, fontFamily: "'Space Mono', monospace", textTransform: "uppercase", letterSpacing: 1.5 }}>Week</span>
-          <input
-            type="date"
+          <DateInput
+            t={t}
             value={jumpDate}
             onChange={(e) => { setJumpDate(e.target.value); }}
-            style={{ background: jumpDate ? t.accent + "15" : t.card2, border: `1px solid ${jumpDate ? t.accent : t.border}`, color: jumpDate ? t.accent : t.text3, borderRadius: 6, padding: "4px 8px", fontSize: 11, fontFamily: "'Space Mono', monospace", cursor: "pointer", outline: "none" }}
+            style={{ background: jumpDate ? t.accent + "15" : t.card2, border: `1px solid ${jumpDate ? t.accent : t.border}`, color: jumpDate ? t.accent : t.text3, borderRadius: 6, padding: "4px 8px 4px 8px", fontSize: 11, fontFamily: "'Space Mono', monospace", cursor: "pointer", outline: "none" }}
           />
           {jumpDate && (
             <button onClick={() => setJumpDate("")} style={{ background: "none", border: "none", color: t.text3, cursor: "pointer", fontSize: 13, padding: "0 2px", lineHeight: 1 }}>×</button>

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { todayStr } from "../lib/utils";
 import { DeleteIcon } from "../lib/icons";
+import DateInput from "../components/DateInput";
 
 export default function JournalView({ journals, onSave, t, mobile }) {
   const [date, setDate] = useState(todayStr());
@@ -52,8 +53,8 @@ export default function JournalView({ journals, onSave, t, mobile }) {
       {/* Editor */}
       <div style={{ background: t.surface, border: `1px solid ${t.border}`, borderRadius: 12, padding: "18px 20px" }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14, gap: 12, flexWrap: "wrap" }}>
-          <input
-            type="date"
+          <DateInput
+            t={t}
             value={date}
             onChange={(e) => setDate(e.target.value)}
             style={{ background: t.input, border: `1px solid ${t.inputBorder}`, borderRadius: 7, color: t.text, padding: "6px 10px", fontSize: 13, fontFamily: "'Space Mono',monospace", outline: "none", cursor: "pointer" }}

@@ -6,6 +6,7 @@ import Tag from "./Tag";
 import VoiceNote from "./VoiceNote";
 import ScreenshotUpload from "./ScreenshotUpload";
 import { EditIcon, LogIcon, CloseIcon, TodayIcon, ExitIcon, EntryPriceIcon, EntryTimeIcon, ExitTimeIcon, EntryDateIcon, ExitDateIcon, TickerIcon, CategoryIcon, StrategyIcon, DirectionIcon, AmountIcon, WarningIcon, TargetIcon, EmotionIcon, TagsIcon, PenIcon, MistakeIcon } from "../lib/icons";
+import DateInput from "./DateInput";
 
 export default function TradeFormModal({ initial, defaults, onClose, onSave, onCSVImport, t, editLabel, isDark, trades = [] }) {
   const { closing, trigger } = useModalClose();
@@ -462,11 +463,11 @@ export default function TradeFormModal({ initial, defaults, onClose, onSave, onC
               </div>
               <div>
                 <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><EntryDateIcon size={14} />Entry Date</label>
-                <input style={inp()} type="date" value={form.date} onChange={(e) => set("date", e.target.value)} />
+                <DateInput style={inp()} t={t} value={form.date} onChange={(e) => set("date", e.target.value)} />
               </div>
               <div>
                 <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><ExitDateIcon size={14} />Exit Date</label>
-                <input style={inp()} type="date" value={form.exitDate || ""} onChange={(e) => set("exitDate", e.target.value)} placeholder={form.date} />
+                <DateInput style={inp()} t={t} value={form.exitDate || ""} onChange={(e) => set("exitDate", e.target.value)} placeholder={form.date} />
               </div>
             </div>
           </>
@@ -503,7 +504,7 @@ export default function TradeFormModal({ initial, defaults, onClose, onSave, onC
                   </div>
                   <div>
                     <label style={lbl}>Expiry</label>
-                    <input style={inp(`leg_${i}_expiration`)} type="date" value={leg.expiration} onChange={(e) => { setLeg(i, "expiration", e.target.value); setErrors((p) => ({ ...p, [`leg_${i}_expiration`]: undefined })); }} />
+                    <DateInput style={inp(`leg_${i}_expiration`)} t={t} value={leg.expiration} onChange={(e) => { setLeg(i, "expiration", e.target.value); setErrors((p) => ({ ...p, [`leg_${i}_expiration`]: undefined })); }} />
                     {errMsg(`leg_${i}_expiration`)}
                   </div>
                   <div>

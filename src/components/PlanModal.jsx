@@ -4,6 +4,7 @@ import { PlanIcon, CloseIcon, WarningIcon, TargetIcon, TickerIcon, CategoryIcon,
 import { supabase } from "../lib/supabase";
 import { STOCK_LIKE, SUGGESTED_TAGS, EMOTIONS, OPTION_STRATEGIES } from "../lib/constants";
 import { todayStr, typeLabels, normCDF, bsPrice } from "../lib/utils";
+import DateInput from "./DateInput";
 import Tag from "./Tag";
 import VoiceNote from "./VoiceNote";
 import ScreenshotUpload from "./ScreenshotUpload";
@@ -620,7 +621,7 @@ const base = {
           {/* Date */}
           <div>
             <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><TodayIcon size={14} />Date</label>
-            <input style={inp} type="date" value={form.date} onChange={(e) => set("date", e.target.value)} />
+            <DateInput style={inp} t={t} value={form.date} onChange={(e) => set("date", e.target.value)} />
           </div>
 
           {/* Current price */}
@@ -708,14 +709,14 @@ const base = {
 {/* Expiry — calendar input */}
       <div>
         <label style={lbl}>Expiry</label>
-        <input
+        <DateInput
           style={{
             ...inp,
             borderColor: leg.expiration && expiryDates.length > 0 && !expiryDates.includes(leg.expiration)
               ? t.danger + "80"
               : t.inputBorder,
           }}
-          type="date"
+          t={t}
           value={leg.expiration}
           min={todayStr()}
           onChange={(e) => {
