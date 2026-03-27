@@ -389,19 +389,6 @@ const [page, setPage] = useState(1);
           showToast("Save failed — free tier limit reached", "#ff4d6d", "warning");
           return;
         }
-        if (isPro && uploaded.exitPrice && uploaded.status !== "planned") {
-          fetch("/api/review-trade", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ action: "grade", tradeData: uploaded, userId: user.id }),
-          }).then(r => r.ok ? r.json() : null).then(data => {
-            if (data?.grade) {
-              const graded = { ...uploaded, grade: data.grade, gradeNote: data.gradeNote };
-              setTrades(p => p.map(tr => tr.id === graded.id ? graded : tr));
-              supabase.from("trades").upsert({ id: graded.id, user_id: user.id, data: graded }).then(() => {});
-            }
-          }).catch(() => {});
-        }
       })();
     }
   };
@@ -458,20 +445,6 @@ const [page, setPage] = useState(1);
         setTrades((p) => p.map((t) => t.id === tradeWithHistory.id ? uploaded : t));
         setSelected(uploaded);
         supabase.from("trades").upsert({ id: uploaded.id, user_id: user.id, data: uploaded }).then(() => {});
-        if (isPro && uploaded.exitPrice && uploaded.status !== "planned" && !uploaded.grade) {
-          fetch("/api/review-trade", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ action: "grade", tradeData: uploaded, userId: user.id }),
-          }).then(r => r.ok ? r.json() : null).then(data => {
-            if (data?.grade) {
-              const graded = { ...uploaded, grade: data.grade, gradeNote: data.gradeNote };
-              setTrades(p => p.map(tr => tr.id === graded.id ? graded : tr));
-              setSelected(s => s?.id === graded.id ? graded : s);
-              supabase.from("trades").upsert({ id: graded.id, user_id: user.id, data: graded }).then(() => {});
-            }
-          }).catch(() => {});
-        }
       })();
     }
   };
@@ -1059,13 +1032,13 @@ const paginated = filtered
             right: 16,
             left: mobile ? 16 : "auto",
             zIndex: 300,
-            background: T.card,
-            border: `1.5px solid ${toast.color}80`,
+            background: toast.color,
+            border: `1.5px solid ${T.card}`,
             borderRadius: 10,
             padding: "11px 16px",
             fontFamily: "'Space Mono',monospace",
             fontSize: 12,
-            color: toast.color,
+            color: "#000",
             display: "flex",
             alignItems: "center",
             justifyContent: mobile ? "center" : "flex-start",

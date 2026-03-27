@@ -11,7 +11,12 @@
       "Bash(do echo:*)",
       "Read(//c/Users/tegam/logfolio/public/images/**)",
       "Bash(done)",
-      "Bash(node:*)"
+      "Bash(node:*)",
+      "Bash(ls C:/Users/tegam/logfolio/public/images/*.svg)",
+      "Bash(xargs -I{} basename {} .svg)",
+      "Bash(node -e \":*)",
+      "Bash(xargs grep:*)",
+      "Bash(cd:*)"
     ]
   }
 }

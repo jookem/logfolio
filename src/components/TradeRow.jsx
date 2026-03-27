@@ -2,17 +2,6 @@ import { calcPL, fmt, fmtDate, fmtR } from "../lib/utils";
 import Tag from "./Tag";
 import { EditIcon, DeleteIcon, ScreenshotIcon, RecIcon } from "../lib/icons";
 
-const GRADE_COLORS = { A: "#00ff87", B: "#4ade80", C: "#f59e0b", D: "#f97316", F: "#ff4d6d" };
-
-function GradeBadge({ grade }) {
-  const color = GRADE_COLORS[grade] || "#888";
-  return (
-    <span style={{ fontSize: 9, fontFamily: "'Space Mono',monospace", color, background: color + "20", border: `1px solid ${color}40`, borderRadius: 4, padding: "1px 5px", letterSpacing: 1 }}>
-      {grade}
-    </span>
-  );
-}
-
 export default function TradeRow({ trade, onClick, onEdit, onDelete, onSelect, isSelected, t, mobile, isFirst, editLabel }) {
   const pl = calcPL(trade);
   const plDisplay = isNaN(pl) ? null : pl;
@@ -37,7 +26,6 @@ export default function TradeRow({ trade, onClick, onEdit, onDelete, onSelect, i
             <span style={{ display: "flex", alignItems: "center", gap: 7 }}>
               <span style={{ fontFamily: "'Space Mono', monospace", fontSize: 15, fontWeight: 700, color: t.text }}>{trade.ticker}</span>
               {isOpen && <span style={{ fontSize: 9, fontFamily: "'Space Mono',monospace", color: "#f59e0b", background: "#f59e0b18", border: "1px solid #f59e0b40", borderRadius: 4, padding: "1px 5px", letterSpacing: 1 }}>OPEN</span>}
-              {trade.grade && <GradeBadge grade={trade.grade} />}
             </span>
             <span style={{ fontFamily: "'Space Mono', monospace", fontSize: 15, fontWeight: 700, color: plDisplay == null ? t.text3 : plDisplay >= 0 ? t.accent : t.danger }}>
               {plDisplay == null ? "—" : `${plDisplay >= 0 ? "+" : ""}${fmt(plDisplay)}`}
@@ -70,10 +58,7 @@ export default function TradeRow({ trade, onClick, onEdit, onDelete, onSelect, i
       ) : (
         <div style={{ display: "grid", gridTemplateColumns: "85px 70px 1fr auto 90px", gap: 10, alignItems: "center" }}>
           <span onClick={onClick} style={{ fontFamily: "'Space Mono', monospace", fontSize: 11, color: t.text3 }}>{fmtDate(trade.date)}</span>
-          <span onClick={onClick} style={{ fontFamily: "'Space Mono', monospace", fontSize: 14, fontWeight: 700, color: t.text, display: "flex", alignItems: "center", gap: 6 }}>
-            {trade.ticker}
-            {trade.grade && <GradeBadge grade={trade.grade} />}
-          </span>
+          <span onClick={onClick} style={{ fontFamily: "'Space Mono', monospace", fontSize: 14, fontWeight: 700, color: t.text }}>{trade.ticker}</span>
           <span onClick={onClick} style={{ fontSize: 13, color: t.text3 }}>
             {trade.strategy}
             {isOpen && <span style={{ marginLeft: 6, fontSize: 9, fontFamily: "'Space Mono',monospace", color: "#f59e0b", background: "#f59e0b18", border: "1px solid #f59e0b40", borderRadius: 4, padding: "1px 5px", letterSpacing: 1 }}>OPEN</span>}
