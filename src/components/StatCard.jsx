@@ -1,11 +1,10 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useLayoutEffect } from "react";
 
-const PADDING = 24; // min gap from viewport edge
+const PADDING = 12; // min gap from viewport edge
 
 export default function StatCard({ label, value, sub, color, t, info }) {
   const c = color || t.accent;
   const [open, setOpen] = useState(false);
-  const [pos, setPos] = useState({ top: 0, left: 0 });
   const btnRef = useRef(null);
   const popRef = useRef(null);
 
@@ -19,38 +18,36 @@ export default function StatCard({ label, value, sub, color, t, info }) {
   }, [label]);
 
   function handleOpen() {
-    if (btnRef.current) {
-      const r = btnRef.current.getBoundingClientRect();
-      setPos({ top: r.bottom + 8, left: r.left });
-    }
     document.dispatchEvent(new CustomEvent("statcard-open", { detail: label }));
     setOpen(true);
   }
 
-  // After popup renders, clamp inside viewport on all edges
-  useEffect(() => {
+  // Position popup before paint — avoids flash and stale-closure issues
+  useLayoutEffect(() => {
     if (!open || !popRef.current || !btnRef.current) return;
-    const pop = popRef.current.getBoundingClientRect();
+    const pop = popRef.current;
     const btn = btnRef.current.getBoundingClientRect();
     const vw = window.innerWidth;
     const vh = window.innerHeight;
+    const popW = pop.offsetWidth;
+    const popH = pop.offsetHeight;
 
-    let newLeft = pos.left;
-    let newTop = pos.top;
+    let top = btn.bottom + 8;
+    // If button is on right half of screen, right-align popup to button's right edge
+    let left = btn.right > vw / 2 ? btn.right - popW : btn.left;
 
-    // Right edge
-    const overflowRight = pop.right - (vw - PADDING);
-    if (overflowRight > 0) newLeft = Math.max(PADDING, newLeft - overflowRight);
-    // Left edge
-    if (newLeft < PADDING) newLeft = PADDING;
-    // Bottom edge — flip above button
-    if (pop.bottom > vh - PADDING) newTop = btn.top - pop.height - 8;
-    // Top edge after flip
-    if (newTop < PADDING) newTop = PADDING;
+    // Flip above button if it overflows bottom
+    if (top + popH > vh - PADDING) top = btn.top - popH - 8;
+    // Clamp top
+    if (top < PADDING) top = PADDING;
+    // Clamp right
+    if (left + popW > vw - PADDING) left = vw - PADDING - popW;
+    // Clamp left
+    if (left < PADDING) left = PADDING;
 
-    if (newLeft !== pos.left || newTop !== pos.top) {
-      setPos({ top: newTop, left: newLeft });
-    }
+    pop.style.top = `${top}px`;
+    pop.style.left = `${left}px`;
+    pop.style.visibility = "visible";
   }, [open]);
 
   // Close on outside click
@@ -143,8 +140,9 @@ export default function StatCard({ label, value, sub, color, t, info }) {
           data-statpop
           style={{
             position: "fixed",
-            top: pos.top,
-            left: pos.left,
+            top: 0,
+            left: 0,
+            visibility: "hidden",
             zIndex: 9999,
             background: t.card,
             border: `1px solid ${t.border2}`,
