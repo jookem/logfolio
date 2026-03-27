@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useModalClose } from "../lib/useModalClose";
-import { STOCK_LIKE, SUGGESTED_TAGS, EMOTIONS, MISTAKES } from "../lib/constants";
+import { STOCK_LIKE, SUGGESTED_TAGS, EMOTIONS, MISTAKES, OPTION_STRATEGIES } from "../lib/constants";
 import { todayStr, typeLabels, fmt } from "../lib/utils";
 import Tag from "./Tag";
 import VoiceNote from "./VoiceNote";
@@ -50,6 +50,20 @@ export default function TradeFormModal({ initial, defaults, onClose, onSave, onC
   const [mistakeInput, setMistakeInput] = useState("");
   const [dupWarning, setDupWarning] = useState(false);
   const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
+  const blankLeg = (pos = "buy", type = "call") => ({ position: pos, type, strike: "", expiration: "", entryPremium: "", exitPremium: "", contracts: 1, iv: "" });
+  const handleStrategyChange = (strat) => {
+    const cfg = OPTION_STRATEGIES[strat];
+    if (cfg) {
+      setForm((f) => ({ ...f, strategy: strat, legs: cfg.legs.map((tpl) => blankLeg(tpl.position, tpl.type)) }));
+    } else {
+      set("strategy", strat);
+    }
+  };
+  const handleTypeChange = (type) => {
+    set("type", type);
+    if (type === "options") handleStrategyChange("Long Call");
+    else set("strategy", "Breakout");
+  };
   const setLeg = (i, k, v) =>
     setForm((f) => {
       const legs = [...f.legs];
@@ -299,7 +313,7 @@ export default function TradeFormModal({ initial, defaults, onClose, onSave, onC
             <select
               style={inp()}
               value={form.type}
-              onChange={(e) => set("type", e.target.value)}
+              onChange={(e) => handleTypeChange(e.target.value)}
             >
               <option value="stock">Stock</option>
               <option value="options">Options</option>
@@ -322,10 +336,10 @@ export default function TradeFormModal({ initial, defaults, onClose, onSave, onC
             <select
               style={inp()}
               value={form.strategy}
-              onChange={(e) => set("strategy", e.target.value)}
+              onChange={(e) => form.type === "options" ? handleStrategyChange(e.target.value) : set("strategy", e.target.value)}
             >
               {(() => {
-                const baseOptions = ["Long Call","Long Put","Bull Call Spread","Bear Put Spread","Iron Condor","Straddle","Strangle","Covered Call","Cash Secured Put","Butterfly","Calendar Spread"];
+                const baseOptions = Object.keys(OPTION_STRATEGIES);
                 const baseStock = ["Breakout","Pullback","Reversal","Scalp","Trend Follow","Range","Swing"];
                 const base = form.type === "options" ? baseOptions : baseStock;
                 const used = [...new Set(trades.filter(tr => form.type === "options" ? tr.type === "options" : tr.type !== "options").map(tr => tr.strategy).filter(Boolean))];
@@ -460,7 +474,9 @@ export default function TradeFormModal({ initial, defaults, onClose, onSave, onC
           <div style={{ marginBottom: 12 }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
               <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 10, color: t.accent, textTransform: "uppercase", letterSpacing: 2 }}>Option Legs</div>
-              <button onClick={addLeg} style={{ background: t.accent + "15", border: `1px dashed ${t.accent}40`, color: t.accent, borderRadius: 8, padding: "6px 14px", cursor: "pointer", fontSize: 13, fontFamily: "'Space Mono', monospace" }}>+ Leg</button>
+              {!OPTION_STRATEGIES[form.strategy]?.writeLocked && (
+                <button onClick={addLeg} style={{ background: t.accent + "15", border: `1px dashed ${t.accent}40`, color: t.accent, borderRadius: 8, padding: "6px 14px", cursor: "pointer", fontSize: 13, fontFamily: "'Space Mono', monospace" }}>+ Leg</button>
+              )}
             </div>
             {form.legs.map((leg, i) => (
               <div key={i} style={{ background: t.card2, border: `1px solid ${t.border}`, borderRadius: 10, padding: 14, marginBottom: 10 }}>

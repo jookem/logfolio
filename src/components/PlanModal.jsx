@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useModalClose } from "../lib/useModalClose";
 import { PlanIcon, CloseIcon, WarningIcon, TargetIcon, TickerIcon, CategoryIcon, StrategyIcon, TodayIcon, DirectionIcon, AmountIcon, EntryPriceIcon, CurrentPriceIcon, EmotionIcon, TagsIcon, PenIcon, ChecklistIcon, RobotIcon } from "../lib/icons";
 import { supabase } from "../lib/supabase";
-import { STOCK_LIKE, SUGGESTED_TAGS, EMOTIONS } from "../lib/constants";
+import { STOCK_LIKE, SUGGESTED_TAGS, EMOTIONS, OPTION_STRATEGIES } from "../lib/constants";
 import { todayStr, typeLabels, normCDF, bsPrice } from "../lib/utils";
 import Tag from "./Tag";
 import VoiceNote from "./VoiceNote";
@@ -11,15 +11,6 @@ import ScreenshotUpload from "./ScreenshotUpload";
 export default function PlanModal({ onClose, onSave, t, isDark, initial, trades = [], spyData = null, isProPlus = false }) {
   const { closing, trigger } = useModalClose();
   const sm = window.innerWidth < 400;
-  const OPTION_STRATEGIES = {
-    "Long Call":        { stockLabel: "Underlying Stock (optional)", showStock: true, legs: [{ position: "buy", type: "call" }], writeLocked: true },
-    "Long Put":         { stockLabel: "Underlying Stock (optional)", showStock: true, legs: [{ position: "buy", type: "put" }], writeLocked: true },
-    "Covered Call":     { stockLabel: "Stock Purchase", showStock: true, stockRequired: true, legs: [{ position: "sell", type: "call" }], writeLocked: true },
-    "Cash Secured Put": { stockLabel: "Cash Secured (Collateral)", showStock: true, legs: [{ position: "sell", type: "put" }], writeLocked: true },
-    "Naked Call":       { stockLabel: "Underlying Stock (optional)", showStock: true, legs: [{ position: "sell", type: "call" }], writeLocked: true },
-    "Naked Put":        { stockLabel: "Underlying Stock (optional)", showStock: true, legs: [{ position: "sell", type: "put" }], writeLocked: true },
-  };
-
   const OPTION_STRATEGY_NAMES = Object.keys(OPTION_STRATEGIES);
   const STOCK_STRATEGIES = ["Breakout", "Pullback", "Reversal", "Scalp"];
 

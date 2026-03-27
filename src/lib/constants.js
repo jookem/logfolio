@@ -1,5 +1,25 @@
 export const STOCK_LIKE = ["stock", "forex", "crypto"];
 
+// Shared options strategy definitions used by both Log a Trade and Plan a Trade.
+// legs: template of { position: "buy"|"sell", type: "call"|"put" } — components fill in blank fields.
+// writeLocked: true means leg count/structure is fixed by the strategy.
+// stockLabel / showStock: Plan a Trade only — for tracking an accompanying stock position.
+export const OPTION_STRATEGIES = {
+  "Long Call":        { legs: [{ position: "buy",  type: "call" }], writeLocked: true, showStock: true,  stockLabel: "Underlying Stock (optional)" },
+  "Long Put":         { legs: [{ position: "buy",  type: "put"  }], writeLocked: true, showStock: true,  stockLabel: "Underlying Stock (optional)" },
+  "Covered Call":     { legs: [{ position: "sell", type: "call" }], writeLocked: true, showStock: true,  stockLabel: "Stock Purchase", stockRequired: true },
+  "Cash Secured Put": { legs: [{ position: "sell", type: "put"  }], writeLocked: true, showStock: true,  stockLabel: "Cash Secured (Collateral)" },
+  "Naked Call":       { legs: [{ position: "sell", type: "call" }], writeLocked: true, showStock: false },
+  "Naked Put":        { legs: [{ position: "sell", type: "put"  }], writeLocked: true, showStock: false },
+  "Bull Call Spread": { legs: [{ position: "buy",  type: "call" }, { position: "sell", type: "call" }], writeLocked: true, showStock: false },
+  "Bear Put Spread":  { legs: [{ position: "buy",  type: "put"  }, { position: "sell", type: "put"  }], writeLocked: true, showStock: false },
+  "Straddle":         { legs: [{ position: "buy",  type: "call" }, { position: "buy",  type: "put"  }], writeLocked: true, showStock: false },
+  "Strangle":         { legs: [{ position: "buy",  type: "call" }, { position: "buy",  type: "put"  }], writeLocked: true, showStock: false },
+  "Iron Condor":      { legs: [{ position: "sell", type: "put"  }, { position: "buy",  type: "put"  }, { position: "sell", type: "call" }, { position: "buy", type: "call" }], writeLocked: true, showStock: false },
+  "Butterfly":        { legs: [{ position: "buy",  type: "call" }, { position: "sell", type: "call" }, { position: "sell", type: "call" }, { position: "buy", type: "call" }], writeLocked: true, showStock: false },
+  "Calendar Spread":  { legs: [{ position: "sell", type: "call" }, { position: "buy",  type: "call" }], writeLocked: true, showStock: false },
+};
+
 export const STRATEGIES = [
   "Breakout",
   "Pullback",
