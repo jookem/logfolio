@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useModalClose } from "../lib/useModalClose";
-import { PlanIcon, CloseIcon, WarningIcon, TargetIcon, TickerIcon, CategoryIcon, StrategyIcon, TodayIcon, DirectionIcon, AmountIcon, EntryPriceIcon, CurrentPriceIcon, EmotionIcon, TagsIcon, PenIcon, ChecklistIcon, RobotIcon, BuySellIcon, CallOrPutIcon, StrikeIcon, PremiumEntryIcon, ContractsIcon, IVIcon } from "../lib/icons";
+import { PlanIcon, CloseIcon, WarningIcon, TargetIcon, TickerIcon, CategoryIcon, StrategyIcon, TodayIcon, DirectionIcon, AmountIcon, EntryPriceIcon, CurrentPriceIcon, EmotionIcon, TagsIcon, PenIcon, ChecklistIcon, RobotIcon, BuySellIcon, CallOrPutIcon, StrikeIcon, PremiumEntryIcon, ContractsIcon, IVIcon, TimeframeIcon } from "../lib/icons";
 import { supabase } from "../lib/supabase";
 import { STOCK_LIKE, SUGGESTED_TAGS, EMOTIONS, OPTION_STRATEGIES } from "../lib/constants";
 import { todayStr, typeLabels, normCDF, bsPrice } from "../lib/utils";
@@ -708,7 +708,7 @@ const base = {
 
 {/* Expiry — calendar input */}
       <div>
-        <label style={lbl}>Expiry</label>
+        <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><TimeframeIcon size={14} />Expiry</label>
         <DateInput
           style={{
             ...inp,

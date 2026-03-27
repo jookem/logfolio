@@ -5,7 +5,7 @@ import { todayStr, typeLabels, fmt } from "../lib/utils";
 import Tag from "./Tag";
 import VoiceNote from "./VoiceNote";
 import ScreenshotUpload from "./ScreenshotUpload";
-import { EditIcon, LogIcon, CloseIcon, TodayIcon, ExitIcon, EntryPriceIcon, EntryTimeIcon, ExitTimeIcon, EntryDateIcon, ExitDateIcon, TickerIcon, CategoryIcon, StrategyIcon, DirectionIcon, AmountIcon, WarningIcon, TargetIcon, EmotionIcon, TagsIcon, PenIcon, MistakeIcon, BuySellIcon, CallOrPutIcon, StrikeIcon, PremiumEntryIcon, PremiumExitIcon, ContractsIcon, IVIcon } from "../lib/icons";
+import { EditIcon, LogIcon, CloseIcon, TodayIcon, ExitIcon, EntryPriceIcon, EntryTimeIcon, ExitTimeIcon, EntryDateIcon, ExitDateIcon, TickerIcon, CategoryIcon, StrategyIcon, DirectionIcon, AmountIcon, WarningIcon, TargetIcon, EmotionIcon, TagsIcon, PenIcon, MistakeIcon, BuySellIcon, CallOrPutIcon, StrikeIcon, PremiumEntryIcon, PremiumExitIcon, ContractsIcon, IVIcon, TimeframeIcon } from "../lib/icons";
 import DateInput from "./DateInput";
 import TimeInput from "./TimeInput";
 
@@ -492,7 +492,7 @@ export default function TradeFormModal({ initial, defaults, onClose, onSave, onC
                     </select>
                   </div>
                   <div>
-                    <label style={lbl}>Expiry</label>
+                    <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><TimeframeIcon size={14} />Expiry</label>
                     <DateInput style={inp(`leg_${i}_expiration`)} t={t} value={leg.expiration} onChange={(e) => { setLeg(i, "expiration", e.target.value); setErrors((p) => ({ ...p, [`leg_${i}_expiration`]: undefined })); }} />
                     {errMsg(`leg_${i}_expiration`)}
                   </div>
