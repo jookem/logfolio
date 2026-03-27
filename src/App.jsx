@@ -477,7 +477,10 @@ const [page, setPage] = useState(1);
     if (res.ok) {
       await refreshProfile();
       setShowTrialModal(false);
+      return null;
     }
+    const body = await res.json().catch(() => ({}));
+    return body.error || "Something went wrong. Please try again.";
   };
 
   const handleManageBilling = async () => {

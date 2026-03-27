@@ -11,11 +11,14 @@ const FEATURES = [
 export default function ProTrialModal({ t, onClose, onStartTrial, onUpgrade }) {
   const { closing, trigger } = useModalClose();
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   const handleStart = async () => {
     setLoading(true);
-    await onStartTrial();
+    setError(null);
+    const err = await onStartTrial();
     setLoading(false);
+    if (err) setError(err);
   };
 
   return (
@@ -63,6 +66,13 @@ export default function ProTrialModal({ t, onClose, onStartTrial, onUpgrade }) {
             </div>
           ))}
         </div>
+
+        {/* Error message */}
+        {error && (
+          <div style={{ background: "#ff444422", border: "1px solid #ff444466", borderRadius: 8, padding: "9px 12px", marginBottom: 12, fontSize: 12, color: "#ff6666", textAlign: "center" }}>
+            {error}
+          </div>
+        )}
 
         {/* Primary CTA */}
         <button
