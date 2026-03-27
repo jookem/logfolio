@@ -387,6 +387,20 @@ const [page, setPage] = useState(1);
           // Server rejected — roll back optimistic update
           setTrades((p) => p.filter((t) => t.id !== trade.id));
           showToast("Save failed — free tier limit reached", "#ff4d6d", "warning");
+          return;
+        }
+        if (isProPlus && trade.status === "closed" && trade.exitPrice) {
+          fetch("/api/review-trade", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ action: "grade", tradeData: uploaded, userId: user.id }),
+          }).then(r => r.ok ? r.json() : null).then(data => {
+            if (data?.grade) {
+              const graded = { ...uploaded, grade: data.grade, gradeNote: data.gradeNote };
+              setTrades(p => p.map(tr => tr.id === graded.id ? graded : tr));
+              supabase.from("trades").upsert({ id: graded.id, user_id: user.id, data: graded }).then(() => {});
+            }
+          }).catch(() => {});
         }
       })();
     }
@@ -453,7 +467,7 @@ const [page, setPage] = useState(1);
             if (data?.grade) {
               const graded = { ...uploaded, grade: data.grade, gradeNote: data.gradeNote };
               setTrades(p => p.map(tr => tr.id === graded.id ? graded : tr));
-              setSelected(graded);
+              setSelected(s => s?.id === graded.id ? graded : s);
               supabase.from("trades").upsert({ id: graded.id, user_id: user.id, data: graded }).then(() => {});
             }
           }).catch(() => {});
