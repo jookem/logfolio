@@ -9,7 +9,7 @@ import Tag from "./Tag";
 import VoiceNote from "./VoiceNote";
 import ScreenshotUpload from "./ScreenshotUpload";
 
-export default function PlanModal({ onClose, onSave, t, isDark, initial, trades = [], spyData = null, isProPlus = false }) {
+export default function PlanModal({ onClose, onSave, t, isDark, initial, trades = [], spyData = null, isPro = false, isProPlus = false, onUpgrade }) {
   const { closing, trigger } = useModalClose();
   const sm = window.innerWidth < 400;
   const OPTION_STRATEGY_NAMES = Object.keys(OPTION_STRATEGIES);
@@ -1137,27 +1137,42 @@ const base = {
         </div>
 
         {/* AI Assist */}
-        {isProPlus && (
+        {(isProPlus || isPro) && (
           <div id="tut-plan-ai-assist" style={{ marginBottom: 16 }}>
             <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 6, marginBottom: 8 }}>
               <RobotIcon size={14} />AI Analysis
             </label>
-            <button
-              onClick={fetchAiAssist}
-              disabled={aiLoading}
-              style={{
-                width: "100%", padding: "14px", borderRadius: 8, cursor: aiLoading ? "not-allowed" : "pointer",
-                background: t.accent + "08", border: `1px dashed ${t.accent}40`, color: t.accent,
-                fontSize: 13, fontFamily: "'Space Mono',monospace", textAlign: "center",
-                opacity: aiLoading ? 0.6 : 1, marginBottom: 8,
-                display: "flex", flexDirection: "column", alignItems: "center", gap: 4,
-              }}
-            >
-              <div>{aiLoading ? (aiStep === "price" ? "Fetching prices..." : "Analysing...") : "Generate"}</div>
-              <div style={{ fontSize: 11, color: assistUsedToday >= ASSIST_DAILY_LIMIT ? t.danger : t.text3, opacity: 0.8 }}>
-                {assistUsedToday} / {ASSIST_DAILY_LIMIT} uses today
-              </div>
-            </button>
+            {!isProPlus ? (
+              <button
+                onClick={onUpgrade}
+                style={{
+                  width: "100%", padding: "14px", borderRadius: 8, cursor: "pointer",
+                  background: "#f59e0b08", border: "1px dashed #f59e0b40", color: "#f59e0b",
+                  fontSize: 13, fontFamily: "'Space Mono',monospace", textAlign: "center",
+                  display: "flex", flexDirection: "column", alignItems: "center", gap: 4,
+                }}
+              >
+                <div>✦ PRO+ Feature</div>
+                <div style={{ fontSize: 11, opacity: 0.8 }}>Upgrade to unlock AI trade analysis</div>
+              </button>
+            ) : (
+              <button
+                onClick={fetchAiAssist}
+                disabled={aiLoading}
+                style={{
+                  width: "100%", padding: "14px", borderRadius: 8, cursor: aiLoading ? "not-allowed" : "pointer",
+                  background: t.accent + "08", border: `1px dashed ${t.accent}40`, color: t.accent,
+                  fontSize: 13, fontFamily: "'Space Mono',monospace", textAlign: "center",
+                  opacity: aiLoading ? 0.6 : 1, marginBottom: 8,
+                  display: "flex", flexDirection: "column", alignItems: "center", gap: 4,
+                }}
+              >
+                <div>{aiLoading ? (aiStep === "price" ? "Fetching prices..." : "Analysing...") : "Generate"}</div>
+                <div style={{ fontSize: 11, color: assistUsedToday >= ASSIST_DAILY_LIMIT ? t.danger : t.text3, opacity: 0.8 }}>
+                  {assistUsedToday} / {ASSIST_DAILY_LIMIT} uses today
+                </div>
+              </button>
+            )}
             {aiError && (
               <div style={{ fontSize: 11, color: t.danger, marginBottom: 8 }}>{aiError}</div>
             )}

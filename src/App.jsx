@@ -2101,7 +2101,9 @@ const paginated = filtered
           isDark={isDark}
           trades={trades}
           spyData={spyData}
+          isPro={isPro}
           isProPlus={isProPlus}
+          onUpgrade={() => { setEditTrade(null); handleUpgrade("pro_plus"); }}
         />
       )}
       {editTrade && editTrade.status !== "planned" && (
@@ -2153,7 +2155,9 @@ const paginated = filtered
     isDark={isDark}
     trades={trades}
     spyData={spyData}
+    isPro={isPro}
     isProPlus={isProPlus}
+    onUpgrade={() => { setShowPlan(false); handleUpgrade("pro_plus"); }}
   />
 )}
       {showReplay && plList.length > 0 && (
