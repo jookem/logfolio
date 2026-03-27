@@ -33,17 +33,14 @@ export default function StatCard({ label, value, sub, color, t, info }) {
     const popH = pop.offsetHeight;
 
     let top = btn.bottom + 8;
-    // If button is on right half of screen, right-align popup to button's right edge
-    let left = btn.right > vw / 2 ? btn.right - popW : btn.left;
+    // Center popup under the button, then clamp to viewport
+    let left = btn.left + btn.width / 2 - popW / 2;
+    if (left + popW > vw - PADDING) left = vw - PADDING - popW;
+    if (left < PADDING) left = PADDING;
 
     // Flip above button if it overflows bottom
     if (top + popH > vh - PADDING) top = btn.top - popH - 8;
-    // Clamp top
     if (top < PADDING) top = PADDING;
-    // Clamp right
-    if (left + popW > vw - PADDING) left = vw - PADDING - popW;
-    // Clamp left
-    if (left < PADDING) left = PADDING;
 
     pop.style.top = `${top}px`;
     pop.style.left = `${left}px`;
