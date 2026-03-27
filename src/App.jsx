@@ -1158,7 +1158,7 @@ const paginated = filtered
                 }}
               >
                 {nav.map(([id, label]) => {
-                  const isPremiumTab = !isPro && (id === "analytics" || id === "ai");
+                  const isPremiumTab = (id === "analytics" && !isPro) || (id === "ai" && !isProPlus);
                   return (
                   <button
                     key={id}
@@ -1195,7 +1195,7 @@ const paginated = filtered
         ) : (
           <>
             {nav.map(([id, label]) => {
-              const isPremiumTab = !isPro && (id === "analytics" || id === "ai");
+              const isPremiumTab = (id === "analytics" && !isPro) || (id === "ai" && !isProPlus);
               return (
               <button
                 key={id}
