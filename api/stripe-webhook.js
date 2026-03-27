@@ -1,6 +1,6 @@
 import Stripe from "stripe";
 import { createClient } from "@supabase/supabase-js";
-import { sendPaymentConfirmation } from "./lib/email.js";
+import { sendPaymentConfirmation } from "./_lib/email.js";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 const supabase = createClient(

@@ -1,5 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
-import { sendWeeklySummary } from "../lib/email.js";
+import { sendWeeklySummary } from "../_lib/email.js";
 
 const supabase = createClient(
   process.env.SUPABASE_URL,

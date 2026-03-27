@@ -1,5 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
-import { sendTrialExpiringSoon } from "../lib/email.js";
+import { sendTrialExpiringSoon } from "../_lib/email.js";
 
 const supabase = createClient(
   process.env.SUPABASE_URL,
