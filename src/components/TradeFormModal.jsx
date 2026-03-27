@@ -545,7 +545,7 @@ export default function TradeFormModal({ initial, defaults, onClose, onSave, onC
                     <button onClick={() => removeLeg(i)} style={{ background: "none", border: "none", color: t.danger, cursor: "pointer", fontSize: 12 }}>Remove</button>
                   </div>
                 )}
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+                <div style={{ display: "grid", gridTemplateColumns: "1.3fr 1fr", gap: 10 }}>
                   <div>
                     <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><BuySellIcon size={14} />Bought or Wrote</label>
                     <select style={inp()} value={leg.position} onChange={(e) => setLeg(i, "position", e.target.value)}>
