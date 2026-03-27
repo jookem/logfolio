@@ -115,9 +115,14 @@ const [page, setPage] = useState(1);
         .select("id, data")
         .eq("user_id", user.id);
       if (error) {
-        // Supabase unreachable — fall back to localStorage, don't show onboarding
+        // Supabase unreachable — fall back to localStorage
         const local = loadTrades();
         setTrades(local?.length ? local : []);
+        // Still show onboarding for brand-new users (created within last 10 min)
+        const isNew = user.created_at && (Date.now() - new Date(user.created_at).getTime()) < 10 * 60 * 1000;
+        if (isNew && !local?.length && !localStorage.getItem(`tradelog_onboarding_done_${user.id}`)) {
+          setShowOnboarding(true);
+        }
       } else {
         const loaded = data.map(row => ({ ...row.data, id: row.id }));
         if (loaded.length === 0) {
