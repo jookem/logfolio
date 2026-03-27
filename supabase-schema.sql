@@ -78,3 +78,23 @@ create trigger on_auth_user_created
 -- update public.profiles
 -- set ai_analyses_used = 0, ai_analyses_reset_at = date_trunc('month', now())
 -- where ai_analyses_reset_at < date_trunc('month', now());
+
+-- Referral system columns (add if not exists)
+alter table public.profiles add column if not exists referral_code text unique;
+alter table public.profiles add column if not exists referred_by text;
+alter table public.profiles add column if not exists referred_count int default 0;
+
+-- Auto-generate referral code for new users (update existing trigger)
+create or replace function public.handle_new_user()
+returns trigger as $$
+declare
+  ref_code text;
+begin
+  -- Generate unique 8-char referral code
+  ref_code := upper(substring(replace(gen_random_uuid()::text, '-', '') from 1 for 8));
+  insert into public.profiles (id, email, referral_code)
+  values (new.id, new.email, ref_code)
+  on conflict (id) do nothing;
+  return new;
+end;
+$$ language plpgsql security definer;

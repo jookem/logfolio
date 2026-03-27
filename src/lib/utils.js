@@ -28,9 +28,29 @@ export const todayStr = () => {
   return `${t.getFullYear()}-${String(t.getMonth() + 1).padStart(2, "0")}-${String(t.getDate()).padStart(2, "0")}`;
 };
 
+export function calcWeightedExit(closes) {
+  if (!closes?.length) return null;
+  const totalShares = closes.reduce((s, c) => s + (+c.shares || 0), 0);
+  if (totalShares === 0) return null;
+  const weighted = closes.reduce((s, c) => s + (+c.price || 0) * (+c.shares || 0), 0);
+  return weighted / totalShares;
+}
+
+export function calcTotalExited(closes) {
+  if (!closes?.length) return 0;
+  return closes.reduce((s, c) => s + (+c.shares || 0), 0);
+}
+
 export function calcPL(trade) {
   if (STOCK_LIKE.includes(trade.type)) {
     const dir = trade.direction === "long" ? 1 : -1;
+    if (trade.closes?.length) {
+      const weightedExit = calcWeightedExit(trade.closes);
+      const totalExited = calcTotalExited(trade.closes);
+      if (weightedExit !== null) {
+        return dir * (weightedExit - trade.entryPrice) * totalExited;
+      }
+    }
     return dir * (trade.exitPrice - trade.entryPrice) * trade.shares;
   }
   return (trade.legs || []).reduce((sum, l) => {

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useModalClose } from "../lib/useModalClose";
 import { STOCK_LIKE, SUGGESTED_TAGS, EMOTIONS, MISTAKES, OPTION_STRATEGIES } from "../lib/constants";
-import { todayStr, typeLabels, fmt } from "../lib/utils";
+import { todayStr, typeLabels, fmt, calcWeightedExit, calcTotalExited } from "../lib/utils";
 import Tag from "./Tag";
 import VoiceNote from "./VoiceNote";
 import ScreenshotUpload from "./ScreenshotUpload";
@@ -43,7 +43,10 @@ export default function TradeFormModal({ initial, defaults, onClose, onSave, onC
       },
     ],
   };
-  const [form, setForm] = useState(initial || blank);
+  const [form, setForm] = useState(() => {
+    const base = initial || blank;
+    return { ...base, closes: base.closes || [] };
+  });
   const [errors, setErrors] = useState({});
   const [tagInput, setTagInput] = useState("");
   const [customEmotions, setCustomEmotions] = useState([]);
@@ -52,6 +55,9 @@ export default function TradeFormModal({ initial, defaults, onClose, onSave, onC
   const [mistakeInput, setMistakeInput] = useState("");
   const [dupWarning, setDupWarning] = useState(false);
   const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
+  const addClose = () => setForm(f => ({ ...f, closes: [...(f.closes || []), { date: f.date, time: "", price: "", shares: "", notes: "" }] }));
+  const removeClose = (i) => setForm(f => ({ ...f, closes: f.closes.filter((_, idx) => idx !== i) }));
+  const setClose = (i, k, v) => setForm(f => { const closes = [...(f.closes || [])]; closes[i] = { ...closes[i], [k]: v }; return { ...f, closes }; });
   const blankLeg = (pos = "buy", type = "call") => ({ position: pos, type, strike: "", expiration: "", entryPremium: "", exitPremium: "", contracts: 1, iv: "" });
   const handleStrategyChange = (strat) => {
     const cfg = OPTION_STRATEGIES[strat];
@@ -152,10 +158,20 @@ export default function TradeFormModal({ initial, defaults, onClose, onSave, onC
     };
     if (STOCK_LIKE.includes(form.type)) {
       trade.entryPrice = +form.entryPrice;
-      trade.exitPrice = +form.exitPrice;
       trade.shares = +form.shares;
       if (form.stopLoss) trade.stopLoss = +form.stopLoss;
       if (form.takeProfit) trade.takeProfit = +form.takeProfit;
+      const validCloses = (form.closes || []).filter(c => c.price && c.shares);
+      if (validCloses.length) {
+        trade.closes = validCloses.map(c => ({ ...c, price: +c.price, shares: +c.shares }));
+        const weightedExit = calcWeightedExit(trade.closes);
+        const totalExited = calcTotalExited(trade.closes);
+        if (weightedExit !== null) trade.exitPrice = weightedExit;
+        trade.status = totalExited >= trade.shares ? "closed" : "partial";
+      } else {
+        trade.closes = [];
+        trade.exitPrice = +form.exitPrice;
+      }
     } else {
       trade.legs = form.legs.map((l) => ({
         ...l,
@@ -459,6 +475,59 @@ export default function TradeFormModal({ initial, defaults, onClose, onSave, onC
                 <DateInput style={inp()} t={t} value={form.exitDate || ""} onChange={(e) => set("exitDate", e.target.value)} placeholder={form.date} />
               </div>
             </div>
+          <div style={{ marginBottom: 12 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+              <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 10, color: t.accent, textTransform: "uppercase", letterSpacing: 2 }}>Partial Closes</div>
+              <button type="button" onClick={addClose} style={{ background: t.accent + "15", border: `1px dashed ${t.accent}40`, color: t.accent, borderRadius: 8, padding: "4px 12px", cursor: "pointer", fontSize: 12, fontFamily: "'Space Mono', monospace" }}>+ Add Close</button>
+            </div>
+            {(form.closes || []).length > 0 && (
+              <div style={{ marginBottom: 8 }}>
+                {(form.closes || []).map((c, i) => (
+                  <div key={i} style={{ background: t.card2, border: `1px solid ${t.border}`, borderRadius: 10, padding: 12, marginBottom: 8 }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
+                      <span style={{ fontSize: 11, color: t.accent, fontFamily: "'Space Mono', monospace" }}>Close {i + 1}</span>
+                      <button type="button" onClick={() => removeClose(i)} style={{ background: "none", border: "none", color: t.danger, cursor: "pointer", fontSize: 12 }}>Remove</button>
+                    </div>
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+                      <div>
+                        <label style={{ ...lbl }}>Date</label>
+                        <DateInput style={inp()} t={t} value={c.date || ""} onChange={(e) => setClose(i, "date", e.target.value)} />
+                      </div>
+                      <div>
+                        <label style={{ ...lbl }}>Time</label>
+                        <TimeInput style={inp()} t={t} value={c.time || ""} onChange={(e) => setClose(i, "time", e.target.value)} />
+                      </div>
+                      <div>
+                        <label style={{ ...lbl }}>Price</label>
+                        <input style={inp()} type="number" value={c.price || ""} onChange={(e) => setClose(i, "price", e.target.value)} placeholder="150.00" />
+                      </div>
+                      <div>
+                        <label style={{ ...lbl }}>Shares</label>
+                        <input style={inp()} type="number" value={c.shares || ""} onChange={(e) => setClose(i, "shares", e.target.value)} placeholder="50" />
+                      </div>
+                      <div style={{ gridColumn: "1 / -1" }}>
+                        <label style={{ ...lbl }}>Notes</label>
+                        <input style={inp()} value={c.notes || ""} onChange={(e) => setClose(i, "notes", e.target.value)} placeholder="Scaled out at R1" />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+                {(() => {
+                  const validCloses = (form.closes || []).filter(c => c.price && c.shares);
+                  const weighted = calcWeightedExit(validCloses);
+                  const totalExited = calcTotalExited(validCloses);
+                  const shares = +form.shares;
+                  if (!validCloses.length || !weighted) return null;
+                  return (
+                    <div style={{ fontSize: 11, color: t.text3, fontFamily: "'Space Mono',monospace", marginTop: 4 }}>
+                      Weighted avg exit: <span style={{ color: t.text }}>{weighted.toFixed(2)}</span>
+                      {shares > 0 && <span style={{ marginLeft: 8 }}>· Shares remaining: <span style={{ color: totalExited >= shares ? t.accent : t.text }}>{Math.max(0, shares - totalExited)}</span></span>}
+                    </div>
+                  );
+                })()}
+              </div>
+            )}
+          </div>
           </>
         ) : (
           <div style={{ marginBottom: 12 }}>

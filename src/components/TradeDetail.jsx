@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { calcPL, fmt, fmtDate, fmtR, typeLabels } from "../lib/utils";
+import { calcPL, fmt, fmtDate, fmtR, typeLabels, calcWeightedExit, calcTotalExited } from "../lib/utils";
 import { STOCK_LIKE } from "../lib/constants";
 import Tag from "./Tag";
 import { LogIcon, EditIcon, QuickIcon, ShareIcon, CloseIcon, CheckIcon } from "../lib/icons";
@@ -381,6 +381,38 @@ export default function TradeDetail({ trade, onClose, onEdit, onExecute, onSave,
           <div style={{ fontSize: 13, color: t.text2, lineHeight: 1.6 }}>
             {trade.notes}
           </div>
+        </div>
+      )}
+      {trade.closes?.length > 0 && (
+        <div style={{ marginBottom: 10 }}>
+          <div style={{ fontSize: 10, color: t.text3, marginBottom: 8, textTransform: "uppercase", letterSpacing: 1.5 }}>Scale-Out History</div>
+          <div style={{ background: t.card2, borderRadius: 8, overflow: "hidden" }}>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", padding: "6px 10px", borderBottom: `1px solid ${t.border}` }}>
+              {["Date", "Price", "Shares", "P&L"].map(h => (
+                <div key={h} style={{ fontSize: 10, color: t.text3, textTransform: "uppercase", letterSpacing: 1.5, fontFamily: "'Space Mono',monospace" }}>{h}</div>
+              ))}
+            </div>
+            {trade.closes.map((c, i) => {
+              const dir = trade.direction === "long" ? 1 : -1;
+              const contribution = c.price && c.shares ? dir * (c.price - trade.entryPrice) * c.shares : null;
+              return (
+                <div key={i} style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", padding: "8px 10px", borderBottom: i < trade.closes.length - 1 ? `1px solid ${t.border}` : "none" }}>
+                  <div style={{ fontSize: 12, color: t.text }}>{c.date || "—"}</div>
+                  <div style={{ fontSize: 12, color: t.text, fontFamily: "'Space Mono',monospace" }}>{c.price ? fmt(c.price) : "—"}</div>
+                  <div style={{ fontSize: 12, color: t.text }}>{c.shares || "—"}</div>
+                  <div style={{ fontSize: 12, fontFamily: "'Space Mono',monospace", color: contribution != null ? (contribution >= 0 ? t.accent : t.danger) : t.text3 }}>
+                    {contribution != null ? `${contribution >= 0 ? "+" : ""}${fmt(contribution)}` : "—"}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+          {(() => {
+            const totalExited = calcTotalExited(trade.closes);
+            const remaining = (trade.shares || 0) - totalExited;
+            if (remaining <= 0) return null;
+            return <div style={{ fontSize: 11, color: t.text3, fontFamily: "'Space Mono',monospace", marginTop: 6 }}>{remaining} shares remaining open</div>;
+          })()}
         </div>
       )}
       {trade.history?.length > 0 && (

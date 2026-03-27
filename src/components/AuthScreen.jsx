@@ -40,13 +40,18 @@ export default function AuthScreen({ isDark }) {
       if (error) setError(error.message);
     } else if (mode === "signup") {
       const refCode = new URLSearchParams(window.location.search).get("ref");
-      const { error } = await supabase.auth.signUp({
+      const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: refCode ? { data: { referred_by: refCode } } : undefined,
       });
       if (error) setError(error.message);
-      else setMessage("Check your email for a confirmation link.");
+      else {
+        setMessage("Check your email for a confirmation link.");
+        if (refCode && data.user?.id) {
+          fetch("/api/process-referral", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ newUserId: data.user?.id, refCode }) }).catch(() => {});
+        }
+      }
     } else {
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: window.location.origin,

@@ -5,7 +5,7 @@ import { STRATEGIES, TIMEFRAMES, CURRENCIES, TIMEZONES } from "../lib/constants"
 import { exportCSV, exportJSON } from "../lib/utils";
 import { SettingsIcon, CloseIcon, LightModeIcon, DarkModeIcon, CheckIcon } from "../lib/icons";
 
-export default function SettingsModal({ onClose, isDark, setIsDark, onClear, t, user, profile, onSignOut, isPro, isProPlus, onUpgrade, onManageBilling, onTutorial, tradeDefaults, onSaveDefaults, trades }) {
+export default function SettingsModal({ onClose, isDark, setIsDark, onClear, t, user, profile, onSignOut, isPro, isProPlus, onUpgrade, onManageBilling, onTutorial, tradeDefaults, onSaveDefaults, trades, onChangelog, hasUnreadChangelog }) {
   const { closing, trigger } = useModalClose();
   const sm = window.innerWidth < 400;
   const [copied, setCopied] = useState(false);
@@ -229,6 +229,15 @@ export default function SettingsModal({ onClose, isDark, setIsDark, onClear, t, 
               <div style={{ fontSize: 11, color: t.text3, marginTop: 2 }}>Replay the feature walkthrough</div>
             </div>
             <button onClick={() => trigger(() => { onClose(); onTutorial(); })} style={{ background: "none", border: `1px solid ${t.border}`, color: t.text3, borderRadius: 7, padding: "6px 14px", cursor: "pointer", fontSize: 12, fontFamily: "'Space Mono', monospace" }}>Start</button>
+          </div>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+            <div>
+              <div style={{ fontSize: 14, color: t.text }}>What's New</div>
+              <div style={{ fontSize: 11, color: t.text3, marginTop: 2 }}>View recent updates</div>
+            </div>
+            <button onClick={onChangelog} style={{ background: hasUnreadChangelog ? t.accent : "none", border: `1px solid ${hasUnreadChangelog ? t.accent : t.border}`, color: hasUnreadChangelog ? "#000" : t.text3, borderRadius: 7, padding: "6px 14px", cursor: "pointer", fontSize: 12, fontFamily: "'Space Mono', monospace", fontWeight: hasUnreadChangelog ? 700 : 400 }}>
+              {hasUnreadChangelog ? "New!" : "View"}
+            </button>
           </div>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
             <div>

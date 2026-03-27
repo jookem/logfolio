@@ -1,5 +1,8 @@
 import { useState, useMemo, useEffect, useRef } from "react";
 import { LogIcon, PlanIcon, CloseIcon, CheckIcon, WarningIcon, DeleteIcon, SettingsIcon, MenuIcon } from "./lib/icons";
+import { CHANGELOG, CURRENT_VERSION } from "./lib/changelog";
+import ChangelogModal from "./components/ChangelogModal";
+import AIReviewModal from "./components/AIReviewModal";
 import { supabase } from "./lib/supabase";
 import { uploadTradeMedia, deleteTradeMedia, deleteAllUserMedia } from "./lib/media";
 import { useAuth } from "./contexts/AuthContext";
@@ -99,6 +102,9 @@ const [page, setPage] = useState(1);
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [showGuide, setShowGuide] = useState(false);
   const [showTutorial, setShowTutorial] = useState(false);
+  const [showChangelog, setShowChangelog] = useState(false);
+  const [hasUnreadChangelog, setHasUnreadChangelog] = useState(false);
+  const [aiReviewTrade, setAiReviewTrade] = useState(null);
   const [tutorialStep, setTutorialStep] = useState(0);
   const journalTimerRef = useRef(null);
   const touchStartX = useRef(null);
@@ -122,6 +128,7 @@ const [page, setPage] = useState(1);
         const isNew = user.created_at && (Date.now() - new Date(user.created_at).getTime()) < 10 * 60 * 1000;
         if (isNew && !local?.length && !localStorage.getItem(`tradelog_onboarding_done_${user.id}`)) {
           setShowOnboarding(true);
+          fetch("/api/welcome", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ userId: user.id, email: user.email }) }).catch(() => {});
         }
       } else {
         const loaded = data.map(row => ({ ...row.data, id: row.id }));
@@ -139,6 +146,7 @@ const [page, setPage] = useState(1);
             setTrades([]);
             if (!localStorage.getItem(`tradelog_onboarding_done_${user.id}`)) {
               setShowOnboarding(true);
+              fetch("/api/welcome", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ userId: user.id, email: user.email }) }).catch(() => {});
             }
           }
         } else {
@@ -268,6 +276,11 @@ const [page, setPage] = useState(1);
     setTutorialStep(0);
     setShowTutorial(true);
   };
+
+  useEffect(() => {
+    const seen = localStorage.getItem("logfolio_changelog_seen");
+    if (seen !== CURRENT_VERSION) setHasUnreadChangelog(true);
+  }, []);
 
   useEffect(() => {
     const theme = isDark ? "dark" : "light";
@@ -422,6 +435,9 @@ const [page, setPage] = useState(1);
     setEditTrade(null);
     setSelected(tradeWithHistory);
     showToast("Trade updated", T.accent, "log");
+    if (isProPlus && trade.status === "closed" && trade.exitPrice) {
+      setAiReviewTrade(tradeWithHistory);
+    }
     if (user) {
       (async () => {
         const uploaded = await uploadTradeMedia(user.id, tradeWithHistory);
@@ -2145,6 +2161,8 @@ const paginated = filtered
     tradeDefaults={tradeDefaults}
     onSaveDefaults={saveTradeDefaults}
     trades={trades}
+    onChangelog={() => { setShowSettings(false); setShowChangelog(true); setHasUnreadChangelog(false); localStorage.setItem("logfolio_changelog_seen", CURRENT_VERSION); }}
+    hasUnreadChangelog={hasUnreadChangelog}
   />
 )}
       {showPlan && (
@@ -2238,6 +2256,10 @@ const paginated = filtered
           </div>
         </div>
       )}
+
+      {showChangelog && <ChangelogModal t={T} onClose={() => setShowChangelog(false)} />}
+
+      {aiReviewTrade && <AIReviewModal trade={aiReviewTrade} t={T} onClose={() => setAiReviewTrade(null)} />}
 
       {showTutorial && (
         <TutorialModal
