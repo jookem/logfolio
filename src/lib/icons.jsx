@@ -458,6 +458,70 @@ export const CurrentPriceIcon = ({ size = 24 }) => (
   </SVG>
 );
 
+// ── Options leg icons ────────────────────────────────────────────────────────
+
+// Buy or Sell/Write (shopping cart with arrows)
+export const BuySellIcon = ({ size = 24 }) => (
+  <SVG size={size}>
+    <path d="M701,177.8l-66.7,233.3H246.9 M667.7,544.5h-400L201,111.2H101 M384.4,244.5l66.7,66.7 M451,311.2l66.7-66.7 M451,311.2v-200" />
+  </SVG>
+);
+
+// Call or Put (arrows up/down with horizontal bar)
+export const CallOrPutIcon = ({ size = 24 }) => (
+  <SVG size={size}>
+    <path d="M600,400H200 M400,266.7V100 M400,700V533.3" />
+  </SVG>
+);
+
+// Strike price (crosshair target + small dollar sign)
+export const StrikeIcon = ({ size = 24 }) => (
+  <SVG size={size}>
+    <path d="M62.4,399h100 M629.1,399h100 M395.8,732.3v-100 M395.8,165.7v-100 M229.1,110.3c49-28.4,106-44.6,166.7-44.6c184.1,0,333.3,149.2,333.3,333.3c0,184.1-149.2,333.3-333.3,333.3C211.7,732.3,62.4,583.1,62.4,399c0-60.7,16.2-117.6,44.6-166.7" />
+    <path d="M400,521c40.1,0,72.6-27.1,72.6-60.5c0-33.4-32.5-60.5-72.6-60.5s-72.6-27.1-72.6-60.5c0-33.4,32.5-60.5,72.6-60.5 M400,521c-40.1,0-72.6-27.1-72.6-60.5 M400,521v24.2 M400,254.8V279 M400,279c40.1,0,72.6,27.1,72.6,60.5" />
+  </SVG>
+);
+
+// Premium entry (dollar sign + inward arrow)
+export const PremiumEntryIcon = ({ size = 24 }) => (
+  <SVG size={size}>
+    <path d="M270.7,588.6c48.2,0,87.2-32.5,87.2-72.7c0-40.1-39.1-72.7-87.2-72.7s-87.2-32.5-87.2-72.7c0-40.1,39.1-72.7,87.2-72.7 M270.7,588.6c-48.2,0-87.2-32.5-87.2-72.7 M270.7,588.6v29.1 M270.7,268.8v29.1 M270.7,297.8c48.2,0,87.2,32.5,87.2,72.7" />
+    <path d="M697.5,124.8L573.4,252.1 M546.7,117.8v161h161" />
+  </SVG>
+);
+
+// Premium exit (dollar sign + outward arrow)
+export const PremiumExitIcon = ({ size = 24 }) => (
+  <SVG size={size}>
+    <path d="M270.7,588.6c48.2,0,87.2-32.5,87.2-72.7c0-40.1-39.1-72.7-87.2-72.7s-87.2-32.5-87.2-72.7c0-40.1,39.1-72.7,87.2-72.7 M270.7,588.6c-48.2,0-87.2-32.5-87.2-72.7 M270.7,588.6v29.1 M270.7,268.8v29.1 M270.7,297.8c48.2,0,87.2,32.5,87.2,72.7" />
+    <path d="M558.8,270.8l124.1-127.4 M709.6,277.8v-161h-161" />
+  </SVG>
+);
+
+// Contracts (stacked horizontal lines like a list)
+export const ContractsIcon = ({ size = 24 }) => (
+  <SVG size={size}>
+    <line x1="186.4" y1="208.1" x2="439.9" y2="208.1" />
+    <line x1="186.4" y1="351.8" x2="439.9" y2="351.8" />
+    <line x1="186.4" y1="478.6" x2="553" y2="478.6" />
+    <line x1="186.4" y1="605.3" x2="483.8" y2="605.3" />
+    <line x1="546" y1="153.4" x2="705.7" y2="153.4" />
+    <line x1="529.1" y1="255.4" x2="688.8" y2="255.4" />
+    <line x1="681.6" y1="99.2" x2="633.2" y2="319.3" />
+    <line x1="599.5" y1="97.6" x2="551" y2="317.7" />
+  </SVG>
+);
+
+// IV / Implied Volatility (wavy line chart with tick marks)
+export const IVIcon = ({ size = 24 }) => (
+  <SVG size={size}>
+    <path d="M73.6,550.9l140.1-284.1l113.6,340.9l132.6-416.6L592.5,532L725,229" />
+    <line x1="149.7" y1="554.7" x2="231.7" y2="554.7" />
+    <line x1="418.8" y1="550.6" x2="500.8" y2="550.6" />
+    <line x1="673.5" y1="554.7" x2="741.5" y2="554.7" />
+  </SVG>
+);
+
 // Pro Plus (shield + star outline + plus cross)
 export const ProPlusIcon = ({ size = 30 }) => (
   <SVG size={size}>

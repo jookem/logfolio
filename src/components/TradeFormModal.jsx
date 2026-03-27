@@ -5,8 +5,9 @@ import { todayStr, typeLabels, fmt } from "../lib/utils";
 import Tag from "./Tag";
 import VoiceNote from "./VoiceNote";
 import ScreenshotUpload from "./ScreenshotUpload";
-import { EditIcon, LogIcon, CloseIcon, TodayIcon, ExitIcon, EntryPriceIcon, EntryTimeIcon, ExitTimeIcon, EntryDateIcon, ExitDateIcon, TickerIcon, CategoryIcon, StrategyIcon, DirectionIcon, AmountIcon, WarningIcon, TargetIcon, EmotionIcon, TagsIcon, PenIcon, MistakeIcon } from "../lib/icons";
+import { EditIcon, LogIcon, CloseIcon, TodayIcon, ExitIcon, EntryPriceIcon, EntryTimeIcon, ExitTimeIcon, EntryDateIcon, ExitDateIcon, TickerIcon, CategoryIcon, StrategyIcon, DirectionIcon, AmountIcon, WarningIcon, TargetIcon, EmotionIcon, TagsIcon, PenIcon, MistakeIcon, BuySellIcon, CallOrPutIcon, StrikeIcon, PremiumEntryIcon, PremiumExitIcon, ContractsIcon, IVIcon } from "../lib/icons";
 import DateInput from "./DateInput";
+import TimeInput from "./TimeInput";
 
 export default function TradeFormModal({ initial, defaults, onClose, onSave, onCSVImport, t, editLabel, isDark, trades = [] }) {
   const { closing, trigger } = useModalClose();
@@ -443,23 +444,11 @@ export default function TradeFormModal({ initial, defaults, onClose, onSave, onC
             <div id="tut-trade-times" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 12 }}>
               <div>
                 <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><EntryTimeIcon size={14} />Entry Time</label>
-                <input
-                  style={inp()}
-                  className={isDark ? "time-dark" : ""}
-                  type="time"
-                  value={form.entryTime || ""}
-                  onChange={(e) => set("entryTime", e.target.value)}
-                />
+                <TimeInput style={inp()} t={t} className={isDark ? "time-dark" : ""} value={form.entryTime || ""} onChange={(e) => set("entryTime", e.target.value)} />
               </div>
               <div>
                 <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><ExitTimeIcon size={14} />Exit Time</label>
-                <input
-                  style={inp()}
-                  className={isDark ? "time-dark" : ""}
-                  type="time"
-                  value={form.exitTime || ""}
-                  onChange={(e) => set("exitTime", e.target.value)}
-                />
+                <TimeInput style={inp()} t={t} className={isDark ? "time-dark" : ""} value={form.exitTime || ""} onChange={(e) => set("exitTime", e.target.value)} />
               </div>
               <div>
                 <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><EntryDateIcon size={14} />Entry Date</label>
@@ -489,14 +478,14 @@ export default function TradeFormModal({ initial, defaults, onClose, onSave, onC
                 )}
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
                   <div>
-                    <label style={lbl}>Bought or Wrote</label>
+                    <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><BuySellIcon size={14} />Bought or Wrote</label>
                     <select style={inp()} value={leg.position} onChange={(e) => setLeg(i, "position", e.target.value)}>
                       <option value="buy">Bought</option>
                       <option value="sell">Wrote</option>
                     </select>
                   </div>
                   <div>
-                    <label style={lbl}>Call or Put</label>
+                    <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><CallOrPutIcon size={14} />Call or Put</label>
                     <select style={inp()} value={leg.type} onChange={(e) => setLeg(i, "type", e.target.value)}>
                       <option value="call">Call</option>
                       <option value="put">Put</option>
@@ -508,7 +497,7 @@ export default function TradeFormModal({ initial, defaults, onClose, onSave, onC
                     {errMsg(`leg_${i}_expiration`)}
                   </div>
                   <div>
-                    <label style={lbl}>Strike Price</label>
+                    <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><StrikeIcon size={14} />Strike Price</label>
                     <div style={{ position: "relative" }}>
                       <span style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: t.text3, fontSize: 14 }}>$</span>
                       <input style={{ ...inp(`leg_${i}_strike`), paddingLeft: 26 }} type="number" value={leg.strike} onChange={(e) => { setLeg(i, "strike", e.target.value); setErrors((p) => ({ ...p, [`leg_${i}_strike`]: undefined })); }} placeholder="200" />
@@ -516,7 +505,7 @@ export default function TradeFormModal({ initial, defaults, onClose, onSave, onC
                     {errMsg(`leg_${i}_strike`)}
                   </div>
                   <div>
-                    <label style={lbl}>Price per Option</label>
+                    <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><PremiumEntryIcon size={14} />Price per Option</label>
                     <div style={{ position: "relative" }}>
                       <span style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: t.text3, fontSize: 14 }}>$</span>
                       <input style={{ ...inp(`leg_${i}_entryPremium`), paddingLeft: 26 }} type="number" value={leg.entryPremium} onChange={(e) => { setLeg(i, "entryPremium", e.target.value); setErrors((p) => ({ ...p, [`leg_${i}_entryPremium`]: undefined })); }} placeholder="4.20" />
@@ -524,14 +513,14 @@ export default function TradeFormModal({ initial, defaults, onClose, onSave, onC
                     {errMsg(`leg_${i}_entryPremium`)}
                   </div>
                   <div>
-                    <label style={lbl}>Exit Price per Option</label>
+                    <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><PremiumExitIcon size={14} />Exit Price per Option</label>
                     <div style={{ position: "relative" }}>
                       <span style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: t.text3, fontSize: 14 }}>$</span>
                       <input style={{ ...inp(), paddingLeft: 26 }} type="number" value={leg.exitPremium} onChange={(e) => setLeg(i, "exitPremium", e.target.value)} placeholder="6.00" />
                     </div>
                   </div>
                   <div>
-                    <label style={lbl}>Contracts</label>
+                    <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><ContractsIcon size={14} />Contracts</label>
                     <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
                       <input style={{ ...inp(`leg_${i}_contracts`), flex: 1 }} type="number" value={leg.contracts} onChange={(e) => { setLeg(i, "contracts", e.target.value); setErrors((p) => ({ ...p, [`leg_${i}_contracts`]: undefined })); }} placeholder="1" />
                       <span style={{ fontSize: 12, color: t.text3, whiteSpace: "nowrap" }}>× 100</span>
@@ -539,7 +528,7 @@ export default function TradeFormModal({ initial, defaults, onClose, onSave, onC
                     {errMsg(`leg_${i}_contracts`)}
                   </div>
                   <div>
-                    <label style={lbl}>IV (Implied Vol.) %</label>
+                    <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><IVIcon size={14} />IV (Implied Vol.) %</label>
                     <input style={inp()} type="number" value={leg.iv || ""} onChange={(e) => setLeg(i, "iv", e.target.value)} placeholder="30" />
                   </div>
                   {leg.entryPremium && leg.contracts && (

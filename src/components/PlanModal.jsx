@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useModalClose } from "../lib/useModalClose";
-import { PlanIcon, CloseIcon, WarningIcon, TargetIcon, TickerIcon, CategoryIcon, StrategyIcon, TodayIcon, DirectionIcon, AmountIcon, EntryPriceIcon, CurrentPriceIcon, EmotionIcon, TagsIcon, PenIcon, ChecklistIcon, RobotIcon } from "../lib/icons";
+import { PlanIcon, CloseIcon, WarningIcon, TargetIcon, TickerIcon, CategoryIcon, StrategyIcon, TodayIcon, DirectionIcon, AmountIcon, EntryPriceIcon, CurrentPriceIcon, EmotionIcon, TagsIcon, PenIcon, ChecklistIcon, RobotIcon, BuySellIcon, CallOrPutIcon, StrikeIcon, PremiumEntryIcon, ContractsIcon, IVIcon } from "../lib/icons";
 import { supabase } from "../lib/supabase";
 import { STOCK_LIKE, SUGGESTED_TAGS, EMOTIONS, OPTION_STRATEGIES } from "../lib/constants";
 import { todayStr, typeLabels, normCDF, bsPrice } from "../lib/utils";
@@ -682,7 +682,7 @@ const base = {
     <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
       {/* Buy / Write */}
       <div>
-        <label style={lbl}>Buy or Write</label>
+        <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><BuySellIcon size={14} />Buy or Write</label>
         <select style={inp} value={leg.position}
           onChange={(e) => {
             setLeg(i, "position", e.target.value);
@@ -695,7 +695,7 @@ const base = {
 
       {/* Call / Put */}
       <div>
-        <label style={lbl}>Call or Put</label>
+        <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><CallOrPutIcon size={14} />Call or Put</label>
         <select style={inp} value={leg.type}
           onChange={(e) => {
             setLeg(i, "type", e.target.value);
@@ -729,7 +729,7 @@ const base = {
       {/* Strike — dropdown from chain with manual override */}
       <div>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 4 }}>
-          <label style={{ ...lbl, marginBottom: 0 }}>Strike Price</label>
+          <label style={{ ...lbl, marginBottom: 0, display: "flex", alignItems: "center", gap: 4 }}><StrikeIcon size={14} />Strike Price</label>
           {strikes.length > 0 && (
             <button
               type="button"
@@ -763,7 +763,7 @@ const base = {
 
       {/* Price per option — auto-filled */}
       <div>
-        <label style={lbl}>Price per Option</label>
+        <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><PremiumEntryIcon size={14} />Price per Option</label>
         <div style={{ position: "relative" }}>
           <span style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: t.text3, fontSize: 14 }}>$</span>
           <input style={{ ...inp, paddingLeft: 26 }} type="number"
@@ -773,7 +773,7 @@ const base = {
 
       {/* Contracts */}
       <div>
-        <label style={lbl}>Contracts</label>
+        <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><ContractsIcon size={14} />Contracts</label>
         <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
           <input style={{ ...inp, flex: 1 }} type="number"
             value={leg.contracts} onChange={(e) => setLeg(i, "contracts", e.target.value)} placeholder="1" />
@@ -784,7 +784,7 @@ const base = {
       {/* IV + Disclaimer */}
       <div style={{ display: "flex", gap: 10, gridColumn: "span 2" }}>
         <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
-          <label style={lbl}>IV (Implied Vol.) %</label>
+          <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><IVIcon size={14} />IV (Implied Vol.) %</label>
           <input style={{ ...inp, flex: 1 }} type="number"
             value={leg.iv} onChange={(e) => setLeg(i, "iv", e.target.value)} placeholder="30" />
         </div>
