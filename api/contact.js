@@ -9,7 +9,8 @@ export default async function handler(req, res) {
   try {
     await sendSupportEmail({ subject, message, userEmail });
     res.status(200).json({ ok: true });
-  } catch {
-    res.status(500).json({ error: "Failed to send message. Please try again." });
+  } catch (err) {
+    console.error("contact email error:", err);
+    res.status(500).json({ error: err?.message || "Failed to send message. Please try again." });
   }
 }

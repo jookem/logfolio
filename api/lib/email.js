@@ -4,6 +4,10 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 const FROM = "Log-Folio <hello@log-folio.com>";
 const REPLY_TO = "miranda.adrian.irving@gmail.com";
 
+function esc(str) {
+  return String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+
 function base(content) {
   return `<!DOCTYPE html>
 <html>
@@ -103,13 +107,13 @@ export async function sendSupportEmail({ subject, message, userEmail }) {
     from: FROM,
     reply_to: userEmail || REPLY_TO,
     to: REPLY_TO,
-    subject: `[Log-Folio Support] ${subjectLine}`,
+    subject: `[Log-Folio Support] ${esc(subjectLine)}`,
     html: base(`
       <h1 style="margin:0 0 8px;font-size:22px;font-weight:700;color:#f4f5f7">Support Request</h1>
-      <p style="margin:0 0 20px;font-size:13px;color:#888;line-height:1.7">From: <strong style="color:#f4f5f7">${userEmail || "Unknown"}</strong></p>
+      <p style="margin:0 0 20px;font-size:13px;color:#888;line-height:1.7">From: <strong style="color:#f4f5f7">${esc(userEmail || "Unknown")}</strong></p>
       <div style="background:#0d0d0d;border:1px solid #1a1a1a;border-radius:12px;padding:20px 24px;margin-bottom:24px">
-        <div style="font-size:11px;color:#555;letter-spacing:2px;margin-bottom:12px">${subjectLine.toUpperCase()}</div>
-        <div style="font-size:13px;color:#ccc;line-height:1.8;white-space:pre-wrap">${message.trim()}</div>
+        <div style="font-size:11px;color:#555;letter-spacing:2px;margin-bottom:12px">${esc(subjectLine).toUpperCase()}</div>
+        <div style="font-size:13px;color:#ccc;line-height:1.8;white-space:pre-wrap">${esc(message.trim())}</div>
       </div>
       <p style="margin:0;font-size:11px;color:#555">Reply to this email to respond directly to the user.</p>
     `),
