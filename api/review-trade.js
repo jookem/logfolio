@@ -19,8 +19,13 @@ export default async function handler(req, res) {
     .eq("id", userId)
     .single();
 
-  if (!profile || profile.subscription_status !== "pro_plus") {
-    return res.status(403).json({ error: "AI Trade Review requires a Pro Plus subscription." });
+  const isPro = profile?.subscription_status === "pro" || profile?.subscription_status === "pro_plus";
+  const isProPlus = profile?.subscription_status === "pro_plus";
+
+  // Grade action: available to all Pro users
+  // Review action: Pro Plus only (checked later)
+  if (!profile || !isPro) {
+    return res.status(403).json({ error: "AI features require a Pro subscription." });
   }
 
   const t = tradeData;
@@ -80,7 +85,11 @@ export default async function handler(req, res) {
     }
   }
 
-  // Default: review action — apply rate limit
+  // Default: review action — Pro Plus only
+  if (!isProPlus) {
+    return res.status(403).json({ error: "AI Trade Review requires a Pro Plus subscription." });
+  }
+
   const todayStr = today();
   const count = profile.ai_insights_daily_date === todayStr ? (profile.ai_insights_daily_count ?? 0) : 0;
   const DAILY_LIMIT = 3;

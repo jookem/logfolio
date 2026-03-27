@@ -389,7 +389,7 @@ const [page, setPage] = useState(1);
           showToast("Save failed — free tier limit reached", "#ff4d6d", "warning");
           return;
         }
-        if (isProPlus && trade.status === "closed" && trade.exitPrice) {
+        if (isPro && uploaded.exitPrice && uploaded.status !== "planned") {
           fetch("/api/review-trade", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -449,7 +449,7 @@ const [page, setPage] = useState(1);
     setEditTrade(null);
     setSelected(tradeWithHistory);
     showToast("Trade updated", T.accent, "log");
-    if (isProPlus && trade.status === "closed" && trade.exitPrice) {
+    if (isProPlus && trade.exitPrice && trade.status !== "planned") {
       setAiReviewTrade(tradeWithHistory);
     }
     if (user) {
@@ -458,7 +458,7 @@ const [page, setPage] = useState(1);
         setTrades((p) => p.map((t) => t.id === tradeWithHistory.id ? uploaded : t));
         setSelected(uploaded);
         supabase.from("trades").upsert({ id: uploaded.id, user_id: user.id, data: uploaded }).then(() => {});
-        if (isProPlus && trade.status === "closed" && trade.exitPrice && !trade.grade) {
+        if (isPro && uploaded.exitPrice && uploaded.status !== "planned" && !uploaded.grade) {
           fetch("/api/review-trade", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
