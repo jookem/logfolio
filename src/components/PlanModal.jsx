@@ -449,8 +449,8 @@ const base = {
   </button>
 </div>
 
-        {/* ── Ticker / Date / Type / Strategy ── */}
-        <div id="tut-plan-strategy" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+        {/* ── Ticker / Type ── */}
+        <div id="tut-plan-strategy" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 12 }}>
 <div>
   <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><TickerIcon size={14} />{typeLabels(form.type).ticker}</label>
   <div style={{ position: "relative" }}>
@@ -476,10 +476,6 @@ const base = {
   </div>
 </div>
           <div>
-            <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><TodayIcon size={14} />Date</label>
-            <input style={inp} type="date" value={form.date} onChange={(e) => set("date", e.target.value)} />
-          </div>
-          <div>
             <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><CategoryIcon size={14} />Type</label>
             <select style={inp} value={form.type} onChange={(e) => handleTypeChange(e.target.value)}>
               <option value="stock">Stock</option>
@@ -488,6 +484,10 @@ const base = {
               <option value="crypto">Crypto</option>
             </select>
           </div>
+        </div>
+
+        {/* ── Strategy / Direction ── */}
+        <div style={{ display: "grid", gridTemplateColumns: (STOCK_LIKE.includes(form.type) || optConfig?.stockRequired) ? "1fr 1fr" : "1fr", gap: 12, marginBottom: 12 }}>
           <div>
             <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><StrategyIcon size={14} />Strategy</label>
             <select style={inp} value={form.strategy} onChange={(e) => handleStrategyChange(e.target.value)}>
@@ -496,24 +496,6 @@ const base = {
               ))}
             </select>
           </div>
-        </div>
-
-        {/* ══ STOCK SECTION ══ */}
-        <div id="tut-plan-details">
-        {sectionHeader(form.type === "options" ? (optConfig?.stockLabel || "Underlying Stock") : typeLabels(form.type).section)}
-
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-          {/* Current price — always shown */}
-          <div>
-            <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><CurrentPriceIcon size={14} />Current Price</label>
-            <div style={{ position: "relative" }}>
-              <span style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: t.text3, fontSize: 14 }}>$</span>
-              <input style={{ ...inp, paddingLeft: 26 }} type="number" value={form.currentPrice}
-                onChange={(e) => set("currentPrice", e.target.value)} placeholder="190.00" />
-            </div>
-          </div>
-
-          {/* Buy / Short toggle — for stock type or covered call */}
           {(STOCK_LIKE.includes(form.type) || optConfig?.stockRequired) && (
             <div>
               <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><DirectionIcon size={14} />Direction</label>
@@ -523,7 +505,13 @@ const base = {
               </select>
             </div>
           )}
+        </div>
 
+        {/* ══ STOCK SECTION ══ */}
+        <div id="tut-plan-details">
+        {sectionHeader(form.type === "options" ? (optConfig?.stockLabel || "Underlying Stock") : typeLabels(form.type).section)}
+
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
           {/* Purchase Price */}
           <div>
             <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><EntryPriceIcon size={14} />{form.type === "options" ? "Purchase Price" : "Entry Price"}</label>
@@ -539,6 +527,119 @@ const base = {
             <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><AmountIcon size={14} />Num. {typeLabels(form.type).units}</label>
             <input style={inp} type="number" value={form.numShares}
               onChange={(e) => set("numShares", e.target.value)} placeholder="100" />
+          </div>
+        </div>
+
+        {/* Stop Loss / Take Profit (stock-like only) */}
+        {STOCK_LIKE.includes(form.type) && (
+          <div id="tut-plan-risk" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginTop: 12 }}>
+            <div>
+              <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><WarningIcon size={14} />Stop Loss</label>
+              <div style={{ position: "relative" }}>
+                <span style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: t.text3, fontSize: 14 }}>$</span>
+                <input style={{ ...inp, paddingLeft: 26, borderColor: form.stopLoss ? t.danger + "80" : t.inputBorder }}
+                  type="number" value={form.stopLoss} onChange={(e) => set("stopLoss", e.target.value)} placeholder="185.00" />
+              </div>
+            </div>
+            <div>
+              <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><TargetIcon size={14} />Take Profit</label>
+              <div style={{ position: "relative" }}>
+                <span style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: t.text3, fontSize: 14 }}>$</span>
+                <input style={{ ...inp, paddingLeft: 26, borderColor: form.takeProfit ? t.accent + "80" : t.inputBorder }}
+                  type="number" value={form.takeProfit} onChange={(e) => set("takeProfit", e.target.value)} placeholder="200.00" />
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Planned R (stock-like only) */}
+        {STOCK_LIKE.includes(form.type) && plannedR !== null && (
+          <div style={{
+            background: plannedR >= 2 ? t.accent + "15" : t.danger + "15",
+            border: `1px solid ${plannedR >= 2 ? t.accent : t.danger}30`,
+            borderRadius: 10, padding: "12px 16px", marginTop: 14,
+            display: "flex", justifyContent: "space-between", alignItems: "center",
+          }}>
+            <div>
+              <div style={{ fontSize: 10, color: t.text3, fontFamily: "'Space Mono',monospace", textTransform: "uppercase", letterSpacing: 1.5, marginBottom: 3 }}>Planned R</div>
+              <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 22, fontWeight: 700, color: plannedR >= 2 ? t.accent : t.danger }}>
+                +{plannedR.toFixed(2)}R
+              </div>
+            </div>
+            <div style={{ textAlign: "right" }}>
+              <div style={{ fontSize: 10, color: t.text3, fontFamily: "'Space Mono',monospace", textTransform: "uppercase", letterSpacing: 1.5, marginBottom: 3 }}>Risk/Share</div>
+              <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 16, color: t.danger }}>
+                ${Math.abs(+form.purchasePrice - +form.stopLoss).toFixed(2)}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Position Size Calculator (stock-like only) */}
+        {STOCK_LIKE.includes(form.type) && (() => {
+          const account = parseFloat(calcAccountSize);
+          const risk = parseFloat(calcRiskPct) / 100;
+          const entry = parseFloat(form.purchasePrice);
+          const stop = parseFloat(form.stopLoss);
+          const calcShares = (account && risk && entry && stop && entry !== stop)
+            ? Math.floor((account * risk) / Math.abs(entry - stop)) : null;
+          const riskAmt = calcShares ? (calcShares * Math.abs(entry - stop)).toFixed(2) : null;
+          return (
+            <div style={{ marginBottom: 14, marginTop: 14 }}>
+              <button
+                onClick={() => setShowSizeCalc(s => !s)}
+                style={{ width: "100%", background: t.card2, border: `1px solid ${t.border}`, color: t.text3, borderRadius: 8, padding: "8px 14px", cursor: "pointer", fontSize: 11, fontFamily: "'Space Mono', monospace", textAlign: "left", display: "flex", justifyContent: "space-between", alignItems: "center" }}
+              >
+                <span>Position Size Calculator</span>
+                <span style={{ color: t.accent }}>{showSizeCalc ? "▲" : "▼"}</span>
+              </button>
+              {showSizeCalc && (
+                <div style={{ background: t.card2, border: `1px solid ${t.border}`, borderRadius: "0 0 8px 8px", borderTop: "none", padding: 14 }}>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 10 }}>
+                    <div>
+                      <label style={lbl}>Account Size $</label>
+                      <input style={inp} type="number" value={calcAccountSize} onChange={e => setCalcAccountSize(e.target.value)} placeholder="50000" />
+                    </div>
+                    <div>
+                      <label style={lbl}>Risk %</label>
+                      <input style={inp} type="number" value={calcRiskPct} onChange={e => setCalcRiskPct(e.target.value)} placeholder="1" step="0.1" />
+                    </div>
+                  </div>
+                  {calcShares !== null ? (
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", background: t.accent + "10", border: `1px solid ${t.accent}30`, borderRadius: 8, padding: "10px 14px" }}>
+                      <div>
+                        <div style={{ fontSize: 11, color: t.text3, fontFamily: "'Space Mono', monospace" }}>Suggested size</div>
+                        <div style={{ fontSize: 18, fontWeight: 700, color: t.accent, fontFamily: "'Space Mono', monospace" }}>{calcShares} {typeLabels(form.type).units.toLowerCase()}</div>
+                        <div style={{ fontSize: 11, color: t.text3, marginTop: 2 }}>Max risk: ${riskAmt}</div>
+                      </div>
+                      <button onClick={() => set("numShares", String(calcShares))} style={{ background: t.accent, border: "none", color: "#000", borderRadius: 7, padding: "8px 16px", cursor: "pointer", fontSize: 12, fontWeight: 700, fontFamily: "'Space Mono', monospace" }}>Apply</button>
+                    </div>
+                  ) : (
+                    <div style={{ fontSize: 11, color: t.text3, fontFamily: "'Space Mono', monospace", textAlign: "center", padding: "8px 0" }}>
+                      Fill in Entry $, Stop Loss $, Account Size and Risk % to calculate
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          );
+        })()}
+
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginTop: 12 }}>
+          {/* Date */}
+          <div>
+            <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><TodayIcon size={14} />Date</label>
+            <input style={inp} type="date" value={form.date} onChange={(e) => set("date", e.target.value)} />
+          </div>
+
+          {/* Current price */}
+          <div>
+            <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><CurrentPriceIcon size={14} />Current Price</label>
+            <div style={{ position: "relative" }}>
+              <span style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: t.text3, fontSize: 14 }}>$</span>
+              <input style={{ ...inp, paddingLeft: 26 }} type="number" value={form.currentPrice}
+                onChange={(e) => set("currentPrice", e.target.value)} placeholder="190.00" />
+            </div>
           </div>
 
           {/* Cost display (read-only) */}
@@ -862,104 +963,6 @@ const base = {
           );
         })()}
 
-        {/* ══  SECTION (stock-like only) ══ */}
-        {STOCK_LIKE.includes(form.type) && (
-          <div id="tut-plan-risk">
-            {sectionHeader("Risk Plan")}
-
-            {/* Live R preview */}
-            {plannedR !== null && (
-              <div style={{
-                background: plannedR >= 2 ? t.accent + "15" : t.danger + "15",
-                border: `1px solid ${plannedR >= 2 ? t.accent : t.danger}30`,
-                borderRadius: 10, padding: "12px 16px", marginBottom: 14,
-                display: "flex", justifyContent: "space-between", alignItems: "center",
-              }}>
-                <div>
-                  <div style={{ fontSize: 10, color: t.text3, fontFamily: "'Space Mono',monospace", textTransform: "uppercase", letterSpacing: 1.5, marginBottom: 3 }}>Planned R</div>
-                  <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 22, fontWeight: 700, color: plannedR >= 2 ? t.accent : t.danger }}>
-                    +{plannedR.toFixed(2)}R
-                  </div>
-                </div>
-                <div style={{ textAlign: "right" }}>
-                  <div style={{ fontSize: 10, color: t.text3, fontFamily: "'Space Mono',monospace", textTransform: "uppercase", letterSpacing: 1.5, marginBottom: 3 }}>Risk/Share</div>
-                  <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 16, color: t.danger }}>
-                    ${Math.abs(+form.purchasePrice - +form.stopLoss).toFixed(2)}
-                  </div>
-                </div>
-              </div>
-            )}
-
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-              <div>
-                <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><WarningIcon size={14} />Stop Loss</label>
-                <div style={{ position: "relative" }}>
-                  <span style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: t.text3, fontSize: 14 }}>$</span>
-                  <input style={{ ...inp, paddingLeft: 26, borderColor: form.stopLoss ? t.danger + "80" : t.inputBorder }}
-                    type="number" value={form.stopLoss} onChange={(e) => set("stopLoss", e.target.value)} placeholder="185.00" />
-                </div>
-              </div>
-              <div>
-                <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><TargetIcon size={14} />Take Profit</label>
-                <div style={{ position: "relative" }}>
-                  <span style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: t.text3, fontSize: 14 }}>$</span>
-                  <input style={{ ...inp, paddingLeft: 26, borderColor: form.takeProfit ? t.accent + "80" : t.inputBorder }}
-                    type="number" value={form.takeProfit} onChange={(e) => set("takeProfit", e.target.value)} placeholder="200.00" />
-                </div>
-              </div>
-            </div>
-
-            {/* Position Size Calculator */}
-            {(() => {
-              const account = parseFloat(calcAccountSize);
-              const risk = parseFloat(calcRiskPct) / 100;
-              const entry = parseFloat(form.purchasePrice);
-              const stop = parseFloat(form.stopLoss);
-              const calcShares = (account && risk && entry && stop && entry !== stop)
-                ? Math.floor((account * risk) / Math.abs(entry - stop)) : null;
-              const riskAmt = calcShares ? (calcShares * Math.abs(entry - stop)).toFixed(2) : null;
-              return (
-                <div style={{ marginBottom: 14, marginTop: 14 }}>
-                  <button
-                    onClick={() => setShowSizeCalc(s => !s)}
-                    style={{ width: "100%", background: t.card2, border: `1px solid ${t.border}`, color: t.text3, borderRadius: 8, padding: "8px 14px", cursor: "pointer", fontSize: 11, fontFamily: "'Space Mono', monospace", textAlign: "left", display: "flex", justifyContent: "space-between", alignItems: "center" }}
-                  >
-                    <span>Position Size Calculator</span>
-                    <span style={{ color: t.accent }}>{showSizeCalc ? "▲" : "▼"}</span>
-                  </button>
-                  {showSizeCalc && (
-                    <div style={{ background: t.card2, border: `1px solid ${t.border}`, borderRadius: "0 0 8px 8px", borderTop: "none", padding: 14 }}>
-                      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 10 }}>
-                        <div>
-                          <label style={lbl}>Account Size $</label>
-                          <input style={inp} type="number" value={calcAccountSize} onChange={e => setCalcAccountSize(e.target.value)} placeholder="50000" />
-                        </div>
-                        <div>
-                          <label style={lbl}>Risk %</label>
-                          <input style={inp} type="number" value={calcRiskPct} onChange={e => setCalcRiskPct(e.target.value)} placeholder="1" step="0.1" />
-                        </div>
-                      </div>
-                      {calcShares !== null ? (
-                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", background: t.accent + "10", border: `1px solid ${t.accent}30`, borderRadius: 8, padding: "10px 14px" }}>
-                          <div>
-                            <div style={{ fontSize: 11, color: t.text3, fontFamily: "'Space Mono', monospace" }}>Suggested size</div>
-                            <div style={{ fontSize: 18, fontWeight: 700, color: t.accent, fontFamily: "'Space Mono', monospace" }}>{calcShares} {typeLabels(form.type).units.toLowerCase()}</div>
-                            <div style={{ fontSize: 11, color: t.text3, marginTop: 2 }}>Max risk: ${riskAmt}</div>
-                          </div>
-                          <button onClick={() => set("numShares", String(calcShares))} style={{ background: t.accent, border: "none", color: "#000", borderRadius: 7, padding: "8px 16px", cursor: "pointer", fontSize: 12, fontWeight: 700, fontFamily: "'Space Mono', monospace" }}>Apply</button>
-                        </div>
-                      ) : (
-                        <div style={{ fontSize: 11, color: t.text3, fontFamily: "'Space Mono', monospace", textAlign: "center", padding: "8px 0" }}>
-                          Fill in Entry $, Stop Loss $, Account Size and Risk % to calculate
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </div>
-              );
-            })()}
-          </div>
-        )}{/* end tut-plan-risk */}
 {/* ══ PRE-TRADE CHECKLIST ══ */}
         <div id="tut-plan-checklist">
         {sectionHeader("Pre-Trade Checklist")}
