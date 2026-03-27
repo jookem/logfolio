@@ -9,7 +9,7 @@ export default function TimeInput({ style, t, className, ...props }) {
         ref={ref}
         type="time"
         className={className}
-        style={{ ...style, paddingRight: 36 }}
+        style={{ ...style, paddingRight: 58 }}
         {...props}
       />
       <button
@@ -18,7 +18,7 @@ export default function TimeInput({ style, t, className, ...props }) {
         onClick={() => ref.current?.showPicker?.()}
         style={{
           position: "absolute",
-          right: 10,
+          right: 32,
           top: "50%",
           transform: "translateY(-50%)",
           background: "none",
