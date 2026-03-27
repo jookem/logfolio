@@ -164,7 +164,7 @@ const [emotionInput, setEmotionInput] = useState("");
 const [showSizeCalc, setShowSizeCalc] = useState(false);
 const [calcAccountSize, setCalcAccountSize] = useState("");
 const [calcRiskPct, setCalcRiskPct] = useState("1");
-const [aiAssist, setAiAssist] = useState(null); // { marketBias, checklist }
+const [aiAssist, setAiAssist] = useState(initial?.aiAssist || null); // { marketBias, checklist }
 const [aiLoading, setAiLoading] = useState(false);
 const [aiStep, setAiStep] = useState(""); // "price" | "ai"
 const [aiError, setAiError] = useState(null);
@@ -383,6 +383,7 @@ const base = {
       base.entryPrice = +form.currentPrice || 0;
       base.shares = +form.numShares || 0;
     }
+    if (aiAssist) base.aiAssist = aiAssist;
     onSave(base);
   };
 

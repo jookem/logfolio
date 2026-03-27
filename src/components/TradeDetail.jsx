@@ -458,7 +458,8 @@ export default function TradeDetail({ trade, onClose, onEdit, onExecute, onSave,
   }
   const hasRows = rows.length > 0;
   const hasChecklist = snap.checklist?.length > 0;
-  if (!hasRows && !hasChecklist) return null;
+  const hasAiAssist = !!(snap.aiAssist?.marketBias || snap.aiAssist?.checklist?.length);
+  if (!hasRows && !hasChecklist && !hasAiAssist) return null;
   return (
     <div style={{ background: t.surface, border: `1px solid ${t.border}`, borderRadius: 10, padding: "12px 14px", marginBottom: 10 }}>
       <div style={{ fontSize: 10, color: t.text3, marginBottom: 10, textTransform: "uppercase", letterSpacing: 1.5 }}>Plan vs Reality</div>
@@ -498,6 +499,20 @@ export default function TradeDetail({ trade, onClose, onEdit, onExecute, onSave,
             })}
           </div>
         </>
+      )}
+      {hasAiAssist && (
+        <div style={{ marginTop: hasRows || hasChecklist ? 12 : 0, paddingTop: hasRows || hasChecklist ? 12 : 0, borderTop: hasRows || hasChecklist ? `1px solid ${t.border}` : "none" }}>
+          <div style={{ fontSize: 10, color: t.text3, marginBottom: 8, textTransform: "uppercase", letterSpacing: 1.5 }}>AI Assist (at plan time)</div>
+          {snap.aiAssist.marketBias && (
+            <div style={{ fontSize: 12, color: t.text2, lineHeight: 1.6, marginBottom: snap.aiAssist.checklist?.length ? 8 : 0 }}>{snap.aiAssist.marketBias}</div>
+          )}
+          {snap.aiAssist.checklist?.map((item, i) => (
+            <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: 7, marginBottom: 4 }}>
+              <span style={{ color: t.accent, flexShrink: 0, marginTop: 1 }}>·</span>
+              <span style={{ fontSize: 12, color: t.text3, lineHeight: 1.5 }}>{item}</span>
+            </div>
+          ))}
+        </div>
       )}
     </div>
   );

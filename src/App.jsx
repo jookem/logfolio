@@ -422,6 +422,7 @@ const [page, setPage] = useState(1);
         checklist: plan.checklist || [],
         checklistComplete: plan.checklistComplete || false,
         legIV: plan.legs?.length ? plan.legs.map(l => ({ strike: l.strike, iv: l.iv || null })) : [],
+        aiAssist: plan.aiAssist || null,
       },
     };
     setSelectedPlan(null);
