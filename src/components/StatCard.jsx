@@ -27,13 +27,29 @@ export default function StatCard({ label, value, sub, color, t, info }) {
     setOpen(true);
   }
 
-  // After popup renders, clamp it inside the viewport horizontally
+  // After popup renders, clamp inside viewport on all edges
   useEffect(() => {
-    if (!open || !popRef.current) return;
+    if (!open || !popRef.current || !btnRef.current) return;
     const pop = popRef.current.getBoundingClientRect();
-    const overflowRight = pop.right - (window.innerWidth - PADDING);
-    if (overflowRight > 0) {
-      setPos(p => ({ ...p, left: Math.max(PADDING, p.left - overflowRight) }));
+    const btn = btnRef.current.getBoundingClientRect();
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+
+    let newLeft = pos.left;
+    let newTop = pos.top;
+
+    // Right edge
+    const overflowRight = pop.right - (vw - PADDING);
+    if (overflowRight > 0) newLeft = Math.max(PADDING, newLeft - overflowRight);
+    // Left edge
+    if (newLeft < PADDING) newLeft = PADDING;
+    // Bottom edge — flip above button
+    if (pop.bottom > vh - PADDING) newTop = btn.top - pop.height - 8;
+    // Top edge after flip
+    if (newTop < PADDING) newTop = PADDING;
+
+    if (newLeft !== pos.left || newTop !== pos.top) {
+      setPos({ top: newTop, left: newLeft });
     }
   }, [open]);
 
