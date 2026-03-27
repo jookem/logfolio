@@ -458,129 +458,83 @@ export default function TradeFormModal({ initial, defaults, onClose, onSave, onC
           </>
         ) : (
           <div style={{ marginBottom: 12 }}>
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                marginBottom: 10,
-              }}
-            >
-              <label style={{ ...lbl, marginBottom: 0 }}>Option Legs</label>
-              <button
-                onClick={addLeg}
-                style={{
-                  background: t.accent + "20",
-                  border: `1px solid ${t.accent}40`,
-                  color: t.accent,
-                  borderRadius: 6,
-                  padding: "4px 12px",
-                  fontSize: 12,
-                  cursor: "pointer",
-                }}
-              >
-                + Leg
-              </button>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+              <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 10, color: t.accent, textTransform: "uppercase", letterSpacing: 2 }}>Option Legs</div>
+              <button onClick={addLeg} style={{ background: t.accent + "15", border: `1px dashed ${t.accent}40`, color: t.accent, borderRadius: 8, padding: "6px 14px", cursor: "pointer", fontSize: 13, fontFamily: "'Space Mono', monospace" }}>+ Leg</button>
             </div>
             {form.legs.map((leg, i) => (
-              <div
-                key={i}
-                style={{
-                  background: t.card2,
-                  border: `1px solid ${t.border}`,
-                  borderRadius: 10,
-                  padding: 12,
-                  marginBottom: 8,
-                }}
-              >
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    marginBottom: 8,
-                  }}
-                >
-                  <span
-                    style={{
-                      fontSize: 11,
-                      color: t.accent,
-                      fontFamily: "'Space Mono', monospace",
-                    }}
-                  >
-                    Leg {i + 1}
-                  </span>
-                  {form.legs.length > 1 && (
-                    <button
-                      onClick={() => removeLeg(i)}
-                      style={{
-                        background: "none",
-                        border: "none",
-                        color: t.danger,
-                        cursor: "pointer",
-                        fontSize: 12,
-                      }}
-                    >
-                      Remove
-                    </button>
+              <div key={i} style={{ background: t.card2, border: `1px solid ${t.border}`, borderRadius: 10, padding: 14, marginBottom: 10 }}>
+                {form.legs.length > 1 && (
+                  <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 10 }}>
+                    <span style={{ fontSize: 11, color: t.accent, fontFamily: "'Space Mono', monospace" }}>Leg {i + 1}</span>
+                    <button onClick={() => removeLeg(i)} style={{ background: "none", border: "none", color: t.danger, cursor: "pointer", fontSize: 12 }}>Remove</button>
+                  </div>
+                )}
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+                  <div>
+                    <label style={lbl}>Bought or Wrote</label>
+                    <select style={inp()} value={leg.position} onChange={(e) => setLeg(i, "position", e.target.value)}>
+                      <option value="buy">Bought</option>
+                      <option value="sell">Wrote</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label style={lbl}>Call or Put</label>
+                    <select style={inp()} value={leg.type} onChange={(e) => setLeg(i, "type", e.target.value)}>
+                      <option value="call">Call</option>
+                      <option value="put">Put</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label style={lbl}>Expiry</label>
+                    <input style={inp(`leg_${i}_expiration`)} type="date" value={leg.expiration} onChange={(e) => { setLeg(i, "expiration", e.target.value); setErrors((p) => ({ ...p, [`leg_${i}_expiration`]: undefined })); }} />
+                    {errMsg(`leg_${i}_expiration`)}
+                  </div>
+                  <div>
+                    <label style={lbl}>Strike Price</label>
+                    <div style={{ position: "relative" }}>
+                      <span style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: t.text3, fontSize: 14 }}>$</span>
+                      <input style={{ ...inp(`leg_${i}_strike`), paddingLeft: 26 }} type="number" value={leg.strike} onChange={(e) => { setLeg(i, "strike", e.target.value); setErrors((p) => ({ ...p, [`leg_${i}_strike`]: undefined })); }} placeholder="200" />
+                    </div>
+                    {errMsg(`leg_${i}_strike`)}
+                  </div>
+                  <div>
+                    <label style={lbl}>Price per Option</label>
+                    <div style={{ position: "relative" }}>
+                      <span style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: t.text3, fontSize: 14 }}>$</span>
+                      <input style={{ ...inp(`leg_${i}_entryPremium`), paddingLeft: 26 }} type="number" value={leg.entryPremium} onChange={(e) => { setLeg(i, "entryPremium", e.target.value); setErrors((p) => ({ ...p, [`leg_${i}_entryPremium`]: undefined })); }} placeholder="4.20" />
+                    </div>
+                    {errMsg(`leg_${i}_entryPremium`)}
+                  </div>
+                  <div>
+                    <label style={lbl}>Exit Price per Option</label>
+                    <div style={{ position: "relative" }}>
+                      <span style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: t.text3, fontSize: 14 }}>$</span>
+                      <input style={{ ...inp(), paddingLeft: 26 }} type="number" value={leg.exitPremium} onChange={(e) => setLeg(i, "exitPremium", e.target.value)} placeholder="6.00" />
+                    </div>
+                  </div>
+                  <div>
+                    <label style={lbl}>Contracts</label>
+                    <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                      <input style={{ ...inp(`leg_${i}_contracts`), flex: 1 }} type="number" value={leg.contracts} onChange={(e) => { setLeg(i, "contracts", e.target.value); setErrors((p) => ({ ...p, [`leg_${i}_contracts`]: undefined })); }} placeholder="1" />
+                      <span style={{ fontSize: 12, color: t.text3, whiteSpace: "nowrap" }}>× 100</span>
+                    </div>
+                    {errMsg(`leg_${i}_contracts`)}
+                  </div>
+                  <div>
+                    <label style={lbl}>IV (Implied Vol.) %</label>
+                    <input style={inp()} type="number" value={leg.iv || ""} onChange={(e) => setLeg(i, "iv", e.target.value)} placeholder="30" />
+                  </div>
+                  {leg.entryPremium && leg.contracts && (
+                    <div style={{ gridColumn: "span 2", display: "flex", alignItems: "flex-end" }}>
+                      <div style={{ background: t.surface || t.card, border: `1px solid ${t.border}`, borderRadius: 8, padding: "10px 14px", width: "100%", display: "flex", justifyContent: "space-between" }}>
+                        <span style={{ fontSize: 11, color: t.text3, fontFamily: "'Space Mono', monospace", textTransform: "uppercase" }}>Total Cost</span>
+                        <span style={{ fontFamily: "'Space Mono', monospace", fontSize: 14, color: t.text }}>
+                          ${(+leg.entryPremium * +leg.contracts * 100).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        </span>
+                      </div>
+                    </div>
                   )}
-                </div>
-                <div
-                  style={{
-                    display: "grid",
-                    gridTemplateColumns: "1fr 1fr",
-                    gap: 8,
-                  }}
-                >
-                  <select
-                    style={inp()}
-                    value={leg.position}
-                    onChange={(e) => setLeg(i, "position", e.target.value)}
-                  >
-                    <option value="buy">Buy</option>
-                    <option value="sell">Sell</option>
-                  </select>
-                  <select
-                    style={inp()}
-                    value={leg.type}
-                    onChange={(e) => setLeg(i, "type", e.target.value)}
-                  >
-                    <option value="call">Call</option>
-                    <option value="put">Put</option>
-                  </select>
-                  <input
-                    style={inp(`leg_${i}_strike`)}
-                    type="number"
-                    placeholder="Strike"
-                    value={leg.strike}
-                    onChange={(e) => { setLeg(i, "strike", e.target.value); setErrors((p) => ({ ...p, [`leg_${i}_strike`]: undefined })); }}
-                  />
-                  <input
-                    style={inp(`leg_${i}_expiration`)}
-                    type="date"
-                    value={leg.expiration}
-                    onChange={(e) => { setLeg(i, "expiration", e.target.value); setErrors((p) => ({ ...p, [`leg_${i}_expiration`]: undefined })); }}
-                  />
-                  <input
-                    style={inp(`leg_${i}_entryPremium`)}
-                    type="number"
-                    placeholder="Entry $"
-                    value={leg.entryPremium}
-                    onChange={(e) => { setLeg(i, "entryPremium", e.target.value); setErrors((p) => ({ ...p, [`leg_${i}_entryPremium`]: undefined })); }}
-                  />
-                  <input
-                    style={inp()}
-                    type="number"
-                    placeholder="Exit $"
-                    value={leg.exitPremium}
-                    onChange={(e) => setLeg(i, "exitPremium", e.target.value)}
-                  />
-                  <input
-                    style={inp(`leg_${i}_contracts`)}
-                    type="number"
-                    placeholder="Contracts"
-                    value={leg.contracts}
-                    onChange={(e) => { setLeg(i, "contracts", e.target.value); setErrors((p) => ({ ...p, [`leg_${i}_contracts`]: undefined })); }}
-                  />
                 </div>
               </div>
             ))}
