@@ -4,21 +4,23 @@
 	 viewBox="0 0 800 800" style="enable-background:new 0 0 800 800;" xml:space="preserve">
 <style type="text/css">
 	.st0{fill:none;stroke:#000000;stroke-width:66;stroke-linecap:round;stroke-miterlimit:133.3333;}
-	.st1{fill:none;stroke:#000000;stroke-width:66;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:133.3333;}
+	.st1{fill:none;stroke:#000000;stroke-width:33;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:133.3333;}
+	.st2{fill:none;stroke:#000000;stroke-width:66;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:133.3333;}
 </style>
+<g id="price_per">
+	<path class="st0" d="M270.7,588.6c48.2,0,87.2-32.5,87.2-72.7c0-40.1-39.1-72.7-87.2-72.7s-87.2-32.5-87.2-72.7
+		c0-40.1,39.1-72.7,87.2-72.7 M270.7,588.6c-48.2,0-87.2-32.5-87.2-72.7 M270.7,588.6v29.1 M270.7,268.8v29.1 M270.7,297.8
+		c48.2,0,87.2,32.5,87.2,72.7"/>
+	<polygon class="st1" points="527.6,359.4 447.3,498.5 608,498.5 	"/>
+</g>
 <g id="BG2">
 	<path class="st0" d="M729.1,399c0,157.1,0,235.7-48.8,284.5s-127.4,48.8-284.5,48.8s-235.7,0-284.5-48.8
 		C62.4,634.7,62.4,556.1,62.4,399s0-235.7,48.8-284.5s127.4-48.8,284.5-48.8c20,0,38.8,0,56.4,0.1"/>
 </g>
-<g id="dollar">
-	<path class="st0" d="M326.9,583.7c62.7,0,113.5-42.3,113.5-94.6c0-52.2-50.8-94.6-113.5-94.6s-113.5-42.3-113.5-94.6
-		c0-52.2,50.8-94.6,113.5-94.6 M326.9,583.7c-62.7,0-113.5-42.3-113.5-94.6 M326.9,583.7v37.8 M326.9,167.5v37.8 M326.9,205.4
-		c62.7,0,113.5,42.3,113.5,94.6"/>
-</g>
 <g id="entry">
 	<g>
-		<path class="st1" d="M697.5,124.8L573.4,252.1"/>
-		<path class="st1" d="M546.7,117.8v161h161"/>
+		<path class="st2" d="M697.5,124.8L573.4,252.1"/>
+		<path class="st2" d="M546.7,117.8v161h161"/>
 	</g>
 </g>
 </svg>

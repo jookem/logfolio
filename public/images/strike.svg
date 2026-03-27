@@ -6,20 +6,16 @@
 	.st0{fill:none;stroke:#000000;stroke-width:66;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:133.3333;}
 	.st1{fill:none;stroke:#000000;stroke-width:66;stroke-linecap:round;stroke-miterlimit:133.3333;}
 </style>
-<g id="planFollowed">
-	<path class="st0" d="M210,415.5l18.1,40l115.2-100"/>
-	<path class="st1" d="M443.3,422.2H590"/>
+<g id="target">
+	<path class="st0" d="M62.4,399h100"/>
+	<path class="st0" d="M629.1,399h100"/>
+	<path class="st0" d="M395.8,732.3v-100"/>
+	<path class="st0" d="M395.8,165.7v-100"/>
+	<path class="st0" d="M229.1,110.3c49-28.4,106-44.6,166.7-44.6c184.1,0,333.3,149.2,333.3,333.3S579.9,732.3,395.8,732.3
+		S62.4,583.1,62.4,399c0-60.7,16.2-117.6,44.6-166.7"/>
 </g>
-<g id="Layer_56">
-</g>
-<g id="BG2">
-	<path class="st1" d="M729.1,399c0,157.1,0,235.7-48.8,284.5s-127.4,48.8-284.5,48.8s-235.7,0-284.5-48.8
-		C62.4,634.7,62.4,556.1,62.4,399s0-235.7,48.8-284.5s127.4-48.8,284.5-48.8c20,0,38.8,0,56.4,0.1"/>
-</g>
-<g id="exit">
-	<g>
-		<path class="st0" d="M558.8,270.8l124.1-127.4"/>
-		<path class="st0" d="M709.6,277.8v-161h-161"/>
-	</g>
+<g id="dollar_small">
+	<path class="st1" d="M400,521c40.1,0,72.6-27.1,72.6-60.5S440.1,400,400,400s-72.6-27.1-72.6-60.5S359.9,279,400,279 M400,521
+		c-40.1,0-72.6-27.1-72.6-60.5 M400,521v24.2 M400,254.8V279 M400,279c40.1,0,72.6,27.1,72.6,60.5"/>
 </g>
 </svg>
