@@ -468,13 +468,19 @@ const [page, setPage] = useState(1);
   };
   const handleStripeCheckout = async (plan = "pro") => {
     if (!user) return;
-    const res = await fetch("/api/billing", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ userId: user.id, email: user.email, plan }),
-    });
-    const { url } = await res.json();
-    if (url) window.location.href = url;
+    showToast("Redirecting to checkout…", T.accent, null, 0);
+    try {
+      const res = await fetch("/api/billing", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId: user.id, email: user.email, plan }),
+      });
+      const body = await res.json();
+      if (body.url) { window.location.href = body.url; return; }
+      showToast(body.error || "Checkout failed — please try again", "#ff4d6d");
+    } catch {
+      showToast("Checkout failed — please try again", "#ff4d6d");
+    }
   };
 
   const handleUpgrade = (plan = "pro") => {
@@ -503,13 +509,19 @@ const [page, setPage] = useState(1);
 
   const handleManageBilling = async () => {
     if (!user) return;
-    const res = await fetch("/api/billing", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ action: "portal", userId: user.id }),
-    });
-    const { url } = await res.json();
-    if (url) window.location.href = url;
+    showToast("Opening billing portal…", T.accent, null, 0);
+    try {
+      const res = await fetch("/api/billing", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "portal", userId: user.id }),
+      });
+      const body = await res.json();
+      if (body.url) { window.location.href = body.url; return; }
+      showToast(body.error || "Could not open billing portal — please try again", "#ff4d6d");
+    } catch {
+      showToast("Could not open billing portal — please try again", "#ff4d6d");
+    }
   };
 
   const currentMonth = todayStr().slice(0, 7);
