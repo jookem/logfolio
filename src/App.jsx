@@ -444,6 +444,20 @@ const [page, setPage] = useState(1);
         setTrades((p) => p.map((t) => t.id === tradeWithHistory.id ? uploaded : t));
         setSelected(uploaded);
         supabase.from("trades").upsert({ id: uploaded.id, user_id: user.id, data: uploaded }).then(() => {});
+        if (isProPlus && trade.status === "closed" && trade.exitPrice && !trade.grade) {
+          fetch("/api/review-trade", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ action: "grade", tradeData: uploaded, userId: user.id }),
+          }).then(r => r.ok ? r.json() : null).then(data => {
+            if (data?.grade) {
+              const graded = { ...uploaded, grade: data.grade, gradeNote: data.gradeNote };
+              setTrades(p => p.map(tr => tr.id === graded.id ? graded : tr));
+              setSelected(graded);
+              supabase.from("trades").upsert({ id: graded.id, user_id: user.id, data: graded }).then(() => {});
+            }
+          }).catch(() => {});
+        }
       })();
     }
   };

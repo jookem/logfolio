@@ -341,6 +341,21 @@ export default function TradeDetail({ trade, onClose, onEdit, onExecute, onSave,
           </div>
         )}
       </div>
+      {trade.grade && (() => {
+        const gradeColors = { A: "#00ff87", B: "#4ade80", C: "#f59e0b", D: "#f97316", F: "#ff4d6d" };
+        const gc = gradeColors[trade.grade] || "#888";
+        return (
+          <div style={{ background: t.card2, borderRadius: 8, padding: "14px 16px", marginBottom: 10, display: "flex", gap: 14, alignItems: "flex-start" }}>
+            <div style={{ flexShrink: 0, width: 44, height: 44, borderRadius: 8, background: gc + "20", border: `1px solid ${gc}40`, display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <span style={{ fontFamily: "'Space Mono',monospace", fontSize: 22, fontWeight: 700, color: gc }}>{trade.grade}</span>
+            </div>
+            <div>
+              <div style={{ fontSize: 10, color: t.text3, textTransform: "uppercase", letterSpacing: 1.5, marginBottom: 4 }}>AI Trade Grade</div>
+              <div style={{ fontSize: 13, color: t.text, lineHeight: 1.6 }}>{trade.gradeNote || "Auto-graded by AI coach."}</div>
+            </div>
+          </div>
+        );
+      })()}
       {trade.screenshots?.length > 0 && (
         <div style={{ marginBottom: 10 }}>
           <div style={{ fontSize: 10, color: t.text3, marginBottom: 8, textTransform: "uppercase", letterSpacing: 1.5 }}>Chart Screenshots</div>

@@ -158,6 +158,45 @@ export async function sendWelcomeEmail(email) {
   });
 }
 
+export async function sendMonthlyLetter(email, { monthName, year, stats, letter }) {
+  const { totalTrades, wins, losses, winRate, totalPL, bestTrade, worstTrade } = stats;
+  const plColor = totalPL >= 0 ? "#00ff87" : "#ff4d6d";
+  const plSign = totalPL >= 0 ? "+" : "";
+  await resend.emails.send({
+    from: FROM,
+    reply_to: REPLY_TO,
+    to: email,
+    subject: `Your ${monthName} ${year} trading review`,
+    html: base(`
+      <h1 style="margin:0 0 8px;font-size:22px;font-weight:700;color:#f4f5f7">${monthName} ${year} Performance Letter</h1>
+      <p style="margin:0 0 24px;font-size:13px;color:#888;line-height:1.7">Your monthly trading performance summary from Log-Folio.</p>
+      <div style="background:#0d0d0d;border:1px solid #1a1a1a;border-radius:12px;padding:20px 24px;margin-bottom:28px">
+        <div style="font-size:11px;color:#555;letter-spacing:2px;margin-bottom:14px">THE MONTH IN NUMBERS</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:4px">
+          <div>
+            <div style="font-size:10px;color:#555;letter-spacing:1.5px;margin-bottom:4px">TRADES</div>
+            <div style="font-size:18px;font-weight:700;color:#f4f5f7;font-family:monospace">${totalTrades}</div>
+          </div>
+          <div>
+            <div style="font-size:10px;color:#555;letter-spacing:1.5px;margin-bottom:4px">WIN RATE</div>
+            <div style="font-size:18px;font-weight:700;color:#f4f5f7;font-family:monospace">${winRate}%</div>
+          </div>
+          <div>
+            <div style="font-size:10px;color:#555;letter-spacing:1.5px;margin-bottom:4px">P&L</div>
+            <div style="font-size:18px;font-weight:700;color:${plColor};font-family:monospace">${plSign}$${Math.abs(totalPL).toFixed(0)}</div>
+          </div>
+        </div>
+        ${bestTrade ? `<div style="margin-top:14px;padding-top:14px;border-top:1px solid #1a1a1a;font-size:12px;color:#888">Best trade: <strong style="color:#00ff87">${esc(bestTrade.ticker)} +$${Math.abs(bestTrade.pl).toFixed(0)}</strong>${worstTrade ? ` &nbsp;·&nbsp; Worst trade: <strong style="color:#ff4d6d">${esc(worstTrade.ticker)} -$${Math.abs(worstTrade.pl).toFixed(0)}</strong>` : ""}</div>` : ""}
+      </div>
+      ${letter ? `<div style="background:#0d0d0d;border:1px solid #1a1a1a;border-radius:12px;padding:20px 24px;margin-bottom:28px">
+        <div style="font-size:11px;color:#555;letter-spacing:2px;margin-bottom:14px">YOUR COACH'S TAKE</div>
+        <div style="font-size:13px;color:#ccc;line-height:1.9;white-space:pre-wrap">${esc(letter)}</div>
+      </div>` : ""}
+      <a href="https://log-folio.com" style="display:inline-block;background:#00ff87;color:#000;text-decoration:none;border-radius:8px;padding:12px 28px;font-size:13px;font-weight:700;letter-spacing:0.5px">Open Log-Folio →</a>
+    `),
+  });
+}
+
 export async function sendSupportEmail({ subject, message, userEmail }) {
   const subjectLine = subject?.trim() ? subject.trim() : "Support Request";
   await resend.emails.send({
