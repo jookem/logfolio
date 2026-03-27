@@ -18,7 +18,7 @@ export default function TimeInput({ style, t, className, ...props }) {
         onClick={() => ref.current?.showPicker?.()}
         style={{
           position: "absolute",
-          right: 10,
+          right: 26,
           top: "50%",
           transform: "translateY(-50%)",
           background: "none",
