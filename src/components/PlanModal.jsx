@@ -234,21 +234,36 @@ const fetchAiAssist = async () => {
     }
     setAiStep("ai");
 
+    const isOptions = form.type === "options";
+    const tradeDetails = isOptions
+      ? [
+          `- Ticker: ${ticker || "unspecified"}`,
+          `- Type: Options`,
+          `- Strategy: ${form.strategy}`,
+          `- Direction: ${form.direction}`,
+          ...(form.legs?.length ? form.legs.map((l, i) =>
+            `- Leg ${i + 1}: ${l.position?.toUpperCase()} ${l.type?.toUpperCase()} | Strike: ${l.strike || "?"} | Exp: ${l.expiration || "?"} | Entry Premium: ${l.entryPremium || "?"} | Contracts: ${l.contracts || 1}`
+          ) : []),
+        ].join("\n")
+      : [
+          `- Ticker: ${ticker || "unspecified"}`,
+          `- Type: ${form.type}`,
+          `- Strategy: ${form.strategy}`,
+          `- Direction: ${form.direction}`,
+          `- Entry: ${form.currentPrice || "unspecified"}`,
+          `- Stop Loss: ${form.stopLoss || "unspecified"}`,
+          `- Take Profit: ${form.takeProfit || "unspecified"}`,
+        ].join("\n");
+
     const messages = [{
       role: "user",
-      content: `You are a trading coach. Given the following context, provide TWO sections:
+      content: `You are a trading coach reviewing a ${isOptions ? "options" : "stock/equity"} trade plan. Given the following context, provide TWO sections:
 
 1. MARKET_BIAS: One sentence on current price trend for ${ticker} based on its recent closes (bullish/bearish/neutral and why). Be concise.
-2. PERSONAL_CHECKLIST: 2-3 bullet points of personalised warnings or confirmations for this specific trade plan based on the trader's history. Be direct and honest.
+2. PERSONAL_CHECKLIST: 2-3 bullet points of personalised warnings or confirmations for this specific trade plan based on the trader's history. Be direct and honest. ${isOptions ? "This is an options trade — do NOT mention stop loss or share-based risk. Focus on Greeks exposure, expiration timing, premium paid, and strategy-specific risks." : ""}
 
 Planned trade:
-- Ticker: ${ticker || "unspecified"}
-- Type: ${form.type}
-- Strategy: ${form.strategy}
-- Direction: ${form.direction}
-- Entry: ${form.currentPrice || "unspecified"}
-- Stop Loss: ${form.stopLoss || "unspecified"}
-- Take Profit: ${form.takeProfit || "unspecified"}
+${tradeDetails}
 
 Past trades on ${ticker}:
 ${tickerHistory}
