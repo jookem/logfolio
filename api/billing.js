@@ -10,27 +10,26 @@ const supabase = createClient(
 export default async function handler(req, res) {
   if (req.method !== "POST") return res.status(405).end();
 
-  const { userId, email, plan } = req.body;
+  const { action, userId, email, plan } = req.body || {};
+
+  if (action === "portal") {
+    if (!userId) return res.status(400).json({ error: "Missing userId" });
+    const { data: profile } = await supabase.from("profiles").select("stripe_customer_id").eq("id", userId).single();
+    if (!profile?.stripe_customer_id) return res.status(400).json({ error: "No Stripe customer found" });
+    const session = await stripe.billingPortal.sessions.create({ customer: profile.stripe_customer_id, return_url: process.env.APP_URL });
+    return res.status(200).json({ url: session.url });
+  }
+
+  // Default: create checkout session
   if (!userId || !email) return res.status(400).json({ error: "Missing userId or email" });
-
-  const priceId = plan === "pro_plus"
-    ? process.env.STRIPE_PRICE_ID_PRO_PLUS
-    : process.env.STRIPE_PRICE_ID_PRO;
-
-  // Get or create Stripe customer
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("stripe_customer_id")
-    .eq("id", userId)
-    .single();
-
+  const priceId = plan === "pro_plus" ? process.env.STRIPE_PRICE_ID_PRO_PLUS : process.env.STRIPE_PRICE_ID_PRO;
+  const { data: profile } = await supabase.from("profiles").select("stripe_customer_id").eq("id", userId).single();
   let customerId = profile?.stripe_customer_id;
   if (!customerId) {
     const customer = await stripe.customers.create({ email, metadata: { supabase_user_id: userId } });
     customerId = customer.id;
     await supabase.from("profiles").update({ stripe_customer_id: customerId }).eq("id", userId);
   }
-
   const session = await stripe.checkout.sessions.create({
     customer: customerId,
     mode: "subscription",
@@ -40,6 +39,5 @@ export default async function handler(req, res) {
     cancel_url: `${process.env.APP_URL}?upgraded=false`,
     metadata: { supabase_user_id: userId, plan: plan || "pro" },
   });
-
   res.status(200).json({ url: session.url });
 }

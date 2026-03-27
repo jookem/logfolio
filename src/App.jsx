@@ -128,7 +128,7 @@ const [page, setPage] = useState(1);
         const isNew = user.created_at && (Date.now() - new Date(user.created_at).getTime()) < 10 * 60 * 1000;
         if (isNew && !local?.length && !localStorage.getItem(`tradelog_onboarding_done_${user.id}`)) {
           setShowOnboarding(true);
-          fetch("/api/welcome", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ userId: user.id, email: user.email }) }).catch(() => {});
+          fetch("/api/signup", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ userId: user.id, email: user.email }) }).catch(() => {});
         }
       } else {
         const loaded = data.map(row => ({ ...row.data, id: row.id }));
@@ -146,7 +146,7 @@ const [page, setPage] = useState(1);
             setTrades([]);
             if (!localStorage.getItem(`tradelog_onboarding_done_${user.id}`)) {
               setShowOnboarding(true);
-              fetch("/api/welcome", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ userId: user.id, email: user.email }) }).catch(() => {});
+              fetch("/api/signup", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ userId: user.id, email: user.email }) }).catch(() => {});
             }
           }
         } else {
@@ -466,7 +466,7 @@ const [page, setPage] = useState(1);
   };
   const handleStripeCheckout = async (plan = "pro") => {
     if (!user) return;
-    const res = await fetch("/api/create-checkout-session", {
+    const res = await fetch("/api/billing", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ userId: user.id, email: user.email, plan }),
@@ -501,10 +501,10 @@ const [page, setPage] = useState(1);
 
   const handleManageBilling = async () => {
     if (!user) return;
-    const res = await fetch("/api/customer-portal", {
+    const res = await fetch("/api/billing", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ userId: user.id }),
+      body: JSON.stringify({ action: "portal", userId: user.id }),
     });
     const { url } = await res.json();
     if (url) window.location.href = url;

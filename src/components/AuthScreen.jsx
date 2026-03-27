@@ -49,7 +49,7 @@ export default function AuthScreen({ isDark }) {
       else {
         setMessage("Check your email for a confirmation link.");
         if (refCode && data.user?.id) {
-          fetch("/api/process-referral", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ newUserId: data.user?.id, refCode }) }).catch(() => {});
+          fetch("/api/signup", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "referral", userId: data.user?.id, refCode }) }).catch(() => {});
         }
       }
     } else {
