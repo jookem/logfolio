@@ -779,7 +779,7 @@ const base = {
 
       {/* Price per option — auto-filled */}
       <div>
-        <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><PremiumEntryIcon size={14} />Price p/ Option</label>
+        <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><PremiumEntryIcon size={14} />Premium</label>
         <div style={{ position: "relative" }}>
           <span style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: t.text3, fontSize: 14 }}>$</span>
           <input style={{ ...inp, paddingLeft: 26 }} type="number"
