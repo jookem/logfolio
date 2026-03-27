@@ -615,6 +615,26 @@ export default function TradeFormModal({ initial, defaults, onClose, onSave, onC
             ))}
           </div>
         )}
+        {!STOCK_LIKE.includes(form.type) && (
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 12 }}>
+            <div>
+              <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><EntryTimeIcon size={14} />Entry Time</label>
+              <TimeInput style={inp()} t={t} className={isDark ? "time-dark" : ""} value={form.entryTime || ""} onChange={(e) => set("entryTime", e.target.value)} />
+            </div>
+            <div>
+              <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><ExitTimeIcon size={14} />Exit Time</label>
+              <TimeInput style={inp()} t={t} className={isDark ? "time-dark" : ""} value={form.exitTime || ""} onChange={(e) => set("exitTime", e.target.value)} />
+            </div>
+            <div>
+              <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><EntryDateIcon size={14} />Entry Date</label>
+              <DateInput style={inp()} t={t} value={form.date} onChange={(e) => set("date", e.target.value)} />
+            </div>
+            <div>
+              <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><ExitDateIcon size={14} />Exit Date</label>
+              <DateInput style={inp()} t={t} value={form.exitDate || ""} onChange={(e) => set("exitDate", e.target.value)} placeholder={form.date} />
+            </div>
+          </div>
+        )}
         {sectionHeader("Mindset", "tut-trade-mindset")}
         <div id="tut-trade-emotion" style={{ marginBottom: 14 }}>
           <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><EmotionIcon size={14} />Emotion</label>
