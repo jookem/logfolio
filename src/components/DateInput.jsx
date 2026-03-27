@@ -8,7 +8,7 @@ export default function DateInput({ style, t, ...props }) {
       <input
         ref={ref}
         type="date"
-        style={{ ...style, paddingRight: 58 }}
+        style={{ ...style, paddingRight: 46 }}
         {...props}
       />
       <button
@@ -17,7 +17,7 @@ export default function DateInput({ style, t, ...props }) {
         onClick={() => ref.current?.showPicker?.()}
         style={{
           position: "absolute",
-          right: 32,
+          right: 10,
           top: "50%",
           transform: "translateY(-50%)",
           background: "none",
