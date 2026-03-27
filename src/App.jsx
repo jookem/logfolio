@@ -375,11 +375,11 @@ const [page, setPage] = useState(1);
   };
   const executePlan = (plan) => {
     const prefill = {
-      date: todayStr(),
+      date: plan.date || todayStr(),
       ticker: plan.ticker,
       type: plan.type,
       strategy: plan.strategy,
-      direction: plan.direction || (plan.stockDirection === "buy" ? "long" : "short"),
+      direction: plan.direction || plan.stockDirection || "long",
       entryPrice: plan.entryPrice || plan.purchasePrice || "",
       exitPrice: "",
       shares: plan.shares || plan.numShares || "",
@@ -398,8 +398,11 @@ const [page, setPage] = useState(1);
         notes: plan.notes || "",
         emotion: plan.emotion || "None",
         shares: plan.shares || plan.numShares || "",
-        direction: plan.direction || "",
+        direction: plan.direction || plan.stockDirection || "",
         strategy: plan.strategy || "",
+        checklist: plan.checklist || [],
+        checklistComplete: plan.checklistComplete || false,
+        legIV: plan.legs?.length ? plan.legs.map(l => ({ strike: l.strike, iv: l.iv || null })) : [],
       },
     };
     setSelectedPlan(null);

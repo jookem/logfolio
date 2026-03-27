@@ -2,7 +2,7 @@ import { useState } from "react";
 import { calcPL, fmt, fmtDate, fmtR, typeLabels } from "../lib/utils";
 import { STOCK_LIKE } from "../lib/constants";
 import Tag from "./Tag";
-import { LogIcon, EditIcon, QuickIcon, ShareIcon, CloseIcon } from "../lib/icons";
+import { LogIcon, EditIcon, QuickIcon, ShareIcon, CloseIcon, CheckIcon } from "../lib/icons";
 
 export default function TradeDetail({ trade, onClose, onEdit, onExecute, onSave, onShare, t, mobile }) {
   const pl = calcPL(trade);
@@ -417,26 +417,56 @@ export default function TradeDetail({ trade, onClose, onEdit, onExecute, onSave,
   if (snap.takeProfit) rows.push({ label: "Take Profit", planned: `$${snap.takeProfit}`, actual: trade.exitPrice ? `$${trade.exitPrice}` : "—", diff: null, good: trade.exitPrice >= snap.takeProfit });
   if (snap.shares) rows.push({ label: "Size", planned: snap.shares, actual: trade.shares || "—", diff: null, good: String(snap.shares) === String(trade.shares) });
   if (snap.emotion) rows.push({ label: "Emotion", planned: snap.emotion, actual: trade.emotion || "—", diff: null, good: snap.emotion === trade.emotion });
-  if (!rows.length) return null;
+  if (snap.legIV?.length) {
+    snap.legIV.forEach((planned, i) => {
+      if (!planned.iv) return;
+      const actualIV = trade.legs?.[i]?.iv;
+      rows.push({ label: `Leg ${i + 1} IV`, planned: `${planned.iv}%`, actual: actualIV ? `${actualIV}%` : "—", diff: null, good: !!actualIV });
+    });
+  }
+  const hasRows = rows.length > 0;
+  const hasChecklist = snap.checklist?.length > 0;
+  if (!hasRows && !hasChecklist) return null;
   return (
     <div style={{ background: t.surface, border: `1px solid ${t.border}`, borderRadius: 10, padding: "12px 14px", marginBottom: 10 }}>
       <div style={{ fontSize: 10, color: t.text3, marginBottom: 10, textTransform: "uppercase", letterSpacing: 1.5 }}>Plan vs Reality</div>
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "6px 8px" }}>
-        <div style={{ fontSize: 10, color: t.text4, fontFamily: "'Space Mono',monospace" }}></div>
-        <div style={{ fontSize: 10, color: t.text4, fontFamily: "'Space Mono',monospace" }}>PLANNED</div>
-        <div style={{ fontSize: 10, color: t.text4, fontFamily: "'Space Mono',monospace" }}>ACTUAL</div>
-        {rows.map(({ label, planned, actual, diff, good }) => (
-          <>
-            <div key={label + "l"} style={{ fontSize: 11, color: t.text3 }}>{label}</div>
-            <div key={label + "p"} style={{ fontSize: 12, color: t.text, fontFamily: "'Space Mono',monospace" }}>{planned}</div>
-            <div key={label + "a"} style={{ display: "flex", alignItems: "center", gap: 5 }}>
-              <span style={{ fontSize: 12, color: t.text, fontFamily: "'Space Mono',monospace" }}>{actual}</span>
-              {diff && <span style={{ fontSize: 10, color: good ? t.accent : t.danger }}>{diff}</span>}
-              {!diff && <span style={{ fontSize: 10 }}>{good ? "✓" : "✗"}</span>}
-            </div>
-          </>
-        ))}
-      </div>
+      {hasRows && (
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "6px 8px", marginBottom: hasChecklist ? 12 : 0 }}>
+          <div style={{ fontSize: 10, color: t.text4, fontFamily: "'Space Mono',monospace" }}></div>
+          <div style={{ fontSize: 10, color: t.text4, fontFamily: "'Space Mono',monospace" }}>PLANNED</div>
+          <div style={{ fontSize: 10, color: t.text4, fontFamily: "'Space Mono',monospace" }}>ACTUAL</div>
+          {rows.map(({ label, planned, actual, diff, good }) => (
+            <>
+              <div key={label + "l"} style={{ fontSize: 11, color: t.text3 }}>{label}</div>
+              <div key={label + "p"} style={{ fontSize: 12, color: t.text, fontFamily: "'Space Mono',monospace" }}>{planned}</div>
+              <div key={label + "a"} style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                <span style={{ fontSize: 12, color: t.text, fontFamily: "'Space Mono',monospace" }}>{actual}</span>
+                {diff && <span style={{ fontSize: 10, color: good ? t.accent : t.danger }}>{diff}</span>}
+                {!diff && <span style={{ color: good ? t.accent : t.danger, display: "flex" }}>{good ? <CheckIcon size={11} /> : <CloseIcon size={11} />}</span>}
+              </div>
+            </>
+          ))}
+        </div>
+      )}
+      {hasChecklist && (
+        <>
+          <div style={{ fontSize: 10, color: t.text3, marginBottom: 6, textTransform: "uppercase", letterSpacing: 1.5 }}>Pre-Trade Checklist</div>
+          <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+            {snap.checklist.map((item) => {
+              const checked = item.checked ?? (typeof item === "string" ? false : false);
+              const label = item.label ?? item;
+              return (
+                <div key={label} style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                  <span style={{ color: checked ? t.accent : t.danger, display: "flex", flexShrink: 0 }}>
+                    {checked ? <CheckIcon size={12} /> : <CloseIcon size={12} />}
+                  </span>
+                  <span style={{ fontSize: 12, color: checked ? t.text : t.text3, fontFamily: "'Space Mono',monospace" }}>{label}</span>
+                </div>
+              );
+            })}
+          </div>
+        </>
+      )}
     </div>
   );
 })()}
