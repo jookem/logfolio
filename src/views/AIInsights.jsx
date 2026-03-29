@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { supabase } from "../lib/supabase";
 import { useAuth } from "../contexts/AuthContext";
 import { WarningIcon, CheckIcon, CircleIcon } from "../lib/icons";
@@ -18,6 +18,30 @@ const saveDailyUsage = (userId, data) => {
   try { localStorage.setItem(`ai_daily_${userId}`, JSON.stringify(data)); } catch {}
 };
 
+// Compress an image file to JPEG, max 1200px wide, returns { base64, mediaType }
+async function compressImage(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onerror = reject;
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onerror = reject;
+      img.onload = () => {
+        const MAX = 1200;
+        let w = img.width, h = img.height;
+        if (w > MAX) { h = Math.round((h * MAX) / w); w = MAX; }
+        const canvas = document.createElement("canvas");
+        canvas.width = w; canvas.height = h;
+        canvas.getContext("2d").drawImage(img, 0, 0, w, h);
+        const dataUrl = canvas.toDataURL("image/jpeg", 0.88);
+        resolve({ base64: dataUrl.split(",")[1], mediaType: "image/jpeg" });
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
 export default function AIInsights({ plList, t, mobile }) {
   const { user } = useAuth();
   const [insights, setInsights] = useState(null);
@@ -25,6 +49,8 @@ export default function AIInsights({ plList, t, mobile }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [usedToday, setUsedToday] = useState(0);
+  const [chartImage, setChartImage] = useState(null); // { base64, mediaType, previewUrl }
+  const fileInputRef = useRef(null);
 
   useEffect(() => {
     if (!user) return;
@@ -250,6 +276,24 @@ export default function AIInsights({ plList, t, mobile }) {
     doc.save(`logfolio-ai-analysis-${new Date().toISOString().slice(0, 10)}.pdf`);
   };
 
+  const handleImageSelect = async (file) => {
+    if (!file || !file.type.startsWith("image/")) return;
+    if (file.size > 8 * 1024 * 1024) { setError("Image too large. Please use a screenshot under 8 MB."); return; }
+    setError(null);
+    try {
+      const compressed = await compressImage(file);
+      // Guard: base64 payload should stay under ~1.5 MB to avoid serverless body limit
+      if (compressed.base64.length > 1.5 * 1024 * 1024) {
+        setError("Image is too large after compression. Please crop or resize the screenshot.");
+        return;
+      }
+      const previewUrl = `data:${compressed.mediaType};base64,${compressed.base64}`;
+      setChartImage({ ...compressed, previewUrl });
+    } catch {
+      setError("Could not load image. Please try a different file.");
+    }
+  };
+
   const analysePatterns = async () => {
     if (plList.length < 3) {
       setError("Add at least 3 trades to generate insights.");
@@ -284,23 +328,7 @@ export default function AIInsights({ plList, t, mobile }) {
     const losses = plList.filter((t) => t.pl < 0);
     const winRate = ((wins.length / plList.length) * 100).toFixed(0);
 
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      const response = await fetch("/api/analyse", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          ...(session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {}),
-        },
-        body: JSON.stringify({
-          userId: user?.id,
-          model: "claude-sonnet-4-6",
-          max_tokens: 2000,
-          feature: "insights",
-          messages: [
-            {
-              role: "user",
-              content: `You are an expert trading coach analysing a trader's journal data. Identify patterns, weaknesses and strengths. Be specific with numbers and percentages from the data.
+    const promptText = `You are an expert trading coach analysing a trader's journal data.${chartImage ? " The trader has also provided a chart screenshot for additional context." : ""} Identify patterns, weaknesses and strengths. Be specific with numbers and percentages from the data.${chartImage ? "\n\nFor the chart: describe what you observe (trend, key levels, setup quality, entry/exit timing if visible) and how it relates to the trader's patterns." : ""}
 
 Here is their trade history:
 ${JSON.stringify(summary, null, 2)}
@@ -325,9 +353,29 @@ Return ONLY a JSON object with no markdown, no backticks, no preamble. Use exact
     }
   ]
 }
-Provide 4-6 patterns. Be brutally honest but constructive.`,
-            },
-          ],
+Provide 4-6 patterns${chartImage ? " (include 1-2 patterns specifically about the chart if relevant)" : ""}. Be brutally honest but constructive.`;
+
+    const messageContent = chartImage
+      ? [
+          { type: "image", source: { type: "base64", media_type: chartImage.mediaType, data: chartImage.base64 } },
+          { type: "text", text: promptText },
+        ]
+      : promptText;
+
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const response = await fetch("/api/analyse", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {}),
+        },
+        body: JSON.stringify({
+          userId: user?.id,
+          model: "claude-sonnet-4-6",
+          max_tokens: 2000,
+          feature: "insights",
+          messages: [{ role: "user", content: messageContent }],
         }),
       });
 
@@ -408,12 +456,47 @@ Provide 4-6 patterns. Be brutally honest but constructive.`,
         </div>
       </div>
 
+      {/* Chart image upload */}
+      <div style={{ marginBottom: 20 }}>
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          style={{ display: "none" }}
+          onChange={e => { if (e.target.files?.[0]) handleImageSelect(e.target.files[0]); e.target.value = ""; }}
+        />
+        {chartImage ? (
+          <div style={{ display: "flex", alignItems: "center", gap: 12, background: t.surface, border: `1px solid ${t.border}`, borderRadius: 10, padding: "10px 14px" }}>
+            <img src={chartImage.previewUrl} alt="Chart" style={{ width: 80, height: 50, objectFit: "cover", borderRadius: 6, flexShrink: 0 }} />
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontSize: 12, fontWeight: 700, color: t.text, marginBottom: 2 }}>Chart attached</div>
+              <div style={{ fontSize: 11, color: t.text3 }}>Claude will analyse this chart alongside your trade data</div>
+            </div>
+            <button
+              onClick={() => setChartImage(null)}
+              style={{ background: "none", border: "none", color: t.text4, cursor: "pointer", fontSize: 18, lineHeight: 1, padding: 0, flexShrink: 0 }}
+            >
+              ×
+            </button>
+          </div>
+        ) : (
+          <button
+            onClick={() => fileInputRef.current?.click()}
+            style={{ width: "100%", background: "none", border: `1px dashed ${t.border}`, borderRadius: 10, padding: "14px 20px", cursor: "pointer", color: t.text3, fontSize: 12, fontFamily: "'Space Mono', monospace", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, transition: "border-color 0.15s" }}
+            onMouseEnter={e => e.currentTarget.style.borderColor = t.accent}
+            onMouseLeave={e => e.currentTarget.style.borderColor = t.border}
+          >
+            + Attach chart screenshot (optional)
+          </button>
+        )}
+      </div>
+
       {loading && (
         <div style={{ background: t.surface, border: `1px solid ${t.border}`, borderRadius: 12, padding: 48, textAlign: "center", marginBottom: 24 }}>
           <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 13, color: t.accent, marginBottom: 8 }}>
             Analysing your trading patterns...
           </div>
-          <div style={{ fontSize: 12, color: t.text3 }}>Claude is reviewing your trade history</div>
+          <div style={{ fontSize: 12, color: t.text3 }}>{chartImage ? "Claude is reviewing your trade history and chart" : "Claude is reviewing your trade history"}</div>
         </div>
       )}
 
