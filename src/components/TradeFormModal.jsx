@@ -5,7 +5,7 @@ import { todayStr, typeLabels, fmt, calcWeightedExit, calcTotalExited } from "..
 import Tag from "./Tag";
 import VoiceNote from "./VoiceNote";
 import ScreenshotUpload from "./ScreenshotUpload";
-import { EditIcon, LogIcon, CloseIcon, TodayIcon, ExitIcon, EntryPriceIcon, EntryTimeIcon, ExitTimeIcon, EntryDateIcon, ExitDateIcon, TickerIcon, CategoryIcon, StrategyIcon, DirectionIcon, AmountIcon, WarningIcon, TargetIcon, EmotionIcon, TagsIcon, PenIcon, MistakeIcon, BuySellIcon, CallOrPutIcon, StrikeIcon, PremiumEntryIcon, PremiumExitIcon, ContractsIcon, IVIcon, TimeframeIcon } from "../lib/icons";
+import { EditIcon, LogIcon, CloseIcon, TodayIcon, ExitIcon, EntryPriceIcon, EntryTimeIcon, ExitTimeIcon, EntryDateIcon, ExitDateIcon, TickerIcon, CategoryIcon, StrategyIcon, DirectionIcon, AmountIcon, WarningIcon, TargetIcon, EmotionIcon, TagsIcon, PenIcon, MistakeIcon, BuySellIcon, CallOrPutIcon, StrikeIcon, PremiumEntryIcon, PremiumExitIcon, ContractsIcon, IVIcon, TimeframeIcon, TimeIcon } from "../lib/icons";
 import DateInput from "./DateInput";
 import TimeInput from "./TimeInput";
 
@@ -494,7 +494,7 @@ export default function TradeFormModal({ initial, defaults, onClose, onSave, onC
                         <DateInput style={inp()} t={t} value={c.date || ""} onChange={(e) => setClose(i, "date", e.target.value)} />
                       </div>
                       <div>
-                        <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><ExitTimeIcon size={14} />Time</label>
+                        <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><TimeIcon size={14} />Time</label>
                         <TimeInput style={inp()} t={t} value={c.time || ""} onChange={(e) => setClose(i, "time", e.target.value)} />
                       </div>
                       <div>
