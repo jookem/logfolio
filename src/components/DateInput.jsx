@@ -1,7 +1,7 @@
 import { useRef } from "react";
 import { CalendarIcon } from "../lib/icons";
 
-export default function DateInput({ style, t, ...props }) {
+export default function DateInput({ style, t, icon: Icon = CalendarIcon, ...props }) {
   const ref = useRef(null);
   return (
     <div style={{ position: "relative" }}>
@@ -30,7 +30,7 @@ export default function DateInput({ style, t, ...props }) {
           pointerEvents: "all",
         }}
       >
-        <CalendarIcon size={15} />
+        <Icon size={15} />
       </button>
     </div>
   );

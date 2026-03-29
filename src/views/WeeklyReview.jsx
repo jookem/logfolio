@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import DateInput from "../components/DateInput";
+import { WeekIcon } from "../lib/icons";
 import { fmt, fmtDate } from "../lib/utils";
 
 const WEEK_OPTIONS = [4, 8, 12, 26, 52];
@@ -51,6 +52,7 @@ export default function WeeklyReview({ plList, t, mobile }) {
           <span style={{ fontSize: 11, color: t.text3, fontFamily: "'Space Mono', monospace", textTransform: "uppercase", letterSpacing: 1.5 }}>Week</span>
           <DateInput
             t={t}
+            icon={WeekIcon}
             value={jumpDate}
             onChange={(e) => { setJumpDate(e.target.value); }}
             style={{ background: jumpDate ? t.accent + "15" : t.card2, border: `1px solid ${jumpDate ? t.accent : t.border}`, color: jumpDate ? t.accent : t.text3, borderRadius: 6, padding: "4px 8px 4px 8px", fontSize: 11, fontFamily: "'Space Mono', monospace", cursor: "pointer", outline: "none" }}
