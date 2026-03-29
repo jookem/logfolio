@@ -1,5 +1,6 @@
 import Stripe from "stripe";
 import { createClient } from "@supabase/supabase-js";
+import { verifyAuth } from "./_lib/verifyAuth.js";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 const supabase = createClient(
@@ -11,6 +12,9 @@ export default async function handler(req, res) {
   if (req.method !== "POST") return res.status(405).end();
 
   const { action, userId, email, plan } = req.body || {};
+
+  const { error: authError } = await verifyAuth(req, userId);
+  if (authError) return res.status(authError === "Forbidden" ? 403 : 401).json({ error: authError });
 
   if (action === "portal") {
     if (!userId) return res.status(400).json({ error: "Missing userId" });

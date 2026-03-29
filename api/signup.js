@@ -1,5 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 import { sendWelcomeEmail } from "./_lib/email.js";
+import { verifyAuth } from "./_lib/verifyAuth.js";
 
 const supabase = createClient(
   process.env.SUPABASE_URL,
@@ -13,6 +14,8 @@ export default async function handler(req, res) {
 
   if (action === "referral") {
     if (!userId || !refCode) return res.status(400).json({ error: "Missing fields" });
+    const { error: authError } = await verifyAuth(req, userId);
+    if (authError) return res.status(authError === "Forbidden" ? 403 : 401).json({ error: authError });
     try {
       const { data: referrer } = await supabase.from("profiles").select("id, pro_trial_until, referred_count").eq("referral_code", refCode).single();
       if (!referrer) return res.status(200).json({ ok: true });
@@ -31,7 +34,9 @@ export default async function handler(req, res) {
   }
 
   // Default: welcome email
-  if (!email) return res.status(400).json({ error: "Email is required" });
+  if (!userId || !email) return res.status(400).json({ error: "Missing fields" });
+  const { error: authError } = await verifyAuth(req, userId);
+  if (authError) return res.status(authError === "Forbidden" ? 403 : 401).json({ error: authError });
   try {
     await sendWelcomeEmail(email);
     res.status(200).json({ ok: true });

@@ -1,4 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
+import { verifyAuth } from "./_lib/verifyAuth.js";
 
 const today = () => new Date().toISOString().slice(0, 10);
 
@@ -7,6 +8,9 @@ export default async function handler(req, res) {
 
   const { tradeData, userId, action } = req.body || {};
   if (!tradeData || !userId) return res.status(400).json({ error: "Missing fields" });
+
+  const { error: authError } = await verifyAuth(req, userId);
+  if (authError) return res.status(authError === "Forbidden" ? 403 : 401).json({ error: authError });
 
   const admin = createClient(
     process.env.SUPABASE_URL,

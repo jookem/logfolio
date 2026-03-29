@@ -128,7 +128,9 @@ const [page, setPage] = useState(1);
         const isNew = user.created_at && (Date.now() - new Date(user.created_at).getTime()) < 10 * 60 * 1000;
         if (isNew && !local?.length && !localStorage.getItem(`tradelog_onboarding_done_${user.id}`)) {
           setShowOnboarding(true);
-          fetch("/api/signup", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ userId: user.id, email: user.email }) }).catch(() => {});
+          supabase.auth.getSession().then(({ data: { session } }) => {
+            fetch("/api/signup", { method: "POST", headers: { "Content-Type": "application/json", ...(session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {}) }, body: JSON.stringify({ userId: user.id, email: user.email }) }).catch(() => {});
+          });
         }
       } else {
         const loaded = data.map(row => ({ ...row.data, id: row.id }));
@@ -146,7 +148,9 @@ const [page, setPage] = useState(1);
             setTrades([]);
             if (!localStorage.getItem(`tradelog_onboarding_done_${user.id}`)) {
               setShowOnboarding(true);
-              fetch("/api/signup", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ userId: user.id, email: user.email }) }).catch(() => {});
+              supabase.auth.getSession().then(({ data: { session } }) => {
+                fetch("/api/signup", { method: "POST", headers: { "Content-Type": "application/json", ...(session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {}) }, body: JSON.stringify({ userId: user.id, email: user.email }) }).catch(() => {});
+              });
             }
           }
         } else {
@@ -470,9 +474,10 @@ const [page, setPage] = useState(1);
     if (!user) return;
     showToast("Redirecting to checkout…", T.accent, null, 0);
     try {
+      const { data: { session } } = await supabase.auth.getSession();
       const res = await fetch("/api/billing", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", ...(session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {}) },
         body: JSON.stringify({ userId: user.id, email: user.email, plan }),
       });
       const body = await res.json();
@@ -511,9 +516,10 @@ const [page, setPage] = useState(1);
     if (!user) return;
     showToast("Opening billing portal…", T.accent, null, 0);
     try {
+      const { data: { session } } = await supabase.auth.getSession();
       const res = await fetch("/api/billing", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", ...(session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {}) },
         body: JSON.stringify({ action: "portal", userId: user.id }),
       });
       const body = await res.json();
