@@ -1752,22 +1752,22 @@ const paginated = filtered
           <div>
             {/* All key stats */}
             <div style={{ display: "grid", gridTemplateColumns: mobile ? "1fr 1fr" : "repeat(4,1fr)", gap: 12, marginBottom: 20 }}>
-              <StatCard label="Total P/L" value={fmt(stats.totalPL)} sub={`${stats.total} trades`} color={stats.totalPL >= 0 ? T.accent : T.danger} t={T} info="The sum of all realized profits and losses across your filtered trades. Positive means you made money; negative means you lost money over this period." />
+              <StatCard label="Total P/L" value={fmt(stats.totalPL)} sub={`${stats.total} trades`} color={stats.totalPL >= 0 ? T.positive : T.danger} t={T} info="The sum of all realized profits and losses across your filtered trades. Positive means you made money; negative means you lost money over this period." />
               <StatCard label="Win Rate" value={`${(stats.winRate * 100).toFixed(0)}%`} sub={`${stats.wins}W/${stats.total - stats.wins}L`} t={T} info="The percentage of your trades that closed with a profit. A 50% win rate means half your trades were winners. Higher is generally better, but win rate alone doesn't tell the full story — a low win rate can still be profitable with large average wins." />
-              <StatCard label="Expectancy" value={fmt(stats.expectancy)} sub="per trade" color={stats.expectancy >= 0 ? T.accent : T.danger} t={T} info="The average amount you can expect to make (or lose) per trade, calculated as: (Win Rate × Avg Win) + (Loss Rate × Avg Loss). A positive expectancy means your edge is working. This is arguably the most important metric for a trader." />
+              <StatCard label="Expectancy" value={fmt(stats.expectancy)} sub="per trade" color={stats.expectancy >= 0 ? T.positive : T.danger} t={T} info="The average amount you can expect to make (or lose) per trade, calculated as: (Win Rate × Avg Win) + (Loss Rate × Avg Loss). A positive expectancy means your edge is working. This is arguably the most important metric for a trader." />
               <StatCard label="Profit Factor" value={isFinite(stats.profitFactor) ? stats.profitFactor.toFixed(2) : "∞"} sub="wins/losses" t={T} info="Total gross profit divided by total gross loss. A Profit Factor above 1.0 means you made more than you lost. Above 1.5 is decent, above 2.0 is considered strong. For example, a Profit Factor of 2.0 means you earned $2 for every $1 you lost." />
-              <StatCard label="Avg R" value={avgR !== null ? fmtR(avgR) : "—"} sub="per closed trade" color={avgR !== null && avgR >= 0 ? T.accent : avgR !== null ? T.danger : undefined} t={T} info="Average return per trade measured in R-multiples, where 1R equals your initial risk on that trade. An Avg R of 1.5R means you made 1.5× your risk on average. This normalizes performance across trades with different position sizes." />
-              <StatCard label="Avg Win" value={fmt(stats.avgWin)} color={T.accent} t={T} info="The average dollar profit of your winning trades. Compare this to Avg Loss to understand your reward-to-risk ratio. A healthy system typically has an Avg Win at least equal to or larger than the Avg Loss." />
+              <StatCard label="Avg R" value={avgR !== null ? fmtR(avgR) : "—"} sub="per closed trade" color={avgR !== null && avgR >= 0 ? T.positive : avgR !== null ? T.danger : undefined} t={T} info="Average return per trade measured in R-multiples, where 1R equals your initial risk on that trade. An Avg R of 1.5R means you made 1.5× your risk on average. This normalizes performance across trades with different position sizes." />
+              <StatCard label="Avg Win" value={fmt(stats.avgWin)} color={T.positive} t={T} info="The average dollar profit of your winning trades. Compare this to Avg Loss to understand your reward-to-risk ratio. A healthy system typically has an Avg Win at least equal to or larger than the Avg Loss." />
               <StatCard label="Avg Loss" value={fmt(stats.avgLoss)} color={T.danger} t={T} info="The average dollar loss of your losing trades. This is shown as a negative number. Keeping Avg Loss small relative to Avg Win is key to long-term profitability — even with a lower win rate." />
-              <StatCard label="Best Trade" value={plList.length ? fmt(Math.max(...plList.map(t => t.pl))) : "—"} color={T.accent} t={T} info="The single largest profit from one trade in your filtered set. Useful for identifying outlier wins and checking whether your overall P/L is heavily dependent on a few exceptional trades." />
+              <StatCard label="Best Trade" value={plList.length ? fmt(Math.max(...plList.map(t => t.pl))) : "—"} color={T.positive} t={T} info="The single largest profit from one trade in your filtered set. Useful for identifying outlier wins and checking whether your overall P/L is heavily dependent on a few exceptional trades." />
               <StatCard label="Worst Trade" value={plList.length ? fmt(Math.min(...plList.map(t => t.pl))) : "—"} color={T.danger} t={T} info="The single largest loss from one trade in your filtered set. Useful for spotting when you broke your risk rules or got caught in an unexpected move. Large outlier losses often point to position sizing or stop-loss issues." />
               <StatCard label="Max Drawdown" value={maxDrawdown.value > 0 ? `-${fmt(maxDrawdown.value)}` : "—"} sub={maxDrawdown.pct > 0 ? `${(maxDrawdown.pct * 100).toFixed(1)}% of peak` : "no drawdown"} color={maxDrawdown.value > 0 ? T.danger : undefined} t={T} info="The largest peak-to-trough decline in your cumulative equity curve — how much your account dropped from its highest point before recovering. It measures the worst losing streak you endured. Smaller drawdowns mean a smoother, more consistent equity curve." />
-              <StatCard label="Sharpe Ratio" value={stats.sharpe !== null ? stats.sharpe.toFixed(2) : "—"} sub="return / volatility" color={stats.sharpe !== null ? (stats.sharpe >= 1 ? T.accent : stats.sharpe >= 0 ? undefined : T.danger) : undefined} t={T} info="Measures return relative to total volatility (both up and down swings). Calculated as average P/L divided by the standard deviation of your P/L. Above 1.0 is good, above 2.0 is excellent. A low Sharpe means your returns are inconsistent even if profitable." />
-              <StatCard label="Sortino Ratio" value={stats.sortino !== null ? stats.sortino.toFixed(2) : "—"} sub="return / downside risk" color={stats.sortino !== null ? (stats.sortino >= 1 ? T.accent : stats.sortino >= 0 ? undefined : T.danger) : undefined} t={T} info="Like the Sharpe Ratio, but only penalizes downside volatility (losing trades). Calculated as average P/L divided by the standard deviation of losing trades only. Higher is better — a high Sortino with a low Sharpe means your variance comes from big wins, not big losses. Below 1.0: poor downside-adjusted returns. 1.0–2.0: acceptable. Above 2.0: good. Above 3.0: excellent." />
-              <StatCard label="Treynor Ratio" value={benchmarkStats.treynor !== null ? benchmarkStats.treynor.toFixed(4) : "—"} sub={benchmarkStats.treynor !== null ? "return / market risk" : "needs SPY data"} color={benchmarkStats.treynor !== null ? (benchmarkStats.treynor > 0 ? T.accent : T.danger) : undefined} t={T} info="Measures return per unit of market (systematic) risk, using SPY as the benchmark. Beta captures how much your P/L moves with the overall market. A higher Treynor means you're being well-compensated for the market risk you're taking on. Below 0: underperforming the market on a risk-adjusted basis. 0–0.1: weak. 0.1–0.5: decent. Above 0.5: strong. Shows '—' until SPY data loads." />
-              <StatCard label="Info Ratio" value={benchmarkStats.infoRatio !== null ? benchmarkStats.infoRatio.toFixed(2) : "—"} sub={benchmarkStats.infoRatio !== null ? "active return / tracking error" : "needs SPY data"} color={benchmarkStats.infoRatio !== null ? (benchmarkStats.infoRatio >= 0.5 ? T.accent : benchmarkStats.infoRatio >= 0 ? undefined : T.danger) : undefined} t={T} info="Measures how consistently your trading outperforms SPY. Active return is your daily P/L minus what SPY returned that day. Tracking error is the volatility of that difference. Above 0.5 is solid, above 1.0 is exceptional. Shows '—' until SPY data loads." />
-              <StatCard label="Alpha" value={benchmarkStats.alpha !== null ? benchmarkStats.alpha.toFixed(4) : "—"} sub={benchmarkStats.alpha !== null ? "excess return vs SPY" : "needs SPY data"} color={benchmarkStats.alpha !== null ? (benchmarkStats.alpha > 0 ? T.accent : T.danger) : undefined} t={T} info="Jensen's Alpha — the return your trading generates above what would be expected given your exposure to market movements (beta). Positive alpha means you're adding real skill beyond just riding the market. Negative alpha means the market is outperforming your adjusted returns. Shows '—' until SPY data loads." />
-              <StatCard label="Beta" value={benchmarkStats.beta !== null ? benchmarkStats.beta.toFixed(2) : "—"} sub={benchmarkStats.beta !== null ? "vs SPY" : "needs SPY data"} color={benchmarkStats.beta !== null ? (Math.abs(benchmarkStats.beta) <= 1 ? T.accent : T.danger) : undefined} t={T} info="Measures how much your daily P/L moves in sync with SPY. A Beta of 1.0 means your returns move perfectly with the market; below 1.0 means less correlated (more independent); above 1.0 means amplified market swings. Negative beta means your returns tend to move opposite the market. Closer to 0 generally means your edge is more skill-based than market-driven. Shows '—' until SPY data loads." />
+              <StatCard label="Sharpe Ratio" value={stats.sharpe !== null ? stats.sharpe.toFixed(2) : "—"} sub="return / volatility" color={stats.sharpe !== null ? (stats.sharpe >= 1 ? T.positive : stats.sharpe >= 0 ? undefined : T.danger) : undefined} t={T} info="Measures return relative to total volatility (both up and down swings). Calculated as average P/L divided by the standard deviation of your P/L. Above 1.0 is good, above 2.0 is excellent. A low Sharpe means your returns are inconsistent even if profitable." />
+              <StatCard label="Sortino Ratio" value={stats.sortino !== null ? stats.sortino.toFixed(2) : "—"} sub="return / downside risk" color={stats.sortino !== null ? (stats.sortino >= 1 ? T.positive : stats.sortino >= 0 ? undefined : T.danger) : undefined} t={T} info="Like the Sharpe Ratio, but only penalizes downside volatility (losing trades). Calculated as average P/L divided by the standard deviation of losing trades only. Higher is better — a high Sortino with a low Sharpe means your variance comes from big wins, not big losses. Below 1.0: poor downside-adjusted returns. 1.0–2.0: acceptable. Above 2.0: good. Above 3.0: excellent." />
+              <StatCard label="Treynor Ratio" value={benchmarkStats.treynor !== null ? benchmarkStats.treynor.toFixed(4) : "—"} sub={benchmarkStats.treynor !== null ? "return / market risk" : "needs SPY data"} color={benchmarkStats.treynor !== null ? (benchmarkStats.treynor > 0 ? T.positive : T.danger) : undefined} t={T} info="Measures return per unit of market (systematic) risk, using SPY as the benchmark. Beta captures how much your P/L moves with the overall market. A higher Treynor means you're being well-compensated for the market risk you're taking on. Below 0: underperforming the market on a risk-adjusted basis. 0–0.1: weak. 0.1–0.5: decent. Above 0.5: strong. Shows '—' until SPY data loads." />
+              <StatCard label="Info Ratio" value={benchmarkStats.infoRatio !== null ? benchmarkStats.infoRatio.toFixed(2) : "—"} sub={benchmarkStats.infoRatio !== null ? "active return / tracking error" : "needs SPY data"} color={benchmarkStats.infoRatio !== null ? (benchmarkStats.infoRatio >= 0.5 ? T.positive : benchmarkStats.infoRatio >= 0 ? undefined : T.danger) : undefined} t={T} info="Measures how consistently your trading outperforms SPY. Active return is your daily P/L minus what SPY returned that day. Tracking error is the volatility of that difference. Above 0.5 is solid, above 1.0 is exceptional. Shows '—' until SPY data loads." />
+              <StatCard label="Alpha" value={benchmarkStats.alpha !== null ? benchmarkStats.alpha.toFixed(4) : "—"} sub={benchmarkStats.alpha !== null ? "excess return vs SPY" : "needs SPY data"} color={benchmarkStats.alpha !== null ? (benchmarkStats.alpha > 0 ? T.positive : T.danger) : undefined} t={T} info="Jensen's Alpha — the return your trading generates above what would be expected given your exposure to market movements (beta). Positive alpha means you're adding real skill beyond just riding the market. Negative alpha means the market is outperforming your adjusted returns. Shows '—' until SPY data loads." />
+              <StatCard label="Beta" value={benchmarkStats.beta !== null ? benchmarkStats.beta.toFixed(2) : "—"} sub={benchmarkStats.beta !== null ? "vs SPY" : "needs SPY data"} color={benchmarkStats.beta !== null ? (Math.abs(benchmarkStats.beta) <= 1 ? T.positive : T.danger) : undefined} t={T} info="Measures how much your daily P/L moves in sync with SPY. A Beta of 1.0 means your returns move perfectly with the market; below 1.0 means less correlated (more independent); above 1.0 means amplified market swings. Negative beta means your returns tend to move opposite the market. Closer to 0 generally means your edge is more skill-based than market-driven. Shows '—' until SPY data loads." />
             </div>
 
             {/* Equity Curve */}
@@ -1793,7 +1793,7 @@ const paginated = filtered
                     <div style={{ display: "flex", alignItems: "flex-end", gap: 6, height: chartH + 40 }}>
                       {rDistribution.map((b, i) => {
                         const barH = b.count === 0 ? 4 : Math.max(8, (b.count / maxCount) * chartH);
-                        const color = b.min >= 0 ? T.accent : T.danger;
+                        const color = b.min >= 0 ? T.positive : T.danger;
                         return (
                           <div key={i} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
                             <div style={{ fontSize: 10, color: T.text3, fontFamily: "'Space Mono',monospace" }}>{b.count > 0 ? b.count : ""}</div>
@@ -1817,7 +1817,7 @@ const paginated = filtered
                   const { winAvg, lossAvg, winCount, lossCount, fmtMins } = durationAnalysis;
                   const maxVal = Math.max(winAvg || 0, lossAvg || 0, 1);
                   const rows = [
-                    { label: "Winners", avg: winAvg, count: winCount, color: T.accent },
+                    { label: "Winners", avg: winAvg, count: winCount, color: T.positive },
                     { label: "Losers", avg: lossAvg, count: lossCount, color: T.danger },
                   ];
                   return (
@@ -1837,7 +1837,7 @@ const paginated = filtered
                         <div style={{ fontSize: 11, color: T.text3, marginTop: 2 }}>
                           {lossAvg > winAvg
                             ? <span style={{ color: T.danger }}>⚠ You hold losers {durationAnalysis.fmtMins(lossAvg - winAvg)} longer than winners on average</span>
-                            : <span style={{ color: T.accent }}>✓ You cut losers faster than you hold winners</span>}
+                            : <span style={{ color: T.positive }}>✓ You cut losers faster than you hold winners</span>}
                         </div>
                       )}
                     </div>
@@ -1855,7 +1855,7 @@ const paginated = filtered
                 <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                   {stratLeaderboard.map((s, i) => {
                     const winPct = Math.round(s.winRate * 100);
-                    const plColor = s.pl >= 0 ? T.accent : T.danger;
+                    const plColor = s.pl >= 0 ? T.positive : T.danger;
                     const rankColors = ["#f59e0b", T.text3, "#cd7f32"];
                     return (
                       <div key={s.name} style={{ display: "grid", gridTemplateColumns: "24px 1fr auto", gap: 12, alignItems: "center" }}>
@@ -1868,11 +1868,11 @@ const paginated = filtered
                             <span style={{ fontSize: 11, color: T.text3 }}>{s.total} trade{s.total !== 1 ? "s" : ""}</span>
                           </div>
                           <div style={{ height: 5, borderRadius: 3, background: T.border, overflow: "hidden" }}>
-                            <div style={{ height: "100%", width: `${winPct}%`, borderRadius: 3, background: winPct >= 50 ? T.accent : T.danger, transition: "width 0.4s ease" }} />
+                            <div style={{ height: "100%", width: `${winPct}%`, borderRadius: 3, background: winPct >= 50 ? T.positive : T.danger, transition: "width 0.4s ease" }} />
                           </div>
                         </div>
                         <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 2, minWidth: 72 }}>
-                          <span style={{ fontFamily: "'Space Mono',monospace", fontSize: 10, color: winPct >= 50 ? T.accent : T.danger, fontWeight: 700 }}>{winPct}%WR</span>
+                          <span style={{ fontFamily: "'Space Mono',monospace", fontSize: 10, color: winPct >= 50 ? T.positive : T.danger, fontWeight: 700 }}>{winPct}%WR</span>
                           <span style={{ fontFamily: "'Space Mono',monospace", fontSize: 12, fontWeight: 700, color: plColor }}>{s.pl >= 0 ? "+" : ""}{fmt(s.pl)}</span>
                         </div>
                       </div>
@@ -1898,7 +1898,7 @@ const paginated = filtered
                 ) : null}
                 <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                   {strategyDecay.map(({ strategy, allWR, recentWR, allAvg, recentAvg, wrDrop, health, total }) => {
-                    const dotColor = health === "green" ? T.accent : health === "amber" ? "#f59e0b" : T.danger;
+                    const dotColor = health === "green" ? T.positive : health === "amber" ? "#f59e0b" : T.danger;
                     const label = health === "green" ? "Healthy" : health === "amber" ? "Declining" : "Underperforming";
                     return (
                       <div key={strategy} style={{ display: "grid", gridTemplateColumns: "10px 1fr auto", gap: 12, alignItems: "center" }}>
@@ -1910,7 +1910,7 @@ const paginated = filtered
                           </div>
                           <div style={{ display: "flex", gap: 16 }}>
                             <span style={{ fontSize: 11, color: T.text3 }}>All-time: <span style={{ color: T.text, fontFamily: "'Space Mono',monospace" }}>{Math.round(allWR * 100)}%WR · {allAvg >= 0 ? "+" : ""}{fmt(allAvg)}</span></span>
-                            <span style={{ fontSize: 11, color: T.text3 }}>Recent 10: <span style={{ color: health === "green" ? T.accent : dotColor, fontFamily: "'Space Mono',monospace" }}>{Math.round(recentWR * 100)}%WR · {recentAvg >= 0 ? "+" : ""}{fmt(recentAvg)}</span></span>
+                            <span style={{ fontSize: 11, color: T.text3 }}>Recent 10: <span style={{ color: health === "green" ? T.positive : dotColor, fontFamily: "'Space Mono',monospace" }}>{Math.round(recentWR * 100)}%WR · {recentAvg >= 0 ? "+" : ""}{fmt(recentAvg)}</span></span>
                           </div>
                         </div>
                         <div style={{ fontSize: 10, color: T.text3, textAlign: "right", minWidth: 32 }}>{total}t</div>
@@ -1933,7 +1933,7 @@ const paginated = filtered
                     {[...dowBreakdown].sort((a, b) => b.pl - a.pl).map(({ day, total, wins, pl }) => {
                       const winPct = Math.round((wins / total) * 100);
                       const avgPL = pl / total;
-                      const color = pl >= 0 ? T.accent : T.danger;
+                      const color = pl >= 0 ? T.positive : T.danger;
                       const barWidth = Math.round((Math.abs(pl) / maxTimeAbsPL) * 100);
                       return (
                         <div key={day}>
@@ -1965,7 +1965,7 @@ const paginated = filtered
                   <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                     {activeHours.map(h => {
                       const d = hourHeatmap[h];
-                      const color = d.pl >= 0 ? T.accent : T.danger;
+                      const color = d.pl >= 0 ? T.positive : T.danger;
                       const winPct = Math.round((d.wins / d.total) * 100);
                       const barWidth = Math.round((Math.abs(d.pl) / maxTimeAbsPL) * 100);
                       const label = h < 10 ? `0${h}:00` : `${h}:00`;
@@ -2014,7 +2014,7 @@ const paginated = filtered
                       <span style={{ fontSize: 13, color: T.text2 }}>{tag} <span style={{ fontSize: 10, color: T.text3 }}>({tagged.length})</span></span>
                       <div style={{ display: "flex", gap: 10 }}>
                         <span style={{ fontSize: 10, color: T.text3, fontFamily: "'Space Mono',monospace" }}>{(tagWR * 100).toFixed(0)}%WR</span>
-                        <span style={{ fontFamily: "'Space Mono',monospace", fontSize: 12, color: tagPL >= 0 ? T.accent : T.danger }}>{tagPL >= 0 ? "+" : ""}{fmt(tagPL)}</span>
+                        <span style={{ fontFamily: "'Space Mono',monospace", fontSize: 12, color: tagPL >= 0 ? T.positive : T.danger }}>{tagPL >= 0 ? "+" : ""}{fmt(tagPL)}</span>
                       </div>
                     </div>
                     <MiniBar value={tagPL} max={maxTagPL} t={T} />
@@ -2049,7 +2049,7 @@ const paginated = filtered
                           <span style={{ fontSize: 13, color: T.text2 }}>{em}</span>
                           <span style={{ fontSize: 10, color: T.text3, marginLeft: 8 }}>{d.count} trade{d.count !== 1 ? "s" : ""} · {winPct}%WR</span>
                         </div>
-                        <span style={{ fontFamily: "'Space Mono',monospace", fontSize: 12, fontWeight: 700, color: d.pl >= 0 ? T.accent : T.danger }}>{d.pl >= 0 ? "+" : ""}{fmt(d.pl)}</span>
+                        <span style={{ fontFamily: "'Space Mono',monospace", fontSize: 12, fontWeight: 700, color: d.pl >= 0 ? T.positive : T.danger }}>{d.pl >= 0 ? "+" : ""}{fmt(d.pl)}</span>
                       </div>
                       <MiniBar value={d.pl} max={maxEmotionPL} t={T} />
                     </div>
@@ -2070,7 +2070,7 @@ const paginated = filtered
                   <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                     {tickerBreakdown.slice(0, 8).map(({ ticker, pl, total, winRate }) => {
                       const winPct = Math.round(winRate * 100);
-                      const color = pl >= 0 ? T.accent : T.danger;
+                      const color = pl >= 0 ? T.positive : T.danger;
                       const maxAbs = Math.max(...tickerBreakdown.map(t => Math.abs(t.pl)), 1);
                       const barWidth = Math.round((Math.abs(pl) / maxAbs) * 100);
                       return (
@@ -2117,7 +2117,7 @@ const paginated = filtered
                       const maxAbs = Math.max(...mistakeBreakdown.map(m => Math.abs(m.cost)), 1);
                       const barWidth = Math.round((Math.abs(cost) / maxAbs) * 100);
                       const trendIcon = trending === "up" ? "↑" : trending === "down" ? "↓" : null;
-                      const trendColor = trending === "up" ? T.danger : T.accent;
+                      const trendColor = trending === "up" ? T.danger : T.positive;
                       return (
                         <div key={mistake}>
                           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 5 }}>

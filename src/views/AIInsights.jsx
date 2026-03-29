@@ -358,7 +358,7 @@ Provide 4-6 patterns. Be brutally honest but constructive.`;
   };
 
   const scoreColor = insights
-    ? insights.score >= 70 ? t.accent : insights.score >= 40 ? "#f59e0b" : t.danger
+    ? insights.score >= 70 ? t.positive : insights.score >= 40 ? "#f59e0b" : t.danger
     : t.text3;
 
   return (
@@ -436,7 +436,7 @@ Provide 4-6 patterns. Be brutally honest but constructive.`;
             <div style={{ background: t.surface, border: `1px solid ${t.border}`, borderRadius: 12, padding: "20px 24px" }}>
               <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 10, color: t.text3, textTransform: "uppercase", letterSpacing: 2, marginBottom: 12 }}>Pattern Summary</div>
               <div style={{ display: "flex", gap: 16 }}>
-                {[["warning", t.danger, "Warnings", <WarningIcon size={12} />], ["strength", t.accent, "Strengths", <CheckIcon size={12} />], ["neutral", t.text3, "Neutral", <CircleIcon size={12} />]].map(([type, color, label, icon]) => (
+                {[["warning", t.danger, "Warnings", <WarningIcon size={12} />], ["strength", t.positive, "Strengths", <CheckIcon size={12} />], ["neutral", t.text3, "Neutral", <CircleIcon size={12} />]].map(([type, color, label, icon]) => (
                   <div key={type} style={{ textAlign: "center" }}>
                     <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 22, fontWeight: 700, color }}>{insights.patterns.filter((p) => p.type === type).length}</div>
                     <div style={{ fontSize: 11, color, display: "flex", alignItems: "center", justifyContent: "center", gap: 4 }}>{icon}{label}</div>
@@ -448,7 +448,7 @@ Provide 4-6 patterns. Be brutally honest but constructive.`;
 
           <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
             {insights.patterns.map((p, i) => {
-              const color = p.type === "warning" ? t.danger : p.type === "strength" ? t.accent : t.text3;
+              const color = p.type === "warning" ? t.danger : p.type === "strength" ? t.positive : t.text3;
               const icon = p.type === "warning"
                 ? <WarningIcon size={16} />
                 : p.type === "strength"
