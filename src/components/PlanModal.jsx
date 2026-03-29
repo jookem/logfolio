@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useModalClose } from "../lib/useModalClose";
 import { PlanIcon, CloseIcon, WarningIcon, TargetIcon, TickerIcon, CategoryIcon, StrategyIcon, TodayIcon, DirectionIcon, AmountIcon, EntryPriceIcon, CurrentPriceIcon, EmotionIcon, TagsIcon, PenIcon, ChecklistIcon, RobotIcon, BuySellIcon, CallOrPutIcon, StrikeIcon, PremiumEntryIcon, ContractsIcon, IVIcon, TimeframeIcon } from "../lib/icons";
 import { supabase } from "../lib/supabase";
@@ -8,6 +8,30 @@ import DateInput from "./DateInput";
 import Tag from "./Tag";
 import VoiceNote from "./VoiceNote";
 import ScreenshotUpload from "./ScreenshotUpload";
+
+// Compress an image to JPEG max 1200px, returns { base64, mediaType }
+async function compressChartImage(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onerror = reject;
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onerror = reject;
+      img.onload = () => {
+        const MAX = 1200;
+        let w = img.width, h = img.height;
+        if (w > MAX) { h = Math.round((h * MAX) / w); w = MAX; }
+        const canvas = document.createElement("canvas");
+        canvas.width = w; canvas.height = h;
+        canvas.getContext("2d").drawImage(img, 0, 0, w, h);
+        const dataUrl = canvas.toDataURL("image/jpeg", 0.88);
+        resolve({ base64: dataUrl.split(",")[1], mediaType: "image/jpeg", previewUrl: dataUrl });
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
 
 export default function PlanModal({ onClose, onSave, t, isDark, initial, trades = [], spyData = null, isPro = false, isProPlus = false, onUpgrade }) {
   const { closing, trigger } = useModalClose();
@@ -164,10 +188,12 @@ const [emotionInput, setEmotionInput] = useState("");
 const [showSizeCalc, setShowSizeCalc] = useState(false);
 const [calcAccountSize, setCalcAccountSize] = useState("");
 const [calcRiskPct, setCalcRiskPct] = useState("1");
-const [aiAssist, setAiAssist] = useState(initial?.aiAssist || null); // { marketBias, checklist }
+const [aiAssist, setAiAssist] = useState(initial?.aiAssist || null); // { marketBias, checklist, chartAnalysis? }
 const [aiLoading, setAiLoading] = useState(false);
 const [aiStep, setAiStep] = useState(""); // "price" | "ai"
 const [aiError, setAiError] = useState(null);
+const [chartImage, setChartImage] = useState(null); // { base64, mediaType, previewUrl }
+const chartFileRef = useRef(null);
 const [assistUsedToday, setAssistUsedToday] = useState(0);
 const ASSIST_DAILY_LIMIT = 3;
 
@@ -255,12 +281,16 @@ const fetchAiAssist = async () => {
           `- Take Profit: ${form.takeProfit || "unspecified"}`,
         ].join("\n");
 
-    const messages = [{
-      role: "user",
-      content: `You are a trading coach reviewing a ${isOptions ? "options" : "stock/equity"} trade plan. Given the following context, provide TWO sections:
+    const promptText = `You are a trading coach reviewing a ${isOptions ? "options" : "stock/equity"} trade plan. Given the following context, provide ${chartImage ? "THREE" : "TWO"} sections:
 
-1. MARKET_BIAS: One sentence on current price trend for ${ticker} based on its recent closes (bullish/bearish/neutral and why). Be concise.
-2. PERSONAL_CHECKLIST: 2-3 bullet points of personalised warnings or confirmations for this specific trade plan based on the trader's history. Be direct and honest. ${isOptions ? "This is an options trade — do NOT mention stop loss or share-based risk. Focus on Greeks exposure, expiration timing, premium paid, and strategy-specific risks." : ""}
+${chartImage ? `1. CHART_ANALYSIS: Analyse the attached chart screenshot. Identify:
+   - Key support and resistance levels (specific price levels if visible)
+   - Moving average positions and what they suggest (e.g. price above/below 20MA, 50MA, 200MA)
+   - Overall trend direction (uptrend / downtrend / ranging)
+   - Any notable patterns, signals, or risk zones visible
+   Keep it to 3-4 concise bullet points.
+2. MARKET_BIAS` : "1. MARKET_BIAS"}: One sentence on current price trend for ${ticker} based on its recent closes (bullish/bearish/neutral and why). Be concise.
+${chartImage ? "3." : "2."} PERSONAL_CHECKLIST: 2-3 bullet points of personalised warnings or confirmations for this specific trade plan based on the trader's history. Be direct and honest. ${isOptions ? "This is an options trade — do NOT mention stop loss or share-based risk. Focus on Greeks exposure, expiration timing, premium paid, and strategy-specific risks." : ""}
 
 Planned trade:
 ${tradeDetails}
@@ -275,15 +305,23 @@ ${ticker} last 10 closes:
 ${tickerPriceSummary}
 
 Respond in this exact JSON format:
-{"marketBias":"...", "checklist":["...","...","..."]}`,
-    }];
+{"marketBias":"...", "checklist":["...","...","..."]${chartImage ? ', "chartAnalysis":["...","...","..."]' : ""}}`;
+
+    const messageContent = chartImage
+      ? [
+          { type: "image", source: { type: "base64", media_type: chartImage.mediaType, data: chartImage.base64 } },
+          { type: "text", text: promptText },
+        ]
+      : promptText;
+
+    const messages = [{ role: "user", content: messageContent }];
 
     const headers = { "Content-Type": "application/json" };
     if (session?.access_token) headers["Authorization"] = `Bearer ${session.access_token}`;
     const res = await fetch("/api/analyse", {
       method: "POST",
       headers,
-      body: JSON.stringify({ userId: session?.user?.id, model: "claude-haiku-4-5-20251001", max_tokens: 400, messages, feature: "assist" }),
+      body: JSON.stringify({ userId: session?.user?.id, model: "claude-haiku-4-5-20251001", max_tokens: 700, messages, feature: "assist" }),
     });
     const data = await res.json();
     if (data.error) throw new Error(typeof data.error === "string" ? data.error : data.error.message);
@@ -1189,11 +1227,49 @@ const base = {
                 </div>
               </button>
             )}
+            {/* Chart upload */}
+            <input
+              ref={chartFileRef}
+              type="file"
+              accept="image/*"
+              style={{ display: "none" }}
+              onChange={async (e) => {
+                const file = e.target.files?.[0];
+                e.target.value = "";
+                if (!file) return;
+                try { setChartImage(await compressChartImage(file)); } catch { setAiError("Could not load image."); }
+              }}
+            />
+            {chartImage ? (
+              <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8, background: t.surface, border: `1px solid ${t.border}`, borderRadius: 8, padding: "8px 10px" }}>
+                <img src={chartImage.previewUrl} alt="Chart" style={{ width: 64, height: 40, objectFit: "cover", borderRadius: 5, flexShrink: 0 }} />
+                <div style={{ flex: 1, fontSize: 11, color: t.text3 }}>Chart attached — AI will identify S/R levels, MAs & patterns</div>
+                <button onClick={() => setChartImage(null)} style={{ background: "none", border: "none", color: t.text4, cursor: "pointer", fontSize: 16, lineHeight: 1, padding: 0, flexShrink: 0 }}>×</button>
+              </div>
+            ) : (
+              <button
+                onClick={() => chartFileRef.current?.click()}
+                style={{ width: "100%", background: "none", border: `1px dashed ${t.border}`, borderRadius: 7, padding: "8px 12px", cursor: "pointer", color: t.text3, fontSize: 11, fontFamily: "'Space Mono', monospace", marginBottom: 8, textAlign: "center" }}
+              >
+                + Attach chart (optional — for S/R & MA analysis)
+              </button>
+            )}
+
             {aiError && (
               <div style={{ fontSize: 11, color: t.danger, marginBottom: 8 }}>{aiError}</div>
             )}
             {aiAssist && (
               <div style={{ marginTop: 10, background: t.surface, border: `1px solid ${t.accent}30`, borderRadius: 10, padding: "14px 16px" }}>
+                {aiAssist.chartAnalysis?.length > 0 && (
+                  <>
+                    <div style={{ fontSize: 10, color: t.accent, fontFamily: "'Space Mono',monospace", textTransform: "uppercase", letterSpacing: 1.5, marginBottom: 8 }}>Chart Analysis</div>
+                    <div style={{ display: "flex", flexDirection: "column", gap: 5, marginBottom: 12 }}>
+                      {aiAssist.chartAnalysis.map((item, i) => (
+                        <div key={i} style={{ fontSize: 12, color: t.text2, lineHeight: 1.5, paddingLeft: 12, borderLeft: `2px solid ${t.accent}80` }}>{item}</div>
+                      ))}
+                    </div>
+                  </>
+                )}
                 <div style={{ fontSize: 10, color: t.accent, fontFamily: "'Space Mono',monospace", textTransform: "uppercase", letterSpacing: 1.5, marginBottom: 8 }}>Market Bias</div>
                 <div style={{ fontSize: 12, color: t.text2, lineHeight: 1.6, marginBottom: 12 }}>{aiAssist.marketBias}</div>
                 <div style={{ fontSize: 10, color: t.accent, fontFamily: "'Space Mono',monospace", textTransform: "uppercase", letterSpacing: 1.5, marginBottom: 8 }}>Personal Checklist</div>
