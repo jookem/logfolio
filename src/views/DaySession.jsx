@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { fmt, todayStr, typeLabels } from "../lib/utils";
 import { STOCK_LIKE } from "../lib/constants";
 import Tag from "../components/Tag";
@@ -18,7 +18,7 @@ const BADGE_DEFS = [
   { id: "journal_week", icon: "/images/journalCheck.svg",      color: "#14b8a6", label: "Journal Habit", desc: "7-day journal writing streak",                check: ({ journalStreak }) => journalStreak >= 7 },
 ];
 
-export default function DaySession({ plList, plans, onAddTrade, onAddPlan, journals = {}, t, mobile, isDark, isPro, onUpgrade }) {
+export default function DaySession({ plList, plans, onAddTrade, onAddPlan, journals = {}, t, mobile, isDark, isPro, onUpgrade, userId }) {
   const today = todayStr();
   const todayTrades = plList.filter((tr) => tr.date === today);
   const sessionPL = todayTrades.reduce((s, tr) => s + tr.pl, 0);
@@ -78,12 +78,24 @@ export default function DaySession({ plList, plans, onAddTrade, onAddPlan, journ
     : null;
   const showResumeBanner = daysSinceTrade !== null && daysSinceTrade >= 3;
 
-  // Trade anniversary — any trade exactly 1 year ago
-  const yearAgo = (() => { const d = new Date(today); d.setFullYear(d.getFullYear() - 1); return d.toISOString().slice(0, 10); })();
-  const anniversaryTrades = plList.filter(tr => tr.date === yearAgo);
+  // Feature 6: This week last year (Mon–Fri surrounding the date 1 year ago)
+  const weekLastYearTrades = useMemo(() => {
+    const yearAgoDate = new Date(today);
+    yearAgoDate.setFullYear(yearAgoDate.getFullYear() - 1);
+    const dow = yearAgoDate.getDay(); // 0=Sun
+    const daysToMonday = (dow + 6) % 7;
+    const weekStart = new Date(yearAgoDate);
+    weekStart.setDate(yearAgoDate.getDate() - daysToMonday);
+    const weekEnd = new Date(weekStart);
+    weekEnd.setDate(weekStart.getDate() + 4); // Friday
+    const startStr = weekStart.toISOString().slice(0, 10);
+    const endStr = weekEnd.toISOString().slice(0, 10);
+    return plList.filter(tr => tr.date >= startStr && tr.date <= endStr);
+  }, [plList, today]);
 
   // Badges
   const earnedIds = new Set(BADGE_DEFS.filter(b => b.check({ trades: plList, streak, journalStreak })).map(b => b.id));
+  const earnedIdsStr = [...earnedIds].sort().join(",");
 
   const [now, setNow] = useState(new Date());
   useEffect(() => {
@@ -102,11 +114,11 @@ export default function DaySession({ plList, plans, onAddTrade, onAddPlan, journ
     const closeSec = 16 * 3600;          // 4:00 PM ET
     const isWeekday = etDay >= 1 && etDay <= 5;
     const isOpen = isWeekday && totalSec >= openSec && totalSec < closeSec;
-    const fmt = (s) => {
+    const fmtSec = (s) => {
       const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), sec = s % 60;
       return `${String(h).padStart(2,"0")}:${String(m).padStart(2,"0")}:${String(sec).padStart(2,"0")}`;
     };
-    if (isOpen) return { label: "MARKET CLOSES IN", time: fmt(closeSec - totalSec), open: true };
+    if (isOpen) return { label: "MARKET CLOSES IN", time: fmtSec(closeSec - totalSec), open: true };
     let secsUntilOpen;
     if (isWeekday && totalSec < openSec) {
       secsUntilOpen = openSec - totalSec;
@@ -115,8 +127,58 @@ export default function DaySession({ plList, plans, onAddTrade, onAddPlan, journ
       while (checkDay === 0 || checkDay === 6) { daysAhead++; checkDay = (checkDay + 1) % 7; }
       secsUntilOpen = daysAhead * 86400 - totalSec + openSec;
     }
-    return { label: "MARKET OPENS IN", time: fmt(secsUntilOpen), open: false };
+    return { label: "MARKET OPENS IN", time: fmtSec(secsUntilOpen), open: false };
   })();
+
+  // Feature 3: EOD review reminder
+  const isAfterMarketClose = (() => {
+    const etNow = new Date(now.toLocaleString("en-US", { timeZone: "America/New_York" }));
+    const etDay = etNow.getDay();
+    const totalSec = etNow.getHours() * 3600 + etNow.getMinutes() * 60 + etNow.getSeconds();
+    return etDay >= 1 && etDay <= 5 && totalSec >= 16 * 3600;
+  })();
+  const eodKey = userId ? `eod_dismissed_${userId}_${today}` : null;
+  const [eodDismissed, setEodDismissed] = useState(() => eodKey ? !!localStorage.getItem(eodKey) : false);
+  const showEodBanner = !eodDismissed && isAfterMarketClose && todayTrades.length > 0;
+
+  // Feature 2: Morning intention
+  const intentionKey = userId ? `intention_${userId}_${today}` : null;
+  const [intention, setIntention] = useState(() => intentionKey ? localStorage.getItem(intentionKey) || "" : "");
+  const [intentionDraft, setIntentionDraft] = useState("");
+
+  // Feature 5: Badge unlock toasts
+  const badgesSeenKey = userId ? `badges_seen_${userId}` : null;
+  const [badgeToasts, setBadgeToasts] = useState([]);
+
+  useEffect(() => {
+    if (!badgesSeenKey) return;
+    const seen = new Set((localStorage.getItem(badgesSeenKey) || "").split(",").filter(Boolean));
+    const newBadges = BADGE_DEFS.filter(b => earnedIds.has(b.id) && !seen.has(b.id));
+    if (newBadges.length > 0) {
+      setBadgeToasts(newBadges.map(b => b.id));
+      localStorage.setItem(badgesSeenKey, [...new Set([...seen, ...newBadges.map(b => b.id)])].join(","));
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [earnedIdsStr, badgesSeenKey]);
+
+  useEffect(() => {
+    if (badgeToasts.length === 0) return;
+    const timer = setTimeout(() => setBadgeToasts([]), 4500);
+    return () => clearTimeout(timer);
+  }, [badgeToasts.length]);
+
+  const handleSetIntention = () => {
+    const trimmed = intentionDraft.trim();
+    if (!trimmed) return;
+    if (intentionKey) localStorage.setItem(intentionKey, trimmed);
+    setIntention(trimmed);
+    setIntentionDraft("");
+  };
+
+  const handleEodDismiss = () => {
+    if (eodKey) localStorage.setItem(eodKey, "1");
+    setEodDismissed(true);
+  };
 
   const statCard = (label, value, color) => (
     <div style={{ background: color + "15", border: `1px solid ${color}30`, borderRadius: 8, padding: "8px 14px", textAlign: "center" }}>
@@ -140,14 +202,68 @@ export default function DaySession({ plList, plans, onAddTrade, onAddPlan, journ
         </div>
       )}
 
-      <QuoteOfDay t={t} />
+      {/* Feature 2: Morning intention */}
+      {userId && (
+        <div style={{ background: t.surface, border: `1px solid ${t.border}`, borderRadius: 10, padding: "12px 16px", marginBottom: 16 }}>
+          <div style={{ fontSize: 10, color: t.accent, fontFamily: "'Space Mono', monospace", textTransform: "uppercase", letterSpacing: 1.5, marginBottom: intention ? 6 : 10 }}>
+            Today's Focus
+          </div>
+          {intention ? (
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
+              <div style={{ fontSize: 13, color: t.text2, fontStyle: "italic", flex: 1 }}>"{intention}"</div>
+              <button
+                onClick={() => { setIntention(""); if (intentionKey) localStorage.removeItem(intentionKey); }}
+                style={{ background: "none", border: "none", color: t.text4, cursor: "pointer", fontSize: 18, lineHeight: 1, padding: 0, flexShrink: 0 }}
+              >
+                ×
+              </button>
+            </div>
+          ) : (
+            <div style={{ display: "flex", gap: 8 }}>
+              <input
+                value={intentionDraft}
+                onChange={e => setIntentionDraft(e.target.value)}
+                onKeyDown={e => e.key === "Enter" && handleSetIntention()}
+                placeholder="What is your intention for today's trading session?"
+                style={{ flex: 1, background: t.input, border: `1px solid ${t.border}`, borderRadius: 7, padding: "7px 12px", fontSize: 12, color: t.text, outline: "none", fontFamily: "inherit" }}
+              />
+              <button
+                onClick={handleSetIntention}
+                disabled={!intentionDraft.trim()}
+                style={{ background: t.accent, border: "none", color: "#000", borderRadius: 7, padding: "7px 14px", cursor: intentionDraft.trim() ? "pointer" : "default", fontSize: 11, fontWeight: 700, fontFamily: "'Space Mono', monospace", opacity: intentionDraft.trim() ? 1 : 0.4, whiteSpace: "nowrap" }}
+              >
+                Set
+              </button>
+            </div>
+          )}
+        </div>
+      )}
 
-      {/* Trade anniversary */}
-      {anniversaryTrades.length > 0 && (
+      <QuoteOfDay t={t} plList={plList} streak={streak} />
+
+      {/* Feature 3: EOD review reminder */}
+      {showEodBanner && (
+        <div style={{ background: "#a78bfa18", border: "1px solid #a78bfa40", borderRadius: 10, padding: "12px 16px", marginBottom: 16, display: "flex", alignItems: "center", gap: 12 }}>
+          <div style={{ flex: 1 }}>
+            <div style={{ fontSize: 12, fontWeight: 700, color: "#a78bfa", fontFamily: "'Space Mono', monospace", marginBottom: 2 }}>Market's closed</div>
+            <div style={{ fontSize: 12, color: t.text3 }}>You had {todayTrades.length} trade{todayTrades.length !== 1 ? "s" : ""} today. Take a moment to review and journal.</div>
+          </div>
+          <button
+            onClick={handleEodDismiss}
+            style={{ background: "none", border: "none", color: t.text4, cursor: "pointer", fontSize: 18, lineHeight: 1, padding: 0, flexShrink: 0 }}
+          >
+            ×
+          </button>
+        </div>
+      )}
+
+      {/* Feature 6: This week last year */}
+      {weekLastYearTrades.length > 0 && (
         <div style={{ background: t.surface, border: `1px solid ${t.accent}40`, borderRadius: 10, padding: "12px 16px", marginBottom: 16 }}>
-          <div style={{ fontSize: 10, color: t.accent, fontFamily: "'Space Mono', monospace", textTransform: "uppercase", letterSpacing: 1.5, marginBottom: 6 }}>1 Year Ago Today</div>
-          {anniversaryTrades.map(tr => (
-            <div key={tr.id} style={{ fontSize: 13, color: t.text }}>
+          <div style={{ fontSize: 10, color: t.accent, fontFamily: "'Space Mono', monospace", textTransform: "uppercase", letterSpacing: 1.5, marginBottom: 6 }}>This Week Last Year</div>
+          {weekLastYearTrades.map(tr => (
+            <div key={tr.id} style={{ fontSize: 13, color: t.text, marginBottom: 2 }}>
+              <span style={{ fontFamily: "'Space Mono', monospace", fontSize: 11, color: t.text3 }}>{tr.date} · </span>
               {tr.ticker} ·{" "}
               <span style={{ color: tr.pl >= 0 ? t.accent : t.danger, fontFamily: "'Space Mono', monospace", fontWeight: 700 }}>
                 {tr.pl >= 0 ? "+" : ""}{fmt(tr.pl)}
@@ -295,7 +411,7 @@ export default function DaySession({ plList, plans, onAddTrade, onAddPlan, journ
       {/* Achievement badges */}
       {plList.length > 0 && (
         <div style={{ background: t.surface, border: `1px solid ${t.border}`, borderRadius: 12, padding: "14px 16px", marginTop: 20 }}>
-          <style>{`@keyframes sparkle { 0%,100%{box-shadow:0 0 8px 2px #d4af3799,0 0 0 0 #d4af3700} 50%{box-shadow:0 0 18px 6px #d4af37cc,0 0 28px 10px #d4af3744} }`}</style>
+          <style>{`@keyframes sparkle { 0%,100%{box-shadow:0 0 8px 2px #d4af3799,0 0 0 0 #d4af3700} 50%{box-shadow:0 0 18px 6px #d4af37cc,0 0 28px 10px #d4af3744} } @keyframes badgeToast { 0%{opacity:0;transform:translateY(16px)} 15%{opacity:1;transform:translateY(0)} 85%{opacity:1;transform:translateY(0)} 100%{opacity:0;transform:translateY(-8px)} }`}</style>
           <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 10, color: t.text3, textTransform: "uppercase", letterSpacing: 2, marginBottom: 12 }}>Achievements</div>
           <div style={ mobile ? { display: "grid", gridTemplateColumns: "repeat(5, 1fr)", justifyItems: "center", gap: "12px 0" } : { display: "flex", justifyContent: "space-between" }}>
             {BADGE_DEFS.map(b => {
@@ -329,6 +445,30 @@ export default function DaySession({ plList, plans, onAddTrade, onAddPlan, journ
               );
             })}
           </div>
+        </div>
+      )}
+
+      {/* Feature 5: Badge unlock toasts */}
+      {badgeToasts.length > 0 && (
+        <div style={{ position: "fixed", bottom: 24, right: 24, zIndex: 9999, display: "flex", flexDirection: "column", gap: 10, pointerEvents: "none" }}>
+          {badgeToasts.map(id => {
+            const b = BADGE_DEFS.find(x => x.id === id);
+            if (!b) return null;
+            return (
+              <div key={id} style={{ background: t.card, border: `1.5px solid ${b.color}`, borderRadius: 12, padding: "12px 16px", display: "flex", alignItems: "center", gap: 12, boxShadow: `0 8px 24px rgba(0,0,0,0.3), 0 0 12px ${b.color}44`, animation: "badgeToast 4.5s ease forwards", minWidth: 220 }}>
+                <div style={{ width: 36, height: 36, borderRadius: 9, background: `linear-gradient(135deg, ${b.color}50, ${b.color}20)`, border: `1.5px solid ${b.color}`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                  {b.IconCmp
+                    ? <div style={{ color: isDark ? "#fff" : "#000" }}><b.IconCmp size={20} /></div>
+                    : <img src={b.icon} width={20} height={20} alt={b.label} style={{ filter: isDark ? "brightness(0) invert(1)" : "brightness(0)" }} />}
+                </div>
+                <div>
+                  <div style={{ fontSize: 10, color: b.color, fontFamily: "'Space Mono', monospace", textTransform: "uppercase", letterSpacing: 1, marginBottom: 2 }}>Badge Unlocked</div>
+                  <div style={{ fontSize: 13, fontWeight: 700, color: t.text }}>{b.label}</div>
+                  <div style={{ fontSize: 11, color: t.text3 }}>{b.desc}</div>
+                </div>
+              </div>
+            );
+          })}
         </div>
       )}
     </div>

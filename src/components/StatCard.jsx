@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useLayoutEffect } from "react";
+import { createPortal } from "react-dom";
 
 const PADDING = 12; // min gap from viewport edge
 
@@ -131,7 +132,7 @@ export default function StatCard({ label, value, sub, color, t, info }) {
         )}
       </div>
 
-      {open && (
+      {open && createPortal(
         <div
           ref={popRef}
           data-statpop
@@ -166,7 +167,8 @@ export default function StatCard({ label, value, sub, color, t, info }) {
             </button>
           </div>
           {info}
-        </div>
+        </div>,
+        document.body
       )}
     </>
   );

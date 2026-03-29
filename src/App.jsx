@@ -1392,6 +1392,7 @@ const paginated = filtered
               isDark={isDark}
               isPro={isPro}
               onUpgrade={() => handleUpgrade("pro")}
+              userId={user?.id}
             />
           </ErrorBoundary>
         )}
