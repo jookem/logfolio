@@ -73,14 +73,22 @@ export default function AIInsights({ plList, t, mobile }) {
     doc.setFillColor(...C.black);
     doc.rect(0, 0, pageW, 14, "F");
 
-    // Logo image
+    // Logo — render SVG to canvas to preserve transparency over the black bar
     try {
-      const resp = await fetch("/images/icon-192.png");
-      const blob = await resp.blob();
-      const logoDataUrl = await new Promise(resolve => {
-        const reader = new FileReader();
-        reader.onloadend = () => resolve(reader.result);
-        reader.readAsDataURL(blob);
+      const svgText = await fetch("/images/logfolio.svg").then(r => r.text());
+      const logoDataUrl = await new Promise((resolve, reject) => {
+        const img = new Image();
+        const blob = new Blob([svgText], { type: "image/svg+xml" });
+        const url = URL.createObjectURL(blob);
+        img.onload = () => {
+          const canvas = document.createElement("canvas");
+          canvas.width = 76; canvas.height = 76;
+          canvas.getContext("2d").drawImage(img, 0, 0, 76, 76);
+          URL.revokeObjectURL(url);
+          resolve(canvas.toDataURL("image/png"));
+        };
+        img.onerror = reject;
+        img.src = url;
       });
       doc.addImage(logoDataUrl, "PNG", margin, 1.5, 10, 10);
     } catch { /* skip logo if fetch fails */ }
