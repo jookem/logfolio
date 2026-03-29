@@ -112,14 +112,18 @@ const [page, setPage] = useState(1);
   const mobile = useIsMobile();
   const T = tk(isDark);
 
-  // Load trades from Supabase on login
+  // Load trades from Supabase on login, fetching in chunks to avoid large single queries
   useEffect(() => {
     if (!user) return;
+    const CHUNK_SIZE = 500;
     const loadFromSupabase = async () => {
-      const { data, error } = await supabase
+      // Fetch first chunk immediately so the app is usable right away
+      const { data: firstChunk, error } = await supabase
         .from("trades")
         .select("id, data")
-        .eq("user_id", user.id);
+        .eq("user_id", user.id)
+        .range(0, CHUNK_SIZE - 1);
+
       if (error) {
         // Supabase unreachable — fall back to localStorage
         const local = loadTrades();
@@ -132,32 +136,57 @@ const [page, setPage] = useState(1);
             fetch("/api/signup", { method: "POST", headers: { "Content-Type": "application/json", ...(session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {}) }, body: JSON.stringify({ userId: user.id, email: user.email }) }).catch(() => {});
           });
         }
-      } else {
-        const loaded = data.map(row => ({ ...row.data, id: row.id }));
-        if (loaded.length === 0) {
-          // Only migrate localStorage if it belongs to this exact user
-          const local = loadTrades();
-          const localUserId = localStorage.getItem("tradelog_user_id");
-          if (local?.length && localUserId === user.id) {
-            const rows = local.map(t => ({ id: t.id, user_id: user.id, data: t }));
-            await supabase.from("trades").upsert(rows);
-            setTrades(local);
-          } else {
-            // Supabase confirmed zero trades — show onboarding (only if not already dismissed)
-            saveTrades([]);
-            setTrades([]);
-            if (!localStorage.getItem(`tradelog_onboarding_done_${user.id}`)) {
-              setShowOnboarding(true);
-              supabase.auth.getSession().then(({ data: { session } }) => {
-                fetch("/api/signup", { method: "POST", headers: { "Content-Type": "application/json", ...(session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {}) }, body: JSON.stringify({ userId: user.id, email: user.email }) }).catch(() => {});
-              });
-            }
-          }
+        setTradesLoaded(true);
+        return;
+      }
+
+      const firstBatch = firstChunk.map(row => ({ ...row.data, id: row.id }));
+
+      if (firstBatch.length === 0) {
+        // Only migrate localStorage if it belongs to this exact user
+        const local = loadTrades();
+        const localUserId = localStorage.getItem("tradelog_user_id");
+        if (local?.length && localUserId === user.id) {
+          const rows = local.map(t => ({ id: t.id, user_id: user.id, data: t }));
+          await supabase.from("trades").upsert(rows);
+          setTrades(local);
         } else {
-          setTrades(loaded);
+          // Supabase confirmed zero trades — show onboarding (only if not already dismissed)
+          saveTrades([]);
+          setTrades([]);
+          if (!localStorage.getItem(`tradelog_onboarding_done_${user.id}`)) {
+            setShowOnboarding(true);
+            supabase.auth.getSession().then(({ data: { session } }) => {
+              fetch("/api/signup", { method: "POST", headers: { "Content-Type": "application/json", ...(session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {}) }, body: JSON.stringify({ userId: user.id, email: user.email }) }).catch(() => {});
+            });
+          }
+        }
+        setTradesLoaded(true);
+        return;
+      }
+
+      // App is usable as soon as the first chunk arrives
+      setTrades(firstBatch);
+      setTradesLoaded(true);
+
+      // If the first chunk was full, keep fetching remaining chunks in the background
+      if (firstChunk.length === CHUNK_SIZE) {
+        let allTrades = [...firstBatch];
+        let offset = CHUNK_SIZE;
+        while (true) {
+          const { data: chunk, error: chunkError } = await supabase
+            .from("trades")
+            .select("id, data")
+            .eq("user_id", user.id)
+            .range(offset, offset + CHUNK_SIZE - 1);
+          if (chunkError || !chunk?.length) break;
+          const batch = chunk.map(row => ({ ...row.data, id: row.id }));
+          allTrades = [...allTrades, ...batch];
+          setTrades([...allTrades]);
+          if (chunk.length < CHUNK_SIZE) break;
+          offset += CHUNK_SIZE;
         }
       }
-      setTradesLoaded(true);
     };
     loadFromSupabase();
   }, [user]);
