@@ -47,37 +47,35 @@ export default function SettingsModal({ onClose, isDark, theme, setTheme, onClea
         <div style={{ background: t.surface, border: `1px solid ${t.border}`, borderRadius: 12, padding: "14px 16px", marginBottom: 12 }}>
           <div style={{ fontSize: 11, color: t.text3, fontFamily: "'Space Mono', monospace", textTransform: "uppercase", letterSpacing: 1.5, marginBottom: 12 }}>Appearance</div>
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-            <div style={row}>
-              <span style={{ fontSize: 14, color: t.text }}>Theme</span>
-              <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-                {[
-                  { id: "light",     label: "Light",     Icon: LightModeIcon },
-                  { id: "dark",      label: "Dark",      Icon: DarkModeIcon  },
-                  { id: "bloomberg", label: "Bloomberg", Icon: null          },
-                ].map(({ id, label, Icon }) => {
-                  const active = (theme || (isDark ? "dark" : "light")) === id;
-                  const bbActive = id === "bloomberg" && active;
-                  return (
-                    <button
-                      key={id}
-                      onClick={() => setTheme(id)}
-                      style={{
-                        background: bbActive ? "#FF6600" : active ? t.accent : t.card2,
-                        border: `1px solid ${bbActive ? "#FF6600" : active ? t.accent : t.border}`,
-                        color: active ? "#000" : t.text3,
-                        borderRadius: 7, padding: "6px 12px", cursor: "pointer",
-                        fontSize: 12, fontFamily: "'Space Mono', monospace",
-                        fontWeight: active ? 700 : 400,
-                        display: "flex", alignItems: "center", gap: 5,
-                      }}
-                    >
-                      {Icon && <Icon size={13} />}
-                      {id === "bloomberg" && <span style={{ fontSize: 11, color: active ? "#000" : "#FF6600", fontWeight: 700 }}>◼</span>}
-                      {label}
-                    </button>
-                  );
-                })}
-              </div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+              {[
+                { id: "light",     label: "Light",     Icon: LightModeIcon },
+                { id: "dark",      label: "Dark",      Icon: DarkModeIcon  },
+                { id: "bloomberg", label: "Bloomberg", Icon: null          },
+              ].map(({ id, label, Icon }) => {
+                const active = (theme || (isDark ? "dark" : "light")) === id;
+                const bbActive = id === "bloomberg" && active;
+                return (
+                  <button
+                    key={id}
+                    onClick={() => setTheme(id)}
+                    style={{
+                      background: bbActive ? "#FF6600" : active ? t.accent : t.card2,
+                      border: `1px solid ${bbActive ? "#FF6600" : active ? t.accent : t.border}`,
+                      color: active ? "#000" : t.text3,
+                      borderRadius: 7, padding: "8px 14px", cursor: "pointer",
+                      fontSize: 13, fontFamily: "'Space Mono', monospace",
+                      fontWeight: active ? 700 : 400,
+                      display: "flex", alignItems: "center", gap: 8,
+                      textAlign: "left",
+                    }}
+                  >
+                    {Icon && <Icon size={14} />}
+                    {id === "bloomberg" && <span style={{ fontSize: 12, color: active ? "#000" : "#FF6600", fontWeight: 700, lineHeight: 1 }}>◼</span>}
+                    {label}
+                  </button>
+                );
+              })}
             </div>
             <div style={row}>
               <span style={{ fontSize: 14, color: t.text }}>Timezone</span>
