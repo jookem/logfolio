@@ -149,6 +149,7 @@ export default function StatCard({ label, value, sub, color, t, info }) {
             maxWidth: `min(280px, calc(100vw - ${PADDING * 2}px))`,
             width: "max-content",
             boxShadow: "0 8px 28px rgba(0,0,0,0.45)",
+            fontFamily: "'DM Sans','Segoe UI',sans-serif",
             fontSize: 13,
             color: t.text,
             lineHeight: 1.65,
