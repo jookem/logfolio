@@ -287,9 +287,10 @@ export default function SettingsModal({ onClose, isDark, setIsDark, onClear, t, 
                 onClick={async () => {
                   setSupportSending(true);
                   setSupportError(null);
+                  const { data: { session } } = await supabase.auth.getSession();
                   const res = await fetch("/api/contact", {
                     method: "POST",
-                    headers: { "Content-Type": "application/json" },
+                    headers: { "Content-Type": "application/json", ...(session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {}) },
                     body: JSON.stringify({ subject: supportSubject, message: supportMessage, userEmail: user?.email }),
                   });
                   setSupportSending(false);

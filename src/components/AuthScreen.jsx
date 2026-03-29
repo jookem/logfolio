@@ -48,9 +48,6 @@ export default function AuthScreen({ isDark }) {
       if (error) setError(error.message);
       else {
         setMessage("Check your email for a confirmation link.");
-        if (refCode && data.user?.id && data.session?.access_token) {
-          fetch("/api/signup", { method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${data.session.access_token}` }, body: JSON.stringify({ action: "referral", userId: data.user.id, refCode }) }).catch(() => {});
-        }
       }
     } else {
       const { error } = await supabase.auth.resetPasswordForEmail(email, {

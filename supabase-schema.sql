@@ -84,17 +84,33 @@ alter table public.profiles add column if not exists referral_code text unique;
 alter table public.profiles add column if not exists referred_by text;
 alter table public.profiles add column if not exists referred_count int default 0;
 
--- Auto-generate referral code for new users (update existing trigger)
+-- Auto-generate referral code for new users and process referrals atomically
 create or replace function public.handle_new_user()
 returns trigger as $$
 declare
   ref_code text;
+  ref_input text;
 begin
   -- Generate unique 8-char referral code
   ref_code := upper(substring(replace(gen_random_uuid()::text, '-', '') from 1 for 8));
-  insert into public.profiles (id, email, referral_code)
-  values (new.id, new.email, ref_code)
+
+  -- Read referral code from signup metadata (passed via supabase.auth.signUp options.data)
+  ref_input := new.raw_user_meta_data->>'referred_by';
+
+  -- Create profile, storing referral code used during signup
+  insert into public.profiles (id, email, referral_code, referred_by)
+  values (new.id, new.email, ref_code, ref_input)
   on conflict (id) do nothing;
+
+  -- Atomically reward the referrer (single UPDATE avoids race conditions)
+  if ref_input is not null then
+    update public.profiles
+    set
+      referred_count = coalesce(referred_count, 0) + 1,
+      pro_trial_until = greatest(coalesce(pro_trial_until, now()), now()) + interval '30 days'
+    where referral_code = ref_input;
+  end if;
+
   return new;
 end;
 $$ language plpgsql security definer;

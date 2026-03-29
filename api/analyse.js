@@ -89,21 +89,14 @@ export default async function handler(req, res) {
 
         // Roll back the count if Anthropic returned an error
         if (data.error) {
-          admin
-            .from("profiles")
-            .update({ [countCol]: count })
-            .eq("id", userId)
-            .then(() => {}).catch(() => {});
+          await admin.from("profiles").update({ [countCol]: count }).eq("id", userId).catch(console.error);
+          return res.status(500).json({ error: data.error.message || "AI error" });
         }
 
         return res.status(200).json(data);
       } catch (error) {
         // Roll back on network error
-        admin
-          .from("profiles")
-          .update({ [countCol]: count })
-          .eq("id", userId)
-          .then(() => {}).catch(() => {});
+        await admin.from("profiles").update({ [countCol]: count }).eq("id", userId).catch(console.error);
         return res.status(500).json({ error: error.message });
       }
     } catch {

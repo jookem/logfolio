@@ -12,6 +12,10 @@ Sentry.init({
   enabled: import.meta.env.PROD,
 });
 
+window.addEventListener("unhandledrejection", (event) => {
+  Sentry.captureException(event.reason);
+});
+
 const root = createRoot(document.getElementById("root"));
 root.render(
   <ErrorBoundary>

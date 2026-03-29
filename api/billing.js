@@ -30,7 +30,10 @@ export default async function handler(req, res) {
   const { data: profile } = await supabase.from("profiles").select("stripe_customer_id").eq("id", userId).single();
   let customerId = profile?.stripe_customer_id;
   if (!customerId) {
-    const customer = await stripe.customers.create({ email, metadata: { supabase_user_id: userId } });
+    const customer = await stripe.customers.create(
+      { email, metadata: { supabase_user_id: userId } },
+      { idempotencyKey: `cust_${userId}` }
+    );
     customerId = customer.id;
     await supabase.from("profiles").update({ stripe_customer_id: customerId }).eq("id", userId);
   }

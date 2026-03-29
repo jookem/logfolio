@@ -1,4 +1,5 @@
 import { Resend } from "resend";
+import { verifyAuth } from "./_lib/verifyAuth.js";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -11,6 +12,9 @@ export default async function handler(req, res) {
 
   const { subject, message, userEmail } = req.body || {};
   if (!message?.trim()) return res.status(400).json({ error: "Message is required" });
+
+  const { error: authError } = await verifyAuth(req);
+  if (authError) return res.status(401).json({ error: "Unauthorized" });
 
   const subjectLine = subject?.trim() || "Support Request";
 
