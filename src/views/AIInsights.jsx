@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "../lib/supabase";
 import { useAuth } from "../contexts/AuthContext";
 import { WarningIcon, CheckIcon, CircleIcon } from "../lib/icons";
+import { jsPDF } from "jspdf";
 
 const DAILY_LIMIT = 3;
 const today = () => new Date().toISOString().slice(0, 10);
@@ -45,6 +46,185 @@ export default function AIInsights({ plList, t, mobile }) {
         }
       });
   }, [user]);
+
+  const generatePDF = () => {
+    if (!insights) return;
+    const doc = new jsPDF({ unit: "mm", format: "a4" });
+    const pageW = 210;
+    const margin = 20;
+    const contentW = pageW - margin * 2;
+    let y = 22;
+
+    // Colour palette (light-mode for print readability)
+    const C = {
+      accent:    [0, 184, 122],
+      danger:    [230, 55, 87],
+      amber:     [245, 158, 11],
+      black:     [13, 15, 20],
+      gray:      [74, 80, 104],
+      muted:     [149, 153, 173],
+      rule:      [197, 200, 212],
+      cardBg:    [244, 245, 247],
+    };
+    const scoreColor = insights.score >= 70 ? C.accent : insights.score >= 40 ? C.amber : C.danger;
+    const patternColor = (type) => type === "warning" ? C.danger : type === "strength" ? C.accent : C.muted;
+
+    // ── Branding bar ──────────────────────────────────
+    doc.setFillColor(...C.black);
+    doc.rect(0, 0, pageW, 12, "F");
+    doc.setFont("courier", "bold");
+    doc.setFontSize(9);
+    doc.setTextColor(...C.accent);
+    doc.text("LOG-FOLIO", margin, 8);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(9);
+    doc.setTextColor(180, 180, 180);
+    doc.text("AI Pattern Analysis Report", margin + 27, 8);
+
+    y = 22;
+
+    // ── Title & meta ──────────────────────────────────
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(20);
+    doc.setTextColor(...C.black);
+    doc.text("AI Pattern Analysis", margin, y);
+    y += 7;
+
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(9);
+    doc.setTextColor(...C.gray);
+    const dateStr = insightsAt
+      ? new Date(insightsAt).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric", hour: "numeric", minute: "2-digit" })
+      : new Date().toLocaleDateString();
+    doc.text(`Generated ${dateStr}  ·  Based on ${plList.length} trades`, margin, y);
+    y += 9;
+
+    // ── Score row ─────────────────────────────────────
+    doc.setFillColor(...C.cardBg);
+    doc.roundedRect(margin, y, contentW, 24, 2, 2, "F");
+
+    // Circle
+    const cx = margin + 16, cy = y + 12;
+    doc.setDrawColor(...scoreColor);
+    doc.setLineWidth(1.5);
+    doc.circle(cx, cy, 9, "S");
+    doc.setFont("courier", "bold");
+    doc.setFontSize(13);
+    doc.setTextColor(...scoreColor);
+    const scoreTxt = String(insights.score);
+    doc.text(scoreTxt, cx - doc.getTextWidth(scoreTxt) / 2, cy + 2.5);
+
+    // Label + description
+    const lx = cx + 14;
+    doc.setFont("courier", "bold");
+    doc.setFontSize(14);
+    doc.setTextColor(...scoreColor);
+    doc.text(insights.scoreLabel, lx, cy - 1);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(9);
+    doc.setTextColor(...C.gray);
+    doc.text("Overall trader rating based on consistency, discipline and execution", lx, cy + 6);
+
+    // Pattern counts (right side)
+    const counts = {
+      warning:  insights.patterns.filter(p => p.type === "warning").length,
+      strength: insights.patterns.filter(p => p.type === "strength").length,
+      neutral:  insights.patterns.filter(p => p.type === "neutral").length,
+    };
+    [["Warnings", counts.warning, C.danger], ["Strengths", counts.strength, C.accent], ["Neutral", counts.neutral, C.muted]].forEach(([label, n, col], i) => {
+      const tx = margin + contentW - 46 + i * 16;
+      doc.setFont("courier", "bold");
+      doc.setFontSize(13);
+      doc.setTextColor(...col);
+      doc.text(String(n), tx, cy - 1);
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(7);
+      doc.setTextColor(...col);
+      doc.text(label, tx - (label.length > 7 ? 1 : 0), cy + 5);
+    });
+    y += 30;
+
+    // ── Section header ────────────────────────────────
+    doc.setFont("courier", "bold");
+    doc.setFontSize(8);
+    doc.setTextColor(...C.muted);
+    doc.text("PATTERNS", margin, y);
+    y += 6;
+
+    // ── Pattern cards ─────────────────────────────────
+    insights.patterns.forEach((p) => {
+      const col = patternColor(p.type);
+      const detailLines = doc.splitTextToSize(p.detail, contentW - 10);
+      const actionLines = doc.splitTextToSize(p.action, contentW - 10);
+      const cardH = 6 + 5.5 + detailLines.length * 4.8 + 5 + 4 + actionLines.length * 4.8 + 5;
+
+      if (y + cardH > 275) { doc.addPage(); y = 20; }
+
+      doc.setFillColor(...C.cardBg);
+      doc.roundedRect(margin, y, contentW, cardH, 2, 2, "F");
+      doc.setFillColor(...col);
+      doc.roundedRect(margin, y, 3, cardH, 1, 1, "F");
+
+      let cy2 = y + 6;
+
+      // Type badge
+      doc.setFont("courier", "bold");
+      doc.setFontSize(7);
+      doc.setTextColor(...col);
+      doc.text(p.type.toUpperCase(), margin + 7, cy2);
+      cy2 += 5.5;
+
+      // Title
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(11);
+      doc.setTextColor(...C.black);
+      doc.text(p.title, margin + 7, cy2);
+      cy2 += detailLines.length > 0 ? 4.5 : 0;
+
+      // Detail
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(9);
+      doc.setTextColor(...C.gray);
+      detailLines.forEach(line => { cy2 += 4.8; doc.text(line, margin + 7, cy2); });
+      cy2 += 5;
+
+      // Action label
+      doc.setFont("courier", "bold");
+      doc.setFontSize(7);
+      doc.setTextColor(...col);
+      doc.text("ACTION", margin + 7, cy2);
+      cy2 += 4;
+
+      // Action text
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(9);
+      doc.setTextColor(...C.gray);
+      actionLines.forEach(line => { cy2 += 4.8; doc.text(line, margin + 7, cy2); });
+
+      y += cardH + 4;
+    });
+
+    // ── Footer disclaimer ─────────────────────────────
+    if (y + 22 > 280) { doc.addPage(); y = 20; }
+    y += 3;
+    doc.setDrawColor(...C.rule);
+    doc.setLineWidth(0.3);
+    doc.line(margin, y, pageW - margin, y);
+    y += 6;
+
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(8);
+    doc.setTextColor(...C.muted);
+    const disclaimer = "Not financial advice. These insights are generated by AI based on your trade journal data and are for educational and self-reflection purposes only. They do not constitute financial, investment, or trading advice. Always do your own research before making any trading decisions.";
+    doc.splitTextToSize(disclaimer, contentW).forEach(line => { doc.text(line, margin, y); y += 4.5; });
+    y += 2;
+    doc.setFont("courier", "normal");
+    doc.setFontSize(8);
+    doc.setTextColor(...C.muted);
+    doc.text("log-folio.com", margin, y);
+
+    doc.save(`logfolio-ai-analysis-${new Date().toISOString().slice(0, 10)}.pdf`);
+  };
 
   const analysePatterns = async () => {
     if (plList.length < 3) {
@@ -185,13 +365,23 @@ Provide 4-6 patterns. Be brutally honest but constructive.`,
             </span>
           </div>
         </div>
-        <button
-          onClick={analysePatterns}
-          disabled={loading || usedToday >= DAILY_LIMIT}
-          style={{ background: usedToday >= DAILY_LIMIT ? t.card2 : t.accent, border: `1px solid ${usedToday >= DAILY_LIMIT ? t.border : "transparent"}`, color: usedToday >= DAILY_LIMIT ? t.text3 : "#000", borderRadius: 8, padding: "8px 16px", cursor: (loading || usedToday >= DAILY_LIMIT) ? "not-allowed" : "pointer", fontSize: 12, fontWeight: 700, fontFamily: "'Space Mono',monospace", opacity: loading ? 0.6 : 1 }}
-        >
-          {loading ? "Analysing..." : usedToday >= DAILY_LIMIT ? "Limit reached" : "↻ Re-analyse"}
-        </button>
+        <div style={{ display: "flex", gap: 8 }}>
+          {insights && (
+            <button
+              onClick={generatePDF}
+              style={{ background: "transparent", border: `1px solid ${t.border}`, color: t.text3, borderRadius: 8, padding: "8px 16px", cursor: "pointer", fontSize: 12, fontWeight: 700, fontFamily: "'Space Mono',monospace" }}
+            >
+              Export PDF
+            </button>
+          )}
+          <button
+            onClick={analysePatterns}
+            disabled={loading || usedToday >= DAILY_LIMIT}
+            style={{ background: usedToday >= DAILY_LIMIT ? t.card2 : t.accent, border: `1px solid ${usedToday >= DAILY_LIMIT ? t.border : "transparent"}`, color: usedToday >= DAILY_LIMIT ? t.text3 : "#000", borderRadius: 8, padding: "8px 16px", cursor: (loading || usedToday >= DAILY_LIMIT) ? "not-allowed" : "pointer", fontSize: 12, fontWeight: 700, fontFamily: "'Space Mono',monospace", opacity: loading ? 0.6 : 1 }}
+          >
+            {loading ? "Analysing..." : usedToday >= DAILY_LIMIT ? "Limit reached" : "↻ Re-analyse"}
+          </button>
+        </div>
       </div>
 
       {loading && (
