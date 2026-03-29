@@ -17,7 +17,7 @@ export default function DateInput({ style, t, icon: Icon = CalendarIcon, ...prop
         onClick={() => ref.current?.showPicker?.()}
         style={{
           position: "absolute",
-          right: 26,
+          right: 22,
           top: "50%",
           transform: "translateY(-50%)",
           background: "none",
