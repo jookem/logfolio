@@ -799,7 +799,7 @@ const base = {
 
       {/* IV + Disclaimer */}
       <div style={{ display: "flex", gap: 10, gridColumn: "span 2" }}>
-        <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
+        <div style={{ flex: "0 0 80px", display: "flex", flexDirection: "column" }}>
           <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><IVIcon size={14} />IV</label>
           <input style={{ ...inp, flex: 1 }} type="number"
             value={leg.iv} onChange={(e) => setLeg(i, "iv", e.target.value)} placeholder="30" />
