@@ -490,23 +490,23 @@ export default function TradeFormModal({ initial, defaults, onClose, onSave, onC
                     </div>
                     <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
                       <div>
-                        <label style={{ ...lbl }}>Date</label>
+                        <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><ExitDateIcon size={14} />Date</label>
                         <DateInput style={inp()} t={t} value={c.date || ""} onChange={(e) => setClose(i, "date", e.target.value)} />
                       </div>
                       <div>
-                        <label style={{ ...lbl }}>Time</label>
+                        <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><ExitTimeIcon size={14} />Time</label>
                         <TimeInput style={inp()} t={t} value={c.time || ""} onChange={(e) => setClose(i, "time", e.target.value)} />
                       </div>
                       <div>
-                        <label style={{ ...lbl }}>Price</label>
+                        <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><ExitIcon size={14} />Price</label>
                         <input style={inp()} type="number" value={c.price || ""} onChange={(e) => setClose(i, "price", e.target.value)} placeholder="150.00" />
                       </div>
                       <div>
-                        <label style={{ ...lbl }}>Shares</label>
+                        <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><AmountIcon size={14} />Shares</label>
                         <input style={inp()} type="number" value={c.shares || ""} onChange={(e) => setClose(i, "shares", e.target.value)} placeholder="50" />
                       </div>
                       <div style={{ gridColumn: "1 / -1" }}>
-                        <label style={{ ...lbl }}>Notes</label>
+                        <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><PenIcon size={14} />Notes</label>
                         <input style={inp()} value={c.notes || ""} onChange={(e) => setClose(i, "notes", e.target.value)} placeholder="Scaled out at R1" />
                       </div>
                     </div>
