@@ -11,13 +11,14 @@ const supabase = createClient(
 export default async function handler(req, res) {
   if (req.method !== "POST") return res.status(405).end();
 
-  const { action, userId, email, plan } = req.body || {};
+  const { action, email, plan } = req.body || {};
 
-  const { error: authError } = await verifyAuth(req, userId);
-  if (authError) return res.status(authError === "Forbidden" ? 403 : 401).json({ error: authError });
+  // Always derive userId from the verified JWT — never trust the request body
+  const { user: authUser, error: authError } = await verifyAuth(req);
+  if (authError) return res.status(401).json({ error: authError });
+  const userId = authUser.id;
 
   if (action === "portal") {
-    if (!userId) return res.status(400).json({ error: "Missing userId" });
     const { data: profile } = await supabase.from("profiles").select("stripe_customer_id").eq("id", userId).single();
     if (!profile?.stripe_customer_id) return res.status(400).json({ error: "No Stripe customer found" });
     const session = await stripe.billingPortal.sessions.create({ customer: profile.stripe_customer_id, return_url: process.env.APP_URL });
@@ -25,7 +26,7 @@ export default async function handler(req, res) {
   }
 
   // Default: create checkout session
-  if (!userId || !email) return res.status(400).json({ error: "Missing userId or email" });
+  if (!email) return res.status(400).json({ error: "Missing email" });
   const priceId = plan === "pro_plus" ? process.env.STRIPE_PRICE_ID_PRO_PLUS : process.env.STRIPE_PRICE_ID_PRO;
   const { data: profile } = await supabase.from("profiles").select("stripe_customer_id").eq("id", userId).single();
   let customerId = profile?.stripe_customer_id;

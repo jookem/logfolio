@@ -499,15 +499,23 @@ const [page, setPage] = useState(1);
       })();
     }
   };
+  // Calls getUser() first to force a server-side token refresh if needed,
+  // then reads the fresh session. More reliable than getSession() alone.
+  const getAuthToken = async () => {
+    await supabase.auth.getUser();
+    const { data: { session } } = await supabase.auth.getSession();
+    return session?.access_token ?? null;
+  };
+
   const handleStripeCheckout = async (plan = "pro") => {
     if (!user) return;
     showToast("Redirecting to checkout…", T.accent, null, 0);
     try {
-      const { data: { session } } = await supabase.auth.getSession();
+      const token = await getAuthToken();
       const res = await fetch("/api/billing", {
         method: "POST",
-        headers: { "Content-Type": "application/json", ...(session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {}) },
-        body: JSON.stringify({ userId: user.id, email: user.email, plan }),
+        headers: { "Content-Type": "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+        body: JSON.stringify({ email: user.email, plan }),
       });
       const body = await res.json();
       if (body.url) { window.location.href = body.url; return; }
@@ -545,11 +553,11 @@ const [page, setPage] = useState(1);
     if (!user) return;
     showToast("Opening billing portal…", T.accent, null, 0);
     try {
-      const { data: { session } } = await supabase.auth.getSession();
+      const token = await getAuthToken();
       const res = await fetch("/api/billing", {
         method: "POST",
-        headers: { "Content-Type": "application/json", ...(session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {}) },
-        body: JSON.stringify({ action: "portal", userId: user.id }),
+        headers: { "Content-Type": "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+        body: JSON.stringify({ action: "portal" }),
       });
       const body = await res.json();
       if (body.url) { window.location.href = body.url; return; }
