@@ -99,7 +99,7 @@ const TUTORIAL_STEPS = [
   {
     icon: <RobotIcon size={44} />,
     title: "AI Insights",
-    desc: "Get AI-powered analysis of your full trading journal — pattern recognition, emotional tendencies, strengths, weaknesses, and a trader score. Pro Plus only, up to 3 analyses per day. Powered by Claude.",
+    desc: "Get AI-powered analysis of your full trading journal — pattern recognition, emotional tendencies, strengths, weaknesses, and a trader score.\n\nOptionally attach a chart screenshot before running the analysis and Claude will review the chart alongside your trade data, calling out setup quality, key levels, and how it connects to your patterns.\n\nPro Plus only, up to 3 analyses per day. Export results as a PDF. Powered by Claude.",
     tab: "ai",
     cta: null,
   },

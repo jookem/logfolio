@@ -29,6 +29,20 @@ export default function SettingsModal({ onClose, isDark, setIsDark, onClear, t, 
           </button>
         </div>
 
+        {/* What's New */}
+        <button
+          onClick={onChangelog}
+          style={{ display: "flex", justifyContent: "space-between", alignItems: "center", width: "100%", background: hasUnreadChangelog ? t.accent + "14" : t.surface, border: `1px solid ${hasUnreadChangelog ? t.accent + "60" : t.border}`, borderRadius: 10, padding: "10px 14px", cursor: "pointer", marginBottom: 12, textAlign: "left" }}
+        >
+          <div>
+            <div style={{ fontSize: 13, fontWeight: hasUnreadChangelog ? 700 : 400, color: hasUnreadChangelog ? t.accent : t.text }}>What's New</div>
+            <div style={{ fontSize: 11, color: t.text3, marginTop: 1 }}>View recent updates</div>
+          </div>
+          <span style={{ background: hasUnreadChangelog ? t.accent : "none", border: `1px solid ${hasUnreadChangelog ? t.accent : t.border}`, color: hasUnreadChangelog ? "#000" : t.text3, borderRadius: 6, padding: "4px 10px", fontSize: 11, fontFamily: "'Space Mono', monospace", fontWeight: hasUnreadChangelog ? 700 : 400, whiteSpace: "nowrap", flexShrink: 0 }}>
+            {hasUnreadChangelog ? "New!" : "View"}
+          </span>
+        </button>
+
         {/* Appearance */}
         <div style={{ background: t.surface, border: `1px solid ${t.border}`, borderRadius: 12, padding: "14px 16px", marginBottom: 12 }}>
           <div style={{ fontSize: 11, color: t.text3, fontFamily: "'Space Mono', monospace", textTransform: "uppercase", letterSpacing: 1.5, marginBottom: 12 }}>Appearance</div>
@@ -229,15 +243,6 @@ export default function SettingsModal({ onClose, isDark, setIsDark, onClear, t, 
               <div style={{ fontSize: 11, color: t.text3, marginTop: 2 }}>Replay the feature walkthrough</div>
             </div>
             <button onClick={() => trigger(() => { onClose(); onTutorial(); })} style={{ background: "none", border: `1px solid ${t.border}`, color: t.text3, borderRadius: 7, padding: "6px 14px", cursor: "pointer", fontSize: 12, fontFamily: "'Space Mono', monospace" }}>Start</button>
-          </div>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
-            <div>
-              <div style={{ fontSize: 14, color: t.text }}>What's New</div>
-              <div style={{ fontSize: 11, color: t.text3, marginTop: 2 }}>View recent updates</div>
-            </div>
-            <button onClick={onChangelog} style={{ background: hasUnreadChangelog ? t.accent : "none", border: `1px solid ${hasUnreadChangelog ? t.accent : t.border}`, color: hasUnreadChangelog ? "#000" : t.text3, borderRadius: 7, padding: "6px 14px", cursor: "pointer", fontSize: 12, fontFamily: "'Space Mono', monospace", fontWeight: hasUnreadChangelog ? 700 : 400 }}>
-              {hasUnreadChangelog ? "New!" : "View"}
-            </button>
           </div>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
             <div>

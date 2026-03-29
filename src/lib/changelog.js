@@ -1,5 +1,19 @@
-export const CURRENT_VERSION = "1.4.0";
+export const CURRENT_VERSION = "1.5.0";
 export const CHANGELOG = [
+  {
+    version: "1.5.0",
+    date: "2026-03-30",
+    items: [
+      "AI Insights: attach a chart screenshot to your analysis — Claude reviews the chart alongside your trade data",
+      "AI Insights: export your pattern analysis as a PDF",
+      "Engagement: daily intention prompt on the Today tab to set your session focus",
+      "Engagement: end-of-day review reminder after market close",
+      "Engagement: badge unlock toasts when you earn a new achievement",
+      "Engagement: performance-aware Quote of the Day (resilience, discipline, or humility based on your streak)",
+      "Trade anniversaries extended to show trades from the full week one year ago",
+      "Analytics: fixed info popups appearing far from the clicked card",
+    ]
+  },
   {
     version: "1.4.0",
     date: "2026-03-27",
