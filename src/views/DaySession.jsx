@@ -265,7 +265,7 @@ export default function DaySession({ plList, plans, onAddTrade, onAddPlan, journ
             <div key={tr.id} style={{ fontSize: 13, color: t.text, marginBottom: 2 }}>
               <span style={{ fontFamily: "'Space Mono', monospace", fontSize: 11, color: t.text3 }}>{tr.date} · </span>
               {tr.ticker} ·{" "}
-              <span style={{ color: tr.pl >= 0 ? t.accent : t.danger, fontFamily: "'Space Mono', monospace", fontWeight: 700 }}>
+              <span style={{ color: tr.pl >= 0 ? t.positive : t.danger, fontFamily: "'Space Mono', monospace", fontWeight: 700 }}>
                 {tr.pl >= 0 ? "+" : ""}{fmt(tr.pl)}
               </span>
               <span style={{ fontSize: 11, color: t.text3 }}> · {tr.strategy}</span>
@@ -291,16 +291,16 @@ export default function DaySession({ plList, plans, onAddTrade, onAddPlan, journ
         <div style={{ background: t.surface, border: `1px solid ${t.border}`, borderRadius: 16, padding: "16px 20px", marginBottom: mobile ? 20 : 0, flex: 1, display: "flex", flexDirection: "column" }}>
           <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 10, color: t.text3, textTransform: "uppercase", letterSpacing: 2, marginBottom: 16 }}>Session P&L</div>
           <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", gap: 14 }}>
-            <div style={{ fontFamily: "'Space Mono', monospace", fontSize: mobile ? 32 : 40, fontWeight: 700, color: sessionPL >= 0 ? t.accent : t.danger, letterSpacing: -1, lineHeight: 1 }}>
+            <div style={{ fontFamily: "'Space Mono', monospace", fontSize: mobile ? 32 : 40, fontWeight: 700, color: sessionPL >= 0 ? t.positive : t.danger, letterSpacing: -1, lineHeight: 1 }}>
               {sessionPL >= 0 ? "+" : ""}{fmt(sessionPL)}
             </div>
             {(wins > 0 || losses > 0 || (streak && streak.count >= 2) || journalStreak >= 1) && (
               <div style={{ display: "flex", gap: 6, flexWrap: mobile ? "wrap" : "nowrap", justifyContent: "center" }}>
-                {statCard("WINS", wins, t.accent)}
+                {statCard("WINS", wins, t.positive)}
                 {statCard("LOSSES", losses, t.danger)}
-                {streak && streak.count >= 2 && statCard("STREAK", `${streak.count}${streak.type}`, streak.type === "W" ? t.accent : t.danger)}
+                {streak && streak.count >= 2 && statCard("STREAK", `${streak.count}${streak.type}`, streak.type === "W" ? t.positive : t.danger)}
                 {journalStreak >= 1 && statCard("JOURNAL", `${journalStreak}D`, "#a78bfa")}
-                {vsAvg !== null && todayTrades.length > 0 && statCard("VS AVG", `${vsAvg >= 0 ? "+" : ""}${fmt(vsAvg)}`, vsAvg >= 0 ? t.accent : t.danger)}
+                {vsAvg !== null && todayTrades.length > 0 && statCard("VS AVG", `${vsAvg >= 0 ? "+" : ""}${fmt(vsAvg)}`, vsAvg >= 0 ? t.positive : t.danger)}
               </div>
             )}
           </div>
@@ -317,7 +317,7 @@ export default function DaySession({ plList, plans, onAddTrade, onAddPlan, journ
                 const max = Math.max(...runs.map(Math.abs), 1);
                 return runs.map((val, i) => (
                   <div key={i} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 3 }}>
-                    <div style={{ width: "100%", height: `${(Math.abs(val) / max) * 46 + 10}px`, background: todayTrades[i].pl >= 0 ? t.accent : t.danger, borderRadius: 3, opacity: 0.8 }} />
+                    <div style={{ width: "100%", height: `${(Math.abs(val) / max) * 46 + 10}px`, background: todayTrades[i].pl >= 0 ? t.positive : t.danger, borderRadius: 3, opacity: 0.8 }} />
                     <div style={{ fontSize: 9, color: t.text3, fontFamily: "'Space Mono', monospace", overflow: "hidden", maxWidth: "100%", textAlign: "center" }}>{todayTrades[i].ticker}</div>
                   </div>
                 ));
@@ -360,7 +360,7 @@ export default function DaySession({ plList, plans, onAddTrade, onAddPlan, journ
                   )}
                 </div>
                 <div style={{ textAlign: "right" }}>
-                  <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 16, fontWeight: 700, color: tr.pl >= 0 ? t.accent : t.danger }}>
+                  <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 16, fontWeight: 700, color: tr.pl >= 0 ? t.positive : t.danger }}>
                     {tr.pl >= 0 ? "+" : ""}{fmt(tr.pl)}
                   </div>
                   {tr.mistake !== "None" && <div style={{ fontSize: 11, color: t.danger, marginTop: 2 }}>⚠ {tr.mistake}</div>}

@@ -426,7 +426,7 @@ export default function TradeFormModal({ initial, defaults, onClose, onSave, onC
                   const dir = form.direction === "long" ? 1 : -1;
                   const pl = dir * (exit - entry) * qty;
                   return (
-                    <div style={{ fontSize: 11, fontFamily: "'Space Mono',monospace", color: pl >= 0 ? t.accent : t.danger, marginTop: 4 }}>
+                    <div style={{ fontSize: 11, fontFamily: "'Space Mono',monospace", color: pl >= 0 ? t.positive : t.danger, marginTop: 4 }}>
                       → {pl >= 0 ? "+" : ""}{fmt(pl)}
                     </div>
                   );

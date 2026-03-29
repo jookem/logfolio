@@ -27,10 +27,10 @@ export default function TradeRow({ trade, onClick, onEdit, onDelete, onSelect, i
               <span style={{ fontFamily: "'Space Mono', monospace", fontSize: 15, fontWeight: 700, color: t.text }}>{trade.ticker}</span>
               {isOpen && <span style={{ fontSize: 9, fontFamily: "'Space Mono',monospace", color: "#f59e0b", background: "#f59e0b18", border: "1px solid #f59e0b40", borderRadius: 4, padding: "1px 5px", letterSpacing: 1 }}>OPEN</span>}
             </span>
-            <span style={{ fontFamily: "'Space Mono', monospace", fontSize: 15, fontWeight: 700, color: plDisplay == null ? t.text3 : plDisplay >= 0 ? t.accent : t.danger }}>
+            <span style={{ fontFamily: "'Space Mono', monospace", fontSize: 15, fontWeight: 700, color: plDisplay == null ? t.text3 : plDisplay >= 0 ? t.positive : t.danger }}>
               {plDisplay == null ? "—" : `${plDisplay >= 0 ? "+" : ""}${fmt(plDisplay)}`}
               {trade.r !== null && trade.r !== undefined && (
-                <div style={{ fontSize: 10, color: trade.r >= 0 ? t.accent : t.danger, opacity: 0.8 }}>{fmtR(trade.r)}</div>
+                <div style={{ fontSize: 10, color: trade.r >= 0 ? t.positive : t.danger, opacity: 0.8 }}>{fmtR(trade.r)}</div>
               )}
             </span>
           </div>
@@ -80,7 +80,7 @@ export default function TradeRow({ trade, onClick, onEdit, onDelete, onSelect, i
             <button onClick={(e) => { e.stopPropagation(); onEdit(); }} style={{ background: "none", border: `1px solid ${t.border}`, color: t.text3, borderRadius: 6, padding: "3px 8px", cursor: "pointer", fontSize: 11, display: "flex", alignItems: "center", gap: 4 }}><EditIcon size="1em" />{editLabel || "Edit"}</button>
             <button onClick={(e) => { e.stopPropagation(); onDelete(); }} style={{ background: "none", border: `1px solid ${t.danger}40`, color: t.danger, borderRadius: 6, padding: "3px 8px", cursor: "pointer", fontSize: 11, display: "flex", alignItems: "center", gap: 4 }}><DeleteIcon size="1em" />Del</button>
           </div>
-          <span onClick={onClick} style={{ fontFamily: "'Space Mono', monospace", fontSize: 13, fontWeight: 700, color: plDisplay == null ? t.text3 : plDisplay >= 0 ? t.accent : t.danger, textAlign: "right" }}>
+          <span onClick={onClick} style={{ fontFamily: "'Space Mono', monospace", fontSize: 13, fontWeight: 700, color: plDisplay == null ? t.text3 : plDisplay >= 0 ? t.positive : t.danger, textAlign: "right" }}>
             {plDisplay == null ? "—" : `${plDisplay >= 0 ? "+" : ""}${fmt(plDisplay)}`}
           </span>
         </div>

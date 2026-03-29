@@ -604,14 +604,14 @@ const base = {
         {/* Planned R (stock-like only) */}
         {STOCK_LIKE.includes(form.type) && plannedR !== null && (
           <div style={{
-            background: plannedR >= 2 ? t.accent + "15" : t.danger + "15",
-            border: `1px solid ${plannedR >= 2 ? t.accent : t.danger}30`,
+            background: plannedR >= 2 ? t.positive + "15" : t.danger + "15",
+            border: `1px solid ${plannedR >= 2 ? t.positive : t.danger}30`,
             borderRadius: 10, padding: "12px 16px", marginTop: 14,
             display: "flex", justifyContent: "space-between", alignItems: "center",
           }}>
             <div>
               <div style={{ fontSize: 10, color: t.text3, fontFamily: "'Space Mono',monospace", textTransform: "uppercase", letterSpacing: 1.5, marginBottom: 3 }}>Planned R</div>
-              <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 22, fontWeight: 700, color: plannedR >= 2 ? t.accent : t.danger }}>
+              <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 22, fontWeight: 700, color: plannedR >= 2 ? t.positive : t.danger }}>
                 +{plannedR.toFixed(2)}R
               </div>
             </div>

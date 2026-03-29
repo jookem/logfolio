@@ -60,7 +60,7 @@ export default function TradeDetail({ trade, onClose, onEdit, onExecute, onSave,
                   fontFamily: "'Space Mono', monospace",
                   fontSize: 22,
                   fontWeight: 700,
-                  color: pl >= 0 ? t.accent : t.danger,
+                  color: pl >= 0 ? t.positive : t.danger,
                   textAlign: "right",
                 }}
               >
@@ -400,7 +400,7 @@ export default function TradeDetail({ trade, onClose, onEdit, onExecute, onSave,
                   <div style={{ fontSize: 12, color: t.text }}>{c.date || "—"}</div>
                   <div style={{ fontSize: 12, color: t.text, fontFamily: "'Space Mono',monospace" }}>{c.price ? fmt(c.price) : "—"}</div>
                   <div style={{ fontSize: 12, color: t.text }}>{c.shares || "—"}</div>
-                  <div style={{ fontSize: 12, fontFamily: "'Space Mono',monospace", color: contribution != null ? (contribution >= 0 ? t.accent : t.danger) : t.text3 }}>
+                  <div style={{ fontSize: 12, fontFamily: "'Space Mono',monospace", color: contribution != null ? (contribution >= 0 ? t.positive : t.danger) : t.text3 }}>
                     {contribution != null ? `${contribution >= 0 ? "+" : ""}${fmt(contribution)}` : "—"}
                   </div>
                 </div>
@@ -474,8 +474,8 @@ export default function TradeDetail({ trade, onClose, onEdit, onExecute, onSave,
               <div key={label + "p"} style={{ fontSize: 12, color: t.text, fontFamily: "'Space Mono',monospace" }}>{planned}</div>
               <div key={label + "a"} style={{ display: "flex", alignItems: "center", gap: 5 }}>
                 <span style={{ fontSize: 12, color: t.text, fontFamily: "'Space Mono',monospace" }}>{actual}</span>
-                {diff && <span style={{ fontSize: 10, color: good ? t.accent : t.danger }}>{diff}</span>}
-                {!diff && <span style={{ color: good ? t.accent : t.danger, display: "flex" }}>{good ? <CheckIcon size={11} /> : <CloseIcon size={11} />}</span>}
+                {diff && <span style={{ fontSize: 10, color: good ? t.positive : t.danger }}>{diff}</span>}
+                {!diff && <span style={{ color: good ? t.positive : t.danger, display: "flex" }}>{good ? <CheckIcon size={11} /> : <CloseIcon size={11} />}</span>}
               </div>
             </>
           ))}

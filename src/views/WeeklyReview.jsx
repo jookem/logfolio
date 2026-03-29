@@ -103,7 +103,7 @@ export default function WeeklyReview({ plList, t, mobile }) {
               style={{
                 padding: "14px 18px",
                 borderBottom: `1px solid ${t.border}`,
-                background: data.pl >= 0 ? t.accent + "08" : t.danger + "08",
+                background: data.pl >= 0 ? t.positive + "08" : t.danger + "08",
               }}
             >
               <div
@@ -131,7 +131,7 @@ export default function WeeklyReview({ plList, t, mobile }) {
                     fontFamily: "'Space Mono', monospace",
                     fontSize: 20,
                     fontWeight: 700,
-                    color: data.pl >= 0 ? t.accent : t.danger,
+                    color: data.pl >= 0 ? t.positive : t.danger,
                   }}
                 >
                   {data.pl >= 0 ? "+" : ""}
@@ -174,7 +174,7 @@ export default function WeeklyReview({ plList, t, mobile }) {
                   style={{
                     fontFamily: "'Space Mono', monospace",
                     fontSize: 13,
-                    color: t.accent,
+                    color: t.positive,
                     fontWeight: 700,
                   }}
                 >

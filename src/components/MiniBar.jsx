@@ -14,7 +14,7 @@ export default function MiniBar({ value, max, t }) {
         style={{
           width: `${w}%`,
           height: "100%",
-          background: value >= 0 ? t.accent : t.danger,
+          background: value >= 0 ? t.positive : t.danger,
           borderRadius: 2,
         }}
       />

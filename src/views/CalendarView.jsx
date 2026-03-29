@@ -73,7 +73,7 @@ export default function CalendarView({ plList, t, mobile }) {
           label="Month P/L"
           value={fmt(monthPL)}
           sub={`${monthTrades.length} trades`}
-          color={monthPL >= 0 ? t.accent : t.danger}
+          color={monthPL >= 0 ? t.positive : t.danger}
           t={t}
         />
         <StatCard
@@ -236,7 +236,7 @@ export default function CalendarView({ plList, t, mobile }) {
                       style={{
                         textAlign: "center",
                         fontSize: mobile ? 9 : 10,
-                        color: isGreen ? t.accent : t.danger,
+                        color: isGreen ? t.positive : t.danger,
                         fontFamily: "'Space Mono', monospace",
                         fontWeight: 700,
                         lineHeight: 1.2,
@@ -247,7 +247,7 @@ export default function CalendarView({ plList, t, mobile }) {
                     </div>
                     <div style={{ display: "flex", justifyContent: "center", gap: 2, marginTop: 2 }}>
                       {data.trades.slice(0, 3).map((_, ti) => (
-                        <div key={ti} style={{ width: mobile ? 2 : 3, height: mobile ? 2 : 3, borderRadius: "50%", background: isGreen ? t.accent : t.danger, opacity: 0.7 }} />
+                        <div key={ti} style={{ width: mobile ? 2 : 3, height: mobile ? 2 : 3, borderRadius: "50%", background: isGreen ? t.positive : t.danger, opacity: 0.7 }} />
                       ))}
                     </div>
                   </>
@@ -339,7 +339,7 @@ export default function CalendarView({ plList, t, mobile }) {
                   fontFamily: "'Space Mono', monospace",
                   fontSize: 22,
                   fontWeight: 700,
-                  color: selectedData.pl >= 0 ? t.accent : t.danger,
+                  color: selectedData.pl >= 0 ? t.positive : t.danger,
                 }}
               >
                 {selectedData.pl >= 0 ? "+" : ""}
@@ -383,7 +383,7 @@ export default function CalendarView({ plList, t, mobile }) {
                         fontFamily: "'Space Mono', monospace",
                         fontSize: 14,
                         fontWeight: 700,
-                        color: tr.pl >= 0 ? t.accent : t.danger,
+                        color: tr.pl >= 0 ? t.positive : t.danger,
                       }}
                     >
                       {tr.pl >= 0 ? "+" : ""}
