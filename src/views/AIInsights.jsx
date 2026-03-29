@@ -457,37 +457,24 @@ Provide 4-6 patterns${chartImage ? " (include 1-2 patterns specifically about th
       </div>
 
       {/* Chart image upload */}
-      <div style={{ marginBottom: 20 }}>
+      <div style={{ marginBottom: 20, display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
         <input
           ref={fileInputRef}
           type="file"
           accept="image/*"
-          style={{ display: "none" }}
           onChange={e => { if (e.target.files?.[0]) handleImageSelect(e.target.files[0]); e.target.value = ""; }}
+          style={{ fontSize: 12, color: t.text3 }}
         />
-        {chartImage ? (
-          <div style={{ display: "flex", alignItems: "center", gap: 12, background: t.surface, border: `1px solid ${t.border}`, borderRadius: 10, padding: "10px 14px" }}>
-            <img src={chartImage.previewUrl} alt="Chart" style={{ width: 80, height: 50, objectFit: "cover", borderRadius: 6, flexShrink: 0 }} />
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ fontSize: 12, fontWeight: 700, color: t.text, marginBottom: 2 }}>Chart attached</div>
-              <div style={{ fontSize: 11, color: t.text3 }}>Claude will analyse this chart alongside your trade data</div>
-            </div>
+        {chartImage && (
+          <>
+            <img src={chartImage.previewUrl} alt="Chart" style={{ width: 72, height: 44, objectFit: "cover", borderRadius: 6, border: `1px solid ${t.border}` }} />
             <button
               onClick={() => setChartImage(null)}
-              style={{ background: "none", border: "none", color: t.text4, cursor: "pointer", fontSize: 18, lineHeight: 1, padding: 0, flexShrink: 0 }}
+              style={{ background: "none", border: "none", color: t.text3, cursor: "pointer", fontSize: 12, padding: 0 }}
             >
-              ×
+              Remove
             </button>
-          </div>
-        ) : (
-          <button
-            onClick={() => fileInputRef.current?.click()}
-            style={{ width: "100%", background: "none", border: `1px dashed ${t.border}`, borderRadius: 10, padding: "14px 20px", cursor: "pointer", color: t.text3, fontSize: 12, fontFamily: "'Space Mono', monospace", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, transition: "border-color 0.15s" }}
-            onMouseEnter={e => e.currentTarget.style.borderColor = t.accent}
-            onMouseLeave={e => e.currentTarget.style.borderColor = t.border}
-          >
-            + Attach chart screenshot (optional)
-          </button>
+          </>
         )}
       </div>
 
