@@ -5,7 +5,7 @@ import { STRATEGIES, TIMEFRAMES, CURRENCIES, TIMEZONES } from "../lib/constants"
 import { exportCSV, exportJSON } from "../lib/utils";
 import { SettingsIcon, CloseIcon, LightModeIcon, DarkModeIcon, CheckIcon } from "../lib/icons";
 
-export default function SettingsModal({ onClose, isDark, setIsDark, onClear, t, user, profile, onSignOut, isPro, isProPlus, onUpgrade, onManageBilling, onTutorial, tradeDefaults, onSaveDefaults, trades, onChangelog, hasUnreadChangelog }) {
+export default function SettingsModal({ onClose, isDark, theme, setTheme, onClear, t, user, profile, onSignOut, isPro, isProPlus, onUpgrade, onManageBilling, onTutorial, tradeDefaults, onSaveDefaults, trades, onChangelog, hasUnreadChangelog }) {
   const { closing, trigger } = useModalClose();
   const sm = window.innerWidth < 400;
   const [copied, setCopied] = useState(false);
@@ -49,15 +49,34 @@ export default function SettingsModal({ onClose, isDark, setIsDark, onClear, t, 
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
             <div style={row}>
               <span style={{ fontSize: 14, color: t.text }}>Theme</span>
-              <div style={{ display: "flex", gap: 8 }}>
-                <button onClick={() => setIsDark(false)} style={{ background: !isDark ? t.accent : t.card2, border: `1px solid ${!isDark ? t.accent : t.border}`, color: !isDark ? "#000" : t.text3, borderRadius: 7, padding: "6px 14px", cursor: "pointer", fontSize: 12, fontFamily: "'Space Mono', monospace", fontWeight: !isDark ? 700 : 400, display: "flex", alignItems: "center", gap: 6 }}>
-                  <LightModeIcon size={13} />
-                  Light
-                </button>
-                <button onClick={() => setIsDark(true)} style={{ background: isDark ? t.accent : t.card2, border: `1px solid ${isDark ? t.accent : t.border}`, color: isDark ? "#000" : t.text3, borderRadius: 7, padding: "6px 14px", cursor: "pointer", fontSize: 12, fontFamily: "'Space Mono', monospace", fontWeight: isDark ? 700 : 400, display: "flex", alignItems: "center", gap: 6 }}>
-                  <DarkModeIcon size={13} />
-                  Dark
-                </button>
+              <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                {[
+                  { id: "light",     label: "Light",     Icon: LightModeIcon },
+                  { id: "dark",      label: "Dark",      Icon: DarkModeIcon  },
+                  { id: "bloomberg", label: "Bloomberg", Icon: null          },
+                ].map(({ id, label, Icon }) => {
+                  const active = (theme || (isDark ? "dark" : "light")) === id;
+                  const bbActive = id === "bloomberg" && active;
+                  return (
+                    <button
+                      key={id}
+                      onClick={() => setTheme(id)}
+                      style={{
+                        background: bbActive ? "#FF6600" : active ? t.accent : t.card2,
+                        border: `1px solid ${bbActive ? "#FF6600" : active ? t.accent : t.border}`,
+                        color: active ? "#000" : t.text3,
+                        borderRadius: 7, padding: "6px 12px", cursor: "pointer",
+                        fontSize: 12, fontFamily: "'Space Mono', monospace",
+                        fontWeight: active ? 700 : 400,
+                        display: "flex", alignItems: "center", gap: 5,
+                      }}
+                    >
+                      {Icon && <Icon size={13} />}
+                      {id === "bloomberg" && <span style={{ fontSize: 11, color: active ? "#000" : "#FF6600", fontWeight: 700 }}>◼</span>}
+                      {label}
+                    </button>
+                  );
+                })}
               </div>
             </div>
             <div style={row}>

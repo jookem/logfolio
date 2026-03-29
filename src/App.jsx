@@ -64,8 +64,9 @@ export default function TradingJournal() {
   const [selectedPlan, setSelectedPlan] = useState(null);
   const [trades, setTrades] = useState([]);
   const [tradesLoaded, setTradesLoaded] = useState(false);
-  const [isDark, setIsDark] = useState(() => loadTheme() === "dark");
-  useEffect(() => { if (profile?.theme) setIsDark(profile.theme === "dark"); }, [profile?.theme]);
+  const [theme, setTheme] = useState(() => loadTheme());
+  useEffect(() => { if (profile?.theme) setTheme(profile.theme); }, [profile?.theme]);
+  const isDark = theme !== "light";
   const [tab, setTab] = useState("today");
   const [showAdd, setShowAdd] = useState(false);
   const [showTrialModal, setShowTrialModal] = useState(false);
@@ -110,7 +111,7 @@ const [page, setPage] = useState(1);
   const touchStartX = useRef(null);
   const touchStartY = useRef(null);
   const mobile = useIsMobile();
-  const T = tk(isDark);
+  const T = tk(theme);
 
   // Load trades from Supabase on login, fetching in chunks to avoid large single queries
   useEffect(() => {
@@ -316,10 +317,9 @@ const [page, setPage] = useState(1);
   }, []);
 
   useEffect(() => {
-    const theme = isDark ? "dark" : "light";
     try { localStorage.setItem(THEME_KEY, theme); } catch {}
     if (user) supabase.from("profiles").update({ theme }).eq("id", user.id).then(() => {});
-  }, [isDark, user]);
+  }, [theme, user]);
 
   useEffect(() => {
     if (!user) return;
@@ -2205,7 +2205,8 @@ const paginated = filtered
   <SettingsModal
     onClose={() => setShowSettings(false)}
     isDark={isDark}
-    setIsDark={setIsDark}
+    theme={theme}
+    setTheme={setTheme}
     onClear={clearAll}
     t={T}
     user={user}

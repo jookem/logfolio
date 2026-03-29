@@ -1,4 +1,26 @@
-export function tk(dark) {
+export function tk(theme) {
+  if (theme === "bloomberg") return {
+    bg: "#000000",
+    surface: "rgba(255,102,0,0.04)",
+    border: "#1e1600",
+    border2: "#2e2200",
+    text: "#f0f0ee",
+    text2: "#c8c4bc",
+    text3: "#7a6a50",
+    text4: "#3d3020",
+    input: "#0d0900",
+    inputBorder: "#2a1e00",
+    card: "#070500",
+    card2: "#100c00",
+    accent: "#FF6600",
+    danger: "#FF3333",
+    navBg: "#000000",
+    navBorder: "#1e1600",
+    hoverBg: "#0d0900",
+    tagBg: "#1a1200",
+    tagText: "#cc5500",
+  };
+  const dark = theme === "dark" || theme === true;
   return dark
     ? {
         bg: "#000",
