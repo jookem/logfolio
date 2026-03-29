@@ -514,7 +514,7 @@ const base = {
           if (form.type === "options") fetchExpiryDates(val);
         }
       }}
-      placeholder="AAPL"
+      placeholder={form.type === "forex" ? "EUR/USD" : form.type === "crypto" ? "BTC/USDT" : "AAPL"}
     />
     {tickerLoading && (
       <span style={{ position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)", fontSize: 11, color: t.text3 }}>...</span>
@@ -560,11 +560,12 @@ const base = {
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
           {/* Purchase Price */}
           <div>
-            <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><EntryPriceIcon size={14} />{form.type === "options" ? "Purchase Price" : "Entry Price"}</label>
+            <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><EntryPriceIcon size={14} />{form.type === "options" ? "Purchase Price" : form.type === "forex" ? "Entry Rate" : "Entry Price"}</label>
             <div style={{ position: "relative" }}>
-              <span style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: t.text3, fontSize: 14 }}>$</span>
-              <input style={{ ...inp, paddingLeft: 26 }} type="number" value={form.purchasePrice}
-                onChange={(e) => set("purchasePrice", e.target.value)} placeholder="190.00" />
+              {form.type !== "forex" && <span style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: t.text3, fontSize: 14 }}>$</span>}
+              <input style={{ ...inp, paddingLeft: form.type === "forex" ? 14 : 26 }} type="number" value={form.purchasePrice}
+                onChange={(e) => set("purchasePrice", e.target.value)}
+                placeholder={form.type === "forex" ? "1.0850" : form.type === "crypto" ? "43000" : "190.00"} />
             </div>
           </div>
 
@@ -582,17 +583,19 @@ const base = {
             <div>
               <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><WarningIcon size={14} />Stop Loss</label>
               <div style={{ position: "relative" }}>
-                <span style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: t.text3, fontSize: 14 }}>$</span>
-                <input style={{ ...inp, paddingLeft: 26, borderColor: form.stopLoss ? t.danger + "80" : t.inputBorder }}
-                  type="number" value={form.stopLoss} onChange={(e) => set("stopLoss", e.target.value)} placeholder="185.00" />
+                {form.type !== "forex" && <span style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: t.text3, fontSize: 14 }}>$</span>}
+                <input style={{ ...inp, paddingLeft: form.type === "forex" ? 14 : 26, borderColor: form.stopLoss ? t.danger + "80" : t.inputBorder }}
+                  type="number" value={form.stopLoss} onChange={(e) => set("stopLoss", e.target.value)}
+                  placeholder={form.type === "forex" ? "1.0820" : form.type === "crypto" ? "41000" : "185.00"} />
               </div>
             </div>
             <div>
               <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><TargetIcon size={14} />Take Profit</label>
               <div style={{ position: "relative" }}>
-                <span style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: t.text3, fontSize: 14 }}>$</span>
-                <input style={{ ...inp, paddingLeft: 26, borderColor: form.takeProfit ? t.accent + "80" : t.inputBorder }}
-                  type="number" value={form.takeProfit} onChange={(e) => set("takeProfit", e.target.value)} placeholder="200.00" />
+                {form.type !== "forex" && <span style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: t.text3, fontSize: 14 }}>$</span>}
+                <input style={{ ...inp, paddingLeft: form.type === "forex" ? 14 : 26, borderColor: form.takeProfit ? t.accent + "80" : t.inputBorder }}
+                  type="number" value={form.takeProfit} onChange={(e) => set("takeProfit", e.target.value)}
+                  placeholder={form.type === "forex" ? "1.0960" : form.type === "crypto" ? "47000" : "200.00"} />
               </div>
             </div>
           </div>
@@ -613,9 +616,9 @@ const base = {
               </div>
             </div>
             <div style={{ textAlign: "right" }}>
-              <div style={{ fontSize: 10, color: t.text3, fontFamily: "'Space Mono',monospace", textTransform: "uppercase", letterSpacing: 1.5, marginBottom: 3 }}>Risk/Share</div>
+              <div style={{ fontSize: 10, color: t.text3, fontFamily: "'Space Mono',monospace", textTransform: "uppercase", letterSpacing: 1.5, marginBottom: 3 }}>{form.type === "forex" ? "Risk/Unit" : "Risk/Share"}</div>
               <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 16, color: t.danger }}>
-                ${Math.abs(+form.purchasePrice - +form.stopLoss).toFixed(2)}
+                {form.type !== "forex" && "$"}{Math.abs(+form.purchasePrice - +form.stopLoss).toFixed(form.type === "forex" ? 5 : 2)}
               </div>
             </div>
           </div>
@@ -662,7 +665,7 @@ const base = {
                     </div>
                   ) : (
                     <div style={{ fontSize: 11, color: t.text3, fontFamily: "'Space Mono', monospace", textAlign: "center", padding: "8px 0" }}>
-                      Fill in Entry $, Stop Loss $, Account Size and Risk % to calculate
+                      Fill in Entry, Stop Loss, Account Size and Risk % to calculate
                     </div>
                   )}
                 </div>

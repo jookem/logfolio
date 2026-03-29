@@ -404,7 +404,7 @@ export default function TradeFormModal({ initial, defaults, onClose, onSave, onC
                   type="number"
                   value={form.entryPrice}
                   onChange={(e) => { set("entryPrice", e.target.value); setErrors((p) => ({ ...p, entryPrice: undefined })); }}
-                  placeholder="190"
+                  placeholder={form.type === "forex" ? "1.0850" : form.type === "crypto" ? "43000" : "190"}
                 />
                 {errMsg("entryPrice")}
               </div>
@@ -415,7 +415,7 @@ export default function TradeFormModal({ initial, defaults, onClose, onSave, onC
                   type="number"
                   value={form.exitPrice}
                   onChange={(e) => { set("exitPrice", e.target.value); setErrors((p) => ({ ...p, exitPrice: undefined })); }}
-                  placeholder="196"
+                  placeholder={form.type === "forex" ? "1.0920" : form.type === "crypto" ? "44500" : "196"}
                 />
                 {errMsg("exitPrice")}
                 {(() => {
@@ -441,7 +441,7 @@ export default function TradeFormModal({ initial, defaults, onClose, onSave, onC
                   type="number"
                   value={form.stopLoss || ""}
                   onChange={(e) => { set("stopLoss", e.target.value); setErrors((p) => ({ ...p, stopLoss: undefined })); }}
-                  placeholder="185"
+                  placeholder={form.type === "forex" ? "1.0820" : form.type === "crypto" ? "41000" : "185"}
                 />
                 {errMsg("stopLoss")}
               </div>
@@ -452,7 +452,7 @@ export default function TradeFormModal({ initial, defaults, onClose, onSave, onC
                   type="number"
                   value={form.takeProfit || ""}
                   onChange={(e) => { set("takeProfit", e.target.value); setErrors((p) => ({ ...p, takeProfit: undefined })); }}
-                  placeholder="200"
+                  placeholder={form.type === "forex" ? "1.0960" : form.type === "crypto" ? "47000" : "200"}
                 />
                 {errMsg("takeProfit")}
               </div>
