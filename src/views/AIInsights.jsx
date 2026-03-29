@@ -47,7 +47,7 @@ export default function AIInsights({ plList, t, mobile }) {
       });
   }, [user]);
 
-  const generatePDF = () => {
+  const generatePDF = async () => {
     if (!insights) return;
     const doc = new jsPDF({ unit: "mm", format: "a4" });
     const pageW = 210;
@@ -71,17 +71,30 @@ export default function AIInsights({ plList, t, mobile }) {
 
     // ── Branding bar ──────────────────────────────────
     doc.setFillColor(...C.black);
-    doc.rect(0, 0, pageW, 12, "F");
+    doc.rect(0, 0, pageW, 14, "F");
+
+    // Logo image
+    try {
+      const resp = await fetch("/images/icon-192.png");
+      const blob = await resp.blob();
+      const logoDataUrl = await new Promise(resolve => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result);
+        reader.readAsDataURL(blob);
+      });
+      doc.addImage(logoDataUrl, "PNG", margin, 1.5, 10, 10);
+    } catch { /* skip logo if fetch fails */ }
+
     doc.setFont("courier", "bold");
     doc.setFontSize(9);
     doc.setTextColor(...C.accent);
-    doc.text("LOG-FOLIO", margin, 8);
+    doc.text("LOG-FOLIO", margin + 12, 8);
     doc.setFont("helvetica", "normal");
     doc.setFontSize(9);
     doc.setTextColor(180, 180, 180);
-    doc.text("AI Pattern Analysis Report", margin + 27, 8);
+    doc.text("AI Pattern Analysis Report", margin + 39, 8);
 
-    y = 22;
+    y = 24;
 
     // ── Title & meta ──────────────────────────────────
     doc.setFont("helvetica", "bold");
@@ -114,8 +127,10 @@ export default function AIInsights({ plList, t, mobile }) {
     const scoreTxt = String(insights.score);
     doc.text(scoreTxt, cx - doc.getTextWidth(scoreTxt) / 2, cy + 2.5);
 
-    // Label + description
+    // Label + description — constrained to the left column so they don't bleed into counts
     const lx = cx + 14;
+    const countsStartX = margin + contentW - 56; // counts occupy the right 56mm
+    const descMaxW = countsStartX - lx - 4;      // description stops before counts area
     doc.setFont("courier", "bold");
     doc.setFontSize(14);
     doc.setTextColor(...scoreColor);
@@ -123,16 +138,17 @@ export default function AIInsights({ plList, t, mobile }) {
     doc.setFont("helvetica", "normal");
     doc.setFontSize(9);
     doc.setTextColor(...C.gray);
-    doc.text("Overall trader rating based on consistency, discipline and execution", lx, cy + 6);
+    const descLines = doc.splitTextToSize("Overall trader rating based on consistency, discipline and execution", descMaxW);
+    doc.text(descLines, lx, cy + 6);
 
-    // Pattern counts (right side)
+    // Pattern counts — right-aligned, 3 columns of ~18mm each
     const counts = {
       warning:  insights.patterns.filter(p => p.type === "warning").length,
       strength: insights.patterns.filter(p => p.type === "strength").length,
       neutral:  insights.patterns.filter(p => p.type === "neutral").length,
     };
     [["Warnings", counts.warning, C.danger], ["Strengths", counts.strength, C.accent], ["Neutral", counts.neutral, C.muted]].forEach(([label, n, col], i) => {
-      const tx = margin + contentW - 46 + i * 16;
+      const tx = countsStartX + i * 19;
       doc.setFont("courier", "bold");
       doc.setFontSize(13);
       doc.setTextColor(...col);
@@ -140,7 +156,7 @@ export default function AIInsights({ plList, t, mobile }) {
       doc.setFont("helvetica", "normal");
       doc.setFontSize(7);
       doc.setTextColor(...col);
-      doc.text(label, tx - (label.length > 7 ? 1 : 0), cy + 5);
+      doc.text(label, tx, cy + 5);
     });
     y += 30;
 
@@ -368,7 +384,7 @@ Provide 4-6 patterns. Be brutally honest but constructive.`,
         <div style={{ display: "flex", gap: 8 }}>
           {insights && (
             <button
-              onClick={generatePDF}
+              onClick={() => generatePDF()}
               style={{ background: "transparent", border: `1px solid ${t.border}`, color: t.text3, borderRadius: 8, padding: "8px 16px", cursor: "pointer", fontSize: 12, fontWeight: 700, fontFamily: "'Space Mono',monospace" }}
             >
               Export PDF
