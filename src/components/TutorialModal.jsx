@@ -273,7 +273,7 @@ const PLAN_WALKTHROUGH = [
     panelPos: "top",
   },
   {
-    icon: <Pair a={<RecIcon size={44} />} b={<ScreenshotIcon size={44} />} />,
+    icon: <RecIcon size={44} />,
     title: "Voice Note",
     desc: "Record a voice note with your trade rationale. Speaking your thesis out loud before entering is one of the fastest ways to spot weak reasoning.",
     target: "tut-plan-media",
