@@ -445,6 +445,7 @@ const [page, setPage] = useState(1);
       mistake: "None",
       legs: plan.legs?.length ? plan.legs.map(l => ({ ...l, exitPremium: "" })) : [{ position:"buy",type:"call",strike:"",expiration:"",entryPremium:"",exitPremium:"",contracts:1 }],
       fromPlanId: plan.id,
+      screenshots: plan.screenshots || [],
       planSnapshot: {
         entryPrice: plan.entryPrice || plan.purchasePrice || "",
         stopLoss: plan.stopLoss || "",

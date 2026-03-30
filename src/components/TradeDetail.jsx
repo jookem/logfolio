@@ -503,6 +503,18 @@ export default function TradeDetail({ trade, onClose, onEdit, onExecute, onSave,
       {hasAiAssist && (
         <div style={{ marginTop: hasRows || hasChecklist ? 12 : 0, paddingTop: hasRows || hasChecklist ? 12 : 0, borderTop: hasRows || hasChecklist ? `1px solid ${t.border}` : "none" }}>
           <div style={{ fontSize: 10, color: t.text3, marginBottom: 8, textTransform: "uppercase", letterSpacing: 1.5 }}>AI Assist (at plan time)</div>
+          {snap.aiAssist.chartAnalysis?.length > 0 && (
+            <>
+              <div style={{ fontSize: 10, color: t.text3, marginBottom: 5, textTransform: "uppercase", letterSpacing: 1 }}>Chart Analysis</div>
+              {snap.aiAssist.chartAnalysis.map((item, i) => (
+                <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: 7, marginBottom: 4 }}>
+                  <span style={{ color: t.text4, flexShrink: 0, marginTop: 1 }}>·</span>
+                  <span style={{ fontSize: 12, color: t.text3, lineHeight: 1.5 }}>{item}</span>
+                </div>
+              ))}
+              <div style={{ height: 1, background: t.border, margin: "8px 0" }} />
+            </>
+          )}
           {snap.aiAssist.marketBias && (
             <div style={{ fontSize: 12, color: t.text2, lineHeight: 1.6, marginBottom: snap.aiAssist.checklist?.length ? 8 : 0 }}>{snap.aiAssist.marketBias}</div>
           )}

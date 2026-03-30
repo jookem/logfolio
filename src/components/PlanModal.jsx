@@ -421,6 +421,10 @@ const base = {
       base.shares = +form.numShares || 0;
     }
     if (aiAssist) base.aiAssist = aiAssist;
+    if (chartImage) {
+      const chartScreenshot = { id: `ai-chart-${base.id}`, src: `data:${chartImage.mediaType};base64,${chartImage.base64}` };
+      base.screenshots = [...(base.screenshots || []).filter(s => !s.id?.startsWith("ai-chart-")), chartScreenshot];
+    }
     onSave(base);
   };
 
