@@ -7,7 +7,6 @@ import { todayStr, typeLabels, normCDF, bsPrice } from "../lib/utils";
 import DateInput from "./DateInput";
 import Tag from "./Tag";
 import VoiceNote from "./VoiceNote";
-import ScreenshotUpload from "./ScreenshotUpload";
 
 // Compress an image to JPEG max 1200px, returns { base64, mediaType }
 async function compressChartImage(file) {
@@ -1181,9 +1180,6 @@ const base = {
         <div id="tut-plan-media">
           <div style={{ marginBottom: 12 }}>
             <VoiceNote value={form.voiceNote} onChange={(v) => set("voiceNote", v)} t={t} />
-          </div>
-          <div style={{ marginBottom: 12 }}>
-            <ScreenshotUpload value={form.screenshots || []} onChange={(v) => set("screenshots", v)} t={t} />
           </div>
         </div>
 
