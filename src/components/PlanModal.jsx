@@ -282,12 +282,16 @@ const fetchAiAssist = async () => {
 
     const promptText = `You are a trading coach reviewing a ${isOptions ? "options" : "stock/equity"} trade plan. Given the following context, provide ${chartImage ? "THREE" : "TWO"} sections:
 
-${chartImage ? `1. CHART_ANALYSIS: Analyse the attached chart screenshot. Identify:
+${chartImage ? `1. CHART_ANALYSIS: Analyse the attached chart screenshot. Identify only what is visible — skip any indicator if it is not present on the chart:
    - Key support and resistance levels (specific price levels if visible)
-   - Moving average positions and what they suggest (e.g. price above/below 20MA, 50MA, 200MA)
-   - Overall trend direction (uptrend / downtrend / ranging)
-   - Any notable patterns, signals, or risk zones visible
-   Keep it to 3-4 concise bullet points.
+   - Moving average positions (e.g. price above/below 20MA, 50MA, 200MA) and what they suggest
+   - Volume: is volume confirming the move? Any notable volume spikes or divergence from price?
+   - RSI: overbought (>70) / oversold (<30), or any bullish/bearish divergence visible
+   - MACD: crossover direction, histogram momentum, any divergence from price
+   - VWAP: is price trading above or below VWAP? What does that suggest for institutional bias?
+   - Candlestick patterns at key levels: rejection wicks, engulfing candles, doji, hammer, shooting star
+   - Overall trend direction and any notable risk zones
+   Keep it to 4-6 concise bullet points covering only what is actually visible.
 2. MARKET_BIAS` : "1. MARKET_BIAS"}: One sentence on current price trend for ${ticker} based on its recent closes (bullish/bearish/neutral and why). Be concise.
 ${chartImage ? "3." : "2."} PERSONAL_CHECKLIST: 2-3 bullet points of personalised warnings or confirmations for this specific trade plan based on the trader's history. Be direct and honest. ${isOptions ? "This is an options trade — do NOT mention stop loss or share-based risk. Focus on Greeks exposure, expiration timing, premium paid, and strategy-specific risks." : ""}
 
@@ -320,7 +324,7 @@ Respond in this exact JSON format:
     const res = await fetch("/api/analyse", {
       method: "POST",
       headers,
-      body: JSON.stringify({ userId: session?.user?.id, model: "claude-haiku-4-5-20251001", max_tokens: 700, messages, feature: "assist" }),
+      body: JSON.stringify({ userId: session?.user?.id, model: "claude-haiku-4-5-20251001", max_tokens: 900, messages, feature: "assist" }),
     });
     const data = await res.json();
     if (data.error) throw new Error(typeof data.error === "string" ? data.error : data.error.message);
@@ -1246,7 +1250,7 @@ const base = {
             {chartImage ? (
               <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8, background: t.surface, border: `1px solid ${t.border}`, borderRadius: 8, padding: "8px 10px" }}>
                 <img src={chartImage.previewUrl} alt="Chart" style={{ width: 64, height: 40, objectFit: "cover", borderRadius: 5, flexShrink: 0 }} />
-                <div style={{ flex: 1, fontSize: 11, color: t.text3 }}>Chart attached — AI will identify S/R levels, MAs & patterns</div>
+                <div style={{ flex: 1, fontSize: 11, color: t.text3 }}>Chart attached — AI will analyse S/R, MAs, Volume, RSI, MACD, VWAP & patterns</div>
                 <button onClick={() => setChartImage(null)} style={{ background: "none", border: "none", color: t.text4, cursor: "pointer", fontSize: 16, lineHeight: 1, padding: 0, flexShrink: 0 }}>×</button>
               </div>
             ) : (
@@ -1254,7 +1258,7 @@ const base = {
                 onClick={() => chartFileRef.current?.click()}
                 style={{ width: "100%", background: "none", border: `1px dashed ${t.border}`, borderRadius: 7, padding: "8px 12px", cursor: "pointer", color: t.text3, fontSize: 11, fontFamily: "'Space Mono', monospace", marginBottom: 8, textAlign: "center" }}
               >
-                + Attach chart (optional — for S/R & MA analysis)
+                + Attach chart (optional — S/R, MAs, Volume, RSI, MACD, VWAP & patterns)
               </button>
             )}
 

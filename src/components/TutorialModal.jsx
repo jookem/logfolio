@@ -289,7 +289,7 @@ const PLAN_WALKTHROUGH = [
   {
     icon: <RobotIcon size={44} />,
     title: "AI Assist (Pro Plus)",
-    desc: "Tap ✦ AI Assist to get Claude's read on your plan. Optionally attach a chart screenshot first — Claude will identify key support/resistance levels, moving average positions, trend direction, and notable patterns. You'll also get a market bias from recent price data and personalised warnings based on your own trade history.\n\nThe chart image and full analysis are saved with your plan. When you execute the plan, everything carries over to the logged trade so you can review it later. Up to 3 uses per day.",
+    desc: "Tap ✦ AI Assist to get Claude's read on your plan. Optionally attach a chart screenshot first — Claude will analyse any indicators visible on the chart: support/resistance levels, moving averages, volume conviction, RSI overbought/oversold and divergences, MACD crossovers and momentum, VWAP institutional bias, and candlestick rejection patterns at key levels. Only indicators actually present on the chart are reported.\n\nYou'll also get a one-line market bias from recent price data and personalised warnings based on your own trade history with the ticker.\n\nThe chart and full analysis are saved with your plan and carry over automatically when you execute it. Up to 3 uses per day.",
     target: "tut-plan-ai-assist",
     panelPos: "top",
   },
