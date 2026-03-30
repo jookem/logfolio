@@ -1092,7 +1092,7 @@ const paginated = filtered
             left: mobile ? 16 : "auto",
             zIndex: 300,
             background: toast.color,
-            border: `1.5px solid ${T.card}`,
+            border: "none",
             borderRadius: 10,
             padding: "11px 16px",
             fontFamily: "'Space Mono',monospace",
