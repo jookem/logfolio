@@ -39,7 +39,7 @@ export function tk(theme) {
         accent: "#00ff87",
         positive: "#00ff87",
         danger: "#ff4d6d",
-        navBg: "#070d20",
+        navBg: "#060e26",
         navBorder: "#101a35",
         hoverBg: "#0d1932",
         tagBg: "#101a35",
