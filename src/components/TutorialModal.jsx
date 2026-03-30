@@ -43,7 +43,7 @@ const TUTORIAL_STEPS = [
   {
     icon: <PlanIcon size={44} />,
     title: "Plan a Trade",
-    desc: "Before entering a position, create a plan. Set your thesis, target, stop loss, and look up the live options chain. Pro Plus members also get AI Assist — personalised market bias and trade warnings based on your history.",
+    desc: "Build your full trade plan before entering a position — thesis, entry, stop, target, and checklist. Pro Plus members get AI Assist: attach a chart screenshot and Claude will identify support/resistance levels, moving averages, and patterns, then give you personalised warnings based on your own trade history. The chart and analysis are saved with the plan and carry over automatically when you execute it.",
     tab: "plans",
     cta: { label: "Try creating a plan", action: "openPlan" },
   },
@@ -143,7 +143,7 @@ const TUTORIAL_STEPS = [
   {
     icon: <Pair a={<AnalysisIcon size={38} />} b={<RobotIcon size={38} />} />,
     title: "Free, Pro & Pro+",
-    desc: "Free tier: log up to 5 trades per month with access to Today, Weekly, Calendar, Logs, Plans, and Journal.\n\nPro: unlimited trade logging, CSV import, full Analytics, and all core features.\n\nPro+: everything in Pro, plus AI Insights (up to 3 analyses per day) and AI Assist inside trade planning — personalised market bias and trade warnings based on your history.",
+    desc: "Free tier: log up to 5 trades per month with access to Today, Weekly, Calendar, Logs, Plans, and Journal.\n\nPro: unlimited trade logging, CSV import, full Analytics, and all core features.\n\nPro+: everything in Pro, plus AI Insights (up to 3 analyses per day) and AI Assist inside trade planning — attach a chart for S/R and MA analysis, get personalised market bias and trade warnings based on your history. Chart and analysis are saved with your plan and carry over when you execute.",
     tab: null,
     cta: null,
   },
@@ -274,8 +274,8 @@ const PLAN_WALKTHROUGH = [
   },
   {
     icon: <Pair a={<RecIcon size={44} />} b={<ScreenshotIcon size={44} />} />,
-    title: "Voice Note & Screenshot",
-    desc: "Record a voice note with your trade rationale and attach a chart screenshot. Reviewing these alongside your results is one of the fastest ways to improve.",
+    title: "Voice Note",
+    desc: "Record a voice note with your trade rationale. Speaking your thesis out loud before entering is one of the fastest ways to spot weak reasoning.",
     target: "tut-plan-media",
     panelPos: "top",
   },
@@ -289,7 +289,7 @@ const PLAN_WALKTHROUGH = [
   {
     icon: <RobotIcon size={44} />,
     title: "AI Assist (Pro Plus)",
-    desc: "Tap ✦ AI Assist to get an instant read on market direction from recent SPY data, plus personalised warnings and confirmations based on your own trade history with this ticker. Up to 3 uses per day.",
+    desc: "Tap ✦ AI Assist to get Claude's read on your plan. Optionally attach a chart screenshot first — Claude will identify key support/resistance levels, moving average positions, trend direction, and notable patterns. You'll also get a market bias from recent price data and personalised warnings based on your own trade history.\n\nThe chart image and full analysis are saved with your plan. When you execute the plan, everything carries over to the logged trade so you can review it later. Up to 3 uses per day.",
     target: "tut-plan-ai-assist",
     panelPos: "top",
   },
