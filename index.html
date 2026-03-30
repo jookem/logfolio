@@ -8,6 +8,15 @@
     <link rel="icon" type="image/svg+xml" href="/images/logfolio-ico.svg">
     <link rel="manifest" href="/manifest.json" />
     <meta name="theme-color" content="#000000" />
+    <script>
+      (function() {
+        try {
+          var theme = localStorage.getItem('logfolio_theme') || 'dark';
+          var color = theme === 'bloomberg' ? '#FF6600' : theme === 'light' ? '#00b87a' : '#00ff87';
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', color);
+        } catch(e) {}
+      })();
+    </script>
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-title" content="LOG-FOLIO" />
