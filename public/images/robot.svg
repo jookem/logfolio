@@ -4,23 +4,18 @@
 	 viewBox="0 0 800 800" style="enable-background:new 0 0 800 800;" xml:space="preserve">
 <style type="text/css">
 	.st0{fill:none;stroke:#000000;stroke-width:66;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:133.3333;}
+	.st1{fill:none;stroke:#000000;stroke-width:33;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:133.3333;}
 </style>
-<g id="robot">
-	<path class="st0" d="M707.6,410.7c36.8,0,56.7,29.8,56.7,66.7v33.3c0,36.8-19.8,66.7-56.7,66.7"/>
-	<line class="st0" x1="167.6" y1="462.7" x2="167.6" y2="529.4"/>
-	<path class="st0" d="M94.3,410.7c-36.8,0-56.7,29.8-56.7,66.7v33.3c0,36.8,19.8,66.7,56.7,66.7"/>
-	<path class="st0" d="M401,277.4H301c-73.6,0-133.3,59.7-133.3,133.3v2h-0.1v164.7v-0.1V721h100h266.7h100V577.3v2.1V410.7l0,0l0,0
-		c0-73.6-59.7-133.3-133.3-133.3L401,277.4"/>
-	<line class="st0" x1="301" y1="412.7" x2="301" y2="412.7"/>
-	<line class="st0" x1="501" y1="412.7" x2="501" y2="412.7"/>
-	<g>
-		<path d="M401,101.7c18.4,0,33.3,14.9,33.3,33.3s-14.9,33.3-33.3,33.3s-33.3-14.9-33.3-33.3S382.6,101.7,401,101.7 M401,35.7
-			c-54.8,0-99.3,44.5-99.3,99.3s44.5,99.3,99.3,99.3s99.3-44.5,99.3-99.3S455.7,35.7,401,35.7L401,35.7z"/>
-	</g>
-	<rect x="268.5" y="517.3" class="st0" width="261" height="102.5"/>
-	<path class="st0" d="M360.8,609.7"/>
-	<path class="st0" d="M360.8,543.9"/>
-	<path class="st0" d="M442.8,609.7"/>
-	<path class="st0" d="M442.8,543.9"/>
-</g>
+<path class="st0" d="M707.6,410.7c36.8,0,56.7,29.8,56.7,66.7v33.3c0,36.8-19.8,66.7-56.7,66.7"/>
+<path class="st0" d="M94.3,410.7c-36.8,0-56.7,29.8-56.7,66.7v33.3c0,36.8,19.8,66.7,56.7,66.7"/>
+<path class="st0" d="M400.1,277.4h-100c-73.6,0-133.3,59.7-133.3,133.3v2h-0.1v164.7v-0.1V721h100h266.7h100V577.3v2.1V410.7l0,0
+	l0,0c0-73.6-59.7-133.3-133.3-133.3L400.1,277.4"/>
+<line class="st0" x1="301" y1="412.7" x2="301" y2="412.7"/>
+<line class="st0" x1="501" y1="412.7" x2="501" y2="412.7"/>
+<rect x="268.5" y="517.3" class="st1" width="261" height="102.5"/>
+<path class="st0" d="M360.8,609.7"/>
+<path class="st0" d="M360.8,543.9"/>
+<path class="st0" d="M442.8,609.7"/>
+<path class="st0" d="M442.8,543.9"/>
+<circle class="st0" cx="400" cy="121.5" r="80.9"/>
 </svg>

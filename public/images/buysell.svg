@@ -4,12 +4,15 @@
 	 viewBox="0 0 800 800" style="enable-background:new 0 0 800 800;" xml:space="preserve">
 <style type="text/css">
 	.st0{fill:none;stroke:#000000;stroke-width:66;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:133.3333;}
+	.st1{fill:none;stroke:#000000;stroke-width:33;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:133.3333;}
 </style>
-<g id="bought">
-	<path class="st0" d="M701,177.8l-66.7,233.3H246.9 M667.7,544.5h-400L201,111.2H101 M384.4,244.5l66.7,66.7 M451,311.2l66.7-66.7
-		 M451,311.2v-200 M301,677.8c0,18.4-14.9,33.3-33.3,33.3s-33.3-14.9-33.3-33.3s14.9-33.3,33.3-33.3S301,659.4,301,677.8z
-		 M667.7,677.8c0,18.4-14.9,33.3-33.3,33.3c-18.4,0-33.3-14.9-33.3-33.3s14.9-33.3,33.3-33.3S667.7,659.4,667.7,677.8z"/>
-	<line class="st0" x1="517.7" y1="140.8" x2="451" y2="74.2"/>
-	<line class="st0" x1="451" y1="74.2" x2="384.4" y2="140.8"/>
-</g>
+<polyline class="st0" points="701,177.8 634.3,411.1 246.9,411.1 "/>
+<polyline class="st0" points="667.7,544.5 267.7,544.5 201,111.2 101,111.2 "/>
+<line class="st1" x1="384.4" y1="244.5" x2="451.1" y2="311.2"/>
+<line class="st1" x1="451" y1="311.2" x2="517.7" y2="244.5"/>
+<line class="st1" x1="451" y1="311.2" x2="451" y2="74.2"/>
+<circle class="st0" cx="267.7" cy="677.8" r="33.3"/>
+<circle class="st0" cx="634.4" cy="677.8" r="33.3"/>
+<line class="st1" x1="517.7" y1="140.8" x2="451" y2="74.2"/>
+<line class="st1" x1="451" y1="74.2" x2="384.4" y2="140.8"/>
 </svg>
