@@ -53,7 +53,7 @@ export default function SettingsModal({ onClose, isDark, theme, setTheme, onClea
                 {[
                   { id: "light",     label: "Light",     Icon: LightModeIcon },
                   { id: "dark",      label: "Dark",      Icon: DarkModeIcon  },
-                  { id: "bloomberg", label: "Bloomberg", Icon: null          },
+                  { id: "bloomberg", label: "Bloom", Icon: null          },
                 ].map(({ id, label, Icon }) => {
                   const active = (theme || (isDark ? "dark" : "light")) === id;
                   const bbActive = id === "bloomberg" && active;
