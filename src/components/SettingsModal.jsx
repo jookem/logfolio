@@ -280,7 +280,7 @@ export default function SettingsModal({ onClose, isDark, theme, setTheme, onClea
             </div>
             <button onClick={() => trigger(() => { onClear(); onClose(); })} style={{ background: t.danger + "15", border: `1px solid ${t.danger}40`, color: t.danger, borderRadius: 7, padding: "6px 14px", cursor: "pointer", fontSize: 12, fontFamily: "'Space Mono', monospace" }}>Clear</button>
           </div>
-          <div style={{ borderTop: `1px solid ${t.border}`, margin: "12px 0" }} />
+          <div style={{ margin: "12px 0" }} />
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
             <div>
               <div style={{ fontSize: 14, color: t.text }}>Clear All Plans</div>

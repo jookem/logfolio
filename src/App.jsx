@@ -2347,7 +2347,7 @@ const paginated = filtered
               <span style={{ color: T.danger }}><DeleteIcon size={20} /></span>
             </div>
             <div style={{ fontSize: 15, fontWeight: 700, color: T.text, marginBottom: 8 }}>
-              Delete {confirmDelete.isPlan ? "plan" : confirmDelete.id === "__ALL__" ? "trades" : "trade"}?
+              Delete {confirmDelete.id === "__ALL_PLANS__" ? "plans" : confirmDelete.isPlan ? "plan" : confirmDelete.id === "__ALL__" ? "trades" : "trade"}?
             </div>
             <div style={{ fontSize: 13, color: T.text3, marginBottom: 24 }}>
               {confirmDelete.ticker} will be permanently removed.
