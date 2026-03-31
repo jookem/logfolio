@@ -658,18 +658,23 @@ const importTrades = (incoming) => {
     setConfirmDelete({ id: "__ALL__", ticker: "all trades", isPlan: false });
   };
   const clearAllExec = () => {
-    setTrades((p) => p.filter((tr) => tr.status === "planned"));
+    const remaining = trades.filter((tr) => tr.status === "planned");
+    setTrades(remaining);
     setSelected(null);
+    saveTrades(remaining); // immediately flush to localStorage so refresh can't resurrect deleted trades
     showToast("All trades cleared", T.danger, "delete");
     if (user) {
       supabase.from("trades").delete().eq("user_id", user.id).neq("status", "planned").then(() => {});
+      deleteAllUserMedia(user.id);
     }
   };
   const clearAllPlans = () => {
     setConfirmDelete({ id: "__ALL_PLANS__", ticker: "all plans", isPlan: true });
   };
   const clearAllPlansExec = () => {
-    setTrades((p) => p.filter((tr) => tr.status !== "planned"));
+    const remaining = trades.filter((tr) => tr.status !== "planned");
+    setTrades(remaining);
+    saveTrades(remaining); // immediately flush to localStorage
     showToast("All plans cleared", T.danger, "delete");
     if (user) {
       supabase.from("trades").delete().eq("user_id", user.id).eq("status", "planned").then(() => {});
