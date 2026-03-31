@@ -5,16 +5,14 @@
 <style type="text/css">
 	.st0{fill:none;stroke:#000000;stroke-width:66;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;}
 </style>
-<g id="direction">
-	<g>
-		<line class="st0" x1="199.8" y1="109.3" x2="199.8" y2="678.7"/>
-		<line class="st0" x1="198.3" y1="110.3" x2="84.3" y2="224.1"/>
-		<line class="st0" x1="201.6" y1="110.3" x2="315.6" y2="224.1"/>
-	</g>
-	<g>
-		<line class="st0" x1="613" y1="678.7" x2="613" y2="109.3"/>
-		<line class="st0" x1="613" y1="677.7" x2="728.5" y2="563.9"/>
-		<line class="st0" x1="613" y1="677.7" x2="497.4" y2="563.9"/>
-	</g>
+<g>
+	<line class="st0" x1="225.8" y1="245.3" x2="225.8" y2="678.7"/>
+	<line class="st0" x1="224.3" y1="110.3" x2="110.3" y2="224.1"/>
+	<line class="st0" x1="227.6" y1="110.3" x2="341.6" y2="224.1"/>
+</g>
+<g>
+	<line class="st0" x1="594" y1="538.7" x2="594" y2="109.3"/>
+	<line class="st0" x1="594" y1="677.7" x2="709.5" y2="563.9"/>
+	<line class="st0" x1="594" y1="677.7" x2="478.4" y2="563.9"/>
 </g>
 </svg>
