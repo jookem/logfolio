@@ -190,7 +190,7 @@ const [page, setPage] = useState(1);
       }
     };
     loadFromSupabase();
-  }, [user]);
+  }, [user?.id]); // user?.id — don't re-run on token refresh (same ID, new object reference)
 
   // Sync trades to Supabase whenever they change
   useEffect(() => {
