@@ -228,7 +228,7 @@ export default function SettingsModal({ onClose, isDark, theme, setTheme, onClea
                 </div>
                 {isPro && !trialActive && profile?.stripe_customer_id
                   ? <button onClick={onManageBilling} style={{ background: "none", border: `1px solid ${t.border}`, color: t.text3, borderRadius: 7, padding: "6px 14px", cursor: "pointer", fontSize: 12, fontFamily: "'Space Mono', monospace" }}>Manage</button>
-                  : <button onClick={() => onUpgrade("pro")} style={{ background: t.accent, border: "none", color: "#000", borderRadius: 7, padding: "6px 14px", cursor: "pointer", fontSize: 12, fontWeight: 700, fontFamily: "'Space Mono', monospace" }}>{trialActive ? "Upgrade" : "Upgrade"}</button>
+                  : <button onClick={() => onUpgrade("pro")} style={{ background: "none", border: `1px solid ${t.border}`, color: t.text3, borderRadius: 7, padding: "6px 14px", cursor: "pointer", fontSize: 12, fontFamily: "'Space Mono', monospace" }}>Manage</button>
                 }
               </div>
             );
