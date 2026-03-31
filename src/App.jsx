@@ -218,6 +218,10 @@ const [page, setPage] = useState(1);
     const dayOffset = Math.round((anchor - lastSeedDate) / 86400000);
     const shiftDate = (str) => {
       const d = new Date(str); d.setDate(d.getDate() + dayOffset);
+      // Snap to nearest prior weekday (skip weekends)
+      const dow = d.getUTCDay();
+      if (dow === 6) d.setDate(d.getDate() - 1); // Sat → Fri
+      if (dow === 0) d.setDate(d.getDate() - 2); // Sun → Fri
       return d.toISOString().slice(0, 10);
     };
 
