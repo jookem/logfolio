@@ -141,7 +141,21 @@ const [page, setPage] = useState(1);
         return;
       }
 
-      const firstBatch = firstChunk.map(row => ({ ...row.data, id: row.id }));
+      let firstBatch = firstChunk.map(row => ({ ...row.data, id: row.id }));
+
+      // Re-apply any clears that were interrupted by a refresh before Supabase confirmed
+      const clearTradesPending = localStorage.getItem("tradelog_clear_trades_pending");
+      const clearPlansPending = localStorage.getItem("tradelog_clear_plans_pending");
+      if (clearTradesPending) {
+        await supabase.from("trades").delete().eq("user_id", user.id).neq("status", "planned");
+        localStorage.removeItem("tradelog_clear_trades_pending");
+        firstBatch = firstBatch.filter(t => t.status === "planned");
+      }
+      if (clearPlansPending) {
+        await supabase.from("trades").delete().eq("user_id", user.id).eq("status", "planned");
+        localStorage.removeItem("tradelog_clear_plans_pending");
+        firstBatch = firstBatch.filter(t => t.status !== "planned");
+      }
 
       if (firstBatch.length === 0) {
         // Only migrate localStorage if it belongs to this exact user
@@ -657,27 +671,31 @@ const importTrades = (incoming) => {
   const clearAll = () => {
     setConfirmDelete({ id: "__ALL__", ticker: "all trades", isPlan: false });
   };
-  const clearAllExec = () => {
+  const clearAllExec = async () => {
     const remaining = trades.filter((tr) => tr.status === "planned");
     setTrades(remaining);
     setSelected(null);
-    saveTrades(remaining); // immediately flush to localStorage so refresh can't resurrect deleted trades
+    saveTrades(remaining);
     showToast("All trades cleared", T.danger, "delete");
     if (user) {
-      supabase.from("trades").delete().eq("user_id", user.id).neq("status", "planned").then(() => {});
+      localStorage.setItem("tradelog_clear_trades_pending", "1");
+      await supabase.from("trades").delete().eq("user_id", user.id).neq("status", "planned");
+      localStorage.removeItem("tradelog_clear_trades_pending");
       deleteAllUserMedia(user.id);
     }
   };
   const clearAllPlans = () => {
     setConfirmDelete({ id: "__ALL_PLANS__", ticker: "all plans", isPlan: true });
   };
-  const clearAllPlansExec = () => {
+  const clearAllPlansExec = async () => {
     const remaining = trades.filter((tr) => tr.status !== "planned");
     setTrades(remaining);
-    saveTrades(remaining); // immediately flush to localStorage
+    saveTrades(remaining);
     showToast("All plans cleared", T.danger, "delete");
     if (user) {
-      supabase.from("trades").delete().eq("user_id", user.id).eq("status", "planned").then(() => {});
+      localStorage.setItem("tradelog_clear_plans_pending", "1");
+      await supabase.from("trades").delete().eq("user_id", user.id).eq("status", "planned");
+      localStorage.removeItem("tradelog_clear_plans_pending");
     }
   };
 
