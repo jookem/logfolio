@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, useLayoutEffect } from "react";
 import { createPortal } from "react-dom";
 
-const PADDING = 12; // min gap from viewport edge
+const PADDING = 20; // min gap from viewport edge
 
 export default function StatCard({ label, value, sub, color, t, info }) {
   const c = color || t.accent;
