@@ -5,7 +5,7 @@ import { STRATEGIES, TIMEFRAMES, CURRENCIES, TIMEZONES } from "../lib/constants"
 import { exportCSV, exportJSON } from "../lib/utils";
 import { SettingsIcon, CloseIcon, LightModeIcon, DarkModeIcon, CheckIcon } from "../lib/icons";
 
-export default function SettingsModal({ onClose, isDark, theme, setTheme, onClear, t, user, profile, onSignOut, isPro, isProPlus, onUpgrade, onManageBilling, onTutorial, tradeDefaults, onSaveDefaults, trades, onChangelog, hasUnreadChangelog }) {
+export default function SettingsModal({ onClose, isDark, theme, setTheme, onClear, onClearPlans, t, user, profile, onSignOut, isPro, isProPlus, onUpgrade, onManageBilling, onTutorial, tradeDefaults, onSaveDefaults, trades, onChangelog, hasUnreadChangelog }) {
   const { closing, trigger } = useModalClose();
   const sm = window.innerWidth < 400;
   const [copied, setCopied] = useState(false);
@@ -276,9 +276,17 @@ export default function SettingsModal({ onClose, isDark, theme, setTheme, onClea
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
             <div>
               <div style={{ fontSize: 14, color: t.text }}>Clear All Trades</div>
-              <div style={{ fontSize: 11, color: t.text3, marginTop: 2 }}>Permanently delete all trade data</div>
+              <div style={{ fontSize: 11, color: t.text3, marginTop: 2 }}>Permanently delete all trade logs</div>
             </div>
             <button onClick={() => trigger(() => { onClear(); onClose(); })} style={{ background: t.danger + "15", border: `1px solid ${t.danger}40`, color: t.danger, borderRadius: 7, padding: "6px 14px", cursor: "pointer", fontSize: 12, fontFamily: "'Space Mono', monospace" }}>Clear</button>
+          </div>
+          <div style={{ borderTop: `1px solid ${t.border}`, margin: "12px 0" }} />
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <div>
+              <div style={{ fontSize: 14, color: t.text }}>Clear All Plans</div>
+              <div style={{ fontSize: 11, color: t.text3, marginTop: 2 }}>Permanently delete all trade plans</div>
+            </div>
+            <button onClick={() => trigger(() => { onClearPlans(); onClose(); })} style={{ background: t.danger + "15", border: `1px solid ${t.danger}40`, color: t.danger, borderRadius: 7, padding: "6px 14px", cursor: "pointer", fontSize: 12, fontFamily: "'Space Mono', monospace" }}>Clear</button>
           </div>
         </div>
 

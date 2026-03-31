@@ -582,6 +582,7 @@ const [page, setPage] = useState(1);
     const { id } = confirmDelete;
     setConfirmDelete(null);
     if (id === "__ALL__") { clearAllExec(); return; }
+    if (id === "__ALL_PLANS__") { clearAllPlansExec(); return; }
     setTrades((p) => p.filter((tr) => tr.id !== id));
     if (selected?.id === id) setSelected(null);
     showToast("Deleted", T.danger, "delete");
@@ -653,13 +654,21 @@ const importTrades = (incoming) => {
     setConfirmDelete({ id: "__ALL__", ticker: "all trades", isPlan: false });
   };
   const clearAllExec = () => {
-    setTrades([]);
+    setTrades((p) => p.filter((tr) => tr.status === "planned"));
     setSelected(null);
-    localStorage.removeItem(STORAGE_KEY);
     showToast("All trades cleared", T.danger, "delete");
     if (user) {
-      supabase.from("trades").delete().eq("user_id", user.id).then(() => {});
-      deleteAllUserMedia(user.id);
+      supabase.from("trades").delete().eq("user_id", user.id).neq("status", "planned").then(() => {});
+    }
+  };
+  const clearAllPlans = () => {
+    setConfirmDelete({ id: "__ALL_PLANS__", ticker: "all plans", isPlan: true });
+  };
+  const clearAllPlansExec = () => {
+    setTrades((p) => p.filter((tr) => tr.status !== "planned"));
+    showToast("All plans cleared", T.danger, "delete");
+    if (user) {
+      supabase.from("trades").delete().eq("user_id", user.id).eq("status", "planned").then(() => {});
     }
   };
 
@@ -2211,6 +2220,7 @@ const paginated = filtered
     theme={theme}
     setTheme={setTheme}
     onClear={clearAll}
+    onClearPlans={clearAllPlans}
     t={T}
     user={user}
     profile={profile}
