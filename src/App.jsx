@@ -147,14 +147,18 @@ const [page, setPage] = useState(1);
       const clearTradesPending = localStorage.getItem("tradelog_clear_trades_pending");
       const clearPlansPending = localStorage.getItem("tradelog_clear_plans_pending");
       if (clearTradesPending) {
-        await supabase.from("trades").delete().eq("user_id", user.id).neq("status", "planned");
+        const kept = firstBatch.filter(t => t.status === "planned");
+        await supabase.from("trades").delete().eq("user_id", user.id);
+        if (kept.length > 0) await supabase.from("trades").upsert(kept.map(t => ({ id: t.id, user_id: user.id, data: t })));
         localStorage.removeItem("tradelog_clear_trades_pending");
-        firstBatch = firstBatch.filter(t => t.status === "planned");
+        firstBatch = kept;
       }
       if (clearPlansPending) {
-        await supabase.from("trades").delete().eq("user_id", user.id).eq("status", "planned");
+        const kept = firstBatch.filter(t => t.status !== "planned");
+        await supabase.from("trades").delete().eq("user_id", user.id);
+        if (kept.length > 0) await supabase.from("trades").upsert(kept.map(t => ({ id: t.id, user_id: user.id, data: t })));
         localStorage.removeItem("tradelog_clear_plans_pending");
-        firstBatch = firstBatch.filter(t => t.status !== "planned");
+        firstBatch = kept;
       }
 
       if (firstBatch.length === 0) {
@@ -679,7 +683,13 @@ const importTrades = (incoming) => {
     showToast("All trades cleared", T.danger, "delete");
     if (user) {
       localStorage.setItem("tradelog_clear_trades_pending", "1");
-      await supabase.from("trades").delete().eq("user_id", user.id).neq("status", "planned");
+      // Delete ALL rows for user, then re-insert planned ones.
+      // Cannot filter by status here — status lives inside the data JSON column,
+      // not as a top-level column, so .neq("status","planned") matches nothing.
+      await supabase.from("trades").delete().eq("user_id", user.id);
+      if (remaining.length > 0) {
+        await supabase.from("trades").upsert(remaining.map(t => ({ id: t.id, user_id: user.id, data: t })));
+      }
       localStorage.removeItem("tradelog_clear_trades_pending");
       deleteAllUserMedia(user.id);
     }
@@ -694,7 +704,11 @@ const importTrades = (incoming) => {
     showToast("All plans cleared", T.danger, "delete");
     if (user) {
       localStorage.setItem("tradelog_clear_plans_pending", "1");
-      await supabase.from("trades").delete().eq("user_id", user.id).eq("status", "planned");
+      // Same issue — delete all, re-insert non-planned trades
+      await supabase.from("trades").delete().eq("user_id", user.id);
+      if (remaining.length > 0) {
+        await supabase.from("trades").upsert(remaining.map(t => ({ id: t.id, user_id: user.id, data: t })));
+      }
       localStorage.removeItem("tradelog_clear_plans_pending");
     }
   };
