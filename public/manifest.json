@@ -4,8 +4,8 @@
   "description": "Trading journal and performance analytics",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#000000",
-  "theme_color": "#000000",
+  "background_color": "#060e26",
+  "theme_color": "#060e26",
   "icons": [
     { "src": "/images/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
     { "src": "/images/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" },

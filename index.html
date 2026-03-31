@@ -12,7 +12,7 @@
       (function() {
         try {
           var theme = localStorage.getItem('tradelog_theme') || 'dark';
-          var color = theme === 'bloomberg' ? '#FF6600' : theme === 'light' ? '#00b87a' : '#00ff87';
+          var color = theme === 'bloomberg' ? '#000000' : theme === 'light' ? '#ffffff' : '#060e26';
           document.querySelector('meta[name="theme-color"]').setAttribute('content', color);
         } catch(e) {}
       })();

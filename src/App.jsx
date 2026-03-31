@@ -319,7 +319,7 @@ const [page, setPage] = useState(1);
   useEffect(() => {
     try { localStorage.setItem(THEME_KEY, theme); } catch {}
     if (user) supabase.from("profiles").update({ theme }).eq("id", user.id).then(() => {});
-    const themeColor = theme === "bloomberg" ? "#FF6600" : theme === "light" ? "#00b87a" : "#00ff87";
+    const themeColor = theme === "bloomberg" ? "#000000" : theme === "light" ? "#ffffff" : "#060e26";
     document.querySelector('meta[name="theme-color"]')?.setAttribute("content", themeColor);
   }, [theme, user]);
 
