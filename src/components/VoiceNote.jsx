@@ -16,6 +16,7 @@ export default function VoiceNote({ value, onChange, t }) {
   const [mediaRecorder, setMediaRecorder] = useState(null);
   const [audioUrl, setAudioUrl] = useState(value || null);
   const [elapsed, setElapsed] = useState(0);
+  const [micError, setMicError] = useState(false);
 
   useEffect(() => {
     setAudioUrl(value || null);
@@ -60,7 +61,7 @@ export default function VoiceNote({ value, onChange, t }) {
         if (secs >= MAX_SECONDS) stopRecording();
       }, 1000);
     } catch {
-      alert("Microphone access denied.");
+      setMicError(true);
     }
   };
 
@@ -81,9 +82,12 @@ export default function VoiceNote({ value, onChange, t }) {
         display: "flex", alignItems: "center", gap: 6,
       }}><RecIcon size={13} />Voice Note</div>
 
+      {micError && (
+        <div style={{ fontSize: 12, color: t.danger, marginBottom: 8 }}>Microphone access denied. Check your browser permissions.</div>
+      )}
       {!audioUrl ? (
         <button
-          onClick={recording ? stopRecording : startRecording}
+          onClick={recording ? stopRecording : () => { setMicError(false); startRecording(); }}
           style={{
             width: "100%",
             background: recording ? t.danger + "20" : t.accent + "08",
