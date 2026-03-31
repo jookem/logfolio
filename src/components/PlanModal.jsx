@@ -185,6 +185,7 @@ const [tagInput, setTagInput] = useState("");
 const [customEmotions, setCustomEmotions] = useState([]);
 const [emotionInput, setEmotionInput] = useState("");
 const [showSizeCalc, setShowSizeCalc] = useState(false);
+const [showIncompleteModal, setShowIncompleteModal] = useState(false);
 const [calcAccountSize, setCalcAccountSize] = useState("");
 const [calcRiskPct, setCalcRiskPct] = useState("1");
 const [aiAssist, setAiAssist] = useState(initial?.aiAssist || null); // { marketBias, checklist, chartAnalysis? }
@@ -1089,6 +1090,18 @@ const base = {
           ))}
         </div>
 
+        {/* Check all */}
+        {!allChecked && (
+          <button onClick={() => setChecklist(c => c.map(item => ({ ...item, checked: true })))}
+            style={{
+              width: "100%", background: t.accent + "15", border: `1px solid ${t.accent}40`,
+              color: t.accent, borderRadius: 8, padding: "8px 12px", cursor: "pointer",
+              fontSize: 12, fontFamily: "'Space Mono', monospace", marginBottom: 10,
+            }}>
+            Check All
+          </button>
+        )}
+
         {/* Add custom item */}
         <div style={{ display: "flex", gap: 8, marginBottom: 4 }}>
           <input
@@ -1290,13 +1303,27 @@ const base = {
           </div>
         )}
 
+        {/* Incomplete checklist confirmation modal */}
+        {showIncompleteModal && (
+          <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.6)", zIndex: 200, display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>
+            <div style={{ background: t.card, border: `1px solid ${t.border}`, borderRadius: 12, padding: 24, maxWidth: 340, width: "100%" }}>
+              <div style={{ fontSize: 14, fontWeight: 700, color: t.text, marginBottom: 8, fontFamily: "'Space Mono', monospace" }}>Checklist Incomplete</div>
+              <div style={{ fontSize: 13, color: t.text2, lineHeight: 1.6, marginBottom: 20 }}>
+                {checklist.length - checkedCount} item{checklist.length - checkedCount !== 1 ? "s" : ""} still unchecked. Save the plan anyway?
+              </div>
+              <div style={{ display: "flex", gap: 10 }}>
+                <button onClick={() => setShowIncompleteModal(false)} style={{ flex: 1, background: "none", border: `1px solid ${t.border}`, color: t.text3, borderRadius: 8, padding: "10px 0", cursor: "pointer", fontSize: 13 }}>Go Back</button>
+                <button onClick={() => { setShowIncompleteModal(false); save(); }} style={{ flex: 1, background: "#f59e0b", border: "none", color: "#000", borderRadius: 8, padding: "10px 0", cursor: "pointer", fontSize: 13, fontWeight: 700, fontFamily: "'Space Mono', monospace" }}>Save Anyway</button>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Footer buttons */}
        <div style={{ display: "flex", gap: 10 }}>
           <button onClick={() => trigger(onClose)} style={{ flex: 1, background: "none", border: `1px solid ${t.border}`, color: t.text3, borderRadius: 8, padding: 12, cursor: "pointer", fontSize: 14 }}>Cancel</button>
-            <button onClick={() => {
-            if (!allChecked && canSave) {
-              if (!window.confirm(`${checklist.length - checkedCount} checklist item(s) incomplete. Save anyway?`)) return;
-            }
+          <button onClick={() => {
+            if (!allChecked && canSave) { setShowIncompleteModal(true); return; }
             save();
           }} disabled={!canSave} style={{
             flex: 2, background: canSave ? (allChecked ? t.accent : "#f59e0b") : t.card2,
