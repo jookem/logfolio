@@ -49,7 +49,7 @@ export default function SettingsModal({ onClose, isDark, theme, setTheme, onClea
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
             <div style={row}>
               <span style={{ fontSize: 14, color: t.text }}>Theme</span>
-              <div style={{ display: "flex", flexDirection: "column", gap: 6, alignItems: "stretch", minWidth: 140 }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: 6, alignItems: "stretch", minWidth: 100 }}>
                 {[
                   { id: "light",     label: "Light",     Icon: LightModeIcon },
                   { id: "dark",      label: "Dark",      Icon: DarkModeIcon  },
