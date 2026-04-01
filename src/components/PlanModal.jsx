@@ -53,6 +53,7 @@ const [gridPriceMax, setGridPriceMax] = useState("");
 const [gridDateFrom, setGridDateFrom] = useState("");
 const [gridDateTo, setGridDateTo] = useState("");
 const [gridIV, setGridIV] = useState("");
+const [gridColOffset, setGridColOffset] = useState(0);
 const polyFetch = async (path) => {
   const { data: { session } } = await supabase.auth.getSession();
   return fetch("/api/polygon", {
@@ -955,11 +956,19 @@ const base = {
             return sum + diff * (+leg.contracts || 1) * 100;
           }, 0);
 
-          // Pre-compute grid + color scale
+          // Pre-compute full grid for all days (keeps color scale consistent across navigation)
           const grid = prices.map(p => shownDays.map(d => calcTotalPL(p, d)));
           const allVals = grid.flat();
           const maxGain = Math.max(...allVals, 0.01);
           const maxLoss = Math.min(...allVals, -0.01);
+
+          // 7-day sliding window
+          const WEEK = 7;
+          const safeOffset = Math.min(gridColOffset, Math.max(0, shownDays.length - WEEK));
+          const winStart = safeOffset;
+          const winEnd = Math.min(safeOffset + WEEK, shownDays.length);
+          const canPrev = safeOffset > 0;
+          const canNext = winEnd < shownDays.length;
 
           const getCellStyle = (pl) => {
             if (pl > 0) {
@@ -1048,19 +1057,65 @@ const base = {
                 </div>
               </div>
 
-              {/* Grid table */}
-              <div style={{ overflowX: "auto", borderRadius: 8, border: `1px solid ${t.border}` }}>
-                <table style={{ width: "100%", borderCollapse: "collapse", fontFamily: "'Space Mono',monospace", fontSize: 10 }}>
+              {/* Week navigation */}
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
+                <button
+                  onClick={() => setGridColOffset(Math.max(0, safeOffset - WEEK))}
+                  disabled={!canPrev}
+                  style={{
+                    background: canPrev ? t.card2 : "transparent",
+                    border: `1px solid ${canPrev ? t.border : "transparent"}`,
+                    borderRadius: 6, padding: "4px 10px", cursor: canPrev ? "pointer" : "default",
+                    display: "flex", alignItems: "center", opacity: canPrev ? 1 : 0.3,
+                  }}
+                >
+                  <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                    <path d="M9 11L5 7l4-4" stroke={t.text2} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </button>
+                <span style={{ fontSize: 10, color: t.text3, fontFamily: "'Space Mono',monospace", textAlign: "center" }}>
+                  {dateLabels[winStart]} – {dateLabels[winEnd - 1]}
+                  <span style={{ color: t.text4, marginLeft: 6 }}>
+                    ({winStart + 1}–{winEnd} of {shownDays.length})
+                  </span>
+                </span>
+                <button
+                  onClick={() => setGridColOffset(Math.min(shownDays.length - WEEK, safeOffset + WEEK))}
+                  disabled={!canNext}
+                  style={{
+                    background: canNext ? t.card2 : "transparent",
+                    border: `1px solid ${canNext ? t.border : "transparent"}`,
+                    borderRadius: 6, padding: "4px 10px", cursor: canNext ? "pointer" : "default",
+                    display: "flex", alignItems: "center", opacity: canNext ? 1 : 0.3,
+                  }}
+                >
+                  <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                    <path d="M5 3l4 4-4 4" stroke={t.text2} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </button>
+              </div>
+
+              {/* Grid table — fixed width, no horizontal scroll */}
+              <div style={{ borderRadius: 8, border: `1px solid ${t.border}`, overflow: "hidden" }}>
+                <table style={{ width: "100%", borderCollapse: "collapse", fontFamily: "'Space Mono',monospace", fontSize: 10, tableLayout: "fixed" }}>
+                  <colgroup>
+                    <col style={{ width: "18%" }} />
+                    {Array.from({ length: winEnd - winStart }, (_, i) => (
+                      <col key={i} style={{ width: `${62 / (winEnd - winStart)}%` }} />
+                    ))}
+                    <col style={{ width: "20%" }} />
+                  </colgroup>
                   <thead>
                     <tr style={{ background: t.card2 }}>
-                      <td style={{ padding: "5px 8px", color: t.text3, fontSize: 9, whiteSpace: "nowrap" }}>
+                      <td style={{ padding: "5px 8px", color: t.text3, fontSize: 9, whiteSpace: "nowrap", overflow: "hidden" }}>
                         {form.ticker || "Price"}
                       </td>
-                      {dateLabels.map((label, i) => (
+                      {dateLabels.slice(winStart, winEnd).map((label, i) => (
                         <td key={i} style={{
-                          padding: "5px 6px", textAlign: "center", whiteSpace: "nowrap", fontSize: 9,
+                          padding: "5px 4px", textAlign: "center", fontSize: 9,
                           color: label === "Exp" ? t.danger : t.text3,
                           fontWeight: label === "Exp" ? 700 : 400,
+                          overflow: "hidden", whiteSpace: "nowrap",
                         }}>
                           {label}
                         </td>
@@ -1081,18 +1136,18 @@ const base = {
                             color: isCurrent ? t.accent : t.text2,
                             fontWeight: isCurrent ? 700 : 400,
                             borderLeft: isCurrent ? `3px solid ${t.accent}` : "3px solid transparent",
-                            background: t.card3 || t.card2,
+                            background: t.card3 || t.card2, overflow: "hidden",
                           }}>
                             {price.toFixed(2)}
                           </td>
-                          {grid[ri].map((pl, ci) => {
+                          {grid[ri].slice(winStart, winEnd).map((pl, ci) => {
                             const cs = getCellStyle(pl);
                             return (
                               <td key={ci} style={{
-                                padding: "5px 5px", textAlign: "center",
+                                padding: "5px 4px", textAlign: "center",
                                 background: cs.bg, color: cs.color,
                                 fontWeight: isCurrent ? 700 : 500,
-                                whiteSpace: "nowrap", fontSize: 10,
+                                fontSize: 10, overflow: "hidden", whiteSpace: "nowrap",
                                 borderTop: isCurrent ? `1px solid ${t.accent}50` : "none",
                                 borderBottom: isCurrent ? `1px solid ${t.accent}50` : "none",
                               }}>
