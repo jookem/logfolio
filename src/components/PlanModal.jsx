@@ -54,6 +54,7 @@ const [gridDateFrom, setGridDateFrom] = useState("");
 const [gridDateTo, setGridDateTo] = useState("");
 const [gridIV, setGridIV] = useState("");
 const [gridColOffset, setGridColOffset] = useState(0);
+const [gridRowOffset, setGridRowOffset] = useState(0);
 const polyFetch = async (path) => {
   const { data: { session } } = await supabase.auth.getSession();
   return fetch("/api/polygon", {
@@ -940,15 +941,15 @@ const base = {
           const numRows = Math.min(20, Math.ceil(priceRange / rowStep) + 1);
           const prices = Array.from({ length: numRows }, (_, i) => +(priceHigh - i * rowStep).toFixed(2));
 
-          // IV override — applies to all legs if set
-          const ivOverride = gridIV ? Math.max(0.01, +gridIV / 100) : null;
+          // IV delta — added to each leg's IV (e.g. -10 means IV drops 10pp)
+          const ivDelta = gridIV !== "" ? +gridIV : 0;
 
           // Combined multi-leg P&L at a given price and days elapsed from today
           const calcTotalPL = (S_new, daysFromNow) => validLegs.reduce((sum, leg) => {
             const legExp = new Date(leg.expiration + "T00:00:00");
             const legDaysToExp = Math.max(0, Math.round((legExp - today) / 86400000));
             const T = Math.max(0, legDaysToExp - daysFromNow) / 365;
-            const sigma = ivOverride ?? Math.max(0.01, (+leg.iv || 30) / 100);
+            const sigma = Math.max(0.01, ((+leg.iv || 30) + ivDelta) / 100);
             const theoretical = bsPrice(S_new, +leg.strike, T, sigma, leg.type);
             const diff = leg.position === "sell"
               ? (+leg.entryPremium - theoretical)
@@ -962,13 +963,21 @@ const base = {
           const maxGain = Math.max(...allVals, 0.01);
           const maxLoss = Math.min(...allVals, -0.01);
 
-          // 7-day sliding window
+          // 7-day sliding column window
           const WEEK = 7;
           const safeOffset = Math.min(gridColOffset, Math.max(0, shownDays.length - WEEK));
           const winStart = safeOffset;
           const winEnd = Math.min(safeOffset + WEEK, shownDays.length);
           const canPrev = safeOffset > 0;
           const canNext = winEnd < shownDays.length;
+
+          // Row window (13 rows visible at a time)
+          const ROW_WIN = 13;
+          const safeRowOffset = Math.min(gridRowOffset, Math.max(0, prices.length - ROW_WIN));
+          const visiblePrices = prices.slice(safeRowOffset, safeRowOffset + ROW_WIN);
+          const visibleGrid = grid.slice(safeRowOffset, safeRowOffset + ROW_WIN);
+          const canScrollUp = safeRowOffset > 0;
+          const canScrollDown = safeRowOffset + ROW_WIN < prices.length;
 
           const getCellStyle = (pl) => {
             if (pl > 0) {
@@ -992,68 +1001,58 @@ const base = {
             return `${sign}$${abs >= 1000 ? (abs / 1000).toFixed(1) + "k" : abs.toFixed(0)}`;
           };
 
-          const ctrlInput = { background: t.card2, border: `1px solid ${t.border}`, borderRadius: 6, color: t.text2, fontFamily: "'Space Mono',monospace", fontSize: 11, padding: "5px 8px", outline: "none", width: "100%" };
+          const ctrlInput = { background: t.card2, border: `1px solid ${t.border}`, borderRadius: 6, color: t.text2, fontFamily: "'Space Mono',monospace", fontSize: 11, padding: "5px 8px", outline: "none", width: "100%", boxSizing: "border-box" };
           const ctrlLabel = { fontSize: 9, color: t.text3, fontFamily: "'Space Mono',monospace", textTransform: "uppercase", letterSpacing: 1, marginBottom: 4, display: "block" };
+          const navBtn = (enabled) => ({
+            background: "transparent", border: "none", cursor: enabled ? "pointer" : "default",
+            padding: "6px 4px", display: "flex", alignItems: "center", justifyContent: "center",
+            opacity: enabled ? 1 : 0.25, borderRadius: 4,
+          });
 
           return (
             <div style={{ marginBottom: 4 }}>
               {sectionHeader("P&L Grid")}
 
-              {/* Controls row */}
-              <div style={{ display: "flex", gap: 10, marginBottom: 12, flexWrap: "wrap", alignItems: "flex-end" }}>
-                {/* IV % */}
-                <div style={{ minWidth: 72 }}>
-                  <span style={ctrlLabel}>IV %</span>
+              {/* Controls — row 1: IV + Stock Price Range */}
+              <div style={{ display: "flex", gap: 8, marginBottom: 8, alignItems: "flex-end" }}>
+                <div style={{ width: 76, flexShrink: 0 }}>
+                  <span style={ctrlLabel}>IV Δ%</span>
                   <input
-                    type="number" min="1" max="300" step="1"
+                    type="number" step="1"
                     value={gridIV}
                     onChange={e => setGridIV(e.target.value)}
-                    placeholder={(+validLegs[0].iv || 30).toFixed(0)}
+                    placeholder="0"
                     style={ctrlInput}
                   />
                 </div>
-
-                {/* Stock Price Range */}
-                <div style={{ flex: 1, minWidth: 160 }}>
+                <div style={{ flex: 1, minWidth: 0 }}>
                   <span style={ctrlLabel}>Stock Price Range</span>
-                  <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
                     <span style={{ fontSize: 11, color: t.text3, flexShrink: 0 }}>$</span>
-                    <input
-                      type="number" step="any"
-                      value={gridPriceMin}
+                    <input type="number" step="any" value={gridPriceMin}
                       onChange={e => setGridPriceMin(e.target.value)}
                       placeholder={(center - 6 * rawStep).toFixed(0)}
-                      style={{ ...ctrlInput, width: "100%" }}
-                    />
+                      style={{ ...ctrlInput, minWidth: 0 }} />
                     <span style={{ fontSize: 11, color: t.text3, flexShrink: 0 }}>–</span>
-                    <input
-                      type="number" step="any"
-                      value={gridPriceMax}
+                    <input type="number" step="any" value={gridPriceMax}
                       onChange={e => setGridPriceMax(e.target.value)}
                       placeholder={(center + 6 * rawStep).toFixed(0)}
-                      style={{ ...ctrlInput, width: "100%" }}
-                    />
+                      style={{ ...ctrlInput, minWidth: 0 }} />
                   </div>
                 </div>
+              </div>
 
-                {/* Date Range */}
-                <div style={{ flex: 1, minWidth: 200 }}>
-                  <span style={ctrlLabel}>Date Range</span>
-                  <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                    <input
-                      type="date"
-                      value={gridDateFrom}
-                      onChange={e => setGridDateFrom(e.target.value)}
-                      style={{ ...ctrlInput, width: "100%", colorScheme: isDark ? "dark" : "light" }}
-                    />
-                    <span style={{ fontSize: 11, color: t.text3, flexShrink: 0 }}>–</span>
-                    <input
-                      type="date"
-                      value={gridDateTo}
-                      onChange={e => setGridDateTo(e.target.value)}
-                      style={{ ...ctrlInput, width: "100%", colorScheme: isDark ? "dark" : "light" }}
-                    />
-                  </div>
+              {/* Controls — row 2: Date Range full width */}
+              <div style={{ marginBottom: 12 }}>
+                <span style={ctrlLabel}>Date Range</span>
+                <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                  <input type="date" value={gridDateFrom}
+                    onChange={e => setGridDateFrom(e.target.value)}
+                    style={{ ...ctrlInput, flex: 1, colorScheme: isDark ? "dark" : "light" }} />
+                  <span style={{ fontSize: 11, color: t.text3, flexShrink: 0 }}>–</span>
+                  <input type="date" value={gridDateTo}
+                    onChange={e => setGridDateTo(e.target.value)}
+                    style={{ ...ctrlInput, flex: 1, colorScheme: isDark ? "dark" : "light" }} />
                 </div>
               </div>
 
@@ -1095,80 +1094,97 @@ const base = {
                 </button>
               </div>
 
-              {/* Grid table — fixed width, no horizontal scroll */}
-              <div style={{ borderRadius: 8, border: `1px solid ${t.border}`, overflow: "hidden" }}>
-                <table style={{ width: "100%", borderCollapse: "collapse", fontFamily: "'Space Mono',monospace", fontSize: 10, tableLayout: "fixed" }}>
-                  <colgroup>
-                    <col style={{ width: "18%" }} />
-                    {Array.from({ length: winEnd - winStart }, (_, i) => (
-                      <col key={i} style={{ width: `${62 / (winEnd - winStart)}%` }} />
-                    ))}
-                    <col style={{ width: "20%" }} />
-                  </colgroup>
-                  <thead>
-                    <tr style={{ background: t.card2 }}>
-                      <td style={{ padding: "5px 8px", color: t.text3, fontSize: 9, whiteSpace: "nowrap", overflow: "hidden" }}>
-                        {form.ticker || "Price"}
-                      </td>
-                      {dateLabels.slice(winStart, winEnd).map((label, i) => (
-                        <td key={i} style={{
-                          padding: "5px 4px", textAlign: "center", fontSize: 9,
-                          color: label === "Exp" ? t.danger : t.text3,
-                          fontWeight: label === "Exp" ? 700 : 400,
-                          overflow: "hidden", whiteSpace: "nowrap",
-                        }}>
-                          {label}
-                        </td>
+              {/* Grid: up/down arrows on left + table */}
+              <div style={{ display: "flex", gap: 4, alignItems: "stretch" }}>
+                {/* Vertical price navigation */}
+                <div style={{ display: "flex", flexDirection: "column", justifyContent: "space-between", paddingTop: 28 }}>
+                  <button style={navBtn(canScrollUp)} onClick={() => setGridRowOffset(Math.max(0, safeRowOffset - 1))}>
+                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                      <path d="M3 9l4-4 4 4" stroke={t.text2} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </button>
+                  <button style={navBtn(canScrollDown)} onClick={() => setGridRowOffset(Math.min(prices.length - ROW_WIN, safeRowOffset + 1))}>
+                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                      <path d="M3 5l4 4 4-4" stroke={t.text2} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </button>
+                </div>
+
+                {/* Table */}
+                <div style={{ flex: 1, minWidth: 0, borderRadius: 8, border: `1px solid ${t.border}`, overflow: "hidden" }}>
+                  <table style={{ width: "100%", borderCollapse: "collapse", fontFamily: "'Space Mono',monospace", fontSize: 10, tableLayout: "fixed" }}>
+                    <colgroup>
+                      <col style={{ width: "18%" }} />
+                      {Array.from({ length: winEnd - winStart }, (_, i) => (
+                        <col key={i} style={{ width: `${62 / (winEnd - winStart)}%` }} />
                       ))}
-                      <td style={{ padding: "5px 8px", color: t.text3, textAlign: "right", fontSize: 9, whiteSpace: "nowrap" }}>
-                        +/-%
-                      </td>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {prices.map((price, ri) => {
-                      const isCurrent = Math.abs(price - S) < rowStep * 0.51;
-                      const pct = (price - S) / S * 100;
-                      return (
-                        <tr key={ri}>
-                          <td style={{
-                            padding: "5px 8px", whiteSpace: "nowrap", fontSize: 10,
-                            color: isCurrent ? t.accent : t.text2,
-                            fontWeight: isCurrent ? 700 : 400,
-                            borderLeft: isCurrent ? `3px solid ${t.accent}` : "3px solid transparent",
-                            background: t.card3 || t.card2, overflow: "hidden",
+                      <col style={{ width: "20%" }} />
+                    </colgroup>
+                    <thead>
+                      <tr style={{ background: t.card2 }}>
+                        <td style={{ padding: "5px 8px", color: t.text3, fontSize: 9, overflow: "hidden" }}>
+                          {form.ticker || "Price"}
+                        </td>
+                        {dateLabels.slice(winStart, winEnd).map((label, i) => (
+                          <td key={i} style={{
+                            padding: "5px 4px", textAlign: "center", fontSize: 9,
+                            color: label === "Exp" ? t.danger : t.text3,
+                            fontWeight: label === "Exp" ? 700 : 400,
+                            overflow: "hidden", whiteSpace: "nowrap",
                           }}>
-                            {price.toFixed(2)}
+                            {label}
                           </td>
-                          {grid[ri].slice(winStart, winEnd).map((pl, ci) => {
-                            const cs = getCellStyle(pl);
-                            return (
-                              <td key={ci} style={{
-                                padding: "5px 4px", textAlign: "center",
-                                background: cs.bg, color: cs.color,
-                                fontWeight: isCurrent ? 700 : 500,
-                                fontSize: 10, overflow: "hidden", whiteSpace: "nowrap",
-                                borderTop: isCurrent ? `1px solid ${t.accent}50` : "none",
-                                borderBottom: isCurrent ? `1px solid ${t.accent}50` : "none",
-                              }}>
-                                {fmtPL(pl)}
-                              </td>
-                            );
-                          })}
-                          <td style={{
-                            padding: "5px 8px", textAlign: "right", whiteSpace: "nowrap", fontSize: 9,
-                            color: pct >= 0 ? "#22c55e" : "#ef4444",
-                            fontWeight: 600, background: t.card3 || t.card2,
-                            borderTop: isCurrent ? `1px solid ${t.accent}50` : "none",
-                            borderBottom: isCurrent ? `1px solid ${t.accent}50` : "none",
-                          }}>
-                            {pct >= 0 ? "+" : ""}{pct.toFixed(2)}%
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
+                        ))}
+                        <td style={{ padding: "5px 8px", color: t.text3, textAlign: "right", fontSize: 9, whiteSpace: "nowrap" }}>
+                          +/-%
+                        </td>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {visiblePrices.map((price, ri) => {
+                        const isCurrent = Math.abs(price - S) < rowStep * 0.51;
+                        const pct = (price - S) / S * 100;
+                        return (
+                          <tr key={ri}>
+                            <td style={{
+                              padding: "5px 8px", whiteSpace: "nowrap", fontSize: 10,
+                              color: isCurrent ? t.accent : t.text2,
+                              fontWeight: isCurrent ? 700 : 400,
+                              borderLeft: isCurrent ? `3px solid ${t.accent}` : "3px solid transparent",
+                              background: t.card3 || t.card2, overflow: "hidden",
+                            }}>
+                              {price.toFixed(2)}
+                            </td>
+                            {visibleGrid[ri].slice(winStart, winEnd).map((pl, ci) => {
+                              const cs = getCellStyle(pl);
+                              return (
+                                <td key={ci} style={{
+                                  padding: "5px 4px", textAlign: "center",
+                                  background: cs.bg, color: cs.color,
+                                  fontWeight: isCurrent ? 700 : 500,
+                                  fontSize: 10, overflow: "hidden", whiteSpace: "nowrap",
+                                  borderTop: isCurrent ? `1px solid ${t.accent}50` : "none",
+                                  borderBottom: isCurrent ? `1px solid ${t.accent}50` : "none",
+                                }}>
+                                  {fmtPL(pl)}
+                                </td>
+                              );
+                            })}
+                            <td style={{
+                              padding: "5px 8px", textAlign: "right", whiteSpace: "nowrap", fontSize: 9,
+                              color: pct >= 0 ? "#22c55e" : "#ef4444",
+                              fontWeight: 600, background: t.card3 || t.card2,
+                              borderTop: isCurrent ? `1px solid ${t.accent}50` : "none",
+                              borderBottom: isCurrent ? `1px solid ${t.accent}50` : "none",
+                            }}>
+                              {pct >= 0 ? "+" : ""}{pct.toFixed(2)}%
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
               </div>
               <div style={{ fontSize: 10, color: t.text3, fontFamily: "'Space Mono',monospace", marginTop: 6, lineHeight: 1.6 }}>
                 {validLegs.length > 1
