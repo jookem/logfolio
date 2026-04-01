@@ -48,6 +48,11 @@ const [expiryDates, setExpiryDates] = useState([]);
 const [strikes, setStrikes] = useState([]);
 const [strikeManual, setStrikeManual] = useState({});
 const [pnlMode, setPnlMode] = useState("pct"); // "pct" | "dollar"
+const [gridPriceMin, setGridPriceMin] = useState("");
+const [gridPriceMax, setGridPriceMax] = useState("");
+const [gridDateFrom, setGridDateFrom] = useState("");
+const [gridDateTo, setGridDateTo] = useState("");
+const [gridIV, setGridIV] = useState("");
 const polyFetch = async (path) => {
   const { data: { session } } = await supabase.auth.getSession();
   return fetch("/api/polygon", {
@@ -897,35 +902,54 @@ const base = {
           const S = +form.currentPrice;
           const today = new Date(); today.setHours(0,0,0,0);
 
-          // Use the earliest expiration to bound the date column range
+          // Auto step size based on price
+          const rawStep = S >= 500 ? 10 : S >= 200 ? 5 : S >= 100 ? 2 : S >= 50 ? 1 : S >= 25 ? 0.5 : 0.25;
+          const center = Math.round(S / rawStep) * rawStep;
+
+          // Earliest expiration → default end date for columns
           const expDates = validLegs.map(l => new Date(l.expiration + "T00:00:00"));
           const minExpDate = expDates.reduce((a, b) => a < b ? a : b);
-          const daysToExp = Math.max(0, Math.round((minExpDate - today) / 86400000));
-          if (daysToExp === 0) return null;
+          const minExpDay = Math.max(0, Math.round((minExpDate - today) / 86400000));
+          if (minExpDay === 0) return null;
 
-          // Date columns (daily if ≤14 days, weekly otherwise, max 10 cols)
-          const step = daysToExp > 14 ? 7 : 1;
+          // Date columns — respect custom range if set
+          const fromDay = gridDateFrom
+            ? Math.max(0, Math.round((new Date(gridDateFrom + "T00:00:00") - today) / 86400000))
+            : 0;
+          const toDay = gridDateTo
+            ? Math.max(fromDay + 1, Math.round((new Date(gridDateTo + "T00:00:00") - today) / 86400000))
+            : minExpDay;
+          const dateRange = toDay - fromDay;
+          const colStep = dateRange > 14 ? 7 : 1;
           const days = [];
-          for (let d = 0; d < daysToExp; d += step) days.push(d);
-          days.push(daysToExp);
-          const shownDays = days.length > 10 ? [...days.slice(0, 9), daysToExp] : days;
+          for (let d = fromDay; d < toDay; d += colStep) days.push(d);
+          days.push(toDay);
+          const shownDays = days.length > 10 ? [...days.slice(0, 9), toDay] : days;
           const dateLabels = shownDays.map(d => {
             const dt = new Date(today); dt.setDate(dt.getDate() + d);
-            return d === 0 ? "Now" : d === daysToExp ? "Exp"
+            const isExp = !gridDateTo && d === minExpDay;
+            return (d === 0 && !gridDateFrom) ? "Now"
+              : isExp ? "Exp"
               : dt.toLocaleDateString("en-US", { month: "short", day: "numeric" });
           });
 
-          // Price rows — 13 rows centered on current price with a clean step size
-          const rawStep = S >= 500 ? 10 : S >= 200 ? 5 : S >= 100 ? 2 : S >= 50 ? 1 : S >= 25 ? 0.5 : 0.25;
-          const center = Math.round(S / rawStep) * rawStep;
-          const prices = Array.from({ length: 13 }, (_, i) => +(center + (6 - i) * rawStep).toFixed(2));
+          // Price rows — respect custom range if set
+          const priceHigh = gridPriceMax ? +gridPriceMax : center + 6 * rawStep;
+          const priceLow  = gridPriceMin ? +gridPriceMin : center - 6 * rawStep;
+          const priceRange = Math.max(priceHigh - priceLow, rawStep);
+          const rowStep = Math.max(rawStep * 0.5, Math.ceil(priceRange / 13 / (rawStep * 0.5)) * (rawStep * 0.5));
+          const numRows = Math.min(20, Math.ceil(priceRange / rowStep) + 1);
+          const prices = Array.from({ length: numRows }, (_, i) => +(priceHigh - i * rowStep).toFixed(2));
 
-          // Combined multi-leg P&L at a given price and days elapsed
+          // IV override — applies to all legs if set
+          const ivOverride = gridIV ? Math.max(0.01, +gridIV / 100) : null;
+
+          // Combined multi-leg P&L at a given price and days elapsed from today
           const calcTotalPL = (S_new, daysFromNow) => validLegs.reduce((sum, leg) => {
             const legExp = new Date(leg.expiration + "T00:00:00");
             const legDaysToExp = Math.max(0, Math.round((legExp - today) / 86400000));
             const T = Math.max(0, legDaysToExp - daysFromNow) / 365;
-            const sigma = Math.max(0.01, (+leg.iv || 30) / 100);
+            const sigma = ivOverride ?? Math.max(0.01, (+leg.iv || 30) / 100);
             const theoretical = bsPrice(S_new, +leg.strike, T, sigma, leg.type);
             const diff = leg.position === "sell"
               ? (+leg.entryPremium - theoretical)
@@ -933,7 +957,7 @@ const base = {
             return sum + diff * (+leg.contracts || 1) * 100;
           }, 0);
 
-          // Pre-compute grid values
+          // Pre-compute grid + color scale
           const grid = prices.map(p => shownDays.map(d => calcTotalPL(p, d)));
           const allVals = grid.flat();
           const maxGain = Math.max(...allVals, 0.01);
@@ -961,14 +985,72 @@ const base = {
             return `${sign}$${abs >= 1000 ? (abs / 1000).toFixed(1) + "k" : abs.toFixed(0)}`;
           };
 
+          const ctrlInput = { background: t.card2, border: `1px solid ${t.border}`, borderRadius: 6, color: t.text2, fontFamily: "'Space Mono',monospace", fontSize: 11, padding: "5px 8px", outline: "none", width: "100%" };
+          const ctrlLabel = { fontSize: 9, color: t.text3, fontFamily: "'Space Mono',monospace", textTransform: "uppercase", letterSpacing: 1, marginBottom: 4, display: "block" };
+
           return (
             <div style={{ marginBottom: 4 }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
-                {sectionHeader("P&L Grid")}
-                <div style={{ fontSize: 10, color: t.text3, fontFamily: "'Space Mono',monospace" }}>
-                  {validLegs.length} leg{validLegs.length !== 1 ? "s" : ""} · IV {(+validLegs[0].iv || 30).toFixed(0)}%
+              {sectionHeader("P&L Grid")}
+
+              {/* Controls row */}
+              <div style={{ display: "flex", gap: 10, marginBottom: 12, flexWrap: "wrap", alignItems: "flex-end" }}>
+                {/* IV % */}
+                <div style={{ minWidth: 72 }}>
+                  <span style={ctrlLabel}>IV %</span>
+                  <input
+                    type="number" min="1" max="300" step="1"
+                    value={gridIV}
+                    onChange={e => setGridIV(e.target.value)}
+                    placeholder={(+validLegs[0].iv || 30).toFixed(0)}
+                    style={ctrlInput}
+                  />
+                </div>
+
+                {/* Stock Price Range */}
+                <div style={{ flex: 1, minWidth: 160 }}>
+                  <span style={ctrlLabel}>Stock Price Range</span>
+                  <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                    <span style={{ fontSize: 11, color: t.text3, flexShrink: 0 }}>$</span>
+                    <input
+                      type="number" step="any"
+                      value={gridPriceMin}
+                      onChange={e => setGridPriceMin(e.target.value)}
+                      placeholder={(center - 6 * rawStep).toFixed(0)}
+                      style={{ ...ctrlInput, width: "100%" }}
+                    />
+                    <span style={{ fontSize: 11, color: t.text3, flexShrink: 0 }}>–</span>
+                    <input
+                      type="number" step="any"
+                      value={gridPriceMax}
+                      onChange={e => setGridPriceMax(e.target.value)}
+                      placeholder={(center + 6 * rawStep).toFixed(0)}
+                      style={{ ...ctrlInput, width: "100%" }}
+                    />
+                  </div>
+                </div>
+
+                {/* Date Range */}
+                <div style={{ flex: 1, minWidth: 200 }}>
+                  <span style={ctrlLabel}>Date Range</span>
+                  <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                    <input
+                      type="date"
+                      value={gridDateFrom}
+                      onChange={e => setGridDateFrom(e.target.value)}
+                      style={{ ...ctrlInput, width: "100%", colorScheme: isDark ? "dark" : "light" }}
+                    />
+                    <span style={{ fontSize: 11, color: t.text3, flexShrink: 0 }}>–</span>
+                    <input
+                      type="date"
+                      value={gridDateTo}
+                      onChange={e => setGridDateTo(e.target.value)}
+                      style={{ ...ctrlInput, width: "100%", colorScheme: isDark ? "dark" : "light" }}
+                    />
+                  </div>
                 </div>
               </div>
+
+              {/* Grid table */}
               <div style={{ overflowX: "auto", borderRadius: 8, border: `1px solid ${t.border}` }}>
                 <table style={{ width: "100%", borderCollapse: "collapse", fontFamily: "'Space Mono',monospace", fontSize: 10 }}>
                   <thead>
@@ -992,7 +1074,7 @@ const base = {
                   </thead>
                   <tbody>
                     {prices.map((price, ri) => {
-                      const isCurrent = Math.abs(price - S) < rawStep * 0.51;
+                      const isCurrent = Math.abs(price - S) < rowStep * 0.51;
                       const pct = (price - S) / S * 100;
                       return (
                         <tr key={ri}>
