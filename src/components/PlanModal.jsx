@@ -55,6 +55,7 @@ const [gridDateTo, setGridDateTo] = useState("");
 const [gridIV, setGridIV] = useState("");
 const [gridColOffset, setGridColOffset] = useState(0);
 const [gridRowOffset, setGridRowOffset] = useState(0);
+const [bsInfoOpen, setBsInfoOpen] = useState(false);
 const polyFetch = async (path) => {
   const { data: { session } } = await supabase.auth.getSession();
   return fetch("/api/polygon", {
@@ -1114,28 +1115,27 @@ const base = {
                 <div style={{ flex: 1, minWidth: 0, borderRadius: 8, border: `1px solid ${t.border}`, overflow: "hidden" }}>
                   <table style={{ width: "100%", borderCollapse: "collapse", fontFamily: "'Space Mono',monospace", fontSize: 10, tableLayout: "fixed" }}>
                     <colgroup>
-                      <col style={{ width: "18%" }} />
+                      <col style={{ width: "15%" }} />
                       {Array.from({ length: winEnd - winStart }, (_, i) => (
-                        <col key={i} style={{ width: `${62 / (winEnd - winStart)}%` }} />
+                        <col key={i} style={{ width: `${70 / (winEnd - winStart)}%` }} />
                       ))}
-                      <col style={{ width: "20%" }} />
+                      <col style={{ width: "15%" }} />
                     </colgroup>
                     <thead>
                       <tr style={{ background: t.card2 }}>
-                        <td style={{ padding: "5px 8px", color: t.text3, fontSize: 9, overflow: "hidden" }}>
+                        <td style={{ padding: "5px 6px", color: t.text3, fontSize: 9 }}>
                           {form.ticker || "Price"}
                         </td>
                         {dateLabels.slice(winStart, winEnd).map((label, i) => (
                           <td key={i} style={{
-                            padding: "5px 4px", textAlign: "center", fontSize: 9,
+                            padding: "5px 2px", textAlign: "center", fontSize: 9,
                             color: label === "Exp" ? t.danger : t.text3,
                             fontWeight: label === "Exp" ? 700 : 400,
-                            overflow: "hidden", whiteSpace: "nowrap",
                           }}>
                             {label}
                           </td>
                         ))}
-                        <td style={{ padding: "5px 8px", color: t.text3, textAlign: "right", fontSize: 9, whiteSpace: "nowrap" }}>
+                        <td style={{ padding: "5px 6px", color: t.text3, textAlign: "right", fontSize: 9 }}>
                           +/-%
                         </td>
                       </tr>
@@ -1147,11 +1147,11 @@ const base = {
                         return (
                           <tr key={ri}>
                             <td style={{
-                              padding: "5px 8px", whiteSpace: "nowrap", fontSize: 10,
+                              padding: "5px 6px", fontSize: 10,
                               color: isCurrent ? t.accent : t.text2,
                               fontWeight: isCurrent ? 700 : 400,
                               borderLeft: isCurrent ? `3px solid ${t.accent}` : "3px solid transparent",
-                              background: t.card3 || t.card2, overflow: "hidden",
+                              background: t.card3 || t.card2,
                             }}>
                               {price.toFixed(2)}
                             </td>
@@ -1159,10 +1159,9 @@ const base = {
                               const cs = getCellStyle(pl);
                               return (
                                 <td key={ci} style={{
-                                  padding: "5px 4px", textAlign: "center",
+                                  padding: "5px 2px", textAlign: "center",
                                   background: cs.bg, color: cs.color,
-                                  fontWeight: isCurrent ? 700 : 500,
-                                  fontSize: 10, overflow: "hidden", whiteSpace: "nowrap",
+                                  fontWeight: isCurrent ? 700 : 500, fontSize: 10,
                                   borderTop: isCurrent ? `1px solid ${t.accent}50` : "none",
                                   borderBottom: isCurrent ? `1px solid ${t.accent}50` : "none",
                                 }}>
@@ -1171,7 +1170,7 @@ const base = {
                               );
                             })}
                             <td style={{
-                              padding: "5px 8px", textAlign: "right", whiteSpace: "nowrap", fontSize: 9,
+                              padding: "5px 6px", textAlign: "right", fontSize: 9,
                               color: pct >= 0 ? "#22c55e" : "#ef4444",
                               fontWeight: 600, background: t.card3 || t.card2,
                               borderTop: isCurrent ? `1px solid ${t.accent}50` : "none",
@@ -1186,10 +1185,38 @@ const base = {
                   </table>
                 </div>
               </div>
-              <div style={{ fontSize: 10, color: t.text3, fontFamily: "'Space Mono',monospace", marginTop: 6, lineHeight: 1.6 }}>
-                {validLegs.length > 1
-                  ? `Combined P/L · ${validLegs.length} legs · Black-Scholes`
-                  : `P/L in $ · ${+validLegs[0].contracts || 1} contract${(+validLegs[0].contracts || 1) !== 1 ? "s" : ""} · Black-Scholes`}
+
+              {/* Footer: legend + Black-Scholes info */}
+              <div style={{ marginTop: 8 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 10, color: t.text3, fontFamily: "'Space Mono',monospace" }}>
+                  <span>
+                    {validLegs.length > 1
+                      ? `Combined P/L · ${validLegs.length} legs`
+                      : `P/L in $ · ${+validLegs[0].contracts || 1} contract${(+validLegs[0].contracts || 1) !== 1 ? "s" : ""}`}
+                  </span>
+                  <span style={{ color: t.text4 }}>·</span>
+                  <button
+                    onClick={() => setBsInfoOpen(o => !o)}
+                    style={{ background: "none", border: `1px solid ${t.border}`, borderRadius: "50%", width: 16, height: 16, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", padding: 0, flexShrink: 0 }}
+                  >
+                    <span style={{ fontSize: 9, color: t.text3, fontWeight: 700, lineHeight: 1 }}>?</span>
+                  </button>
+                  <span style={{ color: t.text3 }}>Black-Scholes</span>
+                </div>
+                {bsInfoOpen && (
+                  <div style={{ marginTop: 8, background: t.card2, border: `1px solid ${t.border}`, borderRadius: 8, padding: "12px 14px", fontSize: 11, color: t.text2, fontFamily: "inherit", lineHeight: 1.7 }}>
+                    <div style={{ fontWeight: 700, color: t.text1, marginBottom: 6, fontSize: 12 }}>Black-Scholes Model</div>
+                    <p style={{ margin: "0 0 8px" }}>
+                      A mathematical formula that estimates the theoretical fair value of an option based on 5 inputs: stock price, strike price, time to expiration, implied volatility (IV), and the risk-free interest rate.
+                    </p>
+                    <div style={{ color: t.text3, fontSize: 10, display: "flex", flexDirection: "column", gap: 4 }}>
+                      <div><span style={{ color: t.accent }}>IV Δ%</span> — Adjusts IV up or down from entry to model crush or expansion</div>
+                      <div><span style={{ color: t.accent }}>Risk-free rate</span> — Fixed at 4.5% (approximate current T-bill yield)</div>
+                      <div><span style={{ color: t.accent }}>Assumes</span> — European-style exercise, no dividends, constant IV</div>
+                      <div><span style={{ color: t.accent }}>Limitation</span> — Real prices may differ due to skew, early exercise, and liquidity</div>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           );
