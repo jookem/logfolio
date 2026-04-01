@@ -903,7 +903,7 @@ const base = {
           const today = new Date(); today.setHours(0,0,0,0);
 
           // Auto step size based on price
-          const rawStep = S >= 500 ? 10 : S >= 200 ? 5 : S >= 100 ? 2 : S >= 50 ? 1 : S >= 25 ? 0.5 : 0.25;
+          const rawStep = 1;
           const center = Math.round(S / rawStep) * rawStep;
 
           // Earliest expiration → default end date for columns
