@@ -937,8 +937,8 @@ const base = {
           const priceHigh = gridPriceMax ? +gridPriceMax : center + 6 * rawStep;
           const priceLow  = gridPriceMin ? +gridPriceMin : center - 6 * rawStep;
           const priceRange = Math.max(priceHigh - priceLow, rawStep);
-          const rowStep = Math.max(rawStep * 0.5, Math.ceil(priceRange / 13 / (rawStep * 0.5)) * (rawStep * 0.5));
-          const numRows = Math.min(20, Math.ceil(priceRange / rowStep) + 1);
+          const rowStep = 1;
+          const numRows = Math.min(500, Math.ceil(priceRange) + 1);
           const prices = Array.from({ length: numRows }, (_, i) => +(priceHigh - i * rowStep).toFixed(2));
 
           // IV delta — added to each leg's IV (e.g. -10 means IV drops 10pp)
@@ -1142,7 +1142,7 @@ const base = {
                     </thead>
                     <tbody>
                       {visiblePrices.map((price, ri) => {
-                        const isCurrent = Math.abs(price - S) < rowStep * 0.51;
+                        const isCurrent = Math.abs(price - S) < 0.51;
                         const pct = (price - S) / S * 100;
                         return (
                           <tr key={ri}>
