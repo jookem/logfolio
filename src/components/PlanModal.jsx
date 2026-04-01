@@ -920,11 +920,9 @@ const base = {
             ? Math.max(fromDay + 1, Math.round((new Date(gridDateTo + "T00:00:00") - today) / 86400000))
             : minExpDay;
           const dateRange = toDay - fromDay;
-          const colStep = dateRange > 14 ? 7 : 1;
           const days = [];
-          for (let d = fromDay; d < toDay; d += colStep) days.push(d);
-          days.push(toDay);
-          const shownDays = days.length > 10 ? [...days.slice(0, 9), toDay] : days;
+          for (let d = fromDay; d <= toDay; d++) days.push(d);
+          const shownDays = days;
           const dateLabels = shownDays.map(d => {
             const dt = new Date(today); dt.setDate(dt.getDate() + d);
             const isExp = !gridDateTo && d === minExpDay;
