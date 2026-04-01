@@ -890,131 +890,155 @@ const base = {
           </>
         )}
 
-        {/* ══ OPTIONS P&L BY DATE ══ */}
+        {/* ══ OPTIONS P&L GRID (Price × Date) ══ */}
         {form.type === "options" && (() => {
-          const leg = form.legs[0];
-          if (!leg?.strike || !leg?.expiration || !leg?.entryPremium || !form.currentPrice) return null;
+          const validLegs = (form.legs || []).filter(l => l.strike && l.expiration && l.entryPremium);
+          if (validLegs.length === 0 || !form.currentPrice) return null;
           const S = +form.currentPrice;
-          const K = +leg.strike;
-          const sigma = Math.max(0.01, (+leg.iv || 30) / 100);
-          const entry = +leg.entryPremium;
-          const contracts = +leg.contracts || 1;
-          const isWrite = leg.position === "sell";
           const today = new Date(); today.setHours(0,0,0,0);
-          const expDate = new Date(leg.expiration + "T00:00:00");
-          const daysToExp = Math.max(0, Math.round((expDate - today) / 86400000));
+
+          // Use the earliest expiration to bound the date column range
+          const expDates = validLegs.map(l => new Date(l.expiration + "T00:00:00"));
+          const minExpDate = expDates.reduce((a, b) => a < b ? a : b);
+          const daysToExp = Math.max(0, Math.round((minExpDate - today) / 86400000));
           if (daysToExp === 0) return null;
 
-          // Generate date steps (daily if ≤14 days, else weekly)
+          // Date columns (daily if ≤14 days, weekly otherwise, max 10 cols)
           const step = daysToExp > 14 ? 7 : 1;
           const days = [];
           for (let d = 0; d < daysToExp; d += step) days.push(d);
           days.push(daysToExp);
-          const maxShow = 10;
-          const shown = days.length > maxShow
-            ? [...days.slice(0, maxShow - 1), daysToExp]
-            : days;
-
-          const cells = shown.map(d => {
-            const T = Math.max(0, daysToExp - d) / 365;
-            const price = bsPrice(S, K, T, sigma, leg.type);
-            const pct = entry > 0 ? (price / entry) * 100 : 0;
+          const shownDays = days.length > 10 ? [...days.slice(0, 9), daysToExp] : days;
+          const dateLabels = shownDays.map(d => {
             const dt = new Date(today); dt.setDate(dt.getDate() + d);
-            const label = d === 0 ? "Now"
-              : d === daysToExp ? "Exp"
+            return d === 0 ? "Now" : d === daysToExp ? "Exp"
               : dt.toLocaleDateString("en-US", { month: "short", day: "numeric" });
-            return { label, pct, price };
           });
 
-          const getCell = (pct) => {
-            if (pct >= 120) return { bg: "#16a34a", color: "#fff" };
-            if (pct >= 105) return { bg: "#22c55e", color: "#fff" };
-            if (pct >= 95)  return { bg: "#86efac", color: "#000" };
-            if (pct >= 80)  return { bg: "#bbf7d0", color: "#000" };
-            if (pct >= 60)  return { bg: "#fef08a", color: "#000" };
-            if (pct >= 40)  return { bg: "#fca5a5", color: "#000" };
-            return { bg: "#ef4444", color: "#fff" };
+          // Price rows — 13 rows centered on current price with a clean step size
+          const rawStep = S >= 500 ? 10 : S >= 200 ? 5 : S >= 100 ? 2 : S >= 50 ? 1 : S >= 25 ? 0.5 : 0.25;
+          const center = Math.round(S / rawStep) * rawStep;
+          const prices = Array.from({ length: 13 }, (_, i) => +(center + (6 - i) * rawStep).toFixed(2));
+
+          // Combined multi-leg P&L at a given price and days elapsed
+          const calcTotalPL = (S_new, daysFromNow) => validLegs.reduce((sum, leg) => {
+            const legExp = new Date(leg.expiration + "T00:00:00");
+            const legDaysToExp = Math.max(0, Math.round((legExp - today) / 86400000));
+            const T = Math.max(0, legDaysToExp - daysFromNow) / 365;
+            const sigma = Math.max(0.01, (+leg.iv || 30) / 100);
+            const theoretical = bsPrice(S_new, +leg.strike, T, sigma, leg.type);
+            const diff = leg.position === "sell"
+              ? (+leg.entryPremium - theoretical)
+              : (theoretical - +leg.entryPremium);
+            return sum + diff * (+leg.contracts || 1) * 100;
+          }, 0);
+
+          // Pre-compute grid values
+          const grid = prices.map(p => shownDays.map(d => calcTotalPL(p, d)));
+          const allVals = grid.flat();
+          const maxGain = Math.max(...allVals, 0.01);
+          const maxLoss = Math.min(...allVals, -0.01);
+
+          const getCellStyle = (pl) => {
+            if (pl > 0) {
+              const r = pl / maxGain;
+              if (r > 0.66) return { bg: "#16a34a", color: "#fff" };
+              if (r > 0.33) return { bg: "#22c55e", color: "#fff" };
+              return { bg: "#86efac", color: "#000" };
+            }
+            if (pl < 0) {
+              const r = pl / maxLoss;
+              if (r > 0.66) return { bg: "#ef4444", color: "#fff" };
+              if (r > 0.33) return { bg: "#f87171", color: "#fff" };
+              return { bg: "#fca5a5", color: "#000" };
+            }
+            return { bg: "#fef08a", color: "#000" };
           };
 
-          // Dollar P/L per cell
-          const getDollarPL = (price) => {
-            const diff = isWrite ? (entry - price) : (price - entry);
-            return diff * contracts * 100;
-          };
-          const getDollarCell = (pl) => {
-            if (pl > 0)  return { bg: pl > entry * contracts * 100 * 0.2 ? "#16a34a" : "#22c55e", color: "#fff" };
-            if (pl < -entry * contracts * 100 * 0.4) return { bg: "#ef4444", color: "#fff" };
-            if (pl < 0)  return { bg: "#fca5a5", color: "#000" };
-            return { bg: "#86efac", color: "#000" };
+          const fmtPL = (pl) => {
+            const abs = Math.abs(pl);
+            const sign = pl < 0 ? "-" : "";
+            return `${sign}$${abs >= 1000 ? (abs / 1000).toFixed(1) + "k" : abs.toFixed(0)}`;
           };
 
           return (
             <div style={{ marginBottom: 4 }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
-                {sectionHeader("P&L by Date")}
-                <div style={{ display: "flex", gap: 4 }}>
-                  {[["pct", "%"], ["dollar", "$"]].map(([mode, label]) => (
-                    <button key={mode} onClick={() => setPnlMode(mode)} style={{
-                      background: pnlMode === mode ? t.accent : t.card2,
-                      border: `1px solid ${pnlMode === mode ? t.accent : t.border}`,
-                      color: pnlMode === mode ? "#000" : t.text3,
-                      borderRadius: 6, padding: "3px 10px", cursor: "pointer",
-                      fontSize: 11, fontWeight: pnlMode === mode ? 700 : 400,
-                      fontFamily: "'Space Mono',monospace",
-                    }}>{label}</button>
-                  ))}
+                {sectionHeader("P&L Grid")}
+                <div style={{ fontSize: 10, color: t.text3, fontFamily: "'Space Mono',monospace" }}>
+                  {validLegs.length} leg{validLegs.length !== 1 ? "s" : ""} · IV {(+validLegs[0].iv || 30).toFixed(0)}%
                 </div>
               </div>
-              <div style={{ fontSize: 10, color: t.text3, fontFamily: "'Space Mono',monospace", marginBottom: 8 }}>
-                {pnlMode === "pct"
-                  ? `% of entry premium · IV ${(sigma*100).toFixed(0)}% · ${isWrite ? "Written" : "Bought"} ${leg.type}`
-                  : `P/L in $ · ${contracts} contract${contracts !== 1 ? "s" : ""} · IV ${(sigma*100).toFixed(0)}%`}
-              </div>
               <div style={{ overflowX: "auto", borderRadius: 8, border: `1px solid ${t.border}` }}>
-                <table style={{ width: "100%", borderCollapse: "collapse", fontFamily: "'Space Mono',monospace", fontSize: 11 }}>
+                <table style={{ width: "100%", borderCollapse: "collapse", fontFamily: "'Space Mono',monospace", fontSize: 10 }}>
                   <thead>
                     <tr style={{ background: t.card2 }}>
-                      <td style={{ padding: "6px 10px", color: t.text3, fontSize: 10, whiteSpace: "nowrap" }}>
-                        {form.ticker || "—"} @ ${S}
+                      <td style={{ padding: "5px 8px", color: t.text3, fontSize: 9, whiteSpace: "nowrap" }}>
+                        {form.ticker || "Price"}
                       </td>
-                      {cells.map((c, i) => (
-                        <td key={i} style={{ padding: "6px 8px", color: c.label === "Exp" ? t.danger : t.text3, textAlign: "center", fontWeight: c.label === "Exp" ? 700 : 400, whiteSpace: "nowrap" }}>
-                          {c.label}
+                      {dateLabels.map((label, i) => (
+                        <td key={i} style={{
+                          padding: "5px 6px", textAlign: "center", whiteSpace: "nowrap", fontSize: 9,
+                          color: label === "Exp" ? t.danger : t.text3,
+                          fontWeight: label === "Exp" ? 700 : 400,
+                        }}>
+                          {label}
                         </td>
                       ))}
+                      <td style={{ padding: "5px 8px", color: t.text3, textAlign: "right", fontSize: 9, whiteSpace: "nowrap" }}>
+                        +/-%
+                      </td>
                     </tr>
                   </thead>
                   <tbody>
-                    <tr>
-                      <td style={{ padding: "6px 10px", color: t.text2, fontSize: 10 }}>
-                        K ${K} {leg.type}
-                      </td>
-                      {cells.map((c, i) => {
-                        if (pnlMode === "pct") {
-                          const style = getCell(c.pct);
-                          return (
-                            <td key={i} style={{ padding: "7px 8px", textAlign: "center", background: style.bg, color: style.color, fontWeight: 600, whiteSpace: "nowrap" }}>
-                              {c.pct.toFixed(1)}%
-                            </td>
-                          );
-                        } else {
-                          const pl = getDollarPL(c.price);
-                          const style = getDollarCell(pl);
-                          return (
-                            <td key={i} style={{ padding: "7px 8px", textAlign: "center", background: style.bg, color: style.color, fontWeight: 600, whiteSpace: "nowrap" }}>
-                              {pl >= 0 ? "+" : ""}${Math.abs(pl) >= 1000 ? (pl/1000).toFixed(1)+"k" : pl.toFixed(0)}
-                            </td>
-                          );
-                        }
-                      })}
-                    </tr>
+                    {prices.map((price, ri) => {
+                      const isCurrent = Math.abs(price - S) < rawStep * 0.51;
+                      const pct = (price - S) / S * 100;
+                      return (
+                        <tr key={ri}>
+                          <td style={{
+                            padding: "5px 8px", whiteSpace: "nowrap", fontSize: 10,
+                            color: isCurrent ? t.accent : t.text2,
+                            fontWeight: isCurrent ? 700 : 400,
+                            borderLeft: isCurrent ? `3px solid ${t.accent}` : "3px solid transparent",
+                            background: t.card3 || t.card2,
+                          }}>
+                            {price.toFixed(2)}
+                          </td>
+                          {grid[ri].map((pl, ci) => {
+                            const cs = getCellStyle(pl);
+                            return (
+                              <td key={ci} style={{
+                                padding: "5px 5px", textAlign: "center",
+                                background: cs.bg, color: cs.color,
+                                fontWeight: isCurrent ? 700 : 500,
+                                whiteSpace: "nowrap", fontSize: 10,
+                                borderTop: isCurrent ? `1px solid ${t.accent}50` : "none",
+                                borderBottom: isCurrent ? `1px solid ${t.accent}50` : "none",
+                              }}>
+                                {fmtPL(pl)}
+                              </td>
+                            );
+                          })}
+                          <td style={{
+                            padding: "5px 8px", textAlign: "right", whiteSpace: "nowrap", fontSize: 9,
+                            color: pct >= 0 ? "#22c55e" : "#ef4444",
+                            fontWeight: 600, background: t.card3 || t.card2,
+                            borderTop: isCurrent ? `1px solid ${t.accent}50` : "none",
+                            borderBottom: isCurrent ? `1px solid ${t.accent}50` : "none",
+                          }}>
+                            {pct >= 0 ? "+" : ""}{pct.toFixed(2)}%
+                          </td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>
               <div style={{ fontSize: 10, color: t.text3, fontFamily: "'Space Mono',monospace", marginTop: 6, lineHeight: 1.6 }}>
-                {pnlMode === "pct"
-                  ? "100% = break even · >100% = profit · <100% = loss"
-                  : `Entry premium $${entry} × ${contracts} contract${contracts !== 1 ? "s" : ""} = $${(entry * contracts * 100).toFixed(0)} cost`}
+                {validLegs.length > 1
+                  ? `Combined P/L · ${validLegs.length} legs · Black-Scholes`
+                  : `P/L in $ · ${+validLegs[0].contracts || 1} contract${(+validLegs[0].contracts || 1) !== 1 ? "s" : ""} · Black-Scholes`}
               </div>
             </div>
           );
