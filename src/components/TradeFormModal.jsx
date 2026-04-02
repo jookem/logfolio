@@ -574,7 +574,10 @@ export default function TradeFormModal({ initial, defaults, onClose, onSave, onC
                     {errMsg(`leg_${i}_strike`)}
                   </div>
                   <div>
-                    <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><PremiumEntryIcon size={14} />Premium</label>
+                    <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}>
+                      <PremiumEntryIcon size={14} />
+                      {leg.position === "buy" ? "Premium Paid" : "Premium Received"}
+                    </label>
                     <div style={{ position: "relative" }}>
                       <span style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: t.text3, fontSize: 14 }}>$</span>
                       <input style={{ ...inp(`leg_${i}_entryPremium`), paddingLeft: 26 }} type="number" value={leg.entryPremium} onChange={(e) => { setLeg(i, "entryPremium", e.target.value); setErrors((p) => ({ ...p, [`leg_${i}_entryPremium`]: undefined })); }} placeholder="4.20" />
@@ -582,10 +585,13 @@ export default function TradeFormModal({ initial, defaults, onClose, onSave, onC
                     {errMsg(`leg_${i}_entryPremium`)}
                   </div>
                   <div>
-                    <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><PremiumExitIcon size={14} />Exit Premium</label>
+                    <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}>
+                      <PremiumExitIcon size={14} />
+                      {leg.position === "buy" ? "Exit Price (sold for)" : "Exit Price (bought back)"}
+                    </label>
                     <div style={{ position: "relative" }}>
                       <span style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: t.text3, fontSize: 14 }}>$</span>
-                      <input style={{ ...inp(), paddingLeft: 26 }} type="number" value={leg.exitPremium} onChange={(e) => setLeg(i, "exitPremium", e.target.value)} placeholder="6.00" />
+                      <input style={{ ...inp(), paddingLeft: 26 }} type="number" value={leg.exitPremium} onChange={(e) => setLeg(i, "exitPremium", e.target.value)} placeholder={leg.position === "buy" ? "6.00" : "0.50"} />
                     </div>
                   </div>
                   <div>
@@ -603,7 +609,7 @@ export default function TradeFormModal({ initial, defaults, onClose, onSave, onC
                   {leg.entryPremium && leg.contracts && (
                     <div style={{ gridColumn: "span 2", display: "flex", alignItems: "flex-end" }}>
                       <div style={{ background: t.surface || t.card, border: `1px solid ${t.border}`, borderRadius: 8, padding: "10px 14px", width: "100%", display: "flex", justifyContent: "space-between" }}>
-                        <span style={{ fontSize: 11, color: t.text3, fontFamily: "'Space Mono', monospace", textTransform: "uppercase" }}>Total Cost</span>
+                        <span style={{ fontSize: 11, color: t.text3, fontFamily: "'Space Mono', monospace", textTransform: "uppercase" }}>{leg.position === "buy" ? "Total Cost" : "Total Credit"}</span>
                         <span style={{ fontFamily: "'Space Mono', monospace", fontSize: 14, color: t.text }}>
                           ${(+leg.entryPremium * +leg.contracts * 100).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                         </span>
