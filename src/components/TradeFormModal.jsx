@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
+import useLiveQuotes from "../hooks/useLiveQuotes";
 import { useModalClose } from "../lib/useModalClose";
 import { STOCK_LIKE, SUGGESTED_TAGS, EMOTIONS, MISTAKES, OPTION_STRATEGIES } from "../lib/constants";
 import { todayStr, typeLabels, fmt, calcWeightedExit, calcTotalExited } from "../lib/utils";
@@ -51,6 +52,18 @@ export default function TradeFormModal({ initial, defaults, onClose, onSave, onC
     const base = initial || blank;
     return STOCK_LIKE.includes(base.type) && (!base.exitPrice || +base.exitPrice === 0) && !(base.closes?.length);
   });
+
+  // Live price for open-trade P&L preview — fetch when ticker is set and open trade is toggled
+  const liveTickers = useMemo(() => {
+    const tk = form.ticker.trim().toUpperCase();
+    return openTrade && STOCK_LIKE.includes(form.type) && tk.length >= 1 ? [tk] : [];
+  }, [openTrade, form.ticker, form.type]);
+  const { quotes: liveQuotes } = useLiveQuotes(liveTickers);
+  const livePrice = liveQuotes[form.ticker.trim().toUpperCase()]?.price ?? null;
+  const livePL = livePrice != null && form.entryPrice && form.shares
+    ? (form.direction === "short" ? -1 : 1) * (livePrice - +form.entryPrice) * +form.shares
+    : null;
+
   const [errors, setErrors] = useState({});
   const [tagInput, setTagInput] = useState("");
   const [customEmotions, setCustomEmotions] = useState([]);
@@ -452,6 +465,15 @@ export default function TradeFormModal({ initial, defaults, onClose, onSave, onC
                   placeholder={openTrade ? "— open position —" : form.type === "forex" ? "1.0920" : form.type === "crypto" ? "44500" : "196"}
                 />
                 {errMsg("exitPrice")}
+                {openTrade && livePL != null && (
+                  <div style={{ fontSize: 11, fontFamily: "'Space Mono',monospace", color: livePL >= 0 ? t.positive : t.danger, marginTop: 4, display: "flex", alignItems: "center", gap: 5 }}>
+                    <span style={{ width: 5, height: 5, borderRadius: "50%", background: livePL >= 0 ? t.positive : t.danger, display: "inline-block", flexShrink: 0 }} />
+                    {livePL >= 0 ? "+" : ""}{fmt(livePL)} @ {fmt(livePrice)}
+                  </div>
+                )}
+                {openTrade && livePL == null && form.ticker.trim().length > 0 && (
+                  <div style={{ fontSize: 11, color: t.text4, marginTop: 4, fontFamily: "'Space Mono',monospace" }}>fetching price...</div>
+                )}
                 {!openTrade && (() => {
                   const entry = +form.entryPrice;
                   const exit = +form.exitPrice;
