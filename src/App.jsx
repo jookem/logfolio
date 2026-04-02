@@ -235,12 +235,11 @@ const [page, setPage] = useState(1);
     const lastSeedDate = new Date(SEED_TRADES[SEED_TRADES.length - 1].date);
     const dayOffset = Math.round((anchor - lastSeedDate) / 86400000);
     const shiftDate = (str) => {
-      const d = new Date(str); d.setDate(d.getDate() + dayOffset);
-      // Snap to nearest prior weekday (skip weekends)
-      const dow = d.getUTCDay();
-      if (dow === 6) d.setDate(d.getDate() - 1); // Sat → Fri
-      if (dow === 0) d.setDate(d.getDate() - 2); // Sun → Fri
-      return d.toISOString().slice(0, 10);
+      // Use pure UTC arithmetic to avoid local-timezone day-of-week mismatches
+      const ms = new Date(str + "T00:00:00Z").getTime() + dayOffset * 86400000;
+      const dow = new Date(ms).getUTCDay();
+      const snap = dow === 6 ? -1 : dow === 0 ? -2 : 0; // Sat→Fri, Sun→Fri
+      return new Date(ms + snap * 86400000).toISOString().slice(0, 10);
     };
 
     // Fetch real historical closes from Yahoo Finance (no API key, no rate limits)

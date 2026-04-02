@@ -2,17 +2,32 @@ import { useState, useMemo } from "react";
 import { fmt } from "../lib/utils";
 
 const COLORS = ["#10b981","#3b82f6","#f59e0b","#8b5cf6","#ef4444","#06b6d4","#ec4899","#84cc16","#f97316","#a855f7"];
+const ANIM_CSS = `
+@keyframes lf-draw { to { stroke-dashoffset: 0; } }
+@keyframes lf-fade { from { opacity: 0; } to { opacity: 1; } }
+`;
+const RANGES = ["1W", "1M", "1Y", "ALL"];
 
 export default function SharpeRatioCurve({ trades, t }) {
   const [mode, setMode] = useState("strategy");
+  const [range, setRange] = useState("ALL");
 
   const curves = useMemo(() => {
+    const cutoff = (() => {
+      if (range === "ALL") return null;
+      const d = new Date();
+      if (range === "1W") d.setDate(d.getDate() - 7);
+      else if (range === "1M") d.setMonth(d.getMonth() - 1);
+      else if (range === "1Y") d.setFullYear(d.getFullYear() - 1);
+      return d.toISOString().slice(0, 10);
+    })();
+    const filtered = cutoff ? trades.filter(tr => tr.date >= cutoff) : trades;
     const keys = mode === "strategy"
-      ? [...new Set(trades.map(tr => tr.strategy).filter(Boolean))]
-      : [...new Set(trades.map(tr => tr.ticker).filter(Boolean))];
+      ? [...new Set(filtered.map(tr => tr.strategy).filter(Boolean))]
+      : [...new Set(filtered.map(tr => tr.ticker).filter(Boolean))];
     return keys
       .map((key, si) => {
-        const group = [...trades.filter(tr => (mode === "strategy" ? tr.strategy : tr.ticker) === key)]
+        const group = [...filtered.filter(tr => (mode === "strategy" ? tr.strategy : tr.ticker) === key)]
           .sort((a, b) => a.date.localeCompare(b.date));
         let cum = 0;
         const points = [{ date: group[0].date, cum: 0 }];
@@ -20,7 +35,7 @@ export default function SharpeRatioCurve({ trades, t }) {
         return { label: key, points, color: COLORS[si % COLORS.length], count: group.length };
       })
       .sort((a, b) => b.count - a.count);
-  }, [trades, mode]);
+  }, [trades, mode, range]);
 
   if (curves.length === 0) return null;
 
@@ -52,6 +67,7 @@ export default function SharpeRatioCurve({ trades, t }) {
 
   return (
     <div style={{ background: t.surface, border: `1px solid ${t.border}`, borderRadius: 12, padding: "16px 18px", marginBottom: 16 }}>
+      <style>{ANIM_CSS}</style>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 4 }}>
         <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 10, color: t.text3, textTransform: "uppercase", letterSpacing: 2 }}>Sharpe Ratio Curve</div>
         <div style={{ display: "flex", gap: 4 }}>
@@ -59,29 +75,86 @@ export default function SharpeRatioCurve({ trades, t }) {
           <button style={btnStyle(mode === "ticker")} onClick={() => setMode("ticker")}>Ticker</button>
         </div>
       </div>
-      <div style={{ fontSize: 11, color: t.text3, marginBottom: 16 }}>Cumulative P/L over time. Same slope but less wiggle = better Sharpe ratio.</div>
+      <div style={{ fontSize: 11, color: t.text3, marginBottom: 8 }}>Cumulative P/L over time. Same slope but less wiggle = better Sharpe ratio.</div>
+
+      {/* Range selector */}
+      <div style={{ display: "flex", gap: 4, marginBottom: 12 }}>
+        {RANGES.map(r => (
+          <button key={r} onClick={() => setRange(r)} style={{
+            background: range === r ? t.accent + "25" : "transparent",
+            border: `1px solid ${range === r ? t.accent : t.border}`,
+            color: range === r ? t.accent : t.text3,
+            borderRadius: 5, padding: "2px 8px", fontSize: 10,
+            fontFamily: "'Space Mono',monospace", cursor: "pointer",
+          }}>{r}</button>
+        ))}
+      </div>
+
       <div style={{ position: "relative" }}>
-        <svg width="100%" height={H} viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" style={{ display: "block", overflow: "visible" }}>
+        <svg
+          key={`${range}-${mode}`}
+          width="100%"
+          height={H}
+          viewBox={`0 0 ${W} ${H}`}
+          preserveAspectRatio="none"
+          style={{ display: "block", overflow: "visible" }}
+        >
+          {/* Horizontal grid lines */}
           {yTicks.map((v, i) => (
             <line key={i} x1={0} x2={W} y1={yS(v)} y2={yS(v)} stroke={t.border} strokeWidth={0.5} />
           ))}
+          {/* Zero line */}
           <line x1={0} x2={W} y1={zeroY} y2={zeroY} stroke={t.text3} strokeWidth={1} strokeDasharray="4 3" />
-          {curves.map(({ label, points, color }) => {
+          {/* Vertical tick lines (matches EquityCurve style) */}
+          {xTicks.map((ts, i) => (
+            <line key={`vt${i}`} x1={(i / 4) * W} y1={PAD_T} x2={(i / 4) * W} y2={H} stroke={t.border} strokeWidth="0.8" strokeDasharray="3 4" opacity="0.6" />
+          ))}
+          {/* Curves — draw animation with staggered delay per curve */}
+          {curves.map(({ label, points, color }, ci) => {
             const d = points.map((p, i) => `${i === 0 ? "M" : "L"} ${xS(p.date).toFixed(1)},${yS(p.cum).toFixed(1)}`).join(" ");
-            return <path key={label} d={d} fill="none" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" opacity={0.85} />;
+            return (
+              <path
+                key={label}
+                pathLength="1"
+                d={d}
+                fill="none"
+                stroke={color}
+                strokeWidth={2}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                style={{
+                  strokeDasharray: 1,
+                  strokeDashoffset: 1,
+                  animation: `lf-draw 1.2s cubic-bezier(0.4,0,0.2,1) ${ci * 0.15}s forwards`,
+                }}
+              />
+            );
           })}
-          {curves.map(({ label, points, color }) => {
+          {/* End-point dots — fade in after curves */}
+          {curves.map(({ label, points, color }, ci) => {
             const last = points[points.length - 1];
-            return <circle key={label} cx={xS(last.date)} cy={yS(last.cum)} r={4} fill={color} />;
+            return (
+              <circle
+                key={label}
+                cx={xS(last.date)}
+                cy={yS(last.cum)}
+                r={4}
+                fill={color}
+                style={{ opacity: 0, animation: `lf-fade 0.3s ease ${0.9 + ci * 0.15}s forwards` }}
+              />
+            );
           })}
+          {/* Axis borders */}
           <line x1={0} x2={0} y1={PAD_T} y2={H} stroke={t.border} strokeWidth={1} />
           <line x1={0} x2={W} y1={H} y2={H} stroke={t.border} strokeWidth={1} />
         </svg>
+        {/* Y-axis labels */}
         {yTicks.map((v, i) => (
           <span key={i} style={{ position: "absolute", left: 4, top: `${(yS(v) / H) * 100}%`, transform: "translateY(-50%)", fontSize: 9, color: t.text3, fontFamily: "'Space Mono',monospace", whiteSpace: "nowrap", pointerEvents: "none" }}>
             {v >= 0 ? "+" : ""}{v.toFixed(0)}
           </span>
         ))}
+        {/* X-axis date labels */}
         <div style={{ position: "relative", height: 18, marginTop: 3 }}>
           {xTicks.map((ts, i) => (
             <span key={i} style={{ position: "absolute", left: `${(i / 4) * 100}%`, transform: i === 0 ? "translateX(0%)" : i === 4 ? "translateX(-100%)" : "translateX(-50%)", fontSize: 9, color: t.text3, fontFamily: "'Space Mono',monospace", whiteSpace: "nowrap" }}>

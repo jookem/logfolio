@@ -1,6 +1,12 @@
 import { useState } from "react";
 import { calcPL } from "../lib/utils";
 
+const ANIM_CSS = `
+@keyframes lf-draw { to { stroke-dashoffset: 0; } }
+@keyframes lf-fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes lf-fade-half { to { opacity: 0.5; } }
+`;
+
 export default function EquityCurve({ trades, t, spyData, spyError }) {
   const [range, setRange] = useState("ALL");
   const [annotations, setAnnotations] = useState(() => {
@@ -66,10 +72,15 @@ export default function EquityCurve({ trades, t, spyData, spyError }) {
   const ys = points.map((p) => H - ((p.val - eMin) / eRange) * H);
   const path = points.map((_, i) => `${i === 0 ? "M" : "L"} ${xs[i]},${ys[i]}`).join(" ");
 
+  // Y-axis ticks (shared between grid lines and labels)
+  const yTickVals = Array.from({ length: 5 }, (_, i) => eMin + (i / 4) * eRange);
+
   // SPY: anchored at zeroY (where P/L=0 sits on the equity axis), scaled so its
   // full swing occupies 45% of chart height — always visible, never dominates
   let spyPath = null;
   let spyReturnPct = null;
+  let lastSpyY = null;
+  let lastSpyPrice = null;
   const filteredSpy = cutoffDate ? spyData?.filter(s => s.date >= cutoffDate) : spyData;
   if (filteredSpy?.length >= 2 && sorted.length >= 2) {
     const base = filteredSpy[0].close;
@@ -89,7 +100,20 @@ export default function EquityCurve({ trades, t, spyData, spyError }) {
         r != null ? Math.max(0, Math.min(H, zeroY - r * spyScale)) : null
       );
       const segs = spyYs.map((y, i) => y != null ? `${i === 0 ? "M" : "L"} ${xs[i]},${y}` : null).filter(Boolean);
-      if (segs.length >= 2) spyPath = segs.join(" ");
+      if (segs.length >= 2) {
+        spyPath = segs.join(" ");
+        // Track last valid SPY Y position and price for the "$Price" label
+        let lastValidIdx = -1;
+        spyYs.forEach((y, i) => { if (y != null) lastValidIdx = i; });
+        if (lastValidIdx >= 0) {
+          lastSpyY = spyYs[lastValidIdx];
+          const ptDate = points[lastValidIdx]?.date;
+          if (ptDate) {
+            const match = filteredSpy.filter(s => s.date <= ptDate);
+            if (match.length) lastSpyPrice = match[match.length - 1].close;
+          }
+        }
+      }
     }
   }
 
@@ -102,57 +126,120 @@ export default function EquityCurve({ trades, t, spyData, spyError }) {
 
   return (
     <div>
+      <style>{ANIM_CSS}</style>
       {/* Range selector */}
       {rangeSelector}
 
-      {/* Chart */}
-      <svg
-        viewBox={`0 0 ${W} ${H}`}
-        style={{ width: "100%", height: 200, cursor: "crosshair" }}
-        preserveAspectRatio="none"
-        onClick={(e) => {
-          const rect = e.currentTarget.getBoundingClientRect();
-          const clickX = ((e.clientX - rect.left) / rect.width) * W;
-          const nearestIdx = xs.reduce((best, x, i) => Math.abs(x - clickX) < Math.abs(xs[best] - clickX) ? i : best, 0);
-          if (nearestIdx > 0 && points[nearestIdx]?.date) {
-            const date = points[nearestIdx].date;
-            if (annotations[date]) { const n = { ...annotations }; delete n[date]; saveAnnotations(n); }
-            else setPendingAnnotation({ date, x: xs[nearestIdx], y: ys[nearestIdx], inputVal: "" });
-          }
-        }}
-      >
-        <defs>
-          <linearGradient id="eg" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor={t.accent} stopOpacity="0.25" />
-            <stop offset="100%" stopColor={t.accent} stopOpacity="0" />
-          </linearGradient>
-        </defs>
-        {/* Vertical tick lines — always rendered */}
-        {tickIdxs.map(idx => {
-          const pt = datePts[idx];
-          const ptIdx = points.findIndex(p => p.date === pt.date);
-          if (ptIdx < 0) return null;
-          return <line key={idx} x1={xs[ptIdx]} y1={0} x2={xs[ptIdx]} y2={H} stroke={t.border} strokeWidth="0.8" strokeDasharray="3 4" opacity="0.6" />;
-        })}
-        <path d={`${path} L ${xs[xs.length - 1]},${H} L 0,${H} Z`} fill="url(#eg)" />
-        <path d={path} fill="none" stroke={t.accent} strokeWidth="2" strokeLinejoin="round" />
-        {points.map((p, i) => i > 0 && (
-          <circle key={i} cx={xs[i]} cy={ys[i]} r="2.5" fill={t.accent} opacity="0.5" />
+      {/* Chart wrapper — position:relative for absolute labels */}
+      <div style={{ position: "relative" }}>
+        <svg
+          key={range}
+          viewBox={`0 0 ${W} ${H}`}
+          style={{ width: "100%", height: 200, cursor: "crosshair", overflow: "visible" }}
+          preserveAspectRatio="none"
+          onClick={(e) => {
+            const rect = e.currentTarget.getBoundingClientRect();
+            const clickX = ((e.clientX - rect.left) / rect.width) * W;
+            const nearestIdx = xs.reduce((best, x, i) => Math.abs(x - clickX) < Math.abs(xs[best] - clickX) ? i : best, 0);
+            if (nearestIdx > 0 && points[nearestIdx]?.date) {
+              const date = points[nearestIdx].date;
+              if (annotations[date]) { const n = { ...annotations }; delete n[date]; saveAnnotations(n); }
+              else setPendingAnnotation({ date, x: xs[nearestIdx], y: ys[nearestIdx], inputVal: "" });
+            }
+          }}
+        >
+          <defs>
+            <linearGradient id="eg" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor={t.accent} stopOpacity="0.25" />
+              <stop offset="100%" stopColor={t.accent} stopOpacity="0" />
+            </linearGradient>
+          </defs>
+          {/* Horizontal grid lines (matches SharpeRatioCurve style) */}
+          {yTickVals.map((v, i) => (
+            <line key={`hy${i}`} x1={0} x2={W} y1={H - ((v - eMin) / eRange) * H} y2={H - ((v - eMin) / eRange) * H} stroke={t.border} strokeWidth={0.5} />
+          ))}
+          {/* Vertical tick lines */}
+          {tickIdxs.map(idx => {
+            const pt = datePts[idx];
+            const ptIdx = points.findIndex(p => p.date === pt.date);
+            if (ptIdx < 0) return null;
+            return <line key={idx} x1={xs[ptIdx]} y1={0} x2={xs[ptIdx]} y2={H} stroke={t.border} strokeWidth="0.8" strokeDasharray="3 4" opacity="0.6" />;
+          })}
+          {/* Axis borders */}
+          <line x1={0} x2={0} y1={0} y2={H} stroke={t.border} strokeWidth={1} />
+          <line x1={0} x2={W} y1={H} y2={H} stroke={t.border} strokeWidth={1} />
+          {/* Gradient fill — fade in */}
+          <path
+            d={`${path} L ${xs[xs.length - 1]},${H} L 0,${H} Z`}
+            fill="url(#eg)"
+            style={{ opacity: 0, animation: "lf-fade 1.4s cubic-bezier(0.4,0,0.2,1) forwards" }}
+          />
+          {/* Main equity curve — draw animation */}
+          <path
+            pathLength="1"
+            d={path}
+            fill="none"
+            stroke={t.accent}
+            strokeWidth="2"
+            strokeLinejoin="round"
+            style={{ strokeDasharray: 1, strokeDashoffset: 1, animation: "lf-draw 1.4s cubic-bezier(0.4,0,0.2,1) forwards" }}
+          />
+          {/* Trade dots — fade in after line finishes */}
+          {points.map((p, i) => i > 0 && (
+            <circle key={i} cx={xs[i]} cy={ys[i]} r="2.5" fill={t.accent}
+              style={{ opacity: 0, animation: "lf-fade-half 0.4s ease 1.2s forwards" }}
+            />
+          ))}
+          {/* SPY overlay — fade in with delay */}
+          {spyPath && (
+            <path
+              d={spyPath}
+              fill="none"
+              stroke="#3B82F6"
+              strokeWidth="1.5"
+              strokeDasharray="5 3"
+              strokeLinejoin="round"
+              style={{ opacity: 0, animation: "lf-fade 0.8s ease 0.6s forwards" }}
+            />
+          )}
+          {/* Annotations */}
+          {points.map((p, i) => {
+            if (!p.date || !annotations[p.date]) return null;
+            return (
+              <g key={p.date}>
+                <line x1={xs[i]} y1={ys[i] - 6} x2={xs[i]} y2={ys[i] - 20} stroke={t.accent} strokeWidth="1.5" />
+                <circle cx={xs[i]} cy={ys[i] - 22} r="6" fill={t.accent} opacity="0.9" />
+                <title>{annotations[p.date]}</title>
+              </g>
+            );
+          })}
+        </svg>
+
+        {/* Y-axis P/L labels (left side, matching SharpeRatioCurve) */}
+        {yTickVals.map((v, i) => (
+          <span key={i} style={{
+            position: "absolute", left: 4, top: `${((H - ((v - eMin) / eRange) * H) / H) * 100}%`,
+            transform: "translateY(-50%)", fontSize: 9, color: t.text3,
+            fontFamily: "'Space Mono',monospace", whiteSpace: "nowrap", pointerEvents: "none",
+          }}>
+            {v >= 0 ? "+" : ""}{Math.abs(v) >= 1000 ? `$${(v / 1000).toFixed(1)}k` : `$${v.toFixed(0)}`}
+          </span>
         ))}
-        {spyPath && (
-          <path d={spyPath} fill="none" stroke="#3B82F6" strokeWidth="1.5" strokeDasharray="5 3" strokeLinejoin="round" opacity="0.7" />
+
+        {/* $Price label at right end of SPY line */}
+        {spyPath && lastSpyY != null && (
+          <div style={{
+            position: "absolute", right: 2, top: `${(lastSpyY / H) * 100}%`,
+            transform: "translateY(-50%)", fontSize: 8, color: "#3B82F6",
+            fontFamily: "'Space Mono',monospace", whiteSpace: "nowrap",
+            pointerEvents: "none", opacity: 0.9,
+            background: `${t.surface ?? t.card ?? "#111"}cc`,
+            padding: "1px 3px", borderRadius: 3,
+          }}>
+            {lastSpyPrice != null ? `$${lastSpyPrice.toFixed(0)}` : "$ Price"}
+          </div>
         )}
-        {points.map((p, i) => {
-          if (!p.date || !annotations[p.date]) return null;
-          return (
-            <g key={p.date}>
-              <line x1={xs[i]} y1={ys[i] - 6} x2={xs[i]} y2={ys[i] - 20} stroke={t.accent} strokeWidth="1.5" />
-              <circle cx={xs[i]} cy={ys[i] - 22} r="6" fill={t.accent} opacity="0.9" />
-              <title>{annotations[p.date]}</title>
-            </g>
-          );
-        })}
-      </svg>
+      </div>
 
       {pendingAnnotation && (
         <div style={{ marginTop: 6, background: t.card, border: `1px solid ${t.accent}50`, borderRadius: 8, padding: "8px 12px", display: "flex", gap: 8, alignItems: "center" }}>
