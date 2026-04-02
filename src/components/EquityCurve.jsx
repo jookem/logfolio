@@ -144,88 +144,104 @@ export default function EquityCurve({ trades, t, spyData, spyError }) {
 
       {/* Chart wrapper — position:relative for absolute labels */}
       <div style={{ position: "relative" }}>
-        <svg
-          key={inView ? range : "__pre"}
-          viewBox={`0 0 ${W} ${H}`}
-          style={{ width: "100%", height: 200, cursor: "crosshair", overflow: "visible" }}
-          preserveAspectRatio="none"
-          onClick={(e) => {
-            const rect = e.currentTarget.getBoundingClientRect();
-            const clickX = ((e.clientX - rect.left) / rect.width) * W;
-            const nearestIdx = xs.reduce((best, x, i) => Math.abs(x - clickX) < Math.abs(xs[best] - clickX) ? i : best, 0);
-            if (nearestIdx > 0 && points[nearestIdx]?.date) {
-              const date = points[nearestIdx].date;
-              if (annotations[date]) { const n = { ...annotations }; delete n[date]; saveAnnotations(n); }
-              else setPendingAnnotation({ date, x: xs[nearestIdx], y: ys[nearestIdx], inputVal: "" });
-            }
-          }}
-        >
-          <defs>
-            <linearGradient id="eg" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor={t.accent} stopOpacity="0.25" />
-              <stop offset="100%" stopColor={t.accent} stopOpacity="0" />
-            </linearGradient>
-          </defs>
-          {/* Horizontal grid lines (matches SharpeRatioCurve style) */}
-          {yTickVals.map((v, i) => (
-            <line key={`hy${i}`} x1={0} x2={W} y1={H - ((v - eMin) / eRange) * H} y2={H - ((v - eMin) / eRange) * H} stroke={t.border} strokeWidth={0.5} />
-          ))}
-          {/* Vertical tick lines */}
-          {tickIdxs.map(idx => {
-            const pt = datePts[idx];
-            const ptIdx = points.findIndex(p => p.date === pt.date);
-            if (ptIdx < 0) return null;
-            return <line key={idx} x1={xs[ptIdx]} y1={0} x2={xs[ptIdx]} y2={H} stroke={t.border} strokeWidth="0.8" strokeDasharray="3 4" opacity="0.6" />;
-          })}
-          {/* Axis borders */}
-          <line x1={0} x2={0} y1={0} y2={H} stroke={t.border} strokeWidth={1} />
-          <line x1={0} x2={W} y1={H} y2={H} stroke={t.border} strokeWidth={1} />
-          {/* Gradient fill — fade in */}
-          <path
-            d={`${path} L ${xs[xs.length - 1]},${H} L 0,${H} Z`}
-            fill="url(#eg)"
-            style={{ opacity: 0, animation: "lf-fade 1.4s cubic-bezier(0.4,0,0.2,1) forwards" }}
-          />
-          {/* Main equity curve — draw animation */}
-          <path
-            pathLength="1"
-            d={path}
-            fill="none"
-            stroke={t.accent}
-            strokeWidth="2"
-            strokeLinejoin="round"
-            style={{ strokeDasharray: 1, strokeDashoffset: 1, animation: "lf-draw 1.4s cubic-bezier(0.4,0,0.2,1) forwards" }}
-          />
-          {/* Trade dots — fade in after line finishes */}
-          {points.map((p, i) => i > 0 && (
-            <circle key={i} cx={xs[i]} cy={ys[i]} r="2.5" fill={t.accent}
-              style={{ opacity: 0, animation: "lf-fade-half 0.4s ease 1.2s forwards" }}
-            />
-          ))}
-          {/* SPY overlay — fade in with delay */}
-          {spyPath && (
+        {/* Inner wrapper gives the SVG a fixed pixel height so dots can be absolutely positioned */}
+        <div style={{ position: "relative", height: H }}>
+          <svg
+            key={inView ? range : "__pre"}
+            viewBox={`0 0 ${W} ${H}`}
+            style={{ width: "100%", height: H, cursor: "crosshair", overflow: "visible" }}
+            preserveAspectRatio="none"
+            onClick={(e) => {
+              const rect = e.currentTarget.getBoundingClientRect();
+              const clickX = ((e.clientX - rect.left) / rect.width) * W;
+              const nearestIdx = xs.reduce((best, x, i) => Math.abs(x - clickX) < Math.abs(xs[best] - clickX) ? i : best, 0);
+              if (nearestIdx > 0 && points[nearestIdx]?.date) {
+                const date = points[nearestIdx].date;
+                if (annotations[date]) { const n = { ...annotations }; delete n[date]; saveAnnotations(n); }
+                else setPendingAnnotation({ date, x: xs[nearestIdx], y: ys[nearestIdx], inputVal: "" });
+              }
+            }}
+          >
+            <defs>
+              <linearGradient id="eg" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor={t.accent} stopOpacity="0.25" />
+                <stop offset="100%" stopColor={t.accent} stopOpacity="0" />
+              </linearGradient>
+            </defs>
+            {/* Horizontal grid lines (matches SharpeRatioCurve style) */}
+            {yTickVals.map((v, i) => (
+              <line key={`hy${i}`} x1={0} x2={W} y1={H - ((v - eMin) / eRange) * H} y2={H - ((v - eMin) / eRange) * H} stroke={t.border} strokeWidth={0.5} />
+            ))}
+            {/* Vertical tick lines */}
+            {tickIdxs.map(idx => {
+              const pt = datePts[idx];
+              const ptIdx = points.findIndex(p => p.date === pt.date);
+              if (ptIdx < 0) return null;
+              return <line key={idx} x1={xs[ptIdx]} y1={0} x2={xs[ptIdx]} y2={H} stroke={t.border} strokeWidth="0.8" strokeDasharray="3 4" opacity="0.6" />;
+            })}
+            {/* Axis borders */}
+            <line x1={0} x2={0} y1={0} y2={H} stroke={t.border} strokeWidth={1} />
+            <line x1={0} x2={W} y1={H} y2={H} stroke={t.border} strokeWidth={1} />
+            {/* Gradient fill — fade in */}
             <path
-              d={spyPath}
-              fill="none"
-              stroke="#3B82F6"
-              strokeWidth="1.5"
-              strokeDasharray="5 3"
-              strokeLinejoin="round"
-              style={{ opacity: 0, animation: "lf-fade 0.8s ease 0.6s forwards" }}
+              d={`${path} L ${xs[xs.length - 1]},${H} L 0,${H} Z`}
+              fill="url(#eg)"
+              style={{ opacity: 0, animation: "lf-fade 1.4s cubic-bezier(0.4,0,0.2,1) forwards" }}
             />
-          )}
-          {/* Annotations */}
-          {points.map((p, i) => {
-            if (!p.date || !annotations[p.date]) return null;
-            return (
-              <g key={p.date}>
-                <line x1={xs[i]} y1={ys[i] - 6} x2={xs[i]} y2={ys[i] - 20} stroke={t.accent} strokeWidth="1.5" />
-                <circle cx={xs[i]} cy={ys[i] - 22} r="6" fill={t.accent} opacity="0.9" />
-                <title>{annotations[p.date]}</title>
-              </g>
-            );
-          })}
-        </svg>
+            {/* Main equity curve — draw animation */}
+            <path
+              pathLength="1"
+              d={path}
+              fill="none"
+              stroke={t.accent}
+              strokeWidth="2"
+              strokeLinejoin="round"
+              style={{ strokeDasharray: 1, strokeDashoffset: 1, animation: "lf-draw 1.4s cubic-bezier(0.4,0,0.2,1) forwards" }}
+            />
+            {/* SPY overlay — fade in with delay */}
+            {spyPath && (
+              <path
+                d={spyPath}
+                fill="none"
+                stroke="#3B82F6"
+                strokeWidth="1.5"
+                strokeDasharray="5 3"
+                strokeLinejoin="round"
+                style={{ opacity: 0, animation: "lf-fade 0.8s ease 0.6s forwards" }}
+              />
+            )}
+            {/* Annotations */}
+            {points.map((p, i) => {
+              if (!p.date || !annotations[p.date]) return null;
+              return (
+                <g key={p.date}>
+                  <line x1={xs[i]} y1={ys[i] - 6} x2={xs[i]} y2={ys[i] - 20} stroke={t.accent} strokeWidth="1.5" />
+                  <circle cx={xs[i]} cy={ys[i] - 22} r="6" fill={t.accent} opacity="0.9" />
+                  <title>{annotations[p.date]}</title>
+                </g>
+              );
+            })}
+          </svg>
+          {/* Trade dots as HTML divs — avoids oval distortion from preserveAspectRatio="none" */}
+          {points.map((p, i) => i > 0 && (
+            <div
+              key={i}
+              style={{
+                position: "absolute",
+                left: `${(xs[i] / W) * 100}%`,
+                top: `${(ys[i] / H) * 100}%`,
+                transform: "translate(-50%, -50%)",
+                width: 5,
+                height: 5,
+                borderRadius: "50%",
+                background: t.accent,
+                opacity: 0,
+                animation: "lf-fade-half 0.4s ease 1.2s forwards",
+                pointerEvents: "none",
+              }}
+            />
+          ))}
+        </div>
 
         {/* Y-axis P/L labels (left side, matching SharpeRatioCurve) */}
         {yTickVals.map((v, i) => (

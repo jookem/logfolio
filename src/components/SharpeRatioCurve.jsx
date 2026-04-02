@@ -103,63 +103,73 @@ export default function SharpeRatioCurve({ trades, t }) {
       </div>
 
       <div style={{ position: "relative" }}>
-        <svg
-          key={inView ? `${range}-${mode}` : "__pre"}
-          width="100%"
-          height={H}
-          viewBox={`0 0 ${W} ${H}`}
-          preserveAspectRatio="none"
-          style={{ display: "block", overflow: "visible" }}
-        >
-          {/* Horizontal grid lines */}
-          {yTicks.map((v, i) => (
-            <line key={i} x1={0} x2={W} y1={yS(v)} y2={yS(v)} stroke={t.border} strokeWidth={0.5} />
-          ))}
-          {/* Zero line */}
-          <line x1={0} x2={W} y1={zeroY} y2={zeroY} stroke={t.text3} strokeWidth={1} strokeDasharray="4 3" />
-          {/* Vertical tick lines (matches EquityCurve style) */}
-          {xTicks.map((ts, i) => (
-            <line key={`vt${i}`} x1={(i / 4) * W} y1={PAD_T} x2={(i / 4) * W} y2={H} stroke={t.border} strokeWidth="0.8" strokeDasharray="3 4" opacity="0.6" />
-          ))}
-          {/* Curves — draw animation with staggered delay per curve */}
+        <div style={{ position: "relative", height: H }}>
+          <svg
+            key={inView ? `${range}-${mode}` : "__pre"}
+            width="100%"
+            height={H}
+            viewBox={`0 0 ${W} ${H}`}
+            preserveAspectRatio="none"
+            style={{ display: "block", overflow: "visible" }}
+          >
+            {/* Horizontal grid lines */}
+            {yTicks.map((v, i) => (
+              <line key={i} x1={0} x2={W} y1={yS(v)} y2={yS(v)} stroke={t.border} strokeWidth={0.5} />
+            ))}
+            {/* Zero line */}
+            <line x1={0} x2={W} y1={zeroY} y2={zeroY} stroke={t.text3} strokeWidth={1} strokeDasharray="4 3" />
+            {/* Vertical tick lines (matches EquityCurve style) */}
+            {xTicks.map((ts, i) => (
+              <line key={`vt${i}`} x1={(i / 4) * W} y1={PAD_T} x2={(i / 4) * W} y2={H} stroke={t.border} strokeWidth="0.8" strokeDasharray="3 4" opacity="0.6" />
+            ))}
+            {/* Curves — draw animation with staggered delay per curve */}
+            {curves.map(({ label, points, color }, ci) => {
+              const d = points.map((p, i) => `${i === 0 ? "M" : "L"} ${xS(p.date).toFixed(1)},${yS(p.cum).toFixed(1)}`).join(" ");
+              return (
+                <path
+                  key={label}
+                  pathLength="1"
+                  d={d}
+                  fill="none"
+                  stroke={color}
+                  strokeWidth={2}
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  style={{
+                    strokeDasharray: 1,
+                    strokeDashoffset: 1,
+                    animation: `lf-draw 1.2s cubic-bezier(0.4,0,0.2,1) ${ci * 0.15}s forwards`,
+                  }}
+                />
+              );
+            })}
+            {/* Axis borders */}
+            <line x1={0} x2={0} y1={PAD_T} y2={H} stroke={t.border} strokeWidth={1} />
+            <line x1={0} x2={W} y1={H} y2={H} stroke={t.border} strokeWidth={1} />
+          </svg>
+          {/* End-point dots as HTML divs — avoids oval distortion from preserveAspectRatio="none" */}
           {curves.map(({ label, points, color }, ci) => {
-            const d = points.map((p, i) => `${i === 0 ? "M" : "L"} ${xS(p.date).toFixed(1)},${yS(p.cum).toFixed(1)}`).join(" ");
+            const last = points[points.length - 1];
             return (
-              <path
+              <div
                 key={label}
-                pathLength="1"
-                d={d}
-                fill="none"
-                stroke={color}
-                strokeWidth={2}
-                strokeLinecap="round"
-                strokeLinejoin="round"
                 style={{
-                  strokeDasharray: 1,
-                  strokeDashoffset: 1,
-                  animation: `lf-draw 1.2s cubic-bezier(0.4,0,0.2,1) ${ci * 0.15}s forwards`,
+                  position: "absolute",
+                  left: `${(xS(last.date) / W) * 100}%`,
+                  top: `${(yS(last.cum) / H) * 100}%`,
+                  transform: "translate(-50%, -50%)",
+                  width: 8,
+                  height: 8,
+                  borderRadius: "50%",
+                  background: color,
+                  opacity: 0,
+                  animation: `lf-fade 0.3s ease ${0.9 + ci * 0.15}s forwards`,
+                  pointerEvents: "none",
                 }}
               />
             );
           })}
-          {/* End-point dots — fade in after curves */}
-          {curves.map(({ label, points, color }, ci) => {
-            const last = points[points.length - 1];
-            return (
-              <circle
-                key={label}
-                cx={xS(last.date)}
-                cy={yS(last.cum)}
-                r={4}
-                fill={color}
-                style={{ opacity: 0, animation: `lf-fade 0.3s ease ${0.9 + ci * 0.15}s forwards` }}
-              />
-            );
-          })}
-          {/* Axis borders */}
-          <line x1={0} x2={0} y1={PAD_T} y2={H} stroke={t.border} strokeWidth={1} />
-          <line x1={0} x2={W} y1={H} y2={H} stroke={t.border} strokeWidth={1} />
-        </svg>
+        </div>
         {/* Y-axis labels */}
         {yTicks.map((v, i) => (
           <span key={i} style={{ position: "absolute", left: 4, top: `${(yS(v) / H) * 100}%`, transform: "translateY(-50%)", fontSize: 9, color: t.text3, fontFamily: "'Space Mono',monospace", whiteSpace: "nowrap", pointerEvents: "none" }}>
