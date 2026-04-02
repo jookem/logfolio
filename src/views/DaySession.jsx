@@ -22,9 +22,6 @@ const BADGE_DEFS = [
 export default function DaySession({ plList, plans, onAddTrade, onAddPlan, journals = {}, t, mobile, isDark, isPro, onUpgrade, userId }) {
   const today = todayStr();
   const todayTrades = plList.filter((tr) => tr.date === today);
-  const sessionPL = todayTrades.reduce((s, tr) => s + tr.pl, 0);
-  const wins = todayTrades.filter((tr) => tr.pl > 0).length;
-  const losses = todayTrades.filter((tr) => tr.pl < 0).length;
 
   // Open positions — stock-like trades with no exit price logged yet
   const openPositions = useMemo(() =>
@@ -39,6 +36,19 @@ export default function DaySession({ plList, plans, onAddTrade, onAddPlan, journ
   [openPositions]);
 
   const { quotes, lastUpdated, marketOpen, refresh } = useLiveQuotes(openTickers);
+
+  // For open positions, substitute live quote price for P&L; fall back to 0 if no quote yet
+  const effectivePL = (tr) => {
+    if (tr.exitPrice > 0) return tr.pl;
+    const quote = quotes[tr.ticker];
+    if (!quote) return 0;
+    const dir = tr.direction === "short" ? -1 : 1;
+    return dir * (quote.price - tr.entryPrice) * (tr.shares || 1);
+  };
+
+  const sessionPL = todayTrades.reduce((s, tr) => s + effectivePL(tr), 0);
+  const wins = todayTrades.filter((tr) => effectivePL(tr) > 0).length;
+  const losses = todayTrades.filter((tr) => effectivePL(tr) < 0).length;
 
   // Count-up animation for Session P&L — runs on mount and whenever sessionPL changes
   const [displayedPL, setDisplayedPL] = useState(0);
@@ -354,13 +364,14 @@ export default function DaySession({ plList, plans, onAddTrade, onAddPlan, journ
             <div style={{ display: "flex", alignItems: "flex-end", gap: 4, flex: 1, minHeight: 56 }}>
               {(() => {
                 let running = 0;
-                const runs = todayTrades.map((tr) => { running += tr.pl; return running; });
+                const runs = todayTrades.map((tr) => { running += effectivePL(tr); return running; });
                 const max = Math.max(...runs.map(Math.abs), 1);
                 return runs.map((val, i) => {
+                  const ePL = effectivePL(todayTrades[i]);
                   const targetH = (Math.abs(val) / max) * 46 + 10;
                   return (
                     <div key={i} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 3 }}>
-                      <div style={{ width: "100%", height: `${barsVisible ? targetH : 0}px`, background: todayTrades[i].pl >= 0 ? t.positive : t.danger, borderRadius: 3, opacity: 0.8, transition: `height 0.5s cubic-bezier(0.4,0,0.2,1) ${i * 0.06}s` }} />
+                      <div style={{ width: "100%", height: `${barsVisible ? targetH : 0}px`, background: ePL >= 0 ? t.positive : t.danger, borderRadius: 3, opacity: 0.8, transition: `height 0.5s cubic-bezier(0.4,0,0.2,1) ${i * 0.06}s` }} />
                       <div style={{ fontSize: 9, color: t.text3, fontFamily: "'Space Mono', monospace", overflow: "hidden", maxWidth: "100%", textAlign: "center" }}>{todayTrades[i].ticker}</div>
                     </div>
                   );
