@@ -340,7 +340,15 @@ export default function DaySession({ plList, plans, onAddTrade, onAddPlan, journ
 
         {/* P&L + stats card */}
         <div style={{ background: t.surface, border: `1px solid ${t.border}`, borderRadius: 16, padding: "16px 20px", marginBottom: mobile ? 20 : 0, flex: 1, display: "flex", flexDirection: "column" }}>
-          <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 10, color: t.text3, textTransform: "uppercase", letterSpacing: 2, marginBottom: 16 }}>Session P&L</div>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 16 }}>
+            <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 10, color: t.text3, textTransform: "uppercase", letterSpacing: 2 }}>Session P&L</div>
+            {todayTrades.some(tr => STOCK_LIKE.includes(tr.type) && (!tr.exitPrice || +tr.exitPrice === 0)) && (
+              <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                <div style={{ width: 5, height: 5, borderRadius: "50%", background: t.accent, animation: "lf-pulse 2s ease-in-out infinite" }} />
+                <span style={{ fontSize: 9, color: t.accent, fontFamily: "'Space Mono', monospace", letterSpacing: 1 }}>OPEN</span>
+              </div>
+            )}
+          </div>
           <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", gap: 14 }}>
             <div style={{ fontFamily: "'Space Mono', monospace", fontSize: mobile ? 32 : 40, fontWeight: 700, color: sessionPL >= 0 ? t.positive : t.danger, letterSpacing: -1, lineHeight: 1 }}>
               {displayedPL >= 0 ? "+" : ""}{fmt(displayedPL)}
@@ -498,27 +506,38 @@ export default function DaySession({ plList, plans, onAddTrade, onAddPlan, journ
           {todayTrades.length === 0 ? (
             <div style={{ padding: 48, textAlign: "center", color: t.text4, fontFamily: "'Space Mono', monospace", fontSize: 12 }}>No trades logged today yet</div>
           ) : (
-            [...todayTrades].reverse().map((tr, i) => (
-              <div key={tr.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px 16px", borderBottom: i < todayTrades.length - 1 ? `1px solid ${t.border}` : "none" }}>
-                <div>
-                  <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 14, fontWeight: 700, color: t.text, marginBottom: 3 }}>{tr.ticker}</div>
-                  <div style={{ fontSize: 12, color: t.text3 }}>
-                    {tr.strategy} · {tr.type === "options" ? `${tr.legs?.length}L options` : `${tr.shares} ${typeLabels(tr.type).units.toLowerCase()}`}
-                  </div>
-                  {tr.tags?.length > 0 && (
-                    <div style={{ display: "flex", gap: 4, marginTop: 4, flexWrap: "wrap" }}>
-                      {tr.tags.map((tg) => <Tag key={tg} label={tg} t={t} />)}
+            [...todayTrades].reverse().map((tr, i) => {
+              const isOpen = STOCK_LIKE.includes(tr.type) && (!tr.exitPrice || +tr.exitPrice === 0);
+              const ePL = effectivePL(tr);
+              return (
+                <div key={tr.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px 16px", borderBottom: i < todayTrades.length - 1 ? `1px solid ${t.border}` : "none" }}>
+                  <div>
+                    <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 14, fontWeight: 700, color: t.text, marginBottom: 3 }}>{tr.ticker}</div>
+                    <div style={{ fontSize: 12, color: t.text3 }}>
+                      {tr.strategy} · {tr.type === "options" ? `${tr.legs?.length}L options` : `${tr.shares} ${typeLabels(tr.type).units.toLowerCase()}`}
                     </div>
-                  )}
-                </div>
-                <div style={{ textAlign: "right" }}>
-                  <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 16, fontWeight: 700, color: tr.pl >= 0 ? t.positive : t.danger }}>
-                    {tr.pl >= 0 ? "+" : ""}{fmt(tr.pl)}
+                    {tr.tags?.length > 0 && (
+                      <div style={{ display: "flex", gap: 4, marginTop: 4, flexWrap: "wrap" }}>
+                        {tr.tags.map((tg) => <Tag key={tg} label={tg} t={t} />)}
+                      </div>
+                    )}
                   </div>
-                  {tr.mistake !== "None" && <div style={{ fontSize: 11, color: t.danger, marginTop: 2 }}>⚠ {tr.mistake}</div>}
+                  <div style={{ textAlign: "right" }}>
+                    {isOpen ? (
+                      <div style={{ display: "flex", alignItems: "center", gap: 6, justifyContent: "flex-end" }}>
+                        <div style={{ width: 6, height: 6, borderRadius: "50%", background: t.accent, animation: "lf-pulse 2s ease-in-out infinite" }} />
+                        <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 12, fontWeight: 700, color: t.accent, letterSpacing: 1 }}>OPEN</div>
+                      </div>
+                    ) : (
+                      <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 16, fontWeight: 700, color: ePL >= 0 ? t.positive : t.danger }}>
+                        {ePL >= 0 ? "+" : ""}{fmt(ePL)}
+                      </div>
+                    )}
+                    {tr.mistake !== "None" && <div style={{ fontSize: 11, color: t.danger, marginTop: 2 }}>{tr.mistake}</div>}
+                  </div>
                 </div>
-              </div>
-            ))
+              );
+            })
           )}
         </div>
 
