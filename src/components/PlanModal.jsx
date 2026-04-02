@@ -583,6 +583,9 @@ const base = {
                 onChange={(e) => set("purchasePrice", e.target.value)}
                 placeholder={form.type === "forex" ? "1.0850" : form.type === "crypto" ? "43000" : "190.00"} />
             </div>
+            {tickerLoading && (
+              <div style={{ fontSize: 11, color: t.text4, marginTop: 4, fontFamily: "'Space Mono',monospace" }}>fetching price...</div>
+            )}
           </div>
 
           {/* Num Shares */}
@@ -785,9 +788,7 @@ const base = {
         <DateInput
           style={{
             ...inp,
-            borderColor: leg.expiration && expiryDates.length > 0 && !expiryDates.includes(leg.expiration)
-              ? t.danger + "80"
-              : t.inputBorder,
+            borderColor: t.inputBorder,
           }}
           t={t}
           value={leg.expiration}
