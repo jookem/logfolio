@@ -51,6 +51,7 @@ export function calcPL(trade) {
         return dir * (weightedExit - trade.entryPrice) * totalExited;
       }
     }
+    if (!trade.exitPrice || +trade.exitPrice === 0) return 0;
     return dir * (trade.exitPrice - trade.entryPrice) * trade.shares;
   }
   return (trade.legs || []).reduce((sum, l) => {
