@@ -16,7 +16,7 @@ export default function EquityCurve({ trades, t, spyData, spyError }) {
     if (!el) return;
     const obs = new IntersectionObserver(
       ([entry]) => { if (entry.isIntersecting) { setInView(true); obs.disconnect(); } },
-      { threshold: 0.15 }
+      { threshold: 0, rootMargin: "-25% 0px -25% 0px" }
     );
     obs.observe(el);
     return () => obs.disconnect();

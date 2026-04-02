@@ -2,11 +2,16 @@ import { useRef, useState, useCallback } from "react";
 
 /**
  * Returns [ref, inView].
- * Attach ref to a DOM element — inView flips to true once it enters
- * the viewport (fires only once, then the observer disconnects).
+ * Attach ref to a DOM element — inView flips to true once the element
+ * is near the center of the viewport (fires only once, then disconnects).
+ *
+ * rootMargin "-30% 0px -30% 0px" shrinks the trigger zone to the middle
+ * 40% of the viewport so animations only start when the section is
+ * approximately centered on screen.
+ *
  * Uses a callback ref so it works with conditionally-rendered elements.
  */
-export default function useInView(threshold = 0.1) {
+export default function useInView(threshold = 0, rootMargin = "-30% 0px -30% 0px") {
   const [inView, setInView] = useState(false);
   const obsRef = useRef(null);
 
@@ -25,12 +30,12 @@ export default function useInView(threshold = 0.1) {
             obsRef.current = null;
           }
         },
-        { threshold }
+        { threshold, rootMargin }
       );
       obs.observe(el);
       obsRef.current = obs;
     },
-    [threshold]
+    [threshold, rootMargin]
   );
 
   return [ref, inView];

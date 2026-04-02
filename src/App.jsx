@@ -115,13 +115,13 @@ const [page, setPage] = useState(1);
   const T = tk(theme);
 
   // Analytics section in-view refs — each fires once when scrolled into viewport
-  const [rMultiRef, rMultiVisible] = useInView(0.1);
-  const [durationRef, durationVisible] = useInView(0.1);
-  const [leaderboardRef, leaderboardVisible] = useInView(0.1);
-  const [healthRef, healthVisible] = useInView(0.1);
-  const [dowRef, dowVisible] = useInView(0.1);
-  const [tagRef, tagVisible] = useInView(0.1);
-  const [tickerRef, tickerVisible] = useInView(0.1);
+  const [rMultiRef, rMultiVisible] = useInView();
+  const [durationRef, durationVisible] = useInView();
+  const [leaderboardRef, leaderboardVisible] = useInView();
+  const [healthRef, healthVisible] = useInView();
+  const [dowRef, dowVisible] = useInView();
+  const [tagRef, tagVisible] = useInView();
+  const [tickerRef, tickerVisible] = useInView();
 
   // Load trades from Supabase on login, fetching in chunks to avoid large single queries
   useEffect(() => {

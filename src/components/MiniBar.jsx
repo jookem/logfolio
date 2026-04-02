@@ -2,7 +2,7 @@ import useInView from "../hooks/useInView";
 
 export default function MiniBar({ value, max, t }) {
   const w = (Math.abs(value) / Math.abs(max)) * 100;
-  const [ref, inView] = useInView(0.1);
+  const [ref, inView] = useInView(0, "-15% 0px -15% 0px");
   return (
     <div
       ref={ref}

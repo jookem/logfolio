@@ -9,7 +9,7 @@ export default function StatCard({ label, value, sub, color, t, info }) {
   const [open, setOpen] = useState(false);
   const btnRef = useRef(null);
   const popRef = useRef(null);
-  const [cardRef, inView] = useInView(0.1);
+  const [cardRef, inView] = useInView(0, "-15% 0px -15% 0px");
 
   // Close when another StatCard opens
   useEffect(() => {
