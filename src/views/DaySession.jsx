@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { fmt, todayStr, typeLabels } from "../lib/utils";
 import { STOCK_LIKE } from "../lib/constants";
 import Tag from "../components/Tag";
@@ -24,6 +24,32 @@ export default function DaySession({ plList, plans, onAddTrade, onAddPlan, journ
   const sessionPL = todayTrades.reduce((s, tr) => s + tr.pl, 0);
   const wins = todayTrades.filter((tr) => tr.pl > 0).length;
   const losses = todayTrades.filter((tr) => tr.pl < 0).length;
+
+  // Count-up animation for Session P&L — runs on mount and whenever sessionPL changes
+  const [displayedPL, setDisplayedPL] = useState(0);
+  const rafRef = useRef(null);
+  useEffect(() => {
+    cancelAnimationFrame(rafRef.current);
+    const target = sessionPL;
+    const DURATION = 900;
+    const startTime = performance.now();
+    const tick = (now) => {
+      const progress = Math.min((now - startTime) / DURATION, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      setDisplayedPL(target * eased);
+      if (progress < 1) rafRef.current = requestAnimationFrame(tick);
+      else setDisplayedPL(target);
+    };
+    rafRef.current = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(rafRef.current);
+  }, [sessionPL]);
+
+  // Trigger Running P&L bar grow-in animation one frame after mount
+  const [barsVisible, setBarsVisible] = useState(false);
+  useEffect(() => {
+    const id = requestAnimationFrame(() => setBarsVisible(true));
+    return () => cancelAnimationFrame(id);
+  }, []);
 
   const streak = (() => {
     const sorted = [...plList].sort((a, b) => a.date.localeCompare(b.date));
@@ -292,7 +318,7 @@ export default function DaySession({ plList, plans, onAddTrade, onAddPlan, journ
           <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 10, color: t.text3, textTransform: "uppercase", letterSpacing: 2, marginBottom: 16 }}>Session P&L</div>
           <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", gap: 14 }}>
             <div style={{ fontFamily: "'Space Mono', monospace", fontSize: mobile ? 32 : 40, fontWeight: 700, color: sessionPL >= 0 ? t.positive : t.danger, letterSpacing: -1, lineHeight: 1 }}>
-              {sessionPL >= 0 ? "+" : ""}{fmt(sessionPL)}
+              {displayedPL >= 0 ? "+" : ""}{fmt(displayedPL)}
             </div>
             {(wins > 0 || losses > 0 || (streak && streak.count >= 2) || journalStreak >= 1) && (
               <div style={{ display: "flex", gap: 6, flexWrap: mobile ? "wrap" : "nowrap", justifyContent: "center" }}>
@@ -315,12 +341,15 @@ export default function DaySession({ plList, plans, onAddTrade, onAddPlan, journ
                 let running = 0;
                 const runs = todayTrades.map((tr) => { running += tr.pl; return running; });
                 const max = Math.max(...runs.map(Math.abs), 1);
-                return runs.map((val, i) => (
-                  <div key={i} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 3 }}>
-                    <div style={{ width: "100%", height: `${(Math.abs(val) / max) * 46 + 10}px`, background: todayTrades[i].pl >= 0 ? t.positive : t.danger, borderRadius: 3, opacity: 0.8 }} />
-                    <div style={{ fontSize: 9, color: t.text3, fontFamily: "'Space Mono', monospace", overflow: "hidden", maxWidth: "100%", textAlign: "center" }}>{todayTrades[i].ticker}</div>
-                  </div>
-                ));
+                return runs.map((val, i) => {
+                  const targetH = (Math.abs(val) / max) * 46 + 10;
+                  return (
+                    <div key={i} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 3 }}>
+                      <div style={{ width: "100%", height: `${barsVisible ? targetH : 0}px`, background: todayTrades[i].pl >= 0 ? t.positive : t.danger, borderRadius: 3, opacity: 0.8, transition: `height 0.5s cubic-bezier(0.4,0,0.2,1) ${i * 0.06}s` }} />
+                      <div style={{ fontSize: 9, color: t.text3, fontFamily: "'Space Mono', monospace", overflow: "hidden", maxWidth: "100%", textAlign: "center" }}>{todayTrades[i].ticker}</div>
+                    </div>
+                  );
+                });
               })()}
             </div>
           </div>
