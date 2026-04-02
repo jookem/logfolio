@@ -175,6 +175,31 @@ export default function CSVModal({ onClose, onImport, existingTrades = [], t }) 
         });
       }
 
+      // Sort chronologically so FIFO matching respects trade order
+      orders.sort((a, b) => {
+        if (a.date !== b.date) return a.date.localeCompare(b.date);
+        return (a.time || "").localeCompare(b.time || "");
+      });
+
+      // Consolidate partial fills: merge same ticker + date + side into one order
+      // with a weighted-average price. Brokers often split a single order into
+      // many fill rows — without this step each fill burns a separate match slot.
+      const consolidateOrders = (rawOrders) => {
+        const groups = {};
+        rawOrders.forEach(o => {
+          const key = `${o.ticker}|${o.date}|${o.side}`;
+          if (!groups[key]) groups[key] = { ...o, _shares: 0, _cost: 0 };
+          groups[key]._shares += o.shares;
+          groups[key]._cost  += o.shares * o.price;
+        });
+        return Object.values(groups).map(g => ({
+          ...g,
+          shares: g._shares,
+          price: g._shares > 0 ? g._cost / g._shares : 0,
+        }));
+      };
+      orders = consolidateOrders(orders);
+
       const byTicker = {};
       orders.forEach(o => {
         if (!byTicker[o.ticker]) byTicker[o.ticker] = { buys: [], sells: [] };
