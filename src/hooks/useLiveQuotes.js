@@ -30,27 +30,22 @@ export default function useLiveQuotes(tickers) {
     if (!tickers.length) return;
     try {
       const { data: { session } } = await supabase.auth.getSession();
-      const url = `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${encodeURIComponent(tickerKey)}&fields=regularMarketPrice,regularMarketChange,regularMarketChangePercent`;
-      const res = await fetch("/api/yf", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          ...(session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {}),
-        },
-        body: JSON.stringify({ url }),
-      });
-      const data = await res.json();
-      const result = data?.quoteResponse?.result;
-      if (!Array.isArray(result)) return;
+      const headers = {
+        "Content-Type": "application/json",
+        ...(session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {}),
+      };
+      const results = await Promise.all(
+        tickers.map(ticker =>
+          fetch("/api/polygon", {
+            method: "POST",
+            headers,
+            body: JSON.stringify({ path: `/v2/aggs/ticker/${ticker}/prev?adjusted=true` }),
+          }).then(r => r.json()).then(data => ({ ticker, price: data?.results?.[0]?.c ?? null }))
+        )
+      );
       const next = {};
-      result.forEach(q => {
-        if (q.regularMarketPrice != null) {
-          next[q.symbol] = {
-            price: q.regularMarketPrice,
-            change: q.regularMarketChange ?? 0,
-            changePct: q.regularMarketChangePercent ?? 0,
-          };
-        }
+      results.forEach(({ ticker, price }) => {
+        if (price != null) next[ticker] = { price, change: 0, changePct: 0 };
       });
       setQuotes(next);
       setLastUpdated(new Date());

@@ -1,5 +1,5 @@
-import { useState, useMemo } from "react";
-import useLiveQuotes from "../hooks/useLiveQuotes";
+import { useState, useEffect, useRef } from "react";
+import { supabase } from "../lib/supabase";
 import { useModalClose } from "../lib/useModalClose";
 import { STOCK_LIKE, SUGGESTED_TAGS, EMOTIONS, MISTAKES, OPTION_STRATEGIES } from "../lib/constants";
 import { todayStr, typeLabels, fmt, calcWeightedExit, calcTotalExited } from "../lib/utils";
@@ -53,13 +53,35 @@ export default function TradeFormModal({ initial, defaults, onClose, onSave, onC
     return STOCK_LIKE.includes(base.type) && (!base.exitPrice || +base.exitPrice === 0) && !(base.closes?.length);
   });
 
-  // Live price for open-trade P&L preview — fetch when ticker is set and open trade is toggled
-  const liveTickers = useMemo(() => {
-    const tk = form.ticker.trim().toUpperCase();
-    return openTrade && STOCK_LIKE.includes(form.type) && tk.length >= 1 ? [tk] : [];
+  // Live price for open-trade P&L preview — same Polygon endpoint as PlanModal
+  const [livePrice, setLivePrice] = useState(null);
+  const [liveFetching, setLiveFetching] = useState(false);
+  const liveFetchRef = useRef(null);
+  useEffect(() => {
+    const ticker = form.ticker.trim().toUpperCase();
+    if (!openTrade || !STOCK_LIKE.includes(form.type) || ticker.length < 1) {
+      setLivePrice(null);
+      return;
+    }
+    clearTimeout(liveFetchRef.current);
+    liveFetchRef.current = setTimeout(async () => {
+      setLiveFetching(true);
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        const data = await fetch("/api/polygon", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", ...(session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {}) },
+          body: JSON.stringify({ path: `/v2/aggs/ticker/${ticker}/prev?adjusted=true` }),
+        }).then(r => r.json());
+        const price = data?.results?.[0]?.c;
+        if (price) setLivePrice(price);
+        else setLivePrice(null);
+      } catch { setLivePrice(null); }
+      setLiveFetching(false);
+    }, 400);
+    return () => clearTimeout(liveFetchRef.current);
   }, [openTrade, form.ticker, form.type]);
-  const { quotes: liveQuotes } = useLiveQuotes(liveTickers);
-  const livePrice = liveQuotes[form.ticker.trim().toUpperCase()]?.price ?? null;
+
   const livePL = livePrice != null && form.entryPrice && form.shares
     ? (form.direction === "short" ? -1 : 1) * (livePrice - +form.entryPrice) * +form.shares
     : null;
@@ -471,7 +493,7 @@ export default function TradeFormModal({ initial, defaults, onClose, onSave, onC
                     {livePL >= 0 ? "+" : ""}{fmt(livePL)} @ {fmt(livePrice)}
                   </div>
                 )}
-                {openTrade && livePL == null && form.ticker.trim().length > 0 && (
+                {openTrade && livePL == null && liveFetching && (
                   <div style={{ fontSize: 11, color: t.text4, marginTop: 4, fontFamily: "'Space Mono',monospace" }}>fetching price...</div>
                 )}
                 {!openTrade && (() => {
