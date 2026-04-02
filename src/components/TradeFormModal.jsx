@@ -47,6 +47,10 @@ export default function TradeFormModal({ initial, defaults, onClose, onSave, onC
     const base = initial || blank;
     return { ...base, closes: base.closes || [] };
   });
+  const [openTrade, setOpenTrade] = useState(() => {
+    const base = initial || blank;
+    return STOCK_LIKE.includes(base.type) && (!base.exitPrice || +base.exitPrice === 0) && !(base.closes?.length);
+  });
   const [errors, setErrors] = useState({});
   const [tagInput, setTagInput] = useState("");
   const [customEmotions, setCustomEmotions] = useState([]);
@@ -69,7 +73,7 @@ export default function TradeFormModal({ initial, defaults, onClose, onSave, onC
   };
   const handleTypeChange = (type) => {
     set("type", type);
-    if (type === "options") handleStrategyChange("Long Call");
+    if (type === "options") { handleStrategyChange("Long Call"); setOpenTrade(false); }
     else set("strategy", "Breakout");
   };
   const setLeg = (i, k, v) =>
@@ -409,16 +413,46 @@ export default function TradeFormModal({ initial, defaults, onClose, onSave, onC
                 {errMsg("entryPrice")}
               </div>
               <div>
-                <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><ExitIcon size={14} />Exit</label>
+                <label style={{ ...lbl, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                  <span style={{ display: "flex", alignItems: "center", gap: 4 }}><ExitIcon size={14} />Exit</span>
+                  {STOCK_LIKE.includes(form.type) && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const next = !openTrade;
+                        setOpenTrade(next);
+                        if (next) { set("exitPrice", ""); setErrors(p => ({ ...p, exitPrice: undefined })); }
+                      }}
+                      style={{
+                        background: openTrade ? t.accent + "20" : "none",
+                        border: `1px solid ${openTrade ? t.accent : t.border}`,
+                        borderRadius: 5,
+                        color: openTrade ? t.accent : t.text3,
+                        fontSize: 9,
+                        fontFamily: "'Space Mono', monospace",
+                        letterSpacing: 0.5,
+                        padding: "2px 7px",
+                        cursor: "pointer",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 4,
+                      }}
+                    >
+                      <span style={{ width: 7, height: 7, borderRadius: "50%", background: openTrade ? t.accent : "transparent", border: `1.5px solid ${openTrade ? t.accent : t.text3}`, display: "inline-block", flexShrink: 0 }} />
+                      Open trade
+                    </button>
+                  )}
+                </label>
                 <input
-                  style={inp("exitPrice")}
+                  style={{ ...inp("exitPrice"), opacity: openTrade ? 0.35 : 1 }}
                   type="number"
-                  value={form.exitPrice}
+                  disabled={openTrade}
+                  value={openTrade ? "" : form.exitPrice}
                   onChange={(e) => { set("exitPrice", e.target.value); setErrors((p) => ({ ...p, exitPrice: undefined })); }}
-                  placeholder={form.type === "forex" ? "1.0920" : form.type === "crypto" ? "44500" : "196"}
+                  placeholder={openTrade ? "— open position —" : form.type === "forex" ? "1.0920" : form.type === "crypto" ? "44500" : "196"}
                 />
                 {errMsg("exitPrice")}
-                {(() => {
+                {!openTrade && (() => {
                   const entry = +form.entryPrice;
                   const exit = +form.exitPrice;
                   const qty = +form.shares;
@@ -427,7 +461,7 @@ export default function TradeFormModal({ initial, defaults, onClose, onSave, onC
                   const pl = dir * (exit - entry) * qty;
                   return (
                     <div style={{ fontSize: 11, fontFamily: "'Space Mono',monospace", color: pl >= 0 ? t.positive : t.danger, marginTop: 4 }}>
-                      → {pl >= 0 ? "+" : ""}{fmt(pl)}
+                      {pl >= 0 ? "+" : ""}{fmt(pl)}
                     </div>
                   );
                 })()}
