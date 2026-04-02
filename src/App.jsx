@@ -118,6 +118,7 @@ const [page, setPage] = useState(1);
   const [rMultiRef, rMultiVisible] = useInView(0.1);
   const [durationRef, durationVisible] = useInView(0.1);
   const [leaderboardRef, leaderboardVisible] = useInView(0.1);
+  const [healthRef, healthVisible] = useInView(0.1);
   const [dowRef, dowVisible] = useInView(0.1);
   const [tagRef, tagVisible] = useInView(0.1);
   const [tickerRef, tickerVisible] = useInView(0.1);
@@ -685,6 +686,7 @@ const importTrades = (incoming) => {
   };
   const clearAllExec = async () => {
     const remaining = trades.filter((tr) => tr.status === "planned");
+    const cleared = trades.filter((tr) => tr.status !== "planned");
     setTrades(remaining);
     setSelected(null);
     saveTrades(remaining);
@@ -699,7 +701,10 @@ const importTrades = (incoming) => {
         await supabase.from("trades").upsert(remaining.map(t => ({ id: t.id, user_id: user.id, data: t })));
       }
       localStorage.removeItem("tradelog_clear_trades_pending");
-      deleteAllUserMedia(user.id);
+      // Only delete media for cleared trades — preserve plan media
+      for (const tr of cleared) {
+        deleteTradeMedia(user.id, tr.id);
+      }
     }
   };
   const clearAllPlans = () => {
@@ -1943,7 +1948,7 @@ const paginated = filtered
 
             {/* Strategy Health */}
             {strategyDecay.length > 0 && (
-              <div style={{ background: T.surface, border: `1px solid ${T.border}`, borderRadius: 12, padding: "16px 18px", marginBottom: 16 }}>
+              <div ref={healthRef} style={{ background: T.surface, border: `1px solid ${T.border}`, borderRadius: 12, padding: "16px 18px", marginBottom: 16 }}>
                 <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 10, color: T.text3, textTransform: "uppercase", letterSpacing: 2, marginBottom: 8 }}>Strategy Health</div>
                 <div style={{ fontSize: 11, color: T.text3, marginBottom: 14 }}>Compares your last 10 trades per strategy vs all-time baseline. Flags when performance is deteriorating.</div>
                 {strategyDecay.some(s => s.health !== "green") ? (
@@ -1956,9 +1961,10 @@ const paginated = filtered
                   </div>
                 ) : null}
                 <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                  {strategyDecay.map(({ strategy, allWR, recentWR, allAvg, recentAvg, wrDrop, health, total }) => {
+                  {strategyDecay.map(({ strategy, allWR, recentWR, allAvg, recentAvg, wrDrop, health, total }, si) => {
                     const dotColor = health === "green" ? T.positive : health === "amber" ? "#f59e0b" : T.danger;
                     const label = health === "green" ? "Healthy" : health === "amber" ? "Declining" : "Underperforming";
+                    const maxWR = 100;
                     return (
                       <div key={strategy} style={{ display: "grid", gridTemplateColumns: "10px 1fr auto", gap: 12, alignItems: "center" }}>
                         <div style={{ width: 10, height: 10, borderRadius: "50%", background: dotColor, flexShrink: 0 }} />
@@ -1966,6 +1972,9 @@ const paginated = filtered
                           <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
                             <span style={{ fontSize: 13, color: T.text, fontWeight: 600 }}>{strategy}</span>
                             <span style={{ fontSize: 11, color: dotColor, fontFamily: "'Space Mono',monospace" }}>{label}</span>
+                          </div>
+                          <div style={{ height: 6, borderRadius: 3, background: T.border, overflow: "hidden", marginBottom: 4 }}>
+                            <div style={{ height: "100%", width: healthVisible ? `${Math.round(recentWR * 100)}%` : "0%", borderRadius: 3, background: dotColor, transition: `width 0.6s cubic-bezier(0.4,0,0.2,1) ${si * 0.07}s` }} />
                           </div>
                           <div style={{ display: "flex", gap: 16 }}>
                             <span style={{ fontSize: 11, color: T.text3 }}>All-time: <span style={{ color: T.text, fontFamily: "'Space Mono',monospace" }}>{Math.round(allWR * 100)}%WR · {allAvg >= 0 ? "+" : ""}{fmt(allAvg)}</span></span>
@@ -1984,7 +1993,7 @@ const paginated = filtered
             <div ref={dowRef} style={{ display: "grid", gridTemplateColumns: mobile ? "1fr" : "1fr 1fr", gap: 16, marginBottom: 16 }}>
               {/* Day of Week */}
               <div style={{ background: T.surface, border: `1px solid ${T.border}`, borderRadius: 12, padding: "16px 18px" }}>
-                <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 10, color: T.text3, textTransform: "uppercase", letterSpacing: 2, marginBottom: 16 }}>Day of Week</div>
+                <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 10, color: T.text3, textTransform: "uppercase", letterSpacing: 2, marginBottom: 16 }}>Best Day of the Week to Trade</div>
                 {dowBreakdown.length === 0 ? (
                   <div style={{ fontSize: 13, color: T.text3 }}>No trade data yet.</div>
                 ) : (
