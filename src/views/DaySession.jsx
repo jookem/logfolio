@@ -4,6 +4,7 @@ import { STOCK_LIKE } from "../lib/constants";
 import Tag from "../components/Tag";
 import QuoteOfDay from "./QuoteOfDay";
 import { LogIcon, PlanIcon, FirstTradeIcon, GreenDayIcon } from "../lib/icons";
+import useLiveQuotes from "../hooks/useLiveQuotes";
 
 const BADGE_DEFS = [
   { id: "first_trade",  IconCmp: FirstTradeIcon,               color: "#fbbf24", label: "First Trade",   desc: "Logged your first trade",                     check: ({ trades }) => trades.length >= 1 },
@@ -24,6 +25,20 @@ export default function DaySession({ plList, plans, onAddTrade, onAddPlan, journ
   const sessionPL = todayTrades.reduce((s, tr) => s + tr.pl, 0);
   const wins = todayTrades.filter((tr) => tr.pl > 0).length;
   const losses = todayTrades.filter((tr) => tr.pl < 0).length;
+
+  // Open positions — stock-like trades with no exit price logged yet
+  const openPositions = useMemo(() =>
+    plList.filter(tr =>
+      STOCK_LIKE.includes(tr.type) &&
+      tr.entryPrice > 0 &&
+      (!tr.exitPrice || tr.exitPrice === 0)
+    ), [plList]);
+
+  const openTickers = useMemo(() =>
+    [...new Set(openPositions.map(tr => tr.ticker))],
+  [openPositions]);
+
+  const { quotes, lastUpdated, marketOpen, refresh } = useLiveQuotes(openTickers);
 
   // Count-up animation for Session P&L — runs on mount and whenever sessionPL changes
   const [displayedPL, setDisplayedPL] = useState(0);
@@ -360,6 +375,103 @@ export default function DaySession({ plList, plans, onAddTrade, onAddPlan, journ
         )}
 
       </div>
+
+      {/* Open Positions — live price layer */}
+      {openPositions.length > 0 && (
+        <div style={{ background: t.surface, border: `1px solid ${t.border}`, borderRadius: 12, padding: "14px 18px", marginBottom: 20 }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 10, color: t.text3, textTransform: "uppercase", letterSpacing: 2 }}>Open Positions</div>
+              {marketOpen && (
+                <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                  <div style={{ width: 6, height: 6, borderRadius: "50%", background: t.positive, boxShadow: `0 0 6px ${t.positive}`, animation: "lf-pulse 2s ease-in-out infinite" }} />
+                  <span style={{ fontSize: 9, color: t.positive, fontFamily: "'Space Mono', monospace", letterSpacing: 1 }}>LIVE</span>
+                </div>
+              )}
+            </div>
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              {lastUpdated && (
+                <span style={{ fontSize: 9, color: t.text4, fontFamily: "'Space Mono', monospace" }}>
+                  {lastUpdated.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })}
+                </span>
+              )}
+              <button
+                onClick={refresh}
+                title="Refresh prices"
+                style={{ background: "none", border: `1px solid ${t.border}`, borderRadius: 6, color: t.text3, cursor: "pointer", fontSize: 10, padding: "2px 8px", fontFamily: "'Space Mono', monospace" }}
+              >
+                ↻
+              </button>
+            </div>
+          </div>
+          <style>{`@keyframes lf-pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }`}</style>
+          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+            {openPositions.map((tr, i) => {
+              const quote = quotes[tr.ticker];
+              const currentPrice = quote?.price ?? null;
+              const unreal = currentPrice != null
+                ? (tr.direction === "short" ? tr.entryPrice - currentPrice : currentPrice - tr.entryPrice) * (tr.shares || 1)
+                : null;
+              const unrealColor = unreal == null ? t.text3 : unreal >= 0 ? t.positive : t.danger;
+              return (
+                <div key={tr.id} style={{ display: "flex", alignItems: "center", gap: 12, padding: "8px 10px", background: t.card, borderRadius: 8 }}>
+                  <div style={{ minWidth: 52 }}>
+                    <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 13, fontWeight: 700, color: t.text }}>{tr.ticker}</div>
+                    <div style={{ fontSize: 9, color: tr.direction === "short" ? t.danger : t.positive, textTransform: "uppercase", letterSpacing: 1 }}>{tr.direction}</div>
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontSize: 11, color: t.text3 }}>
+                      {tr.shares} {tr.shares === 1 ? "share" : "shares"} @ {fmt(tr.entryPrice)}
+                    </div>
+                    {currentPrice != null && (
+                      <div style={{ fontSize: 11, color: t.text3 }}>
+                        Current: <span style={{ fontFamily: "'Space Mono', monospace", color: t.text, fontWeight: 600 }}>{fmt(currentPrice)}</span>
+                        {quote.changePct != null && (
+                          <span style={{ marginLeft: 6, color: quote.changePct >= 0 ? t.positive : t.danger, fontFamily: "'Space Mono', monospace" }}>
+                            {quote.changePct >= 0 ? "+" : ""}{quote.changePct.toFixed(2)}%
+                          </span>
+                        )}
+                      </div>
+                    )}
+                    {currentPrice == null && (
+                      <div style={{ fontSize: 11, color: t.text4, fontStyle: "italic" }}>Price unavailable</div>
+                    )}
+                  </div>
+                  <div style={{ textAlign: "right" }}>
+                    {unreal != null ? (
+                      <>
+                        <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 14, fontWeight: 700, color: unrealColor }}>
+                          {unreal >= 0 ? "+" : ""}{fmt(unreal)}
+                        </div>
+                        <div style={{ fontSize: 9, color: t.text4, textTransform: "uppercase", letterSpacing: 1 }}>unrealized</div>
+                      </>
+                    ) : (
+                      <div style={{ fontSize: 11, color: t.text4 }}>—</div>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+          {openPositions.length > 0 && Object.keys(quotes).length > 0 && (() => {
+            const totalUnreal = openPositions.reduce((sum, tr) => {
+              const q = quotes[tr.ticker];
+              if (!q) return sum;
+              return sum + (tr.direction === "short" ? tr.entryPrice - q.price : q.price - tr.entryPrice) * (tr.shares || 1);
+            }, 0);
+            return (
+              <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 10, paddingTop: 10, borderTop: `1px solid ${t.border}` }}>
+                <div style={{ textAlign: "right" }}>
+                  <div style={{ fontSize: 9, color: t.text3, fontFamily: "'Space Mono', monospace", textTransform: "uppercase", letterSpacing: 1.5, marginBottom: 2 }}>Total Unrealized</div>
+                  <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 18, fontWeight: 700, color: totalUnreal >= 0 ? t.positive : t.danger }}>
+                    {totalUnreal >= 0 ? "+" : ""}{fmt(totalUnreal)}
+                  </div>
+                </div>
+              </div>
+            );
+          })()}
+        </div>
+      )}
 
       {/* Trades + Plans row — stacked on mobile, side-by-side on desktop */}
       <div style={{ display: mobile ? "block" : "flex", gap: 20, alignItems: "flex-start" }}>
