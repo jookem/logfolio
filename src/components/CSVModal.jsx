@@ -72,12 +72,16 @@ export default function CSVModal({ onClose, onImport, existingTrades = [], t }) 
           if (!ticker) return;
           const status = (row.status || "").toLowerCase();
           if (status === "failed" || status === "cancelled") return;
+          // Webull sometimes exports filled=0 for unexecuted orders with Status="Filled"
+          // and omits Status entirely for some valid fills — filter by actual qty
+          const shares = parsePrice(row.filled);
+          if (shares <= 0) return;
           const timeStr = row["filled time"] || row["placed time"] || "";
           orders.push({
             ticker,
             side: (row.side || "").toLowerCase(),
             price: parsePrice(row["avg price"] || row.price),
-            shares: parsePrice(row.filled || row["total qty"]),
+            shares,
             date: parseDate(timeStr),
             time: parseTime(timeStr),
           });
