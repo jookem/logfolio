@@ -4,11 +4,19 @@ import { supabase } from "../lib/supabase";
 const POLL_INTERVAL = 60_000; // 60 s — server caches 5 min anyway
 
 function isMarketOpen() {
-  const etStr = new Date().toLocaleString("en-US", { timeZone: "America/New_York" });
-  const et = new Date(etStr);
-  const day = et.getDay();
-  if (day === 0 || day === 6) return false;
-  const min = et.getHours() * 60 + et.getMinutes();
+  const now = new Date();
+  const fmt = new Intl.DateTimeFormat("en-US", {
+    timeZone: "America/New_York",
+    weekday: "short",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  });
+  const parts = Object.fromEntries(fmt.formatToParts(now).map(p => [p.type, p.value]));
+  if (parts.weekday === "Sun" || parts.weekday === "Sat") return false;
+  const hour = parseInt(parts.hour, 10);
+  const minute = parseInt(parts.minute, 10);
+  const min = hour * 60 + minute;
   return min >= 9 * 60 + 30 && min < 16 * 60;
 }
 

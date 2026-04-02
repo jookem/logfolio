@@ -438,12 +438,12 @@ export default function DaySession({ plList, plans, onAddTrade, onAddPlan, journ
                     )}
                   </div>
                   <div style={{ textAlign: "right" }}>
-                    {unreal != null ? (
+                    {unreal != null && marketOpen ? (
                       <>
                         <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 14, fontWeight: 700, color: unrealColor }}>
                           {unreal >= 0 ? "+" : ""}{fmt(unreal)}
                         </div>
-                        <div style={{ fontSize: 9, color: t.text4, textTransform: "uppercase", letterSpacing: 1 }}>{marketOpen ? "unrealized" : "last close"}</div>
+                        <div style={{ fontSize: 9, color: t.text4, textTransform: "uppercase", letterSpacing: 1 }}>unrealized</div>
                       </>
                     ) : (
                       <div style={{ fontSize: 11, color: t.text4 }}>—</div>
@@ -453,7 +453,7 @@ export default function DaySession({ plList, plans, onAddTrade, onAddPlan, journ
               );
             })}
           </div>
-          {openPositions.length > 0 && Object.keys(quotes).length > 0 && (() => {
+          {openPositions.length > 0 && marketOpen && Object.keys(quotes).length > 0 && (() => {
             const totalUnreal = openPositions.reduce((sum, tr) => {
               const q = quotes[tr.ticker];
               if (!q) return sum;
