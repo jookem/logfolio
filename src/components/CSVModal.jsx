@@ -181,25 +181,6 @@ export default function CSVModal({ onClose, onImport, existingTrades = [], t }) 
         return (a.time || "").localeCompare(b.time || "");
       });
 
-      // Consolidate partial fills: merge same ticker + date + side into one order
-      // with a weighted-average price. Brokers often split a single order into
-      // many fill rows — without this step each fill burns a separate match slot.
-      const consolidateOrders = (rawOrders) => {
-        const groups = {};
-        rawOrders.forEach(o => {
-          const key = `${o.ticker}|${o.date}|${o.side}`;
-          if (!groups[key]) groups[key] = { ...o, _shares: 0, _cost: 0 };
-          groups[key]._shares += o.shares;
-          groups[key]._cost  += o.shares * o.price;
-        });
-        return Object.values(groups).map(g => ({
-          ...g,
-          shares: g._shares,
-          price: g._shares > 0 ? g._cost / g._shares : 0,
-        }));
-      };
-      orders = consolidateOrders(orders);
-
       const byTicker = {};
       orders.forEach(o => {
         if (!byTicker[o.ticker]) byTicker[o.ticker] = { buys: [], sells: [] };
@@ -213,27 +194,27 @@ export default function CSVModal({ onClose, onImport, existingTrades = [], t }) 
         const buyQueue = [...buys];
         sells.forEach(sell => {
           const buy = buyQueue.shift();
-          if (buy) {
-            trades.push({
-              id: idBase++,
-              date: buy.date,
-              exitDate: sell.date !== buy.date ? sell.date : undefined,
-              ticker,
-              type: "stock",
-              direction: "long",
-              entryPrice: buy.price,
-              exitPrice: sell.price,
-              shares: Math.min(buy.shares, sell.shares),
-              entryTime: buy.time || "",
-              exitTime: sell.time || "",
-              strategy: "Breakout",
-              emotion: "Calm",
-              mistake: "None",
-              notes: `Imported from ${broker}`,
-              tags: [],
-              legs: [],
-            });
-          }
+          // If no matching buy exists the position was opened before this export —
+          // still create the trade so the sell isn't silently dropped.
+          trades.push({
+            id: idBase++,
+            date: buy ? buy.date : sell.date,
+            exitDate: buy && sell.date !== buy.date ? sell.date : undefined,
+            ticker,
+            type: "stock",
+            direction: "long",
+            entryPrice: buy ? buy.price : 0,
+            exitPrice: sell.price,
+            shares: buy ? Math.min(buy.shares, sell.shares) : sell.shares,
+            entryTime: buy ? buy.time || "" : "",
+            exitTime: sell.time || "",
+            strategy: "Breakout",
+            emotion: "Calm",
+            mistake: "None",
+            notes: buy ? `Imported from ${broker}` : `Imported from ${broker} (entry pre-dates export)`,
+            tags: [],
+            legs: [],
+          });
         });
       });
 
