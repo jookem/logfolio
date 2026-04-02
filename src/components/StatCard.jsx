@@ -4,12 +4,88 @@ import useInView from "../hooks/useInView";
 
 const PADDING = 20; // min gap from viewport edge
 
+// Parses a pre-formatted value string into { num, format } so we can
+// animate from 0 → target and re-format identically on every frame.
+// Returns null for non-numeric values like "—" or "∞".
+function parseAnimatable(str) {
+  if (!str || typeof str !== "string") return null;
+  if (str === "—" || str === "∞" || str.length > 20) return null;
+
+  // Currency: "$1,234" or "-$1,234"
+  const cur = str.match(/^(-?)(\$)([\d,]+)$/);
+  if (cur) {
+    const sign = cur[1] === "-" ? -1 : 1;
+    const num = sign * parseInt(cur[3].replace(/,/g, ""), 10);
+    return {
+      num,
+      format: (v) => {
+        const abs = Math.abs(Math.round(v));
+        return `${v < 0 ? "-" : ""}$${abs.toLocaleString("en-US")}`;
+      },
+    };
+  }
+
+  // Percentage: "67%"
+  const pct = str.match(/^(\d+)%$/);
+  if (pct) {
+    const num = parseInt(pct[1], 10);
+    return { num, format: (v) => `${Math.round(v)}%` };
+  }
+
+  // R-multiple: "+1.50R" or "-0.30R"
+  const r = str.match(/^([+-])([\d.]+)R$/);
+  if (r) {
+    const sign = r[1] === "-" ? -1 : 1;
+    const num = sign * parseFloat(r[2]);
+    const dec = r[2].includes(".") ? r[2].split(".")[1].length : 2;
+    return {
+      num,
+      format: (v) => `${v >= 0 ? "+" : ""}${v.toFixed(dec)}R`,
+    };
+  }
+
+  // Plain decimal (Sharpe, Sortino, Beta, etc.): "1.23", "-0.45", "0.1234"
+  const dec = str.match(/^(-?)([\d]+)(\.[\d]+)?$/);
+  if (dec) {
+    const num = parseFloat(str);
+    if (isNaN(num)) return null;
+    const places = dec[3] ? dec[3].length - 1 : 0;
+    return { num, format: (v) => v.toFixed(places) };
+  }
+
+  return null;
+}
+
 export default function StatCard({ label, value, sub, color, t, info }) {
   const c = color || t.accent;
   const [open, setOpen] = useState(false);
   const btnRef = useRef(null);
   const popRef = useRef(null);
   const [cardRef, inView] = useInView(0, "-15% 0px -15% 0px");
+
+  // Count-up animation: runs once when card enters viewport
+  const [displayed, setDisplayed] = useState(value);
+  useEffect(() => {
+    if (!inView) return;
+    const parsed = parseAnimatable(value);
+    if (!parsed) { setDisplayed(value); return; }
+
+    const DURATION = 900;
+    const target = parsed.num;
+    const startTime = performance.now();
+    let rafId;
+
+    const tick = (now) => {
+      const t = Math.min((now - startTime) / DURATION, 1);
+      // ease-out cubic
+      const eased = 1 - Math.pow(1 - t, 3);
+      setDisplayed(parsed.format(target * eased));
+      if (t < 1) rafId = requestAnimationFrame(tick);
+      else setDisplayed(value); // land on exact formatted string
+    };
+    rafId = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(rafId);
+  }, [inView, value]);
 
   // Close when another StatCard opens
   useEffect(() => {
@@ -45,14 +121,12 @@ export default function StatCard({ label, value, sub, color, t, info }) {
 
     let top;
     if (popH <= spaceBelow || spaceBelow >= spaceAbove) {
-      // Fits below, or more room below — always prefer below
       top = btn.bottom + 8;
       if (popH > spaceBelow) {
         pop.style.maxHeight = `${Math.max(spaceBelow, 120)}px`;
         pop.style.overflowY = "auto";
       }
     } else {
-      // More room above and doesn't fit below — flip
       top = btn.top - Math.min(popH, spaceAbove) - 8;
       if (popH > spaceAbove) {
         pop.style.maxHeight = `${Math.max(spaceAbove, 120)}px`;
@@ -147,7 +221,7 @@ export default function StatCard({ label, value, sub, color, t, info }) {
             letterSpacing: -1,
           }}
         >
-          {value}
+          {displayed}
         </div>
         {sub && (
           <div style={{ fontSize: 11, color: t.text3, marginTop: 3 }}>{sub}</div>
