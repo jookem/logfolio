@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef, useEffect } from "react";
 import { fmt } from "../lib/utils";
 
 const COLORS = ["#10b981","#3b82f6","#f59e0b","#8b5cf6","#ef4444","#06b6d4","#ec4899","#84cc16","#f97316","#a855f7"];
@@ -11,6 +11,18 @@ const RANGES = ["1W", "1M", "1Y", "ALL"];
 export default function SharpeRatioCurve({ trades, t }) {
   const [mode, setMode] = useState("strategy");
   const [range, setRange] = useState("ALL");
+  const wrapperRef = useRef(null);
+  const [inView, setInView] = useState(false);
+  useEffect(() => {
+    const el = wrapperRef.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) { setInView(true); obs.disconnect(); } },
+      { threshold: 0.15 }
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, []);
 
   const curves = useMemo(() => {
     const cutoff = (() => {
@@ -66,7 +78,7 @@ export default function SharpeRatioCurve({ trades, t }) {
   });
 
   return (
-    <div style={{ background: t.surface, border: `1px solid ${t.border}`, borderRadius: 12, padding: "16px 18px", marginBottom: 16 }}>
+    <div ref={wrapperRef} style={{ background: t.surface, border: `1px solid ${t.border}`, borderRadius: 12, padding: "16px 18px", marginBottom: 16 }}>
       <style>{ANIM_CSS}</style>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 4 }}>
         <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 10, color: t.text3, textTransform: "uppercase", letterSpacing: 2 }}>Sharpe Ratio Curve</div>
@@ -92,7 +104,7 @@ export default function SharpeRatioCurve({ trades, t }) {
 
       <div style={{ position: "relative" }}>
         <svg
-          key={`${range}-${mode}`}
+          key={inView ? `${range}-${mode}` : "__pre"}
           width="100%"
           height={H}
           viewBox={`0 0 ${W} ${H}`}

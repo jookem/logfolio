@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, useLayoutEffect } from "react";
 import { createPortal } from "react-dom";
+import useInView from "../hooks/useInView";
 
 const PADDING = 20; // min gap from viewport edge
 
@@ -8,6 +9,7 @@ export default function StatCard({ label, value, sub, color, t, info }) {
   const [open, setOpen] = useState(false);
   const btnRef = useRef(null);
   const popRef = useRef(null);
+  const [cardRef, inView] = useInView(0.1);
 
   // Close when another StatCard opens
   useEffect(() => {
@@ -77,6 +79,7 @@ export default function StatCard({ label, value, sub, color, t, info }) {
   return (
     <>
       <div
+        ref={cardRef}
         style={{
           background: t.surface,
           border: `1px solid ${t.border}`,
@@ -87,6 +90,9 @@ export default function StatCard({ label, value, sub, color, t, info }) {
           boxSizing: "border-box",
           position: "relative",
           textAlign: "center",
+          opacity: inView ? 1 : 0,
+          transform: inView ? "translateY(0)" : "translateY(6px)",
+          transition: "opacity 0.4s ease, transform 0.4s ease",
         }}
       >
         <div

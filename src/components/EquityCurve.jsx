@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { calcPL } from "../lib/utils";
 
 const ANIM_CSS = `
@@ -9,6 +9,18 @@ const ANIM_CSS = `
 
 export default function EquityCurve({ trades, t, spyData, spyError }) {
   const [range, setRange] = useState("ALL");
+  const wrapperRef = useRef(null);
+  const [inView, setInView] = useState(false);
+  useEffect(() => {
+    const el = wrapperRef.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) { setInView(true); obs.disconnect(); } },
+      { threshold: 0.15 }
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, []);
   const [annotations, setAnnotations] = useState(() => {
     try { return JSON.parse(localStorage.getItem("lf_annotations") || "{}"); } catch { return {}; }
   });
@@ -125,7 +137,7 @@ export default function EquityCurve({ trades, t, spyData, spyError }) {
   const fmtDate = d => { const [y, m, dd] = d.split("-"); return `${m}/${dd}/${y.slice(2)}`; };
 
   return (
-    <div>
+    <div ref={wrapperRef}>
       <style>{ANIM_CSS}</style>
       {/* Range selector */}
       {rangeSelector}
@@ -133,7 +145,7 @@ export default function EquityCurve({ trades, t, spyData, spyError }) {
       {/* Chart wrapper — position:relative for absolute labels */}
       <div style={{ position: "relative" }}>
         <svg
-          key={range}
+          key={inView ? range : "__pre"}
           viewBox={`0 0 ${W} ${H}`}
           style={{ width: "100%", height: 200, cursor: "crosshair", overflow: "visible" }}
           preserveAspectRatio="none"

@@ -576,7 +576,10 @@ export default function TradeFormModal({ initial, defaults, onClose, onSave, onC
                   <div>
                     <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}>
                       <PremiumEntryIcon size={14} />
-                      {leg.position === "buy" ? "Premium Paid" : "Premium Received"}
+                      Premium
+                      <span style={{ fontSize: 9, textTransform: "none", letterSpacing: 0, color: leg.position === "buy" ? t.danger : t.positive, fontFamily: "sans-serif", flexShrink: 0 }}>
+                        {leg.position === "buy" ? "paid" : "received"}
+                      </span>
                     </label>
                     <div style={{ position: "relative" }}>
                       <span style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: t.text3, fontSize: 14 }}>$</span>
@@ -587,7 +590,10 @@ export default function TradeFormModal({ initial, defaults, onClose, onSave, onC
                   <div>
                     <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}>
                       <PremiumExitIcon size={14} />
-                      {leg.position === "buy" ? "Exit Price (sold for)" : "Exit Price (bought back)"}
+                      Exit Premium
+                      <span style={{ fontSize: 9, textTransform: "none", letterSpacing: 0, color: leg.position === "buy" ? t.positive : t.danger, fontFamily: "sans-serif", flexShrink: 0 }}>
+                        {leg.position === "buy" ? "sold for" : "buyback"}
+                      </span>
                     </label>
                     <div style={{ position: "relative" }}>
                       <span style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: t.text3, fontSize: 14 }}>$</span>

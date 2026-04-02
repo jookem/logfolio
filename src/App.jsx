@@ -28,6 +28,7 @@ import {
 } from "./lib/constants";
 import { tk } from "./lib/theme";
 import { useIsMobile } from "./hooks/useIsMobile";
+import useInView from "./hooks/useInView";
 import StatCard from "./components/StatCard";
 import MiniBar from "./components/MiniBar";
 import EquityCurve from "./components/EquityCurve";
@@ -112,6 +113,14 @@ const [page, setPage] = useState(1);
   const touchStartY = useRef(null);
   const mobile = useIsMobile();
   const T = tk(theme);
+
+  // Analytics section in-view refs — each fires once when scrolled into viewport
+  const [rMultiRef, rMultiVisible] = useInView(0.1);
+  const [durationRef, durationVisible] = useInView(0.1);
+  const [leaderboardRef, leaderboardVisible] = useInView(0.1);
+  const [dowRef, dowVisible] = useInView(0.1);
+  const [tagRef, tagVisible] = useInView(0.1);
+  const [tickerRef, tickerVisible] = useInView(0.1);
 
   // Load trades from Supabase on login, fetching in chunks to avoid large single queries
   useEffect(() => {
@@ -1833,7 +1842,7 @@ const paginated = filtered
 
             {/* R-Multiple Distribution */}
             {rDistribution.some(b => b.count > 0) && (
-              <div style={{ background: T.surface, border: `1px solid ${T.border}`, borderRadius: 12, padding: "16px 18px", marginBottom: 16 }}>
+              <div ref={rMultiRef} style={{ background: T.surface, border: `1px solid ${T.border}`, borderRadius: 12, padding: "16px 18px", marginBottom: 16 }}>
                 <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 10, color: T.text3, textTransform: "uppercase", letterSpacing: 2, marginBottom: 4 }}>R-Multiple Distribution</div>
                 <div style={{ fontSize: 11, color: T.text3, marginBottom: 16 }}>How your trades are distributed across R-multiples. A healthy edge clusters towards +1R and beyond.</div>
                 {(() => {
@@ -1847,7 +1856,7 @@ const paginated = filtered
                         return (
                           <div key={i} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
                             <div style={{ fontSize: 10, color: T.text3, fontFamily: "'Space Mono',monospace" }}>{b.count > 0 ? b.count : ""}</div>
-                            <div style={{ width: "100%", height: `${barH}px`, background: b.count === 0 ? T.border : color, borderRadius: "3px 3px 0 0", opacity: b.count === 0 ? 0.3 : 0.9, transition: "height 0.4s ease" }} />
+                            <div style={{ width: "100%", height: rMultiVisible ? `${barH}px` : "0px", background: b.count === 0 ? T.border : color, borderRadius: "3px 3px 0 0", opacity: b.count === 0 ? 0.3 : 0.9, transition: `height 0.5s cubic-bezier(0.4,0,0.2,1) ${i * 0.05}s` }} />
                             <div style={{ fontSize: 9, color: T.text3, fontFamily: "'Space Mono',monospace", textAlign: "center", lineHeight: 1.3 }}>{b.label}</div>
                           </div>
                         );
@@ -1860,7 +1869,7 @@ const paginated = filtered
 
             {/* Trade Duration Analysis */}
             {(durationAnalysis.winAvg !== null || durationAnalysis.lossAvg !== null) && (
-              <div style={{ background: T.surface, border: `1px solid ${T.border}`, borderRadius: 12, padding: "16px 18px", marginBottom: 16 }}>
+              <div ref={durationRef} style={{ background: T.surface, border: `1px solid ${T.border}`, borderRadius: 12, padding: "16px 18px", marginBottom: 16 }}>
                 <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 10, color: T.text3, textTransform: "uppercase", letterSpacing: 2, marginBottom: 4 }}>Trade Duration Analysis</div>
                 <div style={{ fontSize: 11, color: T.text3, marginBottom: 16 }}>Average hold time for winning vs losing trades. Holding losers longer than winners is a common discipline issue.</div>
                 {(() => {
@@ -1879,7 +1888,7 @@ const paginated = filtered
                             <span style={{ fontFamily: "'Space Mono',monospace", fontSize: 13, fontWeight: 700, color: avg != null ? color : T.text3 }}>{fmtMins(avg)}</span>
                           </div>
                           <div style={{ height: 14, borderRadius: 4, background: T.border, overflow: "hidden" }}>
-                            <div style={{ height: "100%", width: avg != null ? `${(avg / maxVal) * 100}%` : "0%", background: color, borderRadius: 4, transition: "width 0.5s ease" }} />
+                            <div style={{ height: "100%", width: durationVisible && avg != null ? `${(avg / maxVal) * 100}%` : "0%", background: color, borderRadius: 4, transition: "width 0.6s cubic-bezier(0.4,0,0.2,1)" }} />
                           </div>
                         </div>
                       ))}
@@ -1897,7 +1906,7 @@ const paginated = filtered
             )}
 
             {/* Strategy Leaderboard */}
-            <div style={{ background: T.surface, border: `1px solid ${T.border}`, borderRadius: 12, padding: "16px 18px", marginBottom: 16 }}>
+            <div ref={leaderboardRef} style={{ background: T.surface, border: `1px solid ${T.border}`, borderRadius: 12, padding: "16px 18px", marginBottom: 16 }}>
               <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 10, color: T.text3, textTransform: "uppercase", letterSpacing: 2, marginBottom: 16 }}>Strategy Leaderboard</div>
               {stratLeaderboard.length === 0 ? (
                 <div style={{ fontSize: 13, color: T.text3, fontStyle: "italic" }}>Log trades with strategies to see rankings.</div>
@@ -1918,7 +1927,7 @@ const paginated = filtered
                             <span style={{ fontSize: 11, color: T.text3 }}>{s.total} trade{s.total !== 1 ? "s" : ""}</span>
                           </div>
                           <div style={{ height: 5, borderRadius: 3, background: T.border, overflow: "hidden" }}>
-                            <div style={{ height: "100%", width: `${winPct}%`, borderRadius: 3, background: winPct >= 50 ? T.positive : T.danger, transition: "width 0.4s ease" }} />
+                            <div style={{ height: "100%", width: leaderboardVisible ? `${winPct}%` : "0%", borderRadius: 3, background: winPct >= 50 ? T.positive : T.danger, transition: `width 0.6s cubic-bezier(0.4,0,0.2,1) ${i * 0.06}s` }} />
                           </div>
                         </div>
                         <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 2, minWidth: 72 }}>
@@ -1972,7 +1981,7 @@ const paginated = filtered
             )}
 
             {/* Day of Week + Best Time to Trade — matching row format */}
-            <div style={{ display: "grid", gridTemplateColumns: mobile ? "1fr" : "1fr 1fr", gap: 16, marginBottom: 16 }}>
+            <div ref={dowRef} style={{ display: "grid", gridTemplateColumns: mobile ? "1fr" : "1fr 1fr", gap: 16, marginBottom: 16 }}>
               {/* Day of Week */}
               <div style={{ background: T.surface, border: `1px solid ${T.border}`, borderRadius: 12, padding: "16px 18px" }}>
                 <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 10, color: T.text3, textTransform: "uppercase", letterSpacing: 2, marginBottom: 16 }}>Day of Week</div>
@@ -1980,7 +1989,7 @@ const paginated = filtered
                   <div style={{ fontSize: 13, color: T.text3 }}>No trade data yet.</div>
                 ) : (
                   <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                    {[...dowBreakdown].sort((a, b) => b.pl - a.pl).map(({ day, total, wins, pl }) => {
+                    {[...dowBreakdown].sort((a, b) => b.pl - a.pl).map(({ day, total, wins, pl }, di) => {
                       const winPct = Math.round((wins / total) * 100);
                       const avgPL = pl / total;
                       const color = pl >= 0 ? T.positive : T.danger;
@@ -1996,7 +2005,7 @@ const paginated = filtered
                             <span style={{ fontFamily: "'Space Mono',monospace", fontSize: 12, fontWeight: 700, color }}>{avgPL >= 0 ? "+" : ""}{fmt(avgPL)} avg</span>
                           </div>
                           <div style={{ height: 6, borderRadius: 3, background: T.border2, overflow: "hidden" }}>
-                            <div style={{ height: "100%", width: `${barWidth}%`, borderRadius: 3, background: color, transition: "width 0.4s ease" }} />
+                            <div style={{ height: "100%", width: dowVisible ? `${barWidth}%` : "0%", borderRadius: 3, background: color, transition: `width 0.6s cubic-bezier(0.4,0,0.2,1) ${di * 0.06}s` }} />
                           </div>
                         </div>
                       );
@@ -2013,7 +2022,7 @@ const paginated = filtered
                   <div style={{ fontSize: 13, color: T.text3 }}>Add entry times when logging trades to unlock hourly performance data.</div>
                 ) : (
                   <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                    {activeHours.map(h => {
+                    {activeHours.map((h, hi) => {
                       const d = hourHeatmap[h];
                       const color = d.pl >= 0 ? T.positive : T.danger;
                       const winPct = Math.round((d.wins / d.total) * 100);
@@ -2031,7 +2040,7 @@ const paginated = filtered
                             <span style={{ fontFamily: "'Space Mono',monospace", fontSize: 12, fontWeight: 700, color }}>{avgPL >= 0 ? "+" : ""}{fmt(avgPL)} avg</span>
                           </div>
                           <div style={{ height: 6, borderRadius: 3, background: T.border2, overflow: "hidden" }}>
-                            <div style={{ height: "100%", width: `${barWidth}%`, borderRadius: 3, background: color, transition: "width 0.4s ease" }} />
+                            <div style={{ height: "100%", width: dowVisible ? `${barWidth}%` : "0%", borderRadius: 3, background: color, transition: `width 0.6s cubic-bezier(0.4,0,0.2,1) ${hi * 0.06}s` }} />
                           </div>
                         </div>
                       );
@@ -2043,7 +2052,7 @@ const paginated = filtered
             </div>
 
             {/* Tag Performance + Emotion Impact */}
-            <div style={{ display: "grid", gridTemplateColumns: mobile ? "1fr" : "1fr 1fr", gap: 16, marginBottom: 16 }}>
+            <div ref={tagRef} style={{ display: "grid", gridTemplateColumns: mobile ? "1fr" : "1fr 1fr", gap: 16, marginBottom: 16 }}>
             <div style={{ background: T.surface, border: `1px solid ${T.border}`, borderRadius: 12, padding: "16px 18px" }}>
               <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 10, color: T.text3, textTransform: "uppercase", letterSpacing: 2, marginBottom: 16 }}>
                 Tag Performance
@@ -2110,7 +2119,7 @@ const paginated = filtered
             </div>
 
             {/* Ticker Performance + Mistake Cost */}
-            <div style={{ display: "grid", gridTemplateColumns: mobile ? "1fr" : "1fr 1fr", gap: 16, marginBottom: 16 }}>
+            <div ref={tickerRef} style={{ display: "grid", gridTemplateColumns: mobile ? "1fr" : "1fr 1fr", gap: 16, marginBottom: 16 }}>
               {/* Ticker Performance */}
               <div style={{ background: T.surface, border: `1px solid ${T.border}`, borderRadius: 12, padding: "16px 18px" }}>
                 <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 10, color: T.text3, textTransform: "uppercase", letterSpacing: 2, marginBottom: 16 }}>Ticker Performance</div>
@@ -2118,7 +2127,7 @@ const paginated = filtered
                   <div style={{ fontSize: 13, color: T.text3 }}>No trades logged yet.</div>
                 ) : (
                   <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                    {tickerBreakdown.slice(0, 8).map(({ ticker, pl, total, winRate }) => {
+                    {tickerBreakdown.slice(0, 8).map(({ ticker, pl, total, winRate }, ti) => {
                       const winPct = Math.round(winRate * 100);
                       const color = pl >= 0 ? T.positive : T.danger;
                       const maxAbs = Math.max(...tickerBreakdown.map(t => Math.abs(t.pl)), 1);
@@ -2134,7 +2143,7 @@ const paginated = filtered
                             <span style={{ fontFamily: "'Space Mono',monospace", fontSize: 12, fontWeight: 700, color }}>{pl >= 0 ? "+" : ""}{fmt(pl)}</span>
                           </div>
                           <div style={{ height: 5, borderRadius: 3, background: T.border, overflow: "hidden" }}>
-                            <div style={{ height: "100%", width: `${barWidth}%`, borderRadius: 3, background: color, transition: "width 0.4s ease" }} />
+                            <div style={{ height: "100%", width: tickerVisible ? `${barWidth}%` : "0%", borderRadius: 3, background: color, transition: `width 0.6s cubic-bezier(0.4,0,0.2,1) ${ti * 0.06}s` }} />
                           </div>
                         </div>
                       );
@@ -2163,7 +2172,7 @@ const paginated = filtered
                         </div>
                       ) : null;
                     })()}
-                    {mistakeBreakdown.map(({ mistake, cost, count, avgCost, trending }) => {
+                    {mistakeBreakdown.map(({ mistake, cost, count, avgCost, trending }, mi) => {
                       const maxAbs = Math.max(...mistakeBreakdown.map(m => Math.abs(m.cost)), 1);
                       const barWidth = Math.round((Math.abs(cost) / maxAbs) * 100);
                       const trendIcon = trending === "up" ? "↑" : trending === "down" ? "↓" : null;
@@ -2182,7 +2191,7 @@ const paginated = filtered
                             </div>
                           </div>
                           <div style={{ height: 5, borderRadius: 3, background: T.border, overflow: "hidden" }}>
-                            <div style={{ height: "100%", width: `${barWidth}%`, borderRadius: 3, background: T.danger, transition: "width 0.4s ease" }} />
+                            <div style={{ height: "100%", width: tickerVisible ? `${barWidth}%` : "0%", borderRadius: 3, background: T.danger, transition: `width 0.6s cubic-bezier(0.4,0,0.2,1) ${mi * 0.06}s` }} />
                           </div>
                         </div>
                       );
