@@ -412,7 +412,7 @@ export default function DaySession({ plList, plans, onAddTrade, onAddPlan, journ
               const unreal = currentPrice != null
                 ? (tr.direction === "short" ? tr.entryPrice - currentPrice : currentPrice - tr.entryPrice) * (tr.shares || 1)
                 : null;
-              const unrealColor = unreal == null ? t.text3 : unreal >= 0 ? t.positive : t.danger;
+              const unrealColor = unreal == null || !marketOpen ? t.text3 : unreal >= 0 ? t.positive : t.danger;
               return (
                 <div key={tr.id} style={{ display: "flex", alignItems: "center", gap: 12, padding: "8px 10px", background: t.card, borderRadius: 8 }}>
                   <div style={{ minWidth: 52 }}>
@@ -425,8 +425,8 @@ export default function DaySession({ plList, plans, onAddTrade, onAddPlan, journ
                     </div>
                     {currentPrice != null && (
                       <div style={{ fontSize: 11, color: t.text3 }}>
-                        Current: <span style={{ fontFamily: "'Space Mono', monospace", color: t.text, fontWeight: 600 }}>{fmt(currentPrice)}</span>
-                        {quote.changePct != null && (
+                        {marketOpen ? "Current:" : "Last close:"} <span style={{ fontFamily: "'Space Mono', monospace", color: t.text, fontWeight: 600 }}>{fmt(currentPrice)}</span>
+                        {marketOpen && quote.changePct != null && (
                           <span style={{ marginLeft: 6, color: quote.changePct >= 0 ? t.positive : t.danger, fontFamily: "'Space Mono', monospace" }}>
                             {quote.changePct >= 0 ? "+" : ""}{quote.changePct.toFixed(2)}%
                           </span>
@@ -443,7 +443,7 @@ export default function DaySession({ plList, plans, onAddTrade, onAddPlan, journ
                         <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 14, fontWeight: 700, color: unrealColor }}>
                           {unreal >= 0 ? "+" : ""}{fmt(unreal)}
                         </div>
-                        <div style={{ fontSize: 9, color: t.text4, textTransform: "uppercase", letterSpacing: 1 }}>unrealized</div>
+                        <div style={{ fontSize: 9, color: t.text4, textTransform: "uppercase", letterSpacing: 1 }}>{marketOpen ? "unrealized" : "last close"}</div>
                       </>
                     ) : (
                       <div style={{ fontSize: 11, color: t.text4 }}>—</div>
@@ -462,8 +462,8 @@ export default function DaySession({ plList, plans, onAddTrade, onAddPlan, journ
             return (
               <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 10, paddingTop: 10, borderTop: `1px solid ${t.border}` }}>
                 <div style={{ textAlign: "right" }}>
-                  <div style={{ fontSize: 9, color: t.text3, fontFamily: "'Space Mono', monospace", textTransform: "uppercase", letterSpacing: 1.5, marginBottom: 2 }}>Total Unrealized</div>
-                  <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 18, fontWeight: 700, color: totalUnreal >= 0 ? t.positive : t.danger }}>
+                  <div style={{ fontSize: 9, color: t.text3, fontFamily: "'Space Mono', monospace", textTransform: "uppercase", letterSpacing: 1.5, marginBottom: 2 }}>{marketOpen ? "Total Unrealized" : "Total (Last Close)"}</div>
+                  <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 18, fontWeight: 700, color: marketOpen ? (totalUnreal >= 0 ? t.positive : t.danger) : t.text3 }}>
                     {totalUnreal >= 0 ? "+" : ""}{fmt(totalUnreal)}
                   </div>
                 </div>

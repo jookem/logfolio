@@ -16,7 +16,7 @@ export default function TradeFormModal({ initial, defaults, onClose, onSave, onC
     date: todayStr(),
     ticker: "",
     type: defaults?.type || "stock",
-    strategy: defaults?.strategy || "Breakout",
+    strategy: (OPTION_STRATEGIES[defaults?.strategy] && (defaults?.type || "stock") !== "options") ? "Breakout" : (defaults?.strategy || "Breakout"),
     direction: defaults?.direction || "long",
     timeframe: defaults?.timeframe || "Daily",
     entryPrice: "",
