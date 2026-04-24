@@ -18,6 +18,9 @@ jobs:
             echo "Error: VITE_SUPABASE_URL or VITE_SUPABASE_ANON_KEY secret is not set"
             exit 1
           fi
+          # Strip trailing slash to avoid double-slash in URL
+          SUPABASE_URL="${SUPABASE_URL%/}"
+          echo "Pinging: ${SUPABASE_URL}/rest/v1/"
           RESPONSE=$(curl -s -w "\n%{http_code}" \
             "${SUPABASE_URL}/rest/v1/" \
             -H "apikey: ${SUPABASE_ANON_KEY}") || true
