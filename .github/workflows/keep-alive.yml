@@ -19,9 +19,8 @@ jobs:
             exit 1
           fi
           RESPONSE=$(curl -s -w "\n%{http_code}" \
-            "${SUPABASE_URL}/rest/v1/profiles?limit=1" \
-            -H "apikey: ${SUPABASE_ANON_KEY}" \
-            -H "Authorization: Bearer ${SUPABASE_ANON_KEY}") || true
+            "${SUPABASE_URL}/rest/v1/" \
+            -H "apikey: ${SUPABASE_ANON_KEY}") || true
           STATUS=$(echo "$RESPONSE" | tail -n1)
           BODY=$(echo "$RESPONSE" | head -n-1)
           echo "Response status: $STATUS"
