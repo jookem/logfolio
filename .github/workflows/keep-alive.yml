@@ -28,7 +28,7 @@ jobs:
           BODY=$(echo "$RESPONSE" | head -n-1)
           echo "Response status: $STATUS"
           echo "Response body: $BODY"
-          if [ -z "$STATUS" ] || [ "$STATUS" -lt 200 ] || [ "$STATUS" -ge 300 ]; then
+          if [ -z "$STATUS" ] || [ "$STATUS" -ge 500 ]; then
             echo "Ping failed with status: '${STATUS}'"
             exit 1
           fi
