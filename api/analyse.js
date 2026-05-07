@@ -100,24 +100,9 @@ export default async function handler(req, res) {
         return res.status(500).json({ error: error.message });
       }
     } catch {
-      // DB error — fall through to make the Anthropic call without rate limiting
+      return res.status(503).json({ error: "Service temporarily unavailable. Please try again." });
     }
   }
 
-  try {
-    const response = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-api-key": process.env.ANTHROPIC_API_KEY,
-        "anthropic-version": "2023-06-01",
-      },
-      body: JSON.stringify(anthropicBody),
-    });
-
-    const data = await response.json();
-    return res.status(200).json(data);
-  } catch (error) {
-    return res.status(500).json({ error: error.message });
-  }
+  return res.status(401).json({ error: "Unauthorized" });
 }
