@@ -20,10 +20,11 @@ jobs:
           fi
           # Strip trailing slash to avoid double-slash in URL
           SUPABASE_URL="${SUPABASE_URL%/}"
-          echo "Pinging: ${SUPABASE_URL}/rest/v1/"
+          echo "Pinging: ${SUPABASE_URL}/rest/v1/profiles?select=id&limit=1"
           RESPONSE=$(curl -s -w "\n%{http_code}" \
-            "${SUPABASE_URL}/rest/v1/" \
-            -H "apikey: ${SUPABASE_ANON_KEY}") || true
+            "${SUPABASE_URL}/rest/v1/profiles?select=id&limit=1" \
+            -H "apikey: ${SUPABASE_ANON_KEY}" \
+            -H "Authorization: Bearer ${SUPABASE_ANON_KEY}") || true
           STATUS=$(echo "$RESPONSE" | tail -n1)
           BODY=$(echo "$RESPONSE" | head -n-1)
           echo "Response status: $STATUS"
