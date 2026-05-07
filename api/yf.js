@@ -1,4 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
+import { checkRateLimit } from "./_lib/rateLimit.js";
 
 const ALLOWED_HOSTS = [
   "https://query1.finance.yahoo.com",
@@ -46,10 +47,16 @@ export default async function handler(req, res) {
   // Verify JWT
   const token = req.headers.authorization?.replace("Bearer ", "");
   if (!token) return res.status(401).json({ error: "Unauthorized" });
+  let userId;
   if (process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY) {
     const admin = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
-    const { error } = await admin.auth.getUser(token);
-    if (error) return res.status(401).json({ error: "Unauthorized" });
+    const { data: { user }, error } = await admin.auth.getUser(token);
+    if (error || !user) return res.status(401).json({ error: "Unauthorized" });
+    userId = user.id;
+  }
+
+  if (userId && await checkRateLimit(userId, "yf", { limit: 20, windowSecs: 60 })) {
+    return res.status(429).json({ error: "Rate limit exceeded. Try again shortly." });
   }
 
   res.setHeader("Cache-Control", "s-maxage=300, stale-while-revalidate");

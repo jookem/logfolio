@@ -1,5 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { supabase } from "../lib/supabase";
+
+const TURNSTILE_SITE_KEY = import.meta.env.VITE_TURNSTILE_SITE_KEY;
 
 function tk(dark) {
   return dark ? {
@@ -24,6 +26,56 @@ export default function AuthScreen({ isDark }) {
   const [error, setError] = useState(null);
   const [message, setMessage] = useState(null);
   const [showPassword, setShowPassword] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState(null);
+  const turnstileRef = useRef(null);
+  const widgetIdRef = useRef(null);
+
+  // Load Turnstile script once and render widget whenever mode changes
+  useEffect(() => {
+    if (!TURNSTILE_SITE_KEY) return;
+
+    const scriptId = "cf-turnstile-script";
+    if (!document.getElementById(scriptId)) {
+      const script = document.createElement("script");
+      script.id = scriptId;
+      script.src = "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";
+      script.async = true;
+      document.head.appendChild(script);
+    }
+
+    const render = () => {
+      if (!window.turnstile || !turnstileRef.current) return;
+      if (widgetIdRef.current != null) {
+        window.turnstile.remove(widgetIdRef.current);
+        widgetIdRef.current = null;
+      }
+      widgetIdRef.current = window.turnstile.render(turnstileRef.current, {
+        sitekey: TURNSTILE_SITE_KEY,
+        theme: isDark ? "dark" : "light",
+        callback: (token) => setCaptchaToken(token),
+        "expired-callback": () => setCaptchaToken(null),
+        "error-callback": () => setCaptchaToken(null),
+      });
+    };
+
+    if (window.turnstile) {
+      render();
+    } else {
+      window.onloadTurnstileCallback = render;
+      const script = document.getElementById(scriptId);
+      if (script && !script.src.includes("onload=")) {
+        script.src = script.src + "&onload=onloadTurnstileCallback";
+      }
+    }
+
+    return () => {
+      if (widgetIdRef.current != null && window.turnstile) {
+        window.turnstile.remove(widgetIdRef.current);
+        widgetIdRef.current = null;
+      }
+      setCaptchaToken(null);
+    };
+  }, [mode, isDark]);
 
   const inp = {
     background: T.input, border: `1px solid ${T.inputBorder}`,
@@ -32,23 +84,32 @@ export default function AuthScreen({ isDark }) {
     fontFamily: "'Space Mono', monospace", outline: "none",
   };
 
+  const resetCaptcha = () => {
+    if (widgetIdRef.current != null && window.turnstile) {
+      window.turnstile.reset(widgetIdRef.current);
+    }
+    setCaptchaToken(null);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(null); setMessage(null); setLoading(true);
+
     if (mode === "login") {
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
-      if (error) setError(error.message);
+      const opts = TURNSTILE_SITE_KEY && captchaToken ? { options: { captchaToken } } : {};
+      const { error } = await supabase.auth.signInWithPassword({ email, password, ...opts });
+      if (error) { setError(error.message); resetCaptcha(); }
     } else if (mode === "signup") {
       const refCode = new URLSearchParams(window.location.search).get("ref");
-      const { data, error } = await supabase.auth.signUp({
+      const extraData = refCode ? { referred_by: refCode } : undefined;
+      const captchaOpt = TURNSTILE_SITE_KEY && captchaToken ? { captchaToken } : undefined;
+      const { error } = await supabase.auth.signUp({
         email,
         password,
-        options: refCode ? { data: { referred_by: refCode } } : undefined,
+        options: { ...(extraData ? { data: extraData } : {}), ...(captchaOpt || {}) },
       });
-      if (error) setError(error.message);
-      else {
-        setMessage("Check your email for a confirmation link.");
-      }
+      if (error) { setError(error.message); resetCaptcha(); }
+      else setMessage("Check your email for a confirmation link.");
     } else {
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: window.location.origin,
@@ -67,6 +128,9 @@ export default function AuthScreen({ isDark }) {
       options: { redirectTo: window.location.origin },
     });
   };
+
+  const captchaRequired = !!TURNSTILE_SITE_KEY && mode !== "reset";
+  const submitDisabled = loading || (captchaRequired && !captchaToken);
 
   return (
     <div style={{
@@ -118,6 +182,10 @@ export default function AuthScreen({ isDark }) {
             </div>
           )}
 
+          {captchaRequired && (
+            <div ref={turnstileRef} style={{ marginBottom: 16 }} />
+          )}
+
           {error && (
             <div style={{
               background: T.danger + "15", border: `1px solid ${T.danger}40`,
@@ -135,14 +203,14 @@ export default function AuthScreen({ isDark }) {
 
           <button
             type="submit"
-            disabled={loading}
+            disabled={submitDisabled}
             style={{
               width: "100%", padding: "11px 14px",
               background: T.accent, border: "none",
               borderRadius: 8, color: "#000", fontSize: 12,
               fontWeight: 700, fontFamily: "'Space Mono', monospace",
-              cursor: loading ? "not-allowed" : "pointer",
-              opacity: loading ? 0.7 : 1,
+              cursor: submitDisabled ? "not-allowed" : "pointer",
+              opacity: submitDisabled ? 0.7 : 1,
             }}
           >
             {loading ? "..." :
