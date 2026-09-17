@@ -607,3 +607,12 @@ export const GreenDayIcon = ({ size = 24 }) => (
     <path strokeWidth="33" d="M512.2,591.4c32.8,0,59.3-22.1,59.3-49.4c0-27.3-26.6-49.4-59.3-49.4s-59.3-22.1-59.3-49.4 s26.6-49.4,59.3-49.4 M512.2,591.4c-32.8,0-59.3-22.1-59.3-49.4 M512.2,591.4v19.8 M512.2,373.9v19.8 M512.2,393.7 c32.8,0,59.3,22.1,59.3,49.4" />
   </SVG>
 );
+
+// Connect (two nodes joined by a line — used for broker sync)
+export const ConnectIcon = ({ size = 24 }) => (
+  <SVG size={size}>
+    <circle cx="250" cy="400" r="120" />
+    <circle cx="550" cy="400" r="120" />
+    <line x1="370" y1="400" x2="430" y2="400" />
+  </SVG>
+);

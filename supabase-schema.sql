@@ -87,6 +87,16 @@ alter table public.profiles add column if not exists referred_count int default 
 -- Preferred UI language (add if not exists)
 alter table public.profiles add column if not exists language text;
 
+-- Broker connections (SnapTrade). Service-role only — no RLS policies means
+-- the anon/authenticated client can never read or write this table directly;
+-- only the backend (using the service role key) touches it.
+create table if not exists public.broker_connections (
+  user_id uuid references auth.users on delete cascade primary key,
+  snaptrade_user_secret text not null,
+  created_at timestamptz default now()
+);
+alter table public.broker_connections enable row level security;
+
 -- Auto-generate referral code for new users and process referrals atomically
 create or replace function public.handle_new_user()
 returns trigger as $$

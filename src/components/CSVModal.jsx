@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useModalClose } from "../lib/useModalClose";
 import { todayStr } from "../lib/utils";
+import { matchOrdersToTrades } from "../lib/brokerImport";
 import { CloseIcon, ArrowsIcon, WarningIcon, CheckIcon } from "../lib/icons";
 
 export default function CSVModal({ onClose, onImport, existingTrades = [], t }) {
@@ -179,60 +180,11 @@ export default function CSVModal({ onClose, onImport, existingTrades = [], t }) 
         });
       }
 
-      // Sort chronologically so FIFO matching respects trade order
-      orders.sort((a, b) => {
-        if (a.date !== b.date) return a.date.localeCompare(b.date);
-        return (a.time || "").localeCompare(b.time || "");
-      });
-
-      const byTicker = {};
-      orders.forEach(o => {
-        if (!byTicker[o.ticker]) byTicker[o.ticker] = { buys: [], sells: [] };
-        if (o.side === "buy") byTicker[o.ticker].buys.push(o);
-        else byTicker[o.ticker].sells.push(o);
-      });
-
-      const trades = [];
-      let idBase = Date.now();
-      Object.entries(byTicker).forEach(([ticker, { buys, sells }]) => {
-        const buyQueue = [...buys];
-        sells.forEach(sell => {
-          const buy = buyQueue.shift();
-          // If no matching buy exists the position was opened before this export —
-          // still create the trade so the sell isn't silently dropped.
-          trades.push({
-            id: idBase++,
-            date: buy ? buy.date : sell.date,
-            exitDate: buy && sell.date !== buy.date ? sell.date : undefined,
-            ticker,
-            type: "stock",
-            direction: "long",
-            entryPrice: buy ? buy.price : 0,
-            exitPrice: sell.price,
-            shares: buy ? Math.min(buy.shares, sell.shares) : sell.shares,
-            entryTime: buy ? buy.time || "" : "",
-            exitTime: sell.time || "",
-            strategy: "Breakout",
-            emotion: "Calm",
-            mistake: "None",
-            notes: buy ? `Imported from ${broker}` : `Imported from ${broker} (entry pre-dates export)`,
-            tags: [],
-            legs: [],
-          });
-        });
-      });
+      const { trades, duplicateCount } = matchOrdersToTrades(orders, broker, existingTrades);
 
       if (trades.length === 0) { setError("No completed trades found. Only closed trades will be imported."); return; }
-      trades.sort((a, b) => new Date(b.date) - new Date(a.date));
-      const duplicates = trades.filter(tr =>
-        existingTrades.some(ex =>
-          ex.ticker === tr.ticker &&
-          ex.date === tr.date &&
-          Math.abs((parseFloat(ex.entryPrice) || 0) - (parseFloat(tr.entryPrice) || 0)) < 0.01
-        )
-      );
-      if (duplicates.length > 0) {
-        setError(`⚠ ${duplicates.length} possible duplicate${duplicates.length > 1 ? "s" : ""} detected (same ticker, date & entry price already in your logs). Review before importing.`);
+      if (duplicateCount > 0) {
+        setError(`⚠ ${duplicateCount} possible duplicate${duplicateCount > 1 ? "s" : ""} detected (same ticker, date & entry price already in your logs). Review before importing.`);
       }
       setPreview(trades);
     } catch (e) {

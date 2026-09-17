@@ -6,7 +6,7 @@ import {
   CheckIcon, RecIcon, DirectionIcon, AmountIcon, EntryPriceIcon, ExitIcon,
   WarningIcon, EntryTimeIcon, ExitTimeIcon, ScreenshotIcon, TickerIcon,
   CategoryIcon, StrategyIcon, CurrentPriceIcon, EmotionIcon, TagsIcon,
-  KeyboardIcon,
+  KeyboardIcon, ConnectIcon,
 } from "../lib/icons";
 
 const Pair = ({ a, b }) => (
@@ -46,6 +46,13 @@ const TUTORIAL_STEPS = [
     desc: "Build your full trade plan before entering a position — thesis, entry, stop, target, and checklist. Pro Plus members get AI Assist: attach a chart screenshot and Claude will identify support/resistance levels, moving averages, and patterns, then give you personalised warnings based on your own trade history. The chart and analysis are saved with the plan and carry over automatically when you execute it.",
     tab: "plans",
     cta: { label: "Try creating a plan", action: "openPlan" },
+  },
+  {
+    icon: <ConnectIcon size={44} />,
+    title: "Connect Your Broker",
+    desc: "Pro members can link a brokerage account and pull in closed trades automatically — no more copy-pasting CSV exports. Find it anytime under Settings → Connect Broker.",
+    tab: null,
+    cta: { label: "Connect a broker", action: "openBrokerSync" },
   },
   {
     icon: <TodayIcon size={44} />,
@@ -434,7 +441,7 @@ function SubWalkthrough({ mode, onClose, t }) {
 
 // ── Main component ─────────────────────────────────────────────────────────────
 
-export default function TutorialModal({ step, onNext, onPrev, onClose, onOpenLog, onCloseLog, onOpenPlan, onClosePlan, onSetTab, onLoadSamples, t }) {
+export default function TutorialModal({ step, onNext, onPrev, onClose, onOpenLog, onCloseLog, onOpenPlan, onClosePlan, onSetTab, onLoadSamples, onOpenBrokerSync, t }) {
   const { closing, trigger } = useModalClose();
   const [subMode, setSubMode] = useState(null);
 
@@ -451,6 +458,8 @@ export default function TutorialModal({ step, onNext, onPrev, onClose, onOpenLog
       setSubMode("plan");
     } else if (action === "loadSamples") {
       onLoadSamples?.();
+    } else if (action === "openBrokerSync") {
+      onOpenBrokerSync?.();
     }
   };
 

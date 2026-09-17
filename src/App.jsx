@@ -41,6 +41,7 @@ import TradeDetail from "./components/TradeDetail";
 import TradeFormModal from "./components/TradeFormModal";
 import PlanModal from "./components/PlanModal";
 import CSVModal from "./components/CSVModal";
+import BrokerSyncModal from "./components/BrokerSyncModal";
 import SettingsModal from "./components/SettingsModal";
 import UpgradePrompt from "./components/UpgradePrompt";
 import ProTrialModal from "./components/ProTrialModal";
@@ -78,6 +79,7 @@ export default function TradingJournal() {
   const [showAdd, setShowAdd] = useState(false);
   const [showTrialModal, setShowTrialModal] = useState(false);
   const [showCSV, setShowCSV] = useState(false);
+  const [showBrokerSync, setShowBrokerSync] = useState(false);
   const [editTrade, setEditTrade] = useState(null);
   const [confirmDelete, setConfirmDelete] = useState(null); // { id, ticker, isPlan }
   const [planPrefill, setPlanPrefill] = useState(null);
@@ -2286,6 +2288,15 @@ const paginated = filtered
           t={T}
         />
       )}
+      {showBrokerSync && (
+        <BrokerSyncModal
+          onClose={() => setShowBrokerSync(false)}
+          onImport={importTrades}
+          existingTrades={trades}
+          t={T}
+          tt={tt}
+        />
+      )}
       {showBulkEdit && (
         <BulkEditModal count={bulkSelected.size} onApply={bulkEditApply} onClose={() => setShowBulkEdit(false)} t={T} trades={trades} />
       )}
@@ -2309,6 +2320,7 @@ const paginated = filtered
     onUpgrade={(plan) => { setShowSettings(false); handleUpgrade(plan); }}
     onManageBilling={() => { setShowSettings(false); handleManageBilling(); }}
     onTutorial={openTutorial}
+    onBrokerSync={() => setShowBrokerSync(true)}
     tradeDefaults={tradeDefaults}
     onSaveDefaults={saveTradeDefaults}
     trades={trades}
@@ -2424,6 +2436,7 @@ const paginated = filtered
           onClosePlan={() => setShowPlan(false)}
           onSetTab={setTab}
           onLoadSamples={loadSeedTrades}
+          onOpenBrokerSync={() => (isPro ? setShowBrokerSync(true) : handleUpgrade("pro"))}
           t={T}
         />
       )}
