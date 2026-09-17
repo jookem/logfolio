@@ -58,13 +58,13 @@ const [gridRowOffset, setGridRowOffset] = useState(0);
 const [bsInfoOpen, setBsInfoOpen] = useState(false);
 const polyFetch = async (path) => {
   const { data: { session } } = await supabase.auth.getSession();
-  return fetch("/api/polygon", {
+  return fetch("/api/market-data", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       ...(session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {}),
     },
-    body: JSON.stringify({ path }),
+    body: JSON.stringify({ provider: "polygon", path }),
   }).then(r => r.json());
 };
 
@@ -250,10 +250,10 @@ const fetchAiAssist = async () => {
       try {
         const toTs = Math.floor(Date.now() / 1000);
         const fromTs = toTs - 86400 * 20; // ~20 trading days back to ensure 10 closes
-        const yfRes = await fetch("/api/yf", {
+        const yfRes = await fetch("/api/market-data", {
           method: "POST",
           headers: { "Content-Type": "application/json", ...(session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {}) },
-          body: JSON.stringify({ url: `https://query1.finance.yahoo.com/v8/finance/chart/${ticker}?period1=${fromTs}&period2=${toTs}&interval=1d` }),
+          body: JSON.stringify({ provider: "yf", url: `https://query1.finance.yahoo.com/v8/finance/chart/${ticker}?period1=${fromTs}&period2=${toTs}&interval=1d` }),
         });
         const yfData = await yfRes.json();
         const result = yfData?.chart?.result?.[0];

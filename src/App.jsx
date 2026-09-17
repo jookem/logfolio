@@ -265,13 +265,13 @@ const [page, setPage] = useState(1);
       try {
         const { data: { session } } = await supabase.auth.getSession();
         const url = `https://query1.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1d&range=1y`;
-        const res = await fetch("/api/yf", {
+        const res = await fetch("/api/market-data", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
             ...(session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {}),
           },
-          body: JSON.stringify({ url }),
+          body: JSON.stringify({ provider: "yf", url }),
         });
         const json = await res.json();
         const result = json?.chart?.result?.[0];
@@ -753,13 +753,13 @@ const plList = useMemo(
     const fromTs = Math.floor(new Date(sorted[0].date).getTime() / 1000);
     const toTs = Math.floor(new Date(sorted[sorted.length - 1].date).getTime() / 1000) + 86400;
     supabase.auth.getSession().then(({ data: { session } }) => {
-      fetch("/api/yf", {
+      fetch("/api/market-data", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           ...(session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {}),
         },
-        body: JSON.stringify({ url: `https://query1.finance.yahoo.com/v8/finance/chart/SPY?period1=${fromTs}&period2=${toTs}&interval=1d` }),
+        body: JSON.stringify({ provider: "yf", url: `https://query1.finance.yahoo.com/v8/finance/chart/SPY?period1=${fromTs}&period2=${toTs}&interval=1d` }),
       })
         .then(r => r.json())
         .then(data => {

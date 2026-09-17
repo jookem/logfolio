@@ -68,10 +68,10 @@ export default function TradeFormModal({ initial, defaults, onClose, onSave, onC
       setLiveFetching(true);
       try {
         const { data: { session } } = await supabase.auth.getSession();
-        const data = await fetch("/api/polygon", {
+        const data = await fetch("/api/market-data", {
           method: "POST",
           headers: { "Content-Type": "application/json", ...(session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {}) },
-          body: JSON.stringify({ path: `/v2/aggs/ticker/${ticker}/prev?adjusted=true` }),
+          body: JSON.stringify({ provider: "polygon", path: `/v2/aggs/ticker/${ticker}/prev?adjusted=true` }),
         }).then(r => r.json());
         const price = data?.results?.[0]?.c;
         if (price) setLivePrice(price);

@@ -36,10 +36,10 @@ export default function useLiveQuotes(tickers) {
       };
       const results = await Promise.all(
         tickers.map(ticker =>
-          fetch("/api/polygon", {
+          fetch("/api/market-data", {
             method: "POST",
             headers,
-            body: JSON.stringify({ path: `/v2/aggs/ticker/${ticker}/prev?adjusted=true` }),
+            body: JSON.stringify({ provider: "polygon", path: `/v2/aggs/ticker/${ticker}/prev?adjusted=true` }),
           }).then(r => r.json()).then(data => ({ ticker, price: data?.results?.[0]?.c ?? null }))
         )
       );
