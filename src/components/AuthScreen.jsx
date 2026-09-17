@@ -18,9 +18,9 @@ function tk(dark) {
   };
 }
 
-export default function AuthScreen({ isDark, lang, setLang, tt }) {
+export default function AuthScreen({ isDark, lang, setLang, tt, initialMode, onBack }) {
   const T = tk(isDark);
-  const [mode, setMode] = useState("login");
+  const [mode, setMode] = useState(() => initialMode || (new URLSearchParams(window.location.search).has("ref") ? "signup" : "login"));
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -142,15 +142,22 @@ export default function AuthScreen({ isDark, lang, setLang, tt }) {
       <div style={{
         width: "100%", maxWidth: 400, padding: 32,
       }}>
-        {setLang && (
-          <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 8 }}>
-            <select
-              value={lang || "en"}
-              onChange={(e) => setLang(e.target.value)}
-              style={{ background: "none", border: `1px solid ${T.border}`, borderRadius: 7, color: T.text3, padding: "4px 8px", fontSize: 11, fontFamily: "'Space Mono', monospace", cursor: "pointer", outline: "none" }}
-            >
-              {LANGUAGES.map(l => <option key={l.code} value={l.code}>{l.label}</option>)}
-            </select>
+        {(onBack || setLang) && (
+          <div style={{ display: "flex", justifyContent: onBack ? "space-between" : "flex-end", alignItems: "center", marginBottom: 8 }}>
+            {onBack && (
+              <button onClick={onBack} style={{ background: "none", border: "none", color: T.text3, fontSize: 12, fontFamily: "'Space Mono', monospace", cursor: "pointer", padding: "4px 0" }}>
+                ← {tt ? tt("auth.back", "Back") : "Back"}
+              </button>
+            )}
+            {setLang && (
+              <select
+                value={lang || "en"}
+                onChange={(e) => setLang(e.target.value)}
+                style={{ background: "none", border: `1px solid ${T.border}`, borderRadius: 7, color: T.text3, padding: "4px 8px", fontSize: 11, fontFamily: "'Space Mono', monospace", cursor: "pointer", outline: "none" }}
+              >
+                {LANGUAGES.map(l => <option key={l.code} value={l.code}>{l.label}</option>)}
+              </select>
+            )}
           </div>
         )}
         {/* Logo */}

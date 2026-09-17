@@ -7,6 +7,7 @@ import { supabase } from "./lib/supabase";
 import { uploadTradeMedia, deleteTradeMedia, deleteAllUserMedia } from "./lib/media";
 import { useAuth } from "./contexts/AuthContext";
 import AuthScreen from "./components/AuthScreen";
+import LandingPage from "./components/LandingPage";
 import {
   fmt,
   fmtDate,
@@ -80,6 +81,8 @@ export default function TradingJournal() {
   const [showTrialModal, setShowTrialModal] = useState(false);
   const [showCSV, setShowCSV] = useState(false);
   const [showBrokerSync, setShowBrokerSync] = useState(false);
+  const [showAuthPage, setShowAuthPage] = useState(() => new URLSearchParams(window.location.search).has("ref"));
+  const [authMode, setAuthMode] = useState("login");
   const [editTrade, setEditTrade] = useState(null);
   const [confirmDelete, setConfirmDelete] = useState(null); // { id, ticker, isPlan }
   const [planPrefill, setPlanPrefill] = useState(null);
@@ -1124,7 +1127,27 @@ const paginated = filtered
     );
   }
 
-  if (!user) return <AuthScreen isDark={isDark} lang={lang} setLang={setLang} tt={tt} />;
+  if (!user) {
+    return showAuthPage ? (
+      <AuthScreen
+        isDark={isDark}
+        lang={lang}
+        setLang={setLang}
+        tt={tt}
+        initialMode={authMode}
+        onBack={() => setShowAuthPage(false)}
+      />
+    ) : (
+      <LandingPage
+        isDark={isDark}
+        lang={lang}
+        setLang={setLang}
+        tt={tt}
+        onGetStarted={() => { setAuthMode("signup"); setShowAuthPage(true); }}
+        onSignIn={() => { setAuthMode("login"); setShowAuthPage(true); }}
+      />
+    );
+  }
 
   return (
     <div
