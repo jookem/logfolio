@@ -10,7 +10,7 @@ import { EditIcon, LogIcon, CloseIcon, TodayIcon, ExitIcon, EntryPriceIcon, Entr
 import DateInput from "./DateInput";
 import TimeInput from "./TimeInput";
 
-export default function TradeFormModal({ initial, defaults, onClose, onSave, onCSVImport, t, editLabel, isDark, trades = [] }) {
+export default function TradeFormModal({ initial, defaults, onClose, onSave, onCSVImport, t, tt, editLabel, isDark, trades = [] }) {
   const { closing, trigger } = useModalClose();
   const sm = window.innerWidth < 400;
   const blank = {
@@ -148,31 +148,31 @@ export default function TradeFormModal({ initial, defaults, onClose, onSave, onC
     );
   const validate = () => {
     const e = {};
-    if (!form.ticker.trim()) e.ticker = "Ticker is required";
+    if (!form.ticker.trim()) e.ticker = tt("tradeForm.errTickerRequired", "Ticker is required");
     if (STOCK_LIKE.includes(form.type)) {
-      if (!form.shares || +form.shares <= 0) e.shares = "Must be > 0";
-      if (!form.entryPrice || +form.entryPrice <= 0) e.entryPrice = "Must be > 0";
-      if (form.exitPrice !== "" && +form.exitPrice <= 0) e.exitPrice = "Must be > 0";
+      if (!form.shares || +form.shares <= 0) e.shares = tt("tradeForm.errGtZero", "Must be > 0");
+      if (!form.entryPrice || +form.entryPrice <= 0) e.entryPrice = tt("tradeForm.errGtZero", "Must be > 0");
+      if (form.exitPrice !== "" && +form.exitPrice <= 0) e.exitPrice = tt("tradeForm.errGtZero", "Must be > 0");
       if (form.stopLoss) {
-        if (+form.stopLoss <= 0) e.stopLoss = "Must be > 0";
+        if (+form.stopLoss <= 0) e.stopLoss = tt("tradeForm.errGtZero", "Must be > 0");
         else if (form.entryPrice) {
-          if (form.direction === "long" && +form.stopLoss >= +form.entryPrice) e.stopLoss = "Must be below entry for a long";
-          if (form.direction === "short" && +form.stopLoss <= +form.entryPrice) e.stopLoss = "Must be above entry for a short";
+          if (form.direction === "long" && +form.stopLoss >= +form.entryPrice) e.stopLoss = tt("tradeForm.errStopBelowLong", "Must be below entry for a long");
+          if (form.direction === "short" && +form.stopLoss <= +form.entryPrice) e.stopLoss = tt("tradeForm.errStopAboveShort", "Must be above entry for a short");
         }
       }
       if (form.takeProfit) {
-        if (+form.takeProfit <= 0) e.takeProfit = "Must be > 0";
+        if (+form.takeProfit <= 0) e.takeProfit = tt("tradeForm.errGtZero", "Must be > 0");
         else if (form.entryPrice) {
-          if (form.direction === "long" && +form.takeProfit <= +form.entryPrice) e.takeProfit = "Must be above entry for a long";
-          if (form.direction === "short" && +form.takeProfit >= +form.entryPrice) e.takeProfit = "Must be below entry for a short";
+          if (form.direction === "long" && +form.takeProfit <= +form.entryPrice) e.takeProfit = tt("tradeForm.errTakeProfitAboveLong", "Must be above entry for a long");
+          if (form.direction === "short" && +form.takeProfit >= +form.entryPrice) e.takeProfit = tt("tradeForm.errTakeProfitBelowShort", "Must be below entry for a short");
         }
       }
     } else {
       form.legs.forEach((l, i) => {
-        if (!l.strike || +l.strike <= 0) e[`leg_${i}_strike`] = "Required";
-        if (!l.entryPremium || +l.entryPremium <= 0) e[`leg_${i}_entryPremium`] = "Required";
-        if (!l.expiration) e[`leg_${i}_expiration`] = "Required";
-        if (!l.contracts || +l.contracts <= 0) e[`leg_${i}_contracts`] = "Required";
+        if (!l.strike || +l.strike <= 0) e[`leg_${i}_strike`] = tt("tradeForm.errRequired", "Required");
+        if (!l.entryPremium || +l.entryPremium <= 0) e[`leg_${i}_entryPremium`] = tt("tradeForm.errRequired", "Required");
+        if (!l.expiration) e[`leg_${i}_expiration`] = tt("tradeForm.errRequired", "Required");
+        if (!l.contracts || +l.contracts <= 0) e[`leg_${i}_contracts`] = tt("tradeForm.errRequired", "Required");
       });
     }
     return e;
@@ -325,11 +325,11 @@ export default function TradeFormModal({ initial, defaults, onClose, onSave, onC
           >
            {form.id ? (
   <>
-    <EditIcon size="1em" /> {editLabel || "Edit Trade"}
+    <EditIcon size="1em" /> {editLabel || tt("tradeForm.editTrade", "Edit Trade")}
   </>
 ) : (
   <>
-    <LogIcon size="1em" /> Log A Trade
+    <LogIcon size="1em" /> {tt("tradeForm.logATrade", "Log A Trade")}
   </>
 )}
           </div>
@@ -366,16 +366,16 @@ export default function TradeFormModal({ initial, defaults, onClose, onSave, onC
             {errMsg("ticker")}
           </div>
           <div>
-            <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><CategoryIcon size={14} />Type</label>
+            <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><CategoryIcon size={14} />{tt("tradeForm.type", "Type")}</label>
             <select
               style={inp()}
               value={form.type}
               onChange={(e) => handleTypeChange(e.target.value)}
             >
-              <option value="stock">Stock</option>
-              <option value="options">Options</option>
-              <option value="forex">Forex</option>
-              <option value="crypto">Crypto</option>
+              <option value="stock">{tt("tradeForm.typeStock", "Stock")}</option>
+              <option value="options">{tt("tradeForm.typeOptions", "Options")}</option>
+              <option value="forex">{tt("tradeForm.typeForex", "Forex")}</option>
+              <option value="crypto">{tt("tradeForm.typeCrypto", "Crypto")}</option>
             </select>
           </div>
         </div>
@@ -389,7 +389,7 @@ export default function TradeFormModal({ initial, defaults, onClose, onSave, onC
           }}
         >
           <div>
-            <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><StrategyIcon size={14} />Strategy</label>
+            <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><StrategyIcon size={14} />{tt("tradeForm.strategy", "Strategy")}</label>
             <select
               style={inp()}
               value={form.strategy}
@@ -408,14 +408,14 @@ export default function TradeFormModal({ initial, defaults, onClose, onSave, onC
           </div>
           {STOCK_LIKE.includes(form.type) && (
             <div>
-              <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><DirectionIcon size={14} />Direction</label>
+              <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><DirectionIcon size={14} />{tt("tradeForm.direction", "Direction")}</label>
               <select
                 style={inp()}
                 value={form.direction}
                 onChange={(e) => set("direction", e.target.value)}
               >
-                <option value="long">Long</option>
-                <option value="short">Short</option>
+                <option value="long">{tt("tradeForm.long", "Long")}</option>
+                <option value="short">{tt("tradeForm.short", "Short")}</option>
               </select>
             </div>
           )}
@@ -437,7 +437,7 @@ export default function TradeFormModal({ initial, defaults, onClose, onSave, onC
             </div>
             <div id="tut-trade-prices" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 12 }}>
               <div>
-                <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><EntryPriceIcon size={14} />Entry</label>
+                <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><EntryPriceIcon size={14} />{tt("tradeForm.entry", "Entry")}</label>
                 <input
                   style={inp("entryPrice")}
                   type="number"
@@ -449,7 +449,7 @@ export default function TradeFormModal({ initial, defaults, onClose, onSave, onC
               </div>
               <div>
                 <label style={{ ...lbl, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                  <span style={{ display: "flex", alignItems: "center", gap: 4 }}><ExitIcon size={14} />Exit</span>
+                  <span style={{ display: "flex", alignItems: "center", gap: 4 }}><ExitIcon size={14} />{tt("tradeForm.exit", "Exit")}</span>
                   {STOCK_LIKE.includes(form.type) && (
                     <button
                       type="button"
@@ -474,7 +474,7 @@ export default function TradeFormModal({ initial, defaults, onClose, onSave, onC
                       }}
                     >
                       <span style={{ width: 7, height: 7, borderRadius: "50%", background: openTrade ? t.accent : "transparent", border: `1.5px solid ${openTrade ? t.accent : t.text3}`, display: "inline-block", flexShrink: 0 }} />
-                      Open trade
+                      {tt("tradeForm.openTrade", "Open trade")}
                     </button>
                   )}
                 </label>
@@ -484,7 +484,7 @@ export default function TradeFormModal({ initial, defaults, onClose, onSave, onC
                   disabled={openTrade}
                   value={openTrade ? "" : form.exitPrice}
                   onChange={(e) => { set("exitPrice", e.target.value); setErrors((p) => ({ ...p, exitPrice: undefined })); }}
-                  placeholder={openTrade ? "— open position —" : form.type === "forex" ? "1.0920" : form.type === "crypto" ? "44500" : "196"}
+                  placeholder={openTrade ? tt("tradeForm.openPositionPlaceholder", "— open position —") : form.type === "forex" ? "1.0920" : form.type === "crypto" ? "44500" : "196"}
                 />
                 {errMsg("exitPrice")}
                 {openTrade && livePL != null && (
@@ -494,7 +494,7 @@ export default function TradeFormModal({ initial, defaults, onClose, onSave, onC
                   </div>
                 )}
                 {openTrade && livePL == null && liveFetching && (
-                  <div style={{ fontSize: 11, color: t.text4, marginTop: 4, fontFamily: "'Space Mono',monospace" }}>fetching price...</div>
+                  <div style={{ fontSize: 11, color: t.text4, marginTop: 4, fontFamily: "'Space Mono',monospace" }}>{tt("tradeForm.fetchingPrice", "fetching price...")}</div>
                 )}
                 {!openTrade && (() => {
                   const entry = +form.entryPrice;
@@ -513,7 +513,7 @@ export default function TradeFormModal({ initial, defaults, onClose, onSave, onC
             </div>
             <div id="tut-trade-stoploss" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 12 }}>
               <div>
-                <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><WarningIcon size={14} />Stop Loss</label>
+                <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><WarningIcon size={14} />{tt("tradeForm.stopLoss", "Stop Loss")}</label>
                 <input
                   style={inp("stopLoss")}
                   type="number"
@@ -524,7 +524,7 @@ export default function TradeFormModal({ initial, defaults, onClose, onSave, onC
                 {errMsg("stopLoss")}
               </div>
               <div>
-                <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><TargetIcon size={14} />Take Profit</label>
+                <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><TargetIcon size={14} />{tt("tradeForm.takeProfit", "Take Profit")}</label>
                 <input
                   style={inp("takeProfit")}
                   type="number"
@@ -537,55 +537,55 @@ export default function TradeFormModal({ initial, defaults, onClose, onSave, onC
             </div>
             <div id="tut-trade-times" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 12 }}>
               <div>
-                <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><EntryTimeIcon size={14} />Entry Time</label>
+                <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><EntryTimeIcon size={14} />{tt("tradeForm.entryTime", "Entry Time")}</label>
                 <TimeInput style={inp()} t={t} className={isDark ? "time-dark" : ""} value={form.entryTime || ""} onChange={(e) => set("entryTime", e.target.value)} />
               </div>
               <div>
-                <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><ExitTimeIcon size={14} />Exit Time</label>
+                <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><ExitTimeIcon size={14} />{tt("tradeForm.exitTime", "Exit Time")}</label>
                 <TimeInput style={inp()} t={t} className={isDark ? "time-dark" : ""} value={form.exitTime || ""} onChange={(e) => set("exitTime", e.target.value)} />
               </div>
               <div>
-                <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><EntryDateIcon size={14} />Entry Date</label>
+                <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><EntryDateIcon size={14} />{tt("tradeForm.entryDate", "Entry Date")}</label>
                 <DateInput style={inp()} t={t} value={form.date} onChange={(e) => set("date", e.target.value)} />
               </div>
               <div>
-                <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><ExitDateIcon size={14} />Exit Date</label>
+                <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><ExitDateIcon size={14} />{tt("tradeForm.exitDate", "Exit Date")}</label>
                 <DateInput style={inp()} t={t} value={form.exitDate || ""} onChange={(e) => set("exitDate", e.target.value)} placeholder={form.date} />
               </div>
             </div>
           <div style={{ marginBottom: 12 }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
-              <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 10, color: t.accent, textTransform: "uppercase", letterSpacing: 2 }}>Partial Closes</div>
-              <button type="button" onClick={addClose} style={{ background: t.accent + "15", border: `1px dashed ${t.accent}40`, color: t.accent, borderRadius: 8, padding: "4px 12px", cursor: "pointer", fontSize: 12, fontFamily: "'Space Mono', monospace" }}>+ Add Close</button>
+              <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 10, color: t.accent, textTransform: "uppercase", letterSpacing: 2 }}>{tt("tradeForm.partialCloses", "Partial Closes")}</div>
+              <button type="button" onClick={addClose} style={{ background: t.accent + "15", border: `1px dashed ${t.accent}40`, color: t.accent, borderRadius: 8, padding: "4px 12px", cursor: "pointer", fontSize: 12, fontFamily: "'Space Mono', monospace" }}>{tt("tradeForm.addClose", "+ Add Close")}</button>
             </div>
             {(form.closes || []).length > 0 && (
               <div style={{ marginBottom: 8 }}>
                 {(form.closes || []).map((c, i) => (
                   <div key={i} style={{ background: t.card2, border: `1px solid ${t.border}`, borderRadius: 10, padding: 12, marginBottom: 8 }}>
                     <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
-                      <span style={{ fontSize: 11, color: t.accent, fontFamily: "'Space Mono', monospace" }}>Close {i + 1}</span>
-                      <button type="button" onClick={() => removeClose(i)} style={{ background: "none", border: "none", color: t.danger, cursor: "pointer", fontSize: 12 }}>Remove</button>
+                      <span style={{ fontSize: 11, color: t.accent, fontFamily: "'Space Mono', monospace" }}>{tt("tradeForm.closeNumber", "Close {{n}}", { n: i + 1 })}</span>
+                      <button type="button" onClick={() => removeClose(i)} style={{ background: "none", border: "none", color: t.danger, cursor: "pointer", fontSize: 12 }}>{tt("tradeForm.remove", "Remove")}</button>
                     </div>
                     <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
                       <div>
-                        <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><ExitDateIcon size={14} />Date</label>
+                        <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><ExitDateIcon size={14} />{tt("tradeForm.date", "Date")}</label>
                         <DateInput style={inp()} t={t} value={c.date || ""} onChange={(e) => setClose(i, "date", e.target.value)} />
                       </div>
                       <div>
-                        <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><TimeIcon size={14} />Time</label>
+                        <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><TimeIcon size={14} />{tt("tradeForm.time", "Time")}</label>
                         <TimeInput style={inp()} t={t} value={c.time || ""} onChange={(e) => setClose(i, "time", e.target.value)} />
                       </div>
                       <div>
-                        <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><ExitIcon size={14} />Price</label>
+                        <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><ExitIcon size={14} />{tt("tradeForm.price", "Price")}</label>
                         <input style={inp()} type="number" value={c.price || ""} onChange={(e) => setClose(i, "price", e.target.value)} placeholder="150.00" />
                       </div>
                       <div>
-                        <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><AmountIcon size={14} />Shares</label>
+                        <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><AmountIcon size={14} />{tt("tradeForm.shares", "Shares")}</label>
                         <input style={inp()} type="number" value={c.shares || ""} onChange={(e) => setClose(i, "shares", e.target.value)} placeholder="50" />
                       </div>
                       <div style={{ gridColumn: "1 / -1" }}>
-                        <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><PenIcon size={14} />Notes</label>
-                        <input style={inp()} value={c.notes || ""} onChange={(e) => setClose(i, "notes", e.target.value)} placeholder="Scaled out at R1" />
+                        <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><PenIcon size={14} />{tt("tradeForm.notes", "Notes")}</label>
+                        <input style={inp()} value={c.notes || ""} onChange={(e) => setClose(i, "notes", e.target.value)} placeholder={tt("tradeForm.closeNotesPlaceholder", "Scaled out at R1")} />
                       </div>
                     </div>
                   </div>
@@ -598,8 +598,8 @@ export default function TradeFormModal({ initial, defaults, onClose, onSave, onC
                   if (!validCloses.length || !weighted) return null;
                   return (
                     <div style={{ fontSize: 11, color: t.text3, fontFamily: "'Space Mono',monospace", marginTop: 4 }}>
-                      Weighted avg exit: <span style={{ color: t.text }}>{weighted.toFixed(2)}</span>
-                      {shares > 0 && <span style={{ marginLeft: 8 }}>· Shares remaining: <span style={{ color: totalExited >= shares ? t.accent : t.text }}>{Math.max(0, shares - totalExited)}</span></span>}
+                      {tt("tradeForm.weightedAvgExit", "Weighted avg exit:")} <span style={{ color: t.text }}>{weighted.toFixed(2)}</span>
+                      {shares > 0 && <span style={{ marginLeft: 8 }}>{tt("tradeForm.sharesRemaining", "· Shares remaining:")} <span style={{ color: totalExited >= shares ? t.accent : t.text }}>{Math.max(0, shares - totalExited)}</span></span>}
                     </div>
                   );
                 })()}
@@ -610,41 +610,41 @@ export default function TradeFormModal({ initial, defaults, onClose, onSave, onC
         ) : (
           <div style={{ marginBottom: 12 }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
-              <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 10, color: t.accent, textTransform: "uppercase", letterSpacing: 2 }}>Option Legs</div>
+              <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 10, color: t.accent, textTransform: "uppercase", letterSpacing: 2 }}>{tt("tradeForm.optionLegs", "Option Legs")}</div>
               {!OPTION_STRATEGIES[form.strategy]?.writeLocked && (
-                <button onClick={addLeg} style={{ background: t.accent + "15", border: `1px dashed ${t.accent}40`, color: t.accent, borderRadius: 8, padding: "6px 14px", cursor: "pointer", fontSize: 13, fontFamily: "'Space Mono', monospace" }}>+ Leg</button>
+                <button onClick={addLeg} style={{ background: t.accent + "15", border: `1px dashed ${t.accent}40`, color: t.accent, borderRadius: 8, padding: "6px 14px", cursor: "pointer", fontSize: 13, fontFamily: "'Space Mono', monospace" }}>{tt("tradeForm.addLeg", "+ Leg")}</button>
               )}
             </div>
             {form.legs.map((leg, i) => (
               <div key={i} style={{ background: t.card2, border: `1px solid ${t.border}`, borderRadius: 10, padding: 14, marginBottom: 10 }}>
                 {form.legs.length > 1 && (
                   <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 10 }}>
-                    <span style={{ fontSize: 11, color: t.accent, fontFamily: "'Space Mono', monospace" }}>Leg {i + 1}</span>
-                    <button onClick={() => removeLeg(i)} style={{ background: "none", border: "none", color: t.danger, cursor: "pointer", fontSize: 12 }}>Remove</button>
+                    <span style={{ fontSize: 11, color: t.accent, fontFamily: "'Space Mono', monospace" }}>{tt("tradeForm.legNumber", "Leg {{n}}", { n: i + 1 })}</span>
+                    <button onClick={() => removeLeg(i)} style={{ background: "none", border: "none", color: t.danger, cursor: "pointer", fontSize: 12 }}>{tt("tradeForm.remove", "Remove")}</button>
                   </div>
                 )}
                 <div style={{ display: "grid", gridTemplateColumns: "1.3fr 1fr", gap: 10 }}>
                   <div>
-                    <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><BuySellIcon size={14} />Bought or Wrote</label>
+                    <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><BuySellIcon size={14} />{tt("tradeForm.boughtOrWrote", "Bought or Wrote")}</label>
                     <select style={inp()} value={leg.position} onChange={(e) => setLeg(i, "position", e.target.value)}>
-                      <option value="buy">Bought</option>
-                      <option value="sell">Wrote</option>
+                      <option value="buy">{tt("tradeForm.bought", "Bought")}</option>
+                      <option value="sell">{tt("tradeForm.wrote", "Wrote")}</option>
                     </select>
                   </div>
                   <div>
-                    <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><CallOrPutIcon size={14} />Call or Put</label>
+                    <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><CallOrPutIcon size={14} />{tt("tradeForm.callOrPut", "Call or Put")}</label>
                     <select style={inp()} value={leg.type} onChange={(e) => setLeg(i, "type", e.target.value)}>
-                      <option value="call">Call</option>
-                      <option value="put">Put</option>
+                      <option value="call">{tt("tradeForm.call", "Call")}</option>
+                      <option value="put">{tt("tradeForm.put", "Put")}</option>
                     </select>
                   </div>
                   <div>
-                    <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><TimeframeIcon size={14} />Expiry</label>
+                    <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><TimeframeIcon size={14} />{tt("tradeForm.expiry", "Expiry")}</label>
                     <DateInput style={inp(`leg_${i}_expiration`)} t={t} value={leg.expiration} onChange={(e) => { setLeg(i, "expiration", e.target.value); setErrors((p) => ({ ...p, [`leg_${i}_expiration`]: undefined })); }} />
                     {errMsg(`leg_${i}_expiration`)}
                   </div>
                   <div>
-                    <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><StrikeIcon size={14} />Strike Price</label>
+                    <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><StrikeIcon size={14} />{tt("tradeForm.strikePrice", "Strike Price")}</label>
                     <div style={{ position: "relative" }}>
                       <span style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: t.text3, fontSize: 14 }}>$</span>
                       <input style={{ ...inp(`leg_${i}_strike`), paddingLeft: 26 }} type="number" value={leg.strike} onChange={(e) => { setLeg(i, "strike", e.target.value); setErrors((p) => ({ ...p, [`leg_${i}_strike`]: undefined })); }} placeholder="200" />
@@ -654,9 +654,9 @@ export default function TradeFormModal({ initial, defaults, onClose, onSave, onC
                   <div>
                     <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}>
                       <PremiumEntryIcon size={14} />
-                      Premium
+                      {tt("tradeForm.premium", "Premium")}
                       <span style={{ fontSize: 9, textTransform: "none", letterSpacing: 0, color: leg.position === "buy" ? t.danger : t.positive, fontFamily: "sans-serif", flexShrink: 0 }}>
-                        {leg.position === "buy" ? "paid" : "received"}
+                        {leg.position === "buy" ? tt("tradeForm.paid", "paid") : tt("tradeForm.received", "received")}
                       </span>
                     </label>
                     <div style={{ position: "relative" }}>
@@ -668,9 +668,9 @@ export default function TradeFormModal({ initial, defaults, onClose, onSave, onC
                   <div>
                     <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}>
                       <PremiumExitIcon size={14} />
-                      Exit Premium
+                      {tt("tradeForm.exitPremium", "Exit Premium")}
                       <span style={{ fontSize: 9, textTransform: "none", letterSpacing: 0, color: leg.position === "buy" ? t.positive : t.danger, fontFamily: "sans-serif", flexShrink: 0 }}>
-                        {leg.position === "buy" ? "sold for" : "buyback"}
+                        {leg.position === "buy" ? tt("tradeForm.soldFor", "sold for") : tt("tradeForm.buyback", "buyback")}
                       </span>
                     </label>
                     <div style={{ position: "relative" }}>
@@ -679,7 +679,7 @@ export default function TradeFormModal({ initial, defaults, onClose, onSave, onC
                     </div>
                   </div>
                   <div>
-                    <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><ContractsIcon size={14} />Contracts</label>
+                    <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><ContractsIcon size={14} />{tt("tradeForm.contracts", "Contracts")}</label>
                     <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
                       <input style={{ ...inp(`leg_${i}_contracts`), flex: 1 }} type="number" value={leg.contracts} onChange={(e) => { setLeg(i, "contracts", e.target.value); setErrors((p) => ({ ...p, [`leg_${i}_contracts`]: undefined })); }} placeholder="1" />
                       <span style={{ fontSize: 12, color: t.text3, whiteSpace: "nowrap" }}>× 100</span>
@@ -687,13 +687,13 @@ export default function TradeFormModal({ initial, defaults, onClose, onSave, onC
                     {errMsg(`leg_${i}_contracts`)}
                   </div>
                   <div>
-                    <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><IVIcon size={14} />IV</label>
+                    <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><IVIcon size={14} />{tt("tradeForm.iv", "IV")}</label>
                     <input style={inp()} type="number" value={leg.iv || ""} onChange={(e) => setLeg(i, "iv", e.target.value)} placeholder="30" />
                   </div>
                   {leg.entryPremium && leg.contracts && (
                     <div style={{ gridColumn: "span 2", display: "flex", alignItems: "flex-end" }}>
                       <div style={{ background: t.surface || t.card, border: `1px solid ${t.border}`, borderRadius: 8, padding: "10px 14px", width: "100%", display: "flex", justifyContent: "space-between" }}>
-                        <span style={{ fontSize: 11, color: t.text3, fontFamily: "'Space Mono', monospace", textTransform: "uppercase" }}>{leg.position === "buy" ? "Total Cost" : "Total Credit"}</span>
+                        <span style={{ fontSize: 11, color: t.text3, fontFamily: "'Space Mono', monospace", textTransform: "uppercase" }}>{leg.position === "buy" ? tt("tradeForm.totalCost", "Total Cost") : tt("tradeForm.totalCredit", "Total Credit")}</span>
                         <span style={{ fontFamily: "'Space Mono', monospace", fontSize: 14, color: t.text }}>
                           ${(+leg.entryPremium * +leg.contracts * 100).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                         </span>
@@ -712,22 +712,22 @@ export default function TradeFormModal({ initial, defaults, onClose, onSave, onC
               <TimeInput style={inp()} t={t} className={isDark ? "time-dark" : ""} value={form.entryTime || ""} onChange={(e) => set("entryTime", e.target.value)} />
             </div>
             <div>
-              <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><ExitTimeIcon size={14} />Exit Time</label>
+              <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><ExitTimeIcon size={14} />{tt("tradeForm.exitTime", "Exit Time")}</label>
               <TimeInput style={inp()} t={t} className={isDark ? "time-dark" : ""} value={form.exitTime || ""} onChange={(e) => set("exitTime", e.target.value)} />
             </div>
             <div>
-              <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><EntryDateIcon size={14} />Entry Date</label>
+              <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><EntryDateIcon size={14} />{tt("tradeForm.entryDate", "Entry Date")}</label>
               <DateInput style={inp()} t={t} value={form.date} onChange={(e) => set("date", e.target.value)} />
             </div>
             <div>
-              <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><ExitDateIcon size={14} />Exit Date</label>
+              <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><ExitDateIcon size={14} />{tt("tradeForm.exitDate", "Exit Date")}</label>
               <DateInput style={inp()} t={t} value={form.exitDate || ""} onChange={(e) => set("exitDate", e.target.value)} placeholder={form.date} />
             </div>
           </div>
         )}
-        {sectionHeader("Mindset", "tut-trade-mindset")}
+        {sectionHeader(tt("tradeForm.mindset", "Mindset"), "tut-trade-mindset")}
         <div id="tut-trade-emotion" style={{ marginBottom: 14 }}>
-          <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><EmotionIcon size={14} />Emotion</label>
+          <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><EmotionIcon size={14} />{tt("tradeForm.emotion", "Emotion")}</label>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 4, marginBottom: 8 }}>
             {[...EMOTIONS.filter((e) => e !== "None"), ...customEmotions].map((e) => {
               const active = form.emotion === e;
@@ -765,7 +765,7 @@ export default function TradeFormModal({ initial, defaults, onClose, onSave, onC
                   setEmotionInput("");
                 }
               }}
-              placeholder="Add emotion..."
+              placeholder={tt("tradeForm.addEmotionPlaceholder", "Add emotion...")}
             />
             <button
               onClick={() => {
@@ -776,11 +776,11 @@ export default function TradeFormModal({ initial, defaults, onClose, onSave, onC
                 setEmotionInput("");
               }}
               style={{ background: t.accent + "20", border: `1px solid ${t.accent}40`, color: t.accent, borderRadius: 8, padding: "0 14px", cursor: "pointer", fontSize: 13, whiteSpace: "nowrap" }}
-            >+ Add</button>
+            >{tt("tradeForm.add", "+ Add")}</button>
           </div>
         </div>
         <div id="tut-trade-mistake" style={{ marginBottom: 14 }}>
-          <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><MistakeIcon size={14} />Mistake</label>
+          <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><MistakeIcon size={14} />{tt("tradeForm.mistake", "Mistake")}</label>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 4, marginBottom: 8 }}>
             {[...MISTAKES.filter((m) => m !== "None"), ...customMistakes].map((m) => {
               const active = form.mistake === m;
@@ -818,7 +818,7 @@ export default function TradeFormModal({ initial, defaults, onClose, onSave, onC
                   setMistakeInput("");
                 }
               }}
-              placeholder="Add mistake..."
+              placeholder={tt("tradeForm.addMistakePlaceholder", "Add mistake...")}
             />
             <button
               onClick={() => {
@@ -829,12 +829,12 @@ export default function TradeFormModal({ initial, defaults, onClose, onSave, onC
                 setMistakeInput("");
               }}
               style={{ background: t.accent + "20", border: `1px solid ${t.accent}40`, color: t.accent, borderRadius: 8, padding: "0 14px", cursor: "pointer", fontSize: 13, whiteSpace: "nowrap" }}
-            >+ Add</button>
+            >{tt("tradeForm.add", "+ Add")}</button>
           </div>
         </div>
-        {sectionHeader("Notes", "tut-trade-notes")}
+        {sectionHeader(tt("tradeForm.notes", "Notes"), "tut-trade-notes")}
         <div id="tut-trade-tags" style={{ marginBottom: 12 }}>
-          <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><TagsIcon size={14} />Tags</label>
+          <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><TagsIcon size={14} />{tt("tradeForm.tags", "Tags")}</label>
           <div
             style={{
               display: "flex",
@@ -872,7 +872,7 @@ export default function TradeFormModal({ initial, defaults, onClose, onSave, onC
               value={tagInput}
               onChange={(e) => setTagInput(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && addTag(tagInput)}
-              placeholder="Add tag..."
+              placeholder={tt("tradeForm.addTagPlaceholder", "Add tag...")}
             />
             <button
               onClick={() => addTag(tagInput)}
@@ -887,7 +887,7 @@ export default function TradeFormModal({ initial, defaults, onClose, onSave, onC
                 whiteSpace: "nowrap",
               }}
             >
-              + Add
+              {tt("tradeForm.add", "+ Add")}
             </button>
           </div>
         </div>
@@ -900,12 +900,12 @@ export default function TradeFormModal({ initial, defaults, onClose, onSave, onC
           </div>
         </div>
         <div id="tut-trade-notes-text" style={{ marginBottom: 20 }}>
-          <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><PenIcon size={14} />Notes</label>
+          <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 4 }}><PenIcon size={14} />{tt("tradeForm.notes", "Notes")}</label>
           <textarea
             style={{ ...inp(), height: 80, resize: "none" }}
             value={form.notes}
             onChange={(e) => set("notes", e.target.value)}
-            placeholder="What happened? What did you learn?"
+            placeholder={tt("tradeForm.notesPlaceholder", "What happened? What did you learn?")}
           />
         </div>
         <div style={{ display: "flex", gap: 10 }}>
@@ -922,7 +922,7 @@ export default function TradeFormModal({ initial, defaults, onClose, onSave, onC
               fontSize: 14,
             }}
           >
-            Cancel
+            {tt("tradeForm.cancel", "Cancel")}
           </button>
           <button
             id="tut-trade-csv"
@@ -940,7 +940,7 @@ export default function TradeFormModal({ initial, defaults, onClose, onSave, onC
               fontFamily: "'Space Mono', monospace",
             }}
           >
-            CSV Import
+            {tt("tradeForm.csvImport", "CSV Import")}
           </button>
           <button
             onClick={save}
@@ -957,15 +957,18 @@ export default function TradeFormModal({ initial, defaults, onClose, onSave, onC
               fontFamily: "'Space Mono', monospace",
             }}
           >
-            {editLabel || "Save Trade"}
+            {editLabel || tt("tradeForm.saveTrade", "Save Trade")}
           </button>
     </div>
     {dupWarning && (
       <div style={{ marginTop: 10, background: "#f59e0b18", border: "1px solid #f59e0b60", borderRadius: 8, padding: "10px 14px" }}>
-        <div style={{ fontSize: 12, color: "#f59e0b", marginBottom: 8 }}>⚠ A trade for <strong>{form.ticker?.toUpperCase()}</strong> on <strong>{form.date}</strong> already exists. Duplicate?</div>
+        <div style={{ fontSize: 12, color: "#f59e0b", marginBottom: 8, display: "flex", alignItems: "flex-start", gap: 5 }}>
+          <WarningIcon size={12} />
+          <span>{tt("tradeForm.dupWarning", "A trade for {{ticker}} on {{date}} already exists. Duplicate?", { ticker: form.ticker?.toUpperCase(), date: form.date })}</span>
+        </div>
         <div style={{ display: "flex", gap: 8 }}>
-          <button onClick={() => setDupWarning(false)} style={{ flex: 1, background: "none", border: `1px solid ${t.border}`, color: t.text3, borderRadius: 6, padding: "6px 0", cursor: "pointer", fontSize: 12, fontFamily: "inherit" }}>Cancel</button>
-          <button onClick={() => { setDupWarning(false); save(true); }} style={{ flex: 1, background: "#f59e0b", border: "none", color: "#000", borderRadius: 6, padding: "6px 0", cursor: "pointer", fontSize: 12, fontWeight: 700, fontFamily: "inherit" }}>Save Anyway</button>
+          <button onClick={() => setDupWarning(false)} style={{ flex: 1, background: "none", border: `1px solid ${t.border}`, color: t.text3, borderRadius: 6, padding: "6px 0", cursor: "pointer", fontSize: 12, fontFamily: "inherit" }}>{tt("tradeForm.cancel", "Cancel")}</button>
+          <button onClick={() => { setDupWarning(false); save(true); }} style={{ flex: 1, background: "#f59e0b", border: "none", color: "#000", borderRadius: 6, padding: "6px 0", cursor: "pointer", fontSize: 12, fontWeight: 700, fontFamily: "inherit" }}>{tt("tradeForm.saveAnyway", "Save Anyway")}</button>
         </div>
       </div>
     )}

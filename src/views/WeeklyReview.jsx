@@ -5,7 +5,7 @@ import { fmt, fmtDate } from "../lib/utils";
 
 const WEEK_OPTIONS = [4, 8, 12, 26, 52];
 
-export default function WeeklyReview({ plList, t, mobile }) {
+export default function WeeklyReview({ plList, t, tt, mobile }) {
   const [limit, setLimit] = useState(8);
   const [jumpDate, setJumpDate] = useState("");
 
@@ -36,7 +36,7 @@ export default function WeeklyReview({ plList, t, mobile }) {
           fontSize: 12,
         }}
       >
-        No trades to review yet.
+        {tt("weeklyReview.noTrades", "No trades to review yet.")}
       </div>
     );
 
@@ -49,7 +49,7 @@ export default function WeeklyReview({ plList, t, mobile }) {
     <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-          <span style={{ fontSize: 11, color: t.text3, fontFamily: "'Space Mono', monospace", textTransform: "uppercase", letterSpacing: 1.5 }}>Week</span>
+          <span style={{ fontSize: 11, color: t.text3, fontFamily: "'Space Mono', monospace", textTransform: "uppercase", letterSpacing: 1.5 }}>{tt("weeklyReview.week", "Week")}</span>
           <DateInput
             t={t}
             icon={WeekIcon}
@@ -62,18 +62,18 @@ export default function WeeklyReview({ plList, t, mobile }) {
           )}
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-          <span style={{ fontSize: 11, color: t.text3, fontFamily: "'Space Mono', monospace", textTransform: "uppercase", letterSpacing: 1.5 }}>Show</span>
+          <span style={{ fontSize: 11, color: t.text3, fontFamily: "'Space Mono', monospace", textTransform: "uppercase", letterSpacing: 1.5 }}>{tt("weeklyReview.show", "Show")}</span>
           <div style={{ display: "flex", gap: 6 }}>
             {WEEK_OPTIONS.map(n => (
-              <button key={n} onClick={() => { setLimit(n); setJumpDate(""); }} style={{ background: !jumpDate && limit === n ? t.accent + "20" : "none", border: `1px solid ${!jumpDate && limit === n ? t.accent : t.border}`, color: !jumpDate && limit === n ? t.accent : t.text3, borderRadius: 6, padding: "4px 10px", fontSize: 11, cursor: "pointer", fontFamily: "'Space Mono', monospace" }}>{n}W</button>
+              <button key={n} onClick={() => { setLimit(n); setJumpDate(""); }} style={{ background: !jumpDate && limit === n ? t.accent + "20" : "none", border: `1px solid ${!jumpDate && limit === n ? t.accent : t.border}`, color: !jumpDate && limit === n ? t.accent : t.text3, borderRadius: 6, padding: "4px 10px", fontSize: 11, cursor: "pointer", fontFamily: "'Space Mono', monospace" }}>{tt("weeklyReview.weeksAbbrev", "{{n}}W", { n })}</button>
             ))}
-            <button onClick={() => { setLimit("all"); setJumpDate(""); }} style={{ background: !jumpDate && limit === "all" ? t.accent + "20" : "none", border: `1px solid ${!jumpDate && limit === "all" ? t.accent : t.border}`, color: !jumpDate && limit === "all" ? t.accent : t.text3, borderRadius: 6, padding: "4px 10px", fontSize: 11, cursor: "pointer", fontFamily: "'Space Mono', monospace" }}>All</button>
+            <button onClick={() => { setLimit("all"); setJumpDate(""); }} style={{ background: !jumpDate && limit === "all" ? t.accent + "20" : "none", border: `1px solid ${!jumpDate && limit === "all" ? t.accent : t.border}`, color: !jumpDate && limit === "all" ? t.accent : t.text3, borderRadius: 6, padding: "4px 10px", fontSize: 11, cursor: "pointer", fontFamily: "'Space Mono', monospace" }}>{tt("weeklyReview.all", "All")}</button>
           </div>
         </div>
       </div>
       {jumpDate && visibleWeeks.length === 0 && (
         <div style={{ padding: "40px 20px", textAlign: "center", color: t.text4, fontFamily: "'Space Mono', monospace", fontSize: 12 }}>
-          No trades found for the week of {fmtDate(jumpWeekStart)}.
+          {tt("weeklyReview.noTradesForWeek", "No trades found for the week of {{date}}.", { date: fmtDate(jumpWeekStart) })}
         </div>
       )}
       {visibleWeeks.map(([weekStart, data]) => {
@@ -116,7 +116,7 @@ export default function WeeklyReview({ plList, t, mobile }) {
                   letterSpacing: 1.5,
                 }}
               >
-                Week of {label}
+                {tt("weeklyReview.weekOf", "Week of {{label}}", { label })}
               </div>
               <div
                 style={{
@@ -138,9 +138,12 @@ export default function WeeklyReview({ plList, t, mobile }) {
                   {fmt(data.pl)}
                 </span>
                 <span style={{ fontSize: 13, color: t.text3 }}>
-                  {data.trades.length} trades · {data.wins}W{" "}
-                  {data.trades.length - data.wins}L ·{" "}
-                  {((data.wins / data.trades.length) * 100).toFixed(0)}% WR
+                  {tt("weeklyReview.weekStats", "{{count}} trades · {{wins}}W {{losses}}L · {{pct}}% WR", {
+                    count: data.trades.length,
+                    wins: data.wins,
+                    losses: data.trades.length - data.wins,
+                    pct: ((data.wins / data.trades.length) * 100).toFixed(0),
+                  })}
                 </span>
               </div>
             </div>
@@ -168,7 +171,7 @@ export default function WeeklyReview({ plList, t, mobile }) {
                     fontFamily: "'Space Mono', monospace",
                   }}
                 >
-                  Best
+                  {tt("weeklyReview.best", "Best")}
                 </div>
                 <div
                   style={{
@@ -201,7 +204,7 @@ export default function WeeklyReview({ plList, t, mobile }) {
                     fontFamily: "'Space Mono', monospace",
                   }}
                 >
-                  Worst
+                  {tt("weeklyReview.worst", "Worst")}
                 </div>
                 <div
                   style={{
@@ -229,7 +232,7 @@ export default function WeeklyReview({ plList, t, mobile }) {
                       fontFamily: "'Space Mono', monospace",
                     }}
                   >
-                    Strategies
+                    {tt("weeklyReview.strategies", "Strategies")}
                   </div>
                   <div
                     style={{ fontSize: 12, color: t.text2, lineHeight: 1.6 }}
@@ -256,7 +259,9 @@ export default function WeeklyReview({ plList, t, mobile }) {
                     fontFamily: "'Space Mono', monospace",
                   }}
                 >
-                  ⚠ {mistakes.length} mistake{mistakes.length > 1 ? "s" : ""}:{" "}
+                  ⚠ {mistakes.length === 1
+                    ? tt("weeklyReview.mistakeCountOne", "1 mistake:")
+                    : tt("weeklyReview.mistakeCountOther", "{{n}} mistakes:", { n: mistakes.length })}{" "}
                 </span>
                 <span style={{ fontSize: 12, color: t.text3 }}>
                   {[...new Set(mistakes.map((m) => m.mistake))].join(", ")}

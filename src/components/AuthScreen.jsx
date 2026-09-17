@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { supabase } from "../lib/supabase";
+import { LANGUAGES } from "../lib/constants";
 
 const TURNSTILE_SITE_KEY = import.meta.env.VITE_TURNSTILE_SITE_KEY;
 
@@ -17,7 +18,7 @@ function tk(dark) {
   };
 }
 
-export default function AuthScreen({ isDark }) {
+export default function AuthScreen({ isDark, lang, setLang, tt }) {
   const T = tk(isDark);
   const [mode, setMode] = useState("login");
   const [email, setEmail] = useState("");
@@ -109,13 +110,13 @@ export default function AuthScreen({ isDark }) {
         options: { ...(extraData ? { data: extraData } : {}), ...(captchaOpt || {}) },
       });
       if (error) { setError(error.message); resetCaptcha(); }
-      else setMessage("Check your email for a confirmation link.");
+      else setMessage(tt("auth.confirmEmailSent", "Check your email for a confirmation link."));
     } else {
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: window.location.origin,
       });
       if (error) setError(error.message);
-      else setMessage("Password reset email sent.");
+      else setMessage(tt("auth.resetEmailSent", "Password reset email sent."));
     }
     setLoading(false);
   };
@@ -141,6 +142,17 @@ export default function AuthScreen({ isDark }) {
       <div style={{
         width: "100%", maxWidth: 400, padding: 32,
       }}>
+        {setLang && (
+          <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 8 }}>
+            <select
+              value={lang || "en"}
+              onChange={(e) => setLang(e.target.value)}
+              style={{ background: "none", border: `1px solid ${T.border}`, borderRadius: 7, color: T.text3, padding: "4px 8px", fontSize: 11, fontFamily: "'Space Mono', monospace", cursor: "pointer", outline: "none" }}
+            >
+              {LANGUAGES.map(l => <option key={l.code} value={l.code}>{l.label}</option>)}
+            </select>
+          </div>
+        )}
         {/* Logo */}
         <div style={{ textAlign: "center", marginBottom: 28 }}>
           <div style={{ display: "flex", justifyContent: "center", marginBottom: 10 }}>
@@ -150,16 +162,16 @@ export default function AuthScreen({ isDark }) {
             LOG-FOLIO
           </div>
           <div style={{ fontSize: 11, color: T.text3, textTransform: "uppercase", letterSpacing: 2 }}>
-            {mode === "login" ? "Sign in to your account" :
-             mode === "signup" ? "Create your account" :
-             "Reset your password"}
+            {mode === "login" ? tt("auth.signInSubtitle", "Sign in to your account") :
+             mode === "signup" ? tt("auth.signUpSubtitle", "Create your account") :
+             tt("auth.resetSubtitle", "Reset your password")}
           </div>
         </div>
 
         <form onSubmit={handleSubmit}>
           <div style={{ marginBottom: 12 }}>
             <div style={{ fontSize: 10, color: T.text3, textTransform: "uppercase", letterSpacing: 1.5, marginBottom: 5 }}>
-              Email
+              {tt("auth.email", "Email")}
             </div>
             <input style={inp} type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="you@example.com" required />
           </div>
@@ -167,7 +179,7 @@ export default function AuthScreen({ isDark }) {
           {mode !== "reset" && (
             <div style={{ marginBottom: 20 }}>
               <div style={{ fontSize: 10, color: T.text3, textTransform: "uppercase", letterSpacing: 1.5, marginBottom: 5 }}>
-                Password
+                {tt("auth.password", "Password")}
               </div>
               <div style={{ position: "relative" }}>
                 <input style={{ ...inp, paddingRight: 40 }} type={showPassword ? "text" : "password"} value={password} onChange={e => setPassword(e.target.value)} placeholder="••••••••" required minLength={6} />
@@ -176,7 +188,7 @@ export default function AuthScreen({ isDark }) {
                   onClick={() => setShowPassword(s => !s)}
                   style={{ position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", color: T.text3, fontSize: 13, padding: 0 }}
                 >
-                  {showPassword ? "Hide" : "Show"}
+                  {showPassword ? tt("auth.hide", "Hide") : tt("auth.show", "Show")}
                 </button>
               </div>
             </div>
@@ -214,15 +226,15 @@ export default function AuthScreen({ isDark }) {
             }}
           >
             {loading ? "..." :
-             mode === "login" ? "Sign In" :
-             mode === "signup" ? "Create Account" :
-             "Send Reset Email"}
+             mode === "login" ? tt("auth.signIn", "Sign In") :
+             mode === "signup" ? tt("auth.createAccount", "Create Account") :
+             tt("auth.sendResetEmail", "Send Reset Email")}
           </button>
         </form>
 
         <div style={{ display: "flex", alignItems: "center", gap: 10, margin: "18px 0" }}>
           <div style={{ flex: 1, height: 1, background: T.border }} />
-          <span style={{ fontSize: 11, color: T.text3, letterSpacing: 1 }}>OR</span>
+          <span style={{ fontSize: 11, color: T.text3, letterSpacing: 1 }}>{tt("auth.or", "OR")}</span>
           <div style={{ flex: 1, height: 1, background: T.border }} />
         </div>
 
@@ -244,22 +256,22 @@ export default function AuthScreen({ isDark }) {
             <path fill="#FBBC05" d="M10.5 28.6A14.5 14.5 0 0 1 9.5 24c0-1.6.3-3.2.8-4.6L2.6 13.3A23.9 23.9 0 0 0 0 24c0 3.9.9 7.5 2.6 10.7l7.9-6.1z"/>
             <path fill="#34A853" d="M24 48c6.2 0 11.4-2 15.2-5.5l-7.6-5.9c-2 1.4-4.6 2.2-7.6 2.2-6.2 0-11.5-4.2-13.4-9.8l-7.9 6.1C6.6 42.6 14.6 48 24 48z"/>
           </svg>
-          Continue with Google
+          {tt("auth.continueWithGoogle", "Continue with Google")}
         </button>
 
         <div style={{ marginTop: 20, textAlign: "center", fontSize: 12, color: T.text3, display: "flex", justifyContent: "center", gap: 12 }}>
           {mode === "login" && (
             <>
-              <span onClick={() => { setMode("reset"); reset(); }} style={{ cursor: "pointer", color: T.text2 }}>Forgot password?</span>
+              <span onClick={() => { setMode("reset"); reset(); }} style={{ cursor: "pointer", color: T.text2 }}>{tt("auth.forgotPassword", "Forgot password?")}</span>
               <span>·</span>
-              <span onClick={() => { setMode("signup"); reset(); }} style={{ cursor: "pointer", color: T.accent }}>Create account</span>
+              <span onClick={() => { setMode("signup"); reset(); }} style={{ cursor: "pointer", color: T.accent }}>{tt("auth.createAccountLink", "Create account")}</span>
             </>
           )}
           {mode === "signup" && (
-            <span onClick={() => { setMode("login"); reset(); }} style={{ cursor: "pointer", color: T.accent }}>Already have an account? Sign in</span>
+            <span onClick={() => { setMode("login"); reset(); }} style={{ cursor: "pointer", color: T.accent }}>{tt("auth.alreadyHaveAccount", "Already have an account? Sign in")}</span>
           )}
           {mode === "reset" && (
-            <span onClick={() => { setMode("login"); reset(); }} style={{ cursor: "pointer", color: T.accent }}>Back to sign in</span>
+            <span onClick={() => { setMode("login"); reset(); }} style={{ cursor: "pointer", color: T.accent }}>{tt("auth.backToSignIn", "Back to sign in")}</span>
           )}
         </div>
       </div>

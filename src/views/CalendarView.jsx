@@ -4,7 +4,7 @@ import { fmt, todayStr, typeLabels } from "../lib/utils";
 import StatCard from "../components/StatCard";
 import Tag from "../components/Tag";
 
-export default function CalendarView({ plList, t, mobile }) {
+export default function CalendarView({ plList, t, tt, mobile }) {
   const now = new Date();
   const [viewYear, setViewYear] = useState(now.getFullYear());
   const [viewMonth, setViewMonth] = useState(now.getMonth());
@@ -70,14 +70,14 @@ export default function CalendarView({ plList, t, mobile }) {
         }}
       >
         <StatCard
-          label="Month P/L"
+          label={tt("calendar.monthPL", "Month P/L")}
           value={fmt(monthPL)}
-          sub={`${monthTrades.length} trades`}
+          sub={tt("calendar.tradesCount", "{{n}} trades", { n: monthTrades.length })}
           color={monthPL >= 0 ? t.positive : t.danger}
           t={t}
         />
         <StatCard
-          label="Win Rate"
+          label={tt("calendar.winRate", "Win Rate")}
           value={
             monthTrades.length
               ? `${((monthWins / monthTrades.length) * 100).toFixed(0)}%`
@@ -87,12 +87,12 @@ export default function CalendarView({ plList, t, mobile }) {
           t={t}
         />
         <StatCard
-          label="Days"
+          label={tt("calendar.days", "Days")}
           value={Object.keys(dayMap).filter((k) => k.startsWith(prefix)).length}
-          sub="active trading days"
+          sub={tt("calendar.activeTradingDays", "active trading days")}
           t={t}
         />
-        <StatCard label="Best Day" value={bestDay} t={t} />
+        <StatCard label={tt("calendar.bestDay", "Best Day")} value={bestDay} t={t} />
       </div>
 
       {/* Calendar grid — always full width */}
@@ -162,8 +162,24 @@ export default function CalendarView({ plList, t, mobile }) {
           }}
         >
           {(mobile
-            ? ["S", "M", "T", "W", "T", "F", "S"]
-            : ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
+            ? [
+                tt("calendar.weekdayShort.sun", "S"),
+                tt("calendar.weekdayShort.mon", "M"),
+                tt("calendar.weekdayShort.tue", "T"),
+                tt("calendar.weekdayShort.wed", "W"),
+                tt("calendar.weekdayShort.thu", "T"),
+                tt("calendar.weekdayShort.fri", "F"),
+                tt("calendar.weekdayShort.sat", "S"),
+              ]
+            : [
+                tt("calendar.weekday.sun", "Sun"),
+                tt("calendar.weekday.mon", "Mon"),
+                tt("calendar.weekday.tue", "Tue"),
+                tt("calendar.weekday.wed", "Wed"),
+                tt("calendar.weekday.thu", "Thu"),
+                tt("calendar.weekday.fri", "Fri"),
+                tt("calendar.weekday.sat", "Sat"),
+              ]
           ).map((d, i) => (
             <div
               key={i}
@@ -290,7 +306,7 @@ export default function CalendarView({ plList, t, mobile }) {
                 letterSpacing: 2,
               }}
             >
-              Tap a day to see trades
+              {tt("calendar.tapDay", "Tap a day to see trades")}
             </div>
           </div>
         ) : !selectedData ? (
@@ -315,7 +331,7 @@ export default function CalendarView({ plList, t, mobile }) {
                 letterSpacing: 2,
               }}
             >
-              No trades on this day
+              {tt("calendar.noTradesThisDay", "No trades on this day")}
             </div>
           </div>
         ) : (
@@ -346,9 +362,9 @@ export default function CalendarView({ plList, t, mobile }) {
                 {fmt(selectedData.pl)}
               </div>
               <div style={{ fontSize: 12, color: t.text3, marginTop: 2 }}>
-                {selectedData.trades.length} trade
-                {selectedData.trades.length !== 1 ? "s" : ""} ·{" "}
-                {selectedData.trades.filter((tr) => tr.pl > 0).length} wins
+                {selectedData.trades.length === 1
+                  ? tt("calendar.tradesWinsOne", "1 trade · {{wins}} wins", { wins: selectedData.trades.filter((tr) => tr.pl > 0).length })
+                  : tt("calendar.tradesWinsOther", "{{n}} trades · {{wins}} wins", { n: selectedData.trades.length, wins: selectedData.trades.filter((tr) => tr.pl > 0).length })}
               </div>
             </div>
             <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
@@ -393,7 +409,7 @@ export default function CalendarView({ plList, t, mobile }) {
                   <div style={{ fontSize: 12, color: t.text3 }}>
                     {tr.strategy} ·{" "}
                     {tr.type === "options"
-                      ? `${tr.legs?.length}L options`
+                      ? tt("calendar.legsOptions", "{{n}}L options", { n: tr.legs?.length })
                       : `${tr.shares} ${typeLabels(tr.type).units.toLowerCase()}`}
                   </div>
                   {tr.tags?.length > 0 && (

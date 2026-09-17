@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect, useRef } from "react";
+import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { LogIcon, PlanIcon, CloseIcon, CheckIcon, WarningIcon, DeleteIcon, SettingsIcon, MenuIcon } from "./lib/icons";
 import { CHANGELOG, CURRENT_VERSION } from "./lib/changelog";
 import ChangelogModal from "./components/ChangelogModal";
@@ -17,6 +17,7 @@ import {
   loadTrades,
   saveTrades,
   loadTheme,
+  loadLanguage,
   exportCSV,
   setCurrency,
   setTimezone,
@@ -24,9 +25,11 @@ import {
 import {
   STORAGE_KEY,
   THEME_KEY,
+  LANGUAGE_KEY,
   SEED_TRADES,
 } from "./lib/constants";
 import { tk } from "./lib/theme";
+import { translate } from "./lib/i18n";
 import { useIsMobile } from "./hooks/useIsMobile";
 import useInView from "./hooks/useInView";
 import StatCard from "./components/StatCard";
@@ -67,6 +70,9 @@ export default function TradingJournal() {
   const [tradesLoaded, setTradesLoaded] = useState(false);
   const [theme, setTheme] = useState(() => loadTheme());
   useEffect(() => { if (profile?.theme) setTheme(profile.theme); }, [profile?.theme]);
+  const [lang, setLang] = useState(() => loadLanguage());
+  useEffect(() => { if (profile?.language) setLang(profile.language); }, [profile?.language]);
+  const tt = useCallback((key, fallback, vars) => translate(lang, key, fallback, vars), [lang]);
   const isDark = theme !== "light";
   const [tab, setTab] = useState("today");
   const [showAdd, setShowAdd] = useState(false);
@@ -353,6 +359,12 @@ const [page, setPage] = useState(1);
     const themeColor = theme === "bloomberg" ? "#000000" : theme === "light" ? "#ffffff" : "#060e26";
     document.querySelector('meta[name="theme-color"]')?.setAttribute("content", themeColor);
   }, [theme, user]);
+
+  useEffect(() => {
+    try { localStorage.setItem(LANGUAGE_KEY, lang); } catch {}
+    if (user) supabase.from("profiles").update({ language: lang }).eq("id", user.id).then(() => {});
+    document.documentElement.setAttribute("lang", lang);
+  }, [lang, user]);
 
   useEffect(() => {
     if (!user) return;
@@ -1077,14 +1089,14 @@ const paginated = filtered
   );
 
   const nav = [
-    ["today", "Today"],
-    ["weekly", "Weekly"],
-    ["calendar", "Calendar"],
-    ["trades", "Logs"],
-    ["plans", "Plans"],
-    ["journal", "Journal"],
-    ["analytics", "Analytics"],
-    ["ai", "AI Insights"],
+    ["today", tt("nav.today", "Today")],
+    ["weekly", tt("nav.weekly", "Weekly")],
+    ["calendar", tt("nav.calendar", "Calendar")],
+    ["trades", tt("nav.logs", "Logs")],
+    ["plans", tt("nav.plans", "Plans")],
+    ["journal", tt("nav.journal", "Journal")],
+    ["analytics", tt("nav.analytics", "Analytics")],
+    ["ai", tt("nav.aiInsights", "AI Insights")],
   ];
   const sel = {
     background: T.input,
@@ -1104,13 +1116,13 @@ const paginated = filtered
       <div style={{ minHeight: "100vh", background: isDark ? "#000" : "#f4f5f7", display: "flex", alignItems: "center", justifyContent: "center" }}>
         <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 16 }}>
           <img src="/images/logfolio.svg" width={64} height={64} alt="Logfolio" />
-          <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 13, color: "#666" }}>Loading...</div>
+          <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 13, color: "#666" }}>{tt("common.loading", "Loading...")}</div>
         </div>
       </div>
     );
   }
 
-  if (!user) return <AuthScreen isDark={isDark} />;
+  if (!user) return <AuthScreen isDark={isDark} lang={lang} setLang={setLang} tt={tt} />;
 
   return (
     <div
@@ -1465,7 +1477,7 @@ const paginated = filtered
 
         {tab === "calendar" && (
           <ErrorBoundary compact>
-            <CalendarView plList={plList} t={T} mobile={mobile} />
+            <CalendarView plList={plList} t={T} tt={tt} mobile={mobile} />
           </ErrorBoundary>
         )}
 
@@ -1482,6 +1494,7 @@ const paginated = filtered
         onSave={(updated) => { saveTrade(updated); setSelected(updated); }}
         onShare={() => setShareTarget(selected)}
         t={T}
+        tt={tt}
         mobile={mobile}
       />
     ) : (
@@ -1600,6 +1613,7 @@ const paginated = filtered
               onSelect={() => toggleBulk(tr.id)}
               isSelected={bulkSelected.has(tr.id)}
               t={T}
+              tt={tt}
               mobile={mobile}
             />
           ))}
@@ -1684,6 +1698,7 @@ const paginated = filtered
         onSave={(updated) => { saveTrade(updated); setSelectedPlan(updated); }}
         onShare={() => setShareTarget(selectedPlan)}
         t={T}
+        tt={tt}
         mobile={mobile}
       />
     ) : (
@@ -1772,6 +1787,7 @@ const paginated = filtered
                 onSelect={() => toggleBulkPlan(plan.id)}
                 isSelected={bulkSelectedPlans.has(plan.id)}
                 t={T}
+                tt={tt}
                 mobile={mobile}
               />
             ))
@@ -1804,7 +1820,7 @@ const paginated = filtered
 )}
         {tab === "weekly" && (
           <ErrorBoundary compact>
-            <WeeklyReview plList={plList} t={T} mobile={mobile} />
+            <WeeklyReview plList={plList} t={T} tt={tt} mobile={mobile} />
           </ErrorBoundary>
         )}
 
@@ -1816,22 +1832,22 @@ const paginated = filtered
           <div>
             {/* All key stats */}
             <div style={{ display: "grid", gridTemplateColumns: mobile ? "1fr 1fr" : "repeat(4,1fr)", gap: 12, marginBottom: 20 }}>
-              <StatCard label="Total P/L" value={fmt(stats.totalPL)} sub={`${stats.total} trades`} color={stats.totalPL >= 0 ? T.positive : T.danger} t={T} info="The sum of all realized profits and losses across your filtered trades. Positive means you made money; negative means you lost money over this period." />
-              <StatCard label="Win Rate" value={`${(stats.winRate * 100).toFixed(0)}%`} sub={`${stats.wins}W/${stats.total - stats.wins}L`} t={T} info="The percentage of your trades that closed with a profit. A 50% win rate means half your trades were winners. Higher is generally better, but win rate alone doesn't tell the full story — a low win rate can still be profitable with large average wins." />
-              <StatCard label="Expectancy" value={fmt(stats.expectancy)} sub="per trade" color={stats.expectancy >= 0 ? T.positive : T.danger} t={T} info="The average amount you can expect to make (or lose) per trade, calculated as: (Win Rate × Avg Win) + (Loss Rate × Avg Loss). A positive expectancy means your edge is working. This is arguably the most important metric for a trader." />
-              <StatCard label="Profit Factor" value={isFinite(stats.profitFactor) ? stats.profitFactor.toFixed(2) : "∞"} sub="wins/losses" t={T} info="Total gross profit divided by total gross loss. A Profit Factor above 1.0 means you made more than you lost. Above 1.5 is decent, above 2.0 is considered strong. For example, a Profit Factor of 2.0 means you earned $2 for every $1 you lost." />
-              <StatCard label="Avg R" value={avgR !== null ? fmtR(avgR) : "—"} sub="per closed trade" color={avgR !== null && avgR >= 0 ? T.positive : avgR !== null ? T.danger : undefined} t={T} info="Average return per trade measured in R-multiples, where 1R equals your initial risk on that trade. An Avg R of 1.5R means you made 1.5× your risk on average. This normalizes performance across trades with different position sizes." />
-              <StatCard label="Avg Win" value={fmt(stats.avgWin)} color={T.positive} t={T} info="The average dollar profit of your winning trades. Compare this to Avg Loss to understand your reward-to-risk ratio. A healthy system typically has an Avg Win at least equal to or larger than the Avg Loss." />
-              <StatCard label="Avg Loss" value={fmt(stats.avgLoss)} color={T.danger} t={T} info="The average dollar loss of your losing trades. This is shown as a negative number. Keeping Avg Loss small relative to Avg Win is key to long-term profitability — even with a lower win rate." />
-              <StatCard label="Best Trade" value={plList.length ? fmt(Math.max(...plList.map(t => t.pl))) : "—"} color={T.positive} t={T} info="The single largest profit from one trade in your filtered set. Useful for identifying outlier wins and checking whether your overall P/L is heavily dependent on a few exceptional trades." />
-              <StatCard label="Worst Trade" value={plList.length ? fmt(Math.min(...plList.map(t => t.pl))) : "—"} color={T.danger} t={T} info="The single largest loss from one trade in your filtered set. Useful for spotting when you broke your risk rules or got caught in an unexpected move. Large outlier losses often point to position sizing or stop-loss issues." />
-              <StatCard label="Max Drawdown" value={maxDrawdown.value > 0 ? `-${fmt(maxDrawdown.value)}` : "—"} sub={maxDrawdown.pct > 0 ? `${(maxDrawdown.pct * 100).toFixed(1)}% of peak` : "no drawdown"} color={maxDrawdown.value > 0 ? T.danger : undefined} t={T} info="The largest peak-to-trough decline in your cumulative equity curve — how much your account dropped from its highest point before recovering. It measures the worst losing streak you endured. Smaller drawdowns mean a smoother, more consistent equity curve." />
-              <StatCard label="Sharpe Ratio" value={stats.sharpe !== null ? stats.sharpe.toFixed(2) : "—"} sub="return / volatility" color={stats.sharpe !== null ? (stats.sharpe >= 1 ? T.positive : stats.sharpe >= 0 ? undefined : T.danger) : undefined} t={T} info="Measures return relative to total volatility (both up and down swings). Calculated as average P/L divided by the standard deviation of your P/L. Above 1.0 is good, above 2.0 is excellent. A low Sharpe means your returns are inconsistent even if profitable." />
-              <StatCard label="Sortino Ratio" value={stats.sortino !== null ? stats.sortino.toFixed(2) : "—"} sub="return / downside risk" color={stats.sortino !== null ? (stats.sortino >= 1 ? T.positive : stats.sortino >= 0 ? undefined : T.danger) : undefined} t={T} info="Like the Sharpe Ratio, but only penalizes downside volatility (losing trades). Calculated as average P/L divided by the standard deviation of losing trades only. Higher is better — a high Sortino with a low Sharpe means your variance comes from big wins, not big losses. Below 1.0: poor downside-adjusted returns. 1.0–2.0: acceptable. Above 2.0: good. Above 3.0: excellent." />
-              <StatCard label="Treynor Ratio" value={benchmarkStats.treynor !== null ? benchmarkStats.treynor.toFixed(4) : "—"} sub={benchmarkStats.treynor !== null ? "return / market risk" : "needs SPY data"} color={benchmarkStats.treynor !== null ? (benchmarkStats.treynor > 0 ? T.positive : T.danger) : undefined} t={T} info="Measures return per unit of market (systematic) risk, using SPY as the benchmark. Beta captures how much your P/L moves with the overall market. A higher Treynor means you're being well-compensated for the market risk you're taking on. Below 0: underperforming the market on a risk-adjusted basis. 0–0.1: weak. 0.1–0.5: decent. Above 0.5: strong. Shows '—' until SPY data loads." />
-              <StatCard label="Info Ratio" value={benchmarkStats.infoRatio !== null ? benchmarkStats.infoRatio.toFixed(2) : "—"} sub={benchmarkStats.infoRatio !== null ? "active return / tracking error" : "needs SPY data"} color={benchmarkStats.infoRatio !== null ? (benchmarkStats.infoRatio >= 0.5 ? T.positive : benchmarkStats.infoRatio >= 0 ? undefined : T.danger) : undefined} t={T} info="Measures how consistently your trading outperforms SPY. Active return is your daily P/L minus what SPY returned that day. Tracking error is the volatility of that difference. Above 0.5 is solid, above 1.0 is exceptional. Shows '—' until SPY data loads." />
-              <StatCard label="Alpha" value={benchmarkStats.alpha !== null ? benchmarkStats.alpha.toFixed(4) : "—"} sub={benchmarkStats.alpha !== null ? "excess return vs SPY" : "needs SPY data"} color={benchmarkStats.alpha !== null ? (benchmarkStats.alpha > 0 ? T.positive : T.danger) : undefined} t={T} info="Jensen's Alpha — the return your trading generates above what would be expected given your exposure to market movements (beta). Positive alpha means you're adding real skill beyond just riding the market. Negative alpha means the market is outperforming your adjusted returns. Shows '—' until SPY data loads." />
-              <StatCard label="Beta" value={benchmarkStats.beta !== null ? benchmarkStats.beta.toFixed(2) : "—"} sub={benchmarkStats.beta !== null ? "vs SPY" : "needs SPY data"} color={benchmarkStats.beta !== null ? (Math.abs(benchmarkStats.beta) <= 1 ? T.positive : T.danger) : undefined} t={T} info="Measures how much your daily P/L moves in sync with SPY. A Beta of 1.0 means your returns move perfectly with the market; below 1.0 means less correlated (more independent); above 1.0 means amplified market swings. Negative beta means your returns tend to move opposite the market. Closer to 0 generally means your edge is more skill-based than market-driven. Shows '—' until SPY data loads." />
+              <StatCard label={tt("dashboard.stat.totalPL", "Total P/L")} value={fmt(stats.totalPL)} sub={tt("dashboard.stat.totalPLSub", "{{n}} trades", { n: stats.total })} color={stats.totalPL >= 0 ? T.positive : T.danger} t={T} info="The sum of all realized profits and losses across your filtered trades. Positive means you made money; negative means you lost money over this period." />
+              <StatCard label={tt("dashboard.stat.winRate", "Win Rate")} value={`${(stats.winRate * 100).toFixed(0)}%`} sub={`${stats.wins}W/${stats.total - stats.wins}L`} t={T} info="The percentage of your trades that closed with a profit. A 50% win rate means half your trades were winners. Higher is generally better, but win rate alone doesn't tell the full story — a low win rate can still be profitable with large average wins." />
+              <StatCard label={tt("dashboard.stat.expectancy", "Expectancy")} value={fmt(stats.expectancy)} sub={tt("dashboard.stat.perTrade", "per trade")} color={stats.expectancy >= 0 ? T.positive : T.danger} t={T} info="The average amount you can expect to make (or lose) per trade, calculated as: (Win Rate × Avg Win) + (Loss Rate × Avg Loss). A positive expectancy means your edge is working. This is arguably the most important metric for a trader." />
+              <StatCard label={tt("dashboard.stat.profitFactor", "Profit Factor")} value={isFinite(stats.profitFactor) ? stats.profitFactor.toFixed(2) : "∞"} sub={tt("dashboard.stat.winsLosses", "wins/losses")} t={T} info="Total gross profit divided by total gross loss. A Profit Factor above 1.0 means you made more than you lost. Above 1.5 is decent, above 2.0 is considered strong. For example, a Profit Factor of 2.0 means you earned $2 for every $1 you lost." />
+              <StatCard label={tt("dashboard.stat.avgR", "Avg R")} value={avgR !== null ? fmtR(avgR) : "—"} sub={tt("dashboard.stat.perClosedTrade", "per closed trade")} color={avgR !== null && avgR >= 0 ? T.positive : avgR !== null ? T.danger : undefined} t={T} info="Average return per trade measured in R-multiples, where 1R equals your initial risk on that trade. An Avg R of 1.5R means you made 1.5× your risk on average. This normalizes performance across trades with different position sizes." />
+              <StatCard label={tt("dashboard.stat.avgWin", "Avg Win")} value={fmt(stats.avgWin)} color={T.positive} t={T} info="The average dollar profit of your winning trades. Compare this to Avg Loss to understand your reward-to-risk ratio. A healthy system typically has an Avg Win at least equal to or larger than the Avg Loss." />
+              <StatCard label={tt("dashboard.stat.avgLoss", "Avg Loss")} value={fmt(stats.avgLoss)} color={T.danger} t={T} info="The average dollar loss of your losing trades. This is shown as a negative number. Keeping Avg Loss small relative to Avg Win is key to long-term profitability — even with a lower win rate." />
+              <StatCard label={tt("dashboard.stat.bestTrade", "Best Trade")} value={plList.length ? fmt(Math.max(...plList.map(t => t.pl))) : "—"} color={T.positive} t={T} info="The single largest profit from one trade in your filtered set. Useful for identifying outlier wins and checking whether your overall P/L is heavily dependent on a few exceptional trades." />
+              <StatCard label={tt("dashboard.stat.worstTrade", "Worst Trade")} value={plList.length ? fmt(Math.min(...plList.map(t => t.pl))) : "—"} color={T.danger} t={T} info="The single largest loss from one trade in your filtered set. Useful for spotting when you broke your risk rules or got caught in an unexpected move. Large outlier losses often point to position sizing or stop-loss issues." />
+              <StatCard label={tt("dashboard.stat.maxDrawdown", "Max Drawdown")} value={maxDrawdown.value > 0 ? `-${fmt(maxDrawdown.value)}` : "—"} sub={maxDrawdown.pct > 0 ? tt("dashboard.stat.pctOfPeak", "{{pct}}% of peak", { pct: (maxDrawdown.pct * 100).toFixed(1) }) : tt("dashboard.stat.noDrawdown", "no drawdown")} color={maxDrawdown.value > 0 ? T.danger : undefined} t={T} info="The largest peak-to-trough decline in your cumulative equity curve — how much your account dropped from its highest point before recovering. It measures the worst losing streak you endured. Smaller drawdowns mean a smoother, more consistent equity curve." />
+              <StatCard label={tt("dashboard.stat.sharpeRatio", "Sharpe Ratio")} value={stats.sharpe !== null ? stats.sharpe.toFixed(2) : "—"} sub={tt("dashboard.stat.returnVolatility", "return / volatility")} color={stats.sharpe !== null ? (stats.sharpe >= 1 ? T.positive : stats.sharpe >= 0 ? undefined : T.danger) : undefined} t={T} info="Measures return relative to total volatility (both up and down swings). Calculated as average P/L divided by the standard deviation of your P/L. Above 1.0 is good, above 2.0 is excellent. A low Sharpe means your returns are inconsistent even if profitable." />
+              <StatCard label={tt("dashboard.stat.sortinoRatio", "Sortino Ratio")} value={stats.sortino !== null ? stats.sortino.toFixed(2) : "—"} sub={tt("dashboard.stat.returnDownsideRisk", "return / downside risk")} color={stats.sortino !== null ? (stats.sortino >= 1 ? T.positive : stats.sortino >= 0 ? undefined : T.danger) : undefined} t={T} info="Like the Sharpe Ratio, but only penalizes downside volatility (losing trades). Calculated as average P/L divided by the standard deviation of losing trades only. Higher is better — a high Sortino with a low Sharpe means your variance comes from big wins, not big losses. Below 1.0: poor downside-adjusted returns. 1.0–2.0: acceptable. Above 2.0: good. Above 3.0: excellent." />
+              <StatCard label={tt("dashboard.stat.treynorRatio", "Treynor Ratio")} value={benchmarkStats.treynor !== null ? benchmarkStats.treynor.toFixed(4) : "—"} sub={benchmarkStats.treynor !== null ? tt("dashboard.stat.returnMarketRisk", "return / market risk") : tt("dashboard.stat.needsSpyData", "needs SPY data")} color={benchmarkStats.treynor !== null ? (benchmarkStats.treynor > 0 ? T.positive : T.danger) : undefined} t={T} info="Measures return per unit of market (systematic) risk, using SPY as the benchmark. Beta captures how much your P/L moves with the overall market. A higher Treynor means you're being well-compensated for the market risk you're taking on. Below 0: underperforming the market on a risk-adjusted basis. 0–0.1: weak. 0.1–0.5: decent. Above 0.5: strong. Shows '—' until SPY data loads." />
+              <StatCard label={tt("dashboard.stat.infoRatio", "Info Ratio")} value={benchmarkStats.infoRatio !== null ? benchmarkStats.infoRatio.toFixed(2) : "—"} sub={benchmarkStats.infoRatio !== null ? tt("dashboard.stat.activeReturnTrackingError", "active return / tracking error") : tt("dashboard.stat.needsSpyData", "needs SPY data")} color={benchmarkStats.infoRatio !== null ? (benchmarkStats.infoRatio >= 0.5 ? T.positive : benchmarkStats.infoRatio >= 0 ? undefined : T.danger) : undefined} t={T} info="Measures how consistently your trading outperforms SPY. Active return is your daily P/L minus what SPY returned that day. Tracking error is the volatility of that difference. Above 0.5 is solid, above 1.0 is exceptional. Shows '—' until SPY data loads." />
+              <StatCard label={tt("dashboard.stat.alpha", "Alpha")} value={benchmarkStats.alpha !== null ? benchmarkStats.alpha.toFixed(4) : "—"} sub={benchmarkStats.alpha !== null ? tt("dashboard.stat.excessReturnVsSpy", "excess return vs SPY") : tt("dashboard.stat.needsSpyData", "needs SPY data")} color={benchmarkStats.alpha !== null ? (benchmarkStats.alpha > 0 ? T.positive : T.danger) : undefined} t={T} info="Jensen's Alpha — the return your trading generates above what would be expected given your exposure to market movements (beta). Positive alpha means you're adding real skill beyond just riding the market. Negative alpha means the market is outperforming your adjusted returns. Shows '—' until SPY data loads." />
+              <StatCard label={tt("dashboard.stat.beta", "Beta")} value={benchmarkStats.beta !== null ? benchmarkStats.beta.toFixed(2) : "—"} sub={benchmarkStats.beta !== null ? tt("dashboard.stat.vsSpy", "vs SPY") : tt("dashboard.stat.needsSpyData", "needs SPY data")} color={benchmarkStats.beta !== null ? (Math.abs(benchmarkStats.beta) <= 1 ? T.positive : T.danger) : undefined} t={T} info="Measures how much your daily P/L moves in sync with SPY. A Beta of 1.0 means your returns move perfectly with the market; below 1.0 means less correlated (more independent); above 1.0 means amplified market swings. Negative beta means your returns tend to move opposite the market. Closer to 0 generally means your edge is more skill-based than market-driven. Shows '—' until SPY data loads." />
             </div>
 
             {/* Equity Curve */}
@@ -2218,7 +2234,7 @@ const paginated = filtered
         )}
 
         {tab === "journal" && (
-          <JournalView journals={journals} onSave={saveJournal} t={T} mobile={mobile} />
+          <JournalView journals={journals} onSave={saveJournal} t={T} tt={tt} mobile={mobile} />
         )}
 
       </div>
@@ -2227,11 +2243,12 @@ const paginated = filtered
         <TradeFormModal
           initial={planPrefill || undefined}
           defaults={planPrefill ? undefined : tradeDefaults}
-          editLabel={planPrefill ? "Execute Plan" : undefined}
+          editLabel={planPrefill ? tt("tradeForm.executePlan", "Execute Plan") : undefined}
           onClose={() => { setShowAdd(false); setPlanPrefill(null); }}
           onSave={addTrade}
           onCSVImport={() => { setShowAdd(false); setPlanPrefill(null); setShowCSV(true); }}
           t={T}
+          tt={tt}
           isDark={isDark}
           trades={plList}
         />
@@ -2257,6 +2274,7 @@ const paginated = filtered
           onSave={saveTrade}
           onCSVImport={() => { setEditTrade(null); setShowCSV(true); }}
           t={T}
+          tt={tt}
           isDark={isDark}
         />
       )}
@@ -2280,6 +2298,9 @@ const paginated = filtered
     onClear={clearAll}
     onClearPlans={clearAllPlans}
     t={T}
+    lang={lang}
+    setLang={setLang}
+    tt={tt}
     user={user}
     profile={profile}
     onSignOut={() => { setShowSettings(false); saveTrades([]); localStorage.removeItem("tradelog_user_id"); signOut(); }}

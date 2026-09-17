@@ -3,7 +3,7 @@ import { todayStr } from "../lib/utils";
 import { DeleteIcon } from "../lib/icons";
 import DateInput from "../components/DateInput";
 
-export default function JournalView({ journals, onSave, t, mobile }) {
+export default function JournalView({ journals, onSave, t, tt, mobile }) {
   const [date, setDate] = useState(todayStr());
   const [saved, setSaved] = useState(false);
 
@@ -22,10 +22,10 @@ export default function JournalView({ journals, onSave, t, mobile }) {
       {/* Sidebar: past entries */}
       <div style={{ background: t.surface, border: `1px solid ${t.border}`, borderRadius: 12, overflow: "hidden" }}>
         <div style={{ padding: "12px 16px", borderBottom: `1px solid ${t.border}`, fontFamily: "'Space Mono',monospace", fontSize: 10, color: t.text3, textTransform: "uppercase", letterSpacing: 2 }}>
-          Entries
+          {tt("journal.entries", "Entries")}
         </div>
         {datesWithEntries.length === 0 ? (
-          <div style={{ padding: "16px", fontSize: 12, color: t.text3 }}>No entries yet.</div>
+          <div style={{ padding: "16px", fontSize: 12, color: t.text3 }}>{tt("journal.noEntriesYet", "No entries yet.")}</div>
         ) : (
           datesWithEntries.slice(0, 30).map((d) => (
             <div
@@ -60,22 +60,22 @@ export default function JournalView({ journals, onSave, t, mobile }) {
             style={{ background: t.input, border: `1px solid ${t.inputBorder}`, borderRadius: 7, color: t.text, padding: "6px 10px", fontSize: 13, fontFamily: "'Space Mono',monospace", outline: "none", cursor: "pointer" }}
           />
           {saved && (
-            <span style={{ fontSize: 11, color: t.accent, fontFamily: "'Space Mono',monospace" }}>✓ Saved</span>
+            <span style={{ fontSize: 11, color: t.accent, fontFamily: "'Space Mono',monospace" }}>✓ {tt("journal.saved", "Saved")}</span>
           )}
           {text.trim() && (
             <button
               onClick={() => { onSave(date, ""); setDate(todayStr()); }}
-              title="Delete entry"
+              title={tt("journal.deleteEntry", "Delete entry")}
               style={{ marginLeft: "auto", background: "none", border: `1px solid ${t.danger}40`, color: t.danger, borderRadius: 7, padding: "5px 10px", cursor: "pointer", display: "flex", alignItems: "center", gap: 5, fontSize: 11, fontFamily: "'Space Mono',monospace" }}
             >
-              <DeleteIcon size={13} /> Delete
+              <DeleteIcon size={13} /> {tt("journal.delete", "Delete")}
             </button>
           )}
         </div>
         <textarea
           value={text}
           onChange={(e) => handleChange(e.target.value)}
-          placeholder={`Journal entry for ${date}…\n\nReflect on today's trades, market conditions, mental state, lessons learned.`}
+          placeholder={tt("journal.placeholder", "Journal entry for {{date}}…\n\nReflect on today's trades, market conditions, mental state, lessons learned.", { date })}
           style={{
             width: "100%",
             minHeight: 340,
@@ -93,7 +93,7 @@ export default function JournalView({ journals, onSave, t, mobile }) {
           }}
         />
         <div style={{ fontSize: 11, color: t.text3, marginTop: 8 }}>
-          Auto-saved · {text.length > 0 ? `${text.split(/\s+/).filter(Boolean).length} words` : "Start writing…"}
+          {tt("journal.autoSaved", "Auto-saved")} · {text.length > 0 ? tt("journal.wordCount", "{{n}} words", { n: text.split(/\s+/).filter(Boolean).length }) : tt("journal.startWriting", "Start writing…")}
         </div>
       </div>
     </div>

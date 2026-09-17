@@ -84,6 +84,9 @@ alter table public.profiles add column if not exists referral_code text unique;
 alter table public.profiles add column if not exists referred_by text;
 alter table public.profiles add column if not exists referred_count int default 0;
 
+-- Preferred UI language (add if not exists)
+alter table public.profiles add column if not exists language text;
+
 -- Auto-generate referral code for new users and process referrals atomically
 create or replace function public.handle_new_user()
 returns trigger as $$

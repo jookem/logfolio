@@ -116,6 +116,16 @@ export const TIMEZONES = [
 export const STORAGE_KEY = "tradelog_trades";
 export const THEME_KEY = "tradelog_theme";
 export const ONBOARDING_KEY = "logfolio-onboarded";
+export const LANGUAGE_KEY = "tradelog_language";
+
+export const LANGUAGES = [
+  { code: "en", label: "English" },
+  { code: "es", label: "Español" },
+  { code: "fr", label: "Français" },
+  { code: "de", label: "Deutsch" },
+  { code: "pt", label: "Português" },
+  { code: "ja", label: "日本語" },
+];
 
 export const SEED_TRADES = [
   { id: 1001, date: "2026-01-06", exitDate: "2026-01-08", entryTime: "09:42", exitTime: "15:55", ticker: "AAPL", type: "stock", strategy: "Breakout", direction: "long", entryPrice: 228.50, exitPrice: 234.20, stopLoss: 225.00, takeProfit: 236.00, shares: 50, emotion: "Confident", mistake: "None", notes: "Clean breakout above 228 resistance with volume confirmation.", tags: ["tech", "breakout"], status: "closed" },

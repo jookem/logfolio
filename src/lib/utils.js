@@ -1,4 +1,4 @@
-import { STOCK_LIKE, STORAGE_KEY, THEME_KEY } from "./constants";
+import { STOCK_LIKE, STORAGE_KEY, THEME_KEY, LANGUAGE_KEY, LANGUAGES } from "./constants";
 
 // Module-level preferences — updated by App.jsx via setters below
 let _currency = "USD";
@@ -107,6 +107,16 @@ export function loadTheme() {
     return localStorage.getItem(THEME_KEY) || "dark";
   } catch {}
   return "dark";
+}
+
+export function loadLanguage() {
+  try {
+    const saved = localStorage.getItem(LANGUAGE_KEY);
+    if (saved) return saved;
+    const nav = (navigator.language || "en").slice(0, 2).toLowerCase();
+    if (LANGUAGES.some(l => l.code === nav)) return nav;
+  } catch {}
+  return "en";
 }
 
 export function exportCSV(trades) {

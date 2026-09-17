@@ -4,7 +4,7 @@ import { STOCK_LIKE } from "../lib/constants";
 import Tag from "./Tag";
 import { LogIcon, EditIcon, QuickIcon, ShareIcon, CloseIcon, CheckIcon } from "../lib/icons";
 
-export default function TradeDetail({ trade, onClose, onEdit, onExecute, onSave, onShare, t, mobile }) {
+export default function TradeDetail({ trade, onClose, onEdit, onExecute, onSave, onShare, t, tt, mobile }) {
   const pl = calcPL(trade);
   const [lightbox, setLightbox] = useState(null);
   const [quickEdit, setQuickEdit] = useState(false);
@@ -68,7 +68,7 @@ export default function TradeDetail({ trade, onClose, onEdit, onExecute, onSave,
               </div>
             ) : (
               <span style={{ fontSize: 11, fontFamily: "'Space Mono',monospace", color: "#f59e0b", background: "#f59e0b18", border: "1px solid #f59e0b40", borderRadius: 6, padding: "4px 10px", letterSpacing: 1 }}>
-                OPEN
+                {tt("tradeDetail.open", "OPEN")}
               </span>
             )}
           </div>
@@ -84,7 +84,7 @@ export default function TradeDetail({ trade, onClose, onEdit, onExecute, onSave,
                 fontFamily: "'Space Mono', monospace", display: "flex", alignItems: "center", gap: 5, flexShrink: 0,
               }}
             >
-              <LogIcon size="1em" /> Execute
+              <LogIcon size="1em" /> {tt("tradeDetail.execute", "Execute")}
             </button>
           )}
           <button
@@ -95,14 +95,14 @@ export default function TradeDetail({ trade, onClose, onEdit, onExecute, onSave,
               cursor: "pointer", fontSize: 12, display: "flex", alignItems: "center", gap: 5, flexShrink: 0,
             }}
           >
-            <EditIcon size="1em" /> Edit
+            <EditIcon size="1em" /> {tt("tradeDetail.edit", "Edit")}
           </button>
           {trade.status !== "planned" && onSave && (
             <button
               onClick={() => setQuickEdit(q => !q)}
               style={{ background: quickEdit ? t.accent+"20" : "none", border: `1px solid ${t.border}`, color: quickEdit ? t.accent : t.text3, borderRadius: 6, padding: "4px 10px", cursor: "pointer", fontSize: 12, display: "flex", alignItems: "center", gap: 5, flexShrink: 0 }}
             >
-              <QuickIcon size="1em" /> Quick Edit
+              <QuickIcon size="1em" /> {tt("tradeDetail.quickEdit", "Quick Edit")}
             </button>
           )}
           {onShare && (
@@ -110,7 +110,7 @@ export default function TradeDetail({ trade, onClose, onEdit, onExecute, onSave,
               onClick={onShare}
               style={{ background: "none", border: `1px solid ${t.border}`, color: t.text3, borderRadius: 6, padding: "4px 10px", cursor: "pointer", fontSize: 12, display: "flex", alignItems: "center", gap: 5, flexShrink: 0 }}
             >
-              <ShareIcon size="1em" /> Share
+              <ShareIcon size="1em" /> {tt("tradeDetail.share", "Share")}
             </button>
           )}
           <button
@@ -121,7 +121,7 @@ export default function TradeDetail({ trade, onClose, onEdit, onExecute, onSave,
               cursor: "pointer", fontSize: 12, display: "flex", alignItems: "center", gap: 5, flexShrink: 0,
             }}
           >
-            <CloseIcon size="1em" /> Close
+            <CloseIcon size="1em" /> {tt("tradeDetail.close", "Close")}
           </button>
         </div>
       </div>
@@ -129,20 +129,20 @@ export default function TradeDetail({ trade, onClose, onEdit, onExecute, onSave,
         <div style={{ background: t.surface, border: `1px solid ${t.border}`, borderRadius: 10, padding: "12px 14px", marginBottom: 14, display: "flex", flexWrap: "wrap", gap: 10, alignItems: "flex-end" }}>
           {STOCK_LIKE.includes(trade.type) ? (
             <div>
-              <div style={{ fontSize: 10, color: t.text3, fontFamily: "'Space Mono',monospace", textTransform: "uppercase", letterSpacing: 1.5, marginBottom: 4 }}>Exit Price $</div>
+              <div style={{ fontSize: 10, color: t.text3, fontFamily: "'Space Mono',monospace", textTransform: "uppercase", letterSpacing: 1.5, marginBottom: 4 }}>{tt("tradeDetail.exitPriceLabel", "Exit Price $")}</div>
               <input style={qInp} type="number" value={exitVal} onChange={e => setExitVal(e.target.value)} placeholder="0.00" />
             </div>
           ) : (
             (trade.legs || []).map((leg, i) => (
               <div key={i}>
-                <div style={{ fontSize: 10, color: t.text3, fontFamily: "'Space Mono',monospace", textTransform: "uppercase", letterSpacing: 1.5, marginBottom: 4 }}>Leg {i+1} Exit $</div>
+                <div style={{ fontSize: 10, color: t.text3, fontFamily: "'Space Mono',monospace", textTransform: "uppercase", letterSpacing: 1.5, marginBottom: 4 }}>{tt("tradeDetail.legExitLabel", "Leg {{n}} Exit $", { n: i + 1 })}</div>
                 <input style={qInp} type="number" value={legExits[i]} onChange={e => { const c = [...legExits]; c[i] = e.target.value; setLegExits(c); }} placeholder="0.00" />
               </div>
             ))
           )}
           <div style={{ display: "flex", gap: 8 }}>
-            <button onClick={saveQuickEdit} style={{ background: t.accent, border: "none", color: "#000", borderRadius: 7, padding: "7px 16px", cursor: "pointer", fontSize: 12, fontWeight: 700, fontFamily: "'Space Mono',monospace" }}>Save</button>
-            <button onClick={() => setQuickEdit(false)} style={{ background: "none", border: `1px solid ${t.border}`, color: t.text3, borderRadius: 7, padding: "7px 12px", cursor: "pointer", fontSize: 12 }}>Cancel</button>
+            <button onClick={saveQuickEdit} style={{ background: t.accent, border: "none", color: "#000", borderRadius: 7, padding: "7px 16px", cursor: "pointer", fontSize: 12, fontWeight: 700, fontFamily: "'Space Mono',monospace" }}>{tt("tradeDetail.save", "Save")}</button>
+            <button onClick={() => setQuickEdit(false)} style={{ background: "none", border: `1px solid ${t.border}`, color: t.text3, borderRadius: 7, padding: "7px 12px", cursor: "pointer", fontSize: 12 }}>{tt("tradeDetail.cancel", "Cancel")}</button>
           </div>
         </div>
       )}
@@ -156,19 +156,19 @@ export default function TradeDetail({ trade, onClose, onEdit, onExecute, onSave,
           }}
         >
           {[
-            ["Entry", fmt(trade.entryPrice)],
-            ...(trade.exitPrice ? [["Exit", fmt(trade.exitPrice)]] : []),
-            ...(trade.date ? [["Entry Date", trade.date]] : []),
-            ...(trade.exitDate ? [["Exit Date", trade.exitDate]] : []),
-            ...(trade.entryTime ? [["Entry Time", trade.entryTime]] : []),
-            ...(trade.exitTime ? [["Exit Time", trade.exitTime]] : []),
+            [tt("tradeDetail.entry", "Entry"), fmt(trade.entryPrice)],
+            ...(trade.exitPrice ? [[tt("tradeDetail.exit", "Exit"), fmt(trade.exitPrice)]] : []),
+            ...(trade.date ? [[tt("tradeDetail.entryDate", "Entry Date"), trade.date]] : []),
+            ...(trade.exitDate ? [[tt("tradeDetail.exitDate", "Exit Date"), trade.exitDate]] : []),
+            ...(trade.entryTime ? [[tt("tradeDetail.entryTime", "Entry Time"), trade.entryTime]] : []),
+            ...(trade.exitTime ? [[tt("tradeDetail.exitTime", "Exit Time"), trade.exitTime]] : []),
             [typeLabels(trade.type).units, trade.shares],
-            ["Direction", trade.direction],
-            ...(trade.stopLoss ? [["Stop Loss", fmt(trade.stopLoss)]] : []),
-            ...(trade.takeProfit ? [["Take Profit", fmt(trade.takeProfit)]] : []),
-            ...(trade.r != null ? [["R-Multiple", fmtR(trade.r), true]] : []),
-            ...(trade.plannedR != null ? [["Planned R", `+${trade.plannedR?.toFixed(2)}R`]] : []),
-            ...(trade.holdMinutes != null ? [["Hold Time", trade.holdMinutes < 60 ? `${trade.holdMinutes}m` : `${Math.floor(trade.holdMinutes/60)}h ${trade.holdMinutes%60}m`]] : []),
+            [tt("tradeDetail.direction", "Direction"), trade.direction],
+            ...(trade.stopLoss ? [[tt("tradeDetail.stopLoss", "Stop Loss"), fmt(trade.stopLoss)]] : []),
+            ...(trade.takeProfit ? [[tt("tradeDetail.takeProfit", "Take Profit"), fmt(trade.takeProfit)]] : []),
+            ...(trade.r != null ? [[tt("tradeDetail.rMultiple", "R-Multiple"), fmtR(trade.r), true]] : []),
+            ...(trade.plannedR != null ? [[tt("tradeDetail.plannedR", "Planned R"), `+${trade.plannedR?.toFixed(2)}R`]] : []),
+            ...(trade.holdMinutes != null ? [[tt("tradeDetail.holdTime", "Hold Time"), trade.holdMinutes < 60 ? `${trade.holdMinutes}m` : `${Math.floor(trade.holdMinutes/60)}h ${trade.holdMinutes%60}m`]] : []),
           ].map(([k, v, full]) => (
             <div
               key={k}
@@ -219,7 +219,7 @@ export default function TradeDetail({ trade, onClose, onEdit, onExecute, onSave,
             >
               <div>
                 <div style={{ fontSize: 10, color: t.text3, marginBottom: 2 }}>
-                  LEG {i + 1}
+                  {tt("tradeDetail.legN", "LEG {{n}}", { n: i + 1 })}
                 </div>
                 <div
                   style={{
@@ -233,7 +233,7 @@ export default function TradeDetail({ trade, onClose, onEdit, onExecute, onSave,
               </div>
               <div>
                 <div style={{ fontSize: 10, color: t.text3, marginBottom: 2 }}>
-                  STRIKE
+                  {tt("tradeDetail.strike", "STRIKE")}
                 </div>
                 <div
                   style={{
@@ -247,7 +247,7 @@ export default function TradeDetail({ trade, onClose, onEdit, onExecute, onSave,
               </div>
               <div>
                 <div style={{ fontSize: 10, color: t.text3, marginBottom: 2 }}>
-                  ENTRY
+                  {tt("tradeDetail.entryCaps", "ENTRY")}
                 </div>
                 <div
                   style={{
@@ -261,7 +261,7 @@ export default function TradeDetail({ trade, onClose, onEdit, onExecute, onSave,
               </div>
               <div>
                 <div style={{ fontSize: 10, color: t.text3, marginBottom: 2 }}>
-                  EXIT
+                  {tt("tradeDetail.exitCaps", "EXIT")}
                 </div>
                 <div
                   style={{
@@ -275,7 +275,7 @@ export default function TradeDetail({ trade, onClose, onEdit, onExecute, onSave,
               </div>
               <div>
                 <div style={{ fontSize: 10, color: t.text3, marginBottom: 2 }}>
-                  CONTRACTS
+                  {tt("tradeDetail.contracts", "CONTRACTS")}
                 </div>
                 <div
                   style={{
@@ -311,7 +311,7 @@ export default function TradeDetail({ trade, onClose, onEdit, onExecute, onSave,
               letterSpacing: 1.5,
             }}
           >
-            Emotion
+            {tt("tradeDetail.emotion", "Emotion")}
           </div>
           <div style={{ fontSize: 13, color: t.text }}>{trade.emotion}</div>
         </div>
@@ -328,7 +328,7 @@ export default function TradeDetail({ trade, onClose, onEdit, onExecute, onSave,
                 letterSpacing: 1.5,
               }}
             >
-              Mistake
+              {tt("tradeDetail.mistake", "Mistake")}
             </div>
             <div
               style={{
@@ -343,7 +343,7 @@ export default function TradeDetail({ trade, onClose, onEdit, onExecute, onSave,
       </div>
       {trade.screenshots?.length > 0 && (
         <div style={{ marginBottom: 10 }}>
-          <div style={{ fontSize: 10, color: t.text3, marginBottom: 8, textTransform: "uppercase", letterSpacing: 1.5 }}>Chart Screenshots</div>
+          <div style={{ fontSize: 10, color: t.text3, marginBottom: 8, textTransform: "uppercase", letterSpacing: 1.5 }}>{tt("tradeDetail.chartScreenshots", "Chart Screenshots")}</div>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 6 }}>
             {trade.screenshots.map((img) => (
               <img
@@ -359,7 +359,7 @@ export default function TradeDetail({ trade, onClose, onEdit, onExecute, onSave,
       )}
 {trade.voiceNote && (
         <div style={{ background: t.card2, borderRadius: 8, padding: "12px 14px", marginBottom: 10 }}>
-          <div style={{ fontSize: 10, color: t.text3, marginBottom: 8, textTransform: "uppercase", letterSpacing: 1.5 }}>Voice Note</div>
+          <div style={{ fontSize: 10, color: t.text3, marginBottom: 8, textTransform: "uppercase", letterSpacing: 1.5 }}>{tt("tradeDetail.voiceNote", "Voice Note")}</div>
           <audio controls src={trade.voiceNote} style={{ width: "100%", height: 36 }} />
         </div>
       )}
@@ -376,7 +376,7 @@ export default function TradeDetail({ trade, onClose, onEdit, onExecute, onSave,
               letterSpacing: 1.5,
             }}
           >
-            Notes
+            {tt("tradeDetail.notes", "Notes")}
           </div>
           <div style={{ fontSize: 13, color: t.text2, lineHeight: 1.6 }}>
             {trade.notes}
@@ -385,10 +385,10 @@ export default function TradeDetail({ trade, onClose, onEdit, onExecute, onSave,
       )}
       {trade.closes?.length > 0 && (
         <div style={{ marginBottom: 10 }}>
-          <div style={{ fontSize: 10, color: t.text3, marginBottom: 8, textTransform: "uppercase", letterSpacing: 1.5 }}>Scale-Out History</div>
+          <div style={{ fontSize: 10, color: t.text3, marginBottom: 8, textTransform: "uppercase", letterSpacing: 1.5 }}>{tt("tradeDetail.scaleOutHistory", "Scale-Out History")}</div>
           <div style={{ background: t.card2, borderRadius: 8, overflow: "hidden" }}>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", padding: "6px 10px", borderBottom: `1px solid ${t.border}` }}>
-              {["Date", "Price", "Shares", "P&L"].map(h => (
+              {[tt("tradeDetail.colDate", "Date"), tt("tradeDetail.colPrice", "Price"), tt("tradeDetail.colShares", "Shares"), tt("tradeDetail.colPL", "P&L")].map(h => (
                 <div key={h} style={{ fontSize: 10, color: t.text3, textTransform: "uppercase", letterSpacing: 1.5, fontFamily: "'Space Mono',monospace" }}>{h}</div>
               ))}
             </div>
@@ -411,14 +411,14 @@ export default function TradeDetail({ trade, onClose, onEdit, onExecute, onSave,
             const totalExited = calcTotalExited(trade.closes);
             const remaining = (trade.shares || 0) - totalExited;
             if (remaining <= 0) return null;
-            return <div style={{ fontSize: 11, color: t.text3, fontFamily: "'Space Mono',monospace", marginTop: 6 }}>{remaining} shares remaining open</div>;
+            return <div style={{ fontSize: 11, color: t.text3, fontFamily: "'Space Mono',monospace", marginTop: 6 }}>{tt("tradeDetail.sharesRemaining", "{{n}} shares remaining open", { n: remaining })}</div>;
           })()}
         </div>
       )}
       {trade.history?.length > 0 && (
         <div style={{ marginTop: 10 }}>
           <button onClick={() => setShowHistory(h => !h)} style={{ background: "none", border: "none", color: t.text3, cursor: "pointer", fontSize: 11, fontFamily: "'Space Mono',monospace", padding: 0, display: "flex", alignItems: "center", gap: 5 }}>
-            {showHistory ? "▾" : "▸"} Edit History ({trade.history.length})
+            {showHistory ? "▾" : "▸"} {tt("tradeDetail.editHistory", "Edit History ({{n}})", { n: trade.history.length })}
           </button>
           {showHistory && (
             <div style={{ marginTop: 8, display: "flex", flexDirection: "column", gap: 6 }}>
@@ -443,17 +443,17 @@ export default function TradeDetail({ trade, onClose, onEdit, onExecute, onSave,
     const planned = parseFloat(snap.entryPrice);
     const actual = parseFloat(trade.entryPrice);
     const diff = actual && planned ? ((actual - planned) / planned * 100).toFixed(1) : null;
-    rows.push({ label: "Entry Price", planned: `$${planned}`, actual: `$${actual}`, diff: diff !== null ? `${diff > 0 ? "+" : ""}${diff}%` : null, good: diff !== null ? Math.abs(parseFloat(diff)) <= 2 : true });
+    rows.push({ label: tt("tradeDetail.entryPrice", "Entry Price"), planned: `$${planned}`, actual: `$${actual}`, diff: diff !== null ? `${diff > 0 ? "+" : ""}${diff}%` : null, good: diff !== null ? Math.abs(parseFloat(diff)) <= 2 : true });
   }
-  if (snap.stopLoss) rows.push({ label: "Stop Loss", planned: `$${snap.stopLoss}`, actual: trade.stopLoss ? `$${trade.stopLoss}` : "—", diff: null, good: !!trade.stopLoss });
-  if (snap.takeProfit) rows.push({ label: "Take Profit", planned: `$${snap.takeProfit}`, actual: trade.exitPrice ? `$${trade.exitPrice}` : "—", diff: null, good: trade.exitPrice >= snap.takeProfit });
-  if (snap.shares) rows.push({ label: "Size", planned: snap.shares, actual: trade.shares || "—", diff: null, good: String(snap.shares) === String(trade.shares) });
-  if (snap.emotion) rows.push({ label: "Emotion", planned: snap.emotion, actual: trade.emotion || "—", diff: null, good: snap.emotion === trade.emotion });
+  if (snap.stopLoss) rows.push({ label: tt("tradeDetail.stopLoss", "Stop Loss"), planned: `$${snap.stopLoss}`, actual: trade.stopLoss ? `$${trade.stopLoss}` : "—", diff: null, good: !!trade.stopLoss });
+  if (snap.takeProfit) rows.push({ label: tt("tradeDetail.takeProfit", "Take Profit"), planned: `$${snap.takeProfit}`, actual: trade.exitPrice ? `$${trade.exitPrice}` : "—", diff: null, good: trade.exitPrice >= snap.takeProfit });
+  if (snap.shares) rows.push({ label: tt("tradeDetail.size", "Size"), planned: snap.shares, actual: trade.shares || "—", diff: null, good: String(snap.shares) === String(trade.shares) });
+  if (snap.emotion) rows.push({ label: tt("tradeDetail.emotion", "Emotion"), planned: snap.emotion, actual: trade.emotion || "—", diff: null, good: snap.emotion === trade.emotion });
   if (snap.legIV?.length) {
     snap.legIV.forEach((planned, i) => {
       if (!planned.iv) return;
       const actualIV = trade.legs?.[i]?.iv;
-      rows.push({ label: `Leg ${i + 1} IV`, planned: `${planned.iv}%`, actual: actualIV ? `${actualIV}%` : "—", diff: null, good: !!actualIV });
+      rows.push({ label: tt("tradeDetail.legNIV", "Leg {{n}} IV", { n: i + 1 }), planned: `${planned.iv}%`, actual: actualIV ? `${actualIV}%` : "—", diff: null, good: !!actualIV });
     });
   }
   const hasRows = rows.length > 0;
@@ -462,12 +462,12 @@ export default function TradeDetail({ trade, onClose, onEdit, onExecute, onSave,
   if (!hasRows && !hasChecklist && !hasAiAssist) return null;
   return (
     <div style={{ background: t.surface, border: `1px solid ${t.border}`, borderRadius: 10, padding: "12px 14px", marginBottom: 10 }}>
-      <div style={{ fontSize: 10, color: t.text3, marginBottom: 10, textTransform: "uppercase", letterSpacing: 1.5 }}>Plan vs Reality</div>
+      <div style={{ fontSize: 10, color: t.text3, marginBottom: 10, textTransform: "uppercase", letterSpacing: 1.5 }}>{tt("tradeDetail.planVsReality", "Plan vs Reality")}</div>
       {hasRows && (
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "6px 8px", marginBottom: hasChecklist ? 12 : 0 }}>
           <div style={{ fontSize: 10, color: t.text4, fontFamily: "'Space Mono',monospace" }}></div>
-          <div style={{ fontSize: 10, color: t.text4, fontFamily: "'Space Mono',monospace" }}>PLANNED</div>
-          <div style={{ fontSize: 10, color: t.text4, fontFamily: "'Space Mono',monospace" }}>ACTUAL</div>
+          <div style={{ fontSize: 10, color: t.text4, fontFamily: "'Space Mono',monospace" }}>{tt("tradeDetail.planned", "PLANNED")}</div>
+          <div style={{ fontSize: 10, color: t.text4, fontFamily: "'Space Mono',monospace" }}>{tt("tradeDetail.actual", "ACTUAL")}</div>
           {rows.map(({ label, planned, actual, diff, good }) => (
             <>
               <div key={label + "l"} style={{ fontSize: 11, color: t.text3 }}>{label}</div>
@@ -483,7 +483,7 @@ export default function TradeDetail({ trade, onClose, onEdit, onExecute, onSave,
       )}
       {hasChecklist && (
         <>
-          <div style={{ fontSize: 10, color: t.text3, marginBottom: 6, textTransform: "uppercase", letterSpacing: 1.5 }}>Pre-Trade Checklist</div>
+          <div style={{ fontSize: 10, color: t.text3, marginBottom: 6, textTransform: "uppercase", letterSpacing: 1.5 }}>{tt("tradeDetail.preTradeChecklist", "Pre-Trade Checklist")}</div>
           <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
             {snap.checklist.map((item) => {
               const checked = item.checked ?? (typeof item === "string" ? false : false);
@@ -502,10 +502,10 @@ export default function TradeDetail({ trade, onClose, onEdit, onExecute, onSave,
       )}
       {hasAiAssist && (
         <div style={{ marginTop: hasRows || hasChecklist ? 12 : 0, paddingTop: hasRows || hasChecklist ? 12 : 0, borderTop: hasRows || hasChecklist ? `1px solid ${t.border}` : "none" }}>
-          <div style={{ fontSize: 10, color: t.text3, marginBottom: 8, textTransform: "uppercase", letterSpacing: 1.5 }}>AI Assist (at plan time)</div>
+          <div style={{ fontSize: 10, color: t.text3, marginBottom: 8, textTransform: "uppercase", letterSpacing: 1.5 }}>{tt("tradeDetail.aiAssistAtPlanTime", "AI Assist (at plan time)")}</div>
           {snap.aiAssist.chartAnalysis?.length > 0 && (
             <>
-              <div style={{ fontSize: 10, color: t.text3, marginBottom: 5, textTransform: "uppercase", letterSpacing: 1 }}>Chart Analysis</div>
+              <div style={{ fontSize: 10, color: t.text3, marginBottom: 5, textTransform: "uppercase", letterSpacing: 1 }}>{tt("tradeDetail.chartAnalysis", "Chart Analysis")}</div>
               {snap.aiAssist.chartAnalysis.map((item, i) => (
                 <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: 7, marginBottom: 4 }}>
                   <span style={{ color: t.text4, flexShrink: 0, marginTop: 1 }}>·</span>

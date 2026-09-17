@@ -2,7 +2,7 @@ import { calcPL, fmt, fmtDate, fmtR } from "../lib/utils";
 import Tag from "./Tag";
 import { EditIcon, DeleteIcon, ScreenshotIcon, RecIcon } from "../lib/icons";
 
-export default function TradeRow({ trade, onClick, onEdit, onDelete, onSelect, isSelected, t, mobile, isFirst, editLabel }) {
+export default function TradeRow({ trade, onClick, onEdit, onDelete, onSelect, isSelected, t, tt, mobile, isFirst, editLabel }) {
   const pl = calcPL(trade);
   const plDisplay = isNaN(pl) ? null : pl;
   const isOpen = plDisplay === null;
@@ -25,7 +25,7 @@ export default function TradeRow({ trade, onClick, onEdit, onDelete, onSelect, i
           <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
             <span style={{ display: "flex", alignItems: "center", gap: 7 }}>
               <span style={{ fontFamily: "'Space Mono', monospace", fontSize: 15, fontWeight: 700, color: t.text }}>{trade.ticker}</span>
-              {isOpen && <span style={{ fontSize: 9, fontFamily: "'Space Mono',monospace", color: "#f59e0b", background: "#f59e0b18", border: "1px solid #f59e0b40", borderRadius: 4, padding: "1px 5px", letterSpacing: 1 }}>OPEN</span>}
+              {isOpen && <span style={{ fontSize: 9, fontFamily: "'Space Mono',monospace", color: "#f59e0b", background: "#f59e0b18", border: "1px solid #f59e0b40", borderRadius: 4, padding: "1px 5px", letterSpacing: 1 }}>{tt("tradeRow.open", "OPEN")}</span>}
             </span>
             <span style={{ fontFamily: "'Space Mono', monospace", fontSize: 15, fontWeight: 700, color: plDisplay == null ? t.text3 : plDisplay >= 0 ? t.positive : t.danger }}>
               {plDisplay == null ? "—" : `${plDisplay >= 0 ? "+" : ""}${fmt(plDisplay)}`}
@@ -37,8 +37,8 @@ export default function TradeRow({ trade, onClick, onEdit, onDelete, onSelect, i
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
             <span style={{ fontSize: 12, color: t.text3 }}>{trade.strategy} · {fmtDate(trade.date)}</span>
             <div style={{ display: "flex", gap: 6 }}>
-              <button onClick={(e) => { e.stopPropagation(); onEdit(); }} style={{ background: "none", border: `1px solid ${t.border}`, color: t.text3, borderRadius: 5, padding: "2px 8px", cursor: "pointer", fontSize: 11, display: "flex", alignItems: "center", gap: 4 }}><EditIcon size="1em" />{editLabel || "Edit"}</button>
-              <button onClick={(e) => { e.stopPropagation(); onDelete(); }} style={{ background: "none", border: `1px solid ${t.danger}40`, color: t.danger, borderRadius: 5, padding: "2px 8px", cursor: "pointer", fontSize: 11, display: "flex", alignItems: "center", gap: 4 }}><DeleteIcon size="1em" />Del</button>
+              <button onClick={(e) => { e.stopPropagation(); onEdit(); }} style={{ background: "none", border: `1px solid ${t.border}`, color: t.text3, borderRadius: 5, padding: "2px 8px", cursor: "pointer", fontSize: 11, display: "flex", alignItems: "center", gap: 4 }}><EditIcon size="1em" />{editLabel || tt("tradeRow.edit", "Edit")}</button>
+              <button onClick={(e) => { e.stopPropagation(); onDelete(); }} style={{ background: "none", border: `1px solid ${t.danger}40`, color: t.danger, borderRadius: 5, padding: "2px 8px", cursor: "pointer", fontSize: 11, display: "flex", alignItems: "center", gap: 4 }}><DeleteIcon size="1em" />{tt("tradeRow.del", "Del")}</button>
             </div>
           </div>
           {trade.tags?.length > 0 && (
@@ -61,7 +61,7 @@ export default function TradeRow({ trade, onClick, onEdit, onDelete, onSelect, i
           <span onClick={onClick} style={{ fontFamily: "'Space Mono', monospace", fontSize: 14, fontWeight: 700, color: t.text }}>{trade.ticker}</span>
           <span onClick={onClick} style={{ fontSize: 13, color: t.text3 }}>
             {trade.strategy}
-            {isOpen && <span style={{ marginLeft: 6, fontSize: 9, fontFamily: "'Space Mono',monospace", color: "#f59e0b", background: "#f59e0b18", border: "1px solid #f59e0b40", borderRadius: 4, padding: "1px 5px", letterSpacing: 1 }}>OPEN</span>}
+            {isOpen && <span style={{ marginLeft: 6, fontSize: 9, fontFamily: "'Space Mono',monospace", color: "#f59e0b", background: "#f59e0b18", border: "1px solid #f59e0b40", borderRadius: 4, padding: "1px 5px", letterSpacing: 1 }}>{tt("tradeRow.open", "OPEN")}</span>}
             {trade.tags?.length > 0 && (
               <span style={{ marginLeft: 6, fontSize: 10, color: t.accent, background: t.accent + "15", borderRadius: 4, padding: "1px 6px" }}>
                 {trade.tags[0]}{trade.tags.length > 1 ? ` +${trade.tags.length - 1}` : ""}
@@ -71,14 +71,14 @@ export default function TradeRow({ trade, onClick, onEdit, onDelete, onSelect, i
               <span style={{ marginLeft: 6, fontSize: 10, color: t.text3, display: "inline-flex", alignItems: "center", gap: 3 }}><ScreenshotIcon size={11} /> {trade.screenshots.length}</span>
             )}
             {trade.voiceNote && (
-              <span style={{ marginLeft: 6, fontSize: 10, color: t.text3, display: "inline-flex", alignItems: "center", gap: 3 }} title="Has voice note">
+              <span style={{ marginLeft: 6, fontSize: 10, color: t.text3, display: "inline-flex", alignItems: "center", gap: 3 }} title={tt("tradeRow.hasVoiceNote", "Has voice note")}>
                 <RecIcon size={11} />
               </span>
             )}
           </span>
           <div style={{ display: "flex", gap: 6 }}>
-            <button onClick={(e) => { e.stopPropagation(); onEdit(); }} style={{ background: "none", border: `1px solid ${t.border}`, color: t.text3, borderRadius: 6, padding: "3px 8px", cursor: "pointer", fontSize: 11, display: "flex", alignItems: "center", gap: 4 }}><EditIcon size="1em" />{editLabel || "Edit"}</button>
-            <button onClick={(e) => { e.stopPropagation(); onDelete(); }} style={{ background: "none", border: `1px solid ${t.danger}40`, color: t.danger, borderRadius: 6, padding: "3px 8px", cursor: "pointer", fontSize: 11, display: "flex", alignItems: "center", gap: 4 }}><DeleteIcon size="1em" />Del</button>
+            <button onClick={(e) => { e.stopPropagation(); onEdit(); }} style={{ background: "none", border: `1px solid ${t.border}`, color: t.text3, borderRadius: 6, padding: "3px 8px", cursor: "pointer", fontSize: 11, display: "flex", alignItems: "center", gap: 4 }}><EditIcon size="1em" />{editLabel || tt("tradeRow.edit", "Edit")}</button>
+            <button onClick={(e) => { e.stopPropagation(); onDelete(); }} style={{ background: "none", border: `1px solid ${t.danger}40`, color: t.danger, borderRadius: 6, padding: "3px 8px", cursor: "pointer", fontSize: 11, display: "flex", alignItems: "center", gap: 4 }}><DeleteIcon size="1em" />{tt("tradeRow.del", "Del")}</button>
           </div>
           <span onClick={onClick} style={{ fontFamily: "'Space Mono', monospace", fontSize: 13, fontWeight: 700, color: plDisplay == null ? t.text3 : plDisplay >= 0 ? t.positive : t.danger, textAlign: "right" }}>
             {plDisplay == null ? "—" : `${plDisplay >= 0 ? "+" : ""}${fmt(plDisplay)}`}
