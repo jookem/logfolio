@@ -49,10 +49,10 @@ const TUTORIAL_STEPS = [
   },
   {
     icon: <RocketIcon size={44} />,
-    title: "Party Starter",
-    desc: "Not sure what to trade? Open Plan a Trade and tap Party Starter. It scans for common stocks trading up on the day with at least 2x their average volume and a market cap of $300M or more, sorted by volume. Tap a result to fill in the ticker and current price. Switch the type to Options and the same button scans for options setups: fresh flow, cheap volatility and a squeeze, with the contract filled in for you.",
+    title: "Bullish and Bearish Scans",
+    desc: "Not sure what to trade? Open Plan a Trade and tap Bullish Scan or Bearish Scan. For stocks it finds common stocks moving up or down on the day with at least 2x their average volume and a market cap of $300M or more. Switch the type to Options and the same buttons scan for call or put flow with cheap volatility and a squeeze setup. Tap a result to fill in the trade.",
     tab: "plans",
-    cta: { label: "Try Party Starter", action: "openPlan" },
+    cta: { label: "Try the scans", action: "openPlan" },
   },
   {
     icon: <ConnectIcon size={44} />,

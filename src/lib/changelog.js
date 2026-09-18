@@ -4,16 +4,16 @@ export const CHANGELOG = [
     version: "1.6.0",
     date: "2026-09-19",
     items: [
-      "Party Starter: scan for stocks trading up on unusual volume with a full-width button at the top of Plan a Trade",
+      "Bullish Scan and Bearish Scan in Plan a Trade: find stocks moving up or down on unusual volume, with one tap to load the ticker (Bearish sets the trade to short)",
       "Market status on the Today tab: Market Open or Closed with a live countdown to the close or next open, aware of holidays and early closes",
       "Broker auto-sync via SnapTrade for Pro members",
       "Multi-language support: Spanish, French, German, Portuguese and Japanese",
       "Sample trades now use recent market prices and dates",
-      "Options Party Starter: scans liquid stocks for fresh options flow (volume above open interest, 3x relative volume, trades at the ask) with low volatility and a squeeze setup, and fills in the contract for you",
+      "Options Bullish Scan and Bearish Scan: find liquid stocks with fresh call or put flow (volume above open interest, 3x relative volume, trades at the ask), low volatility and a squeeze setup, and fill in the contract for you",
       "Position Size Calculator now works for options (sized by worst-case loss, including spreads and condors) as well as stocks, forex and crypto",
       "Position Size Calculator can suggest a stop loss price from your entry, share count and risk budget",
       "Position Size Calculator pre-fills Account Size and Risk % from Settings and tells you exactly which fields are still needed",
-      "Tutorial updated with Party Starter and market status",
+      "Tutorial updated with the Bullish and Bearish scans and market status",
     ]
   },
   {

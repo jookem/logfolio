@@ -1,4 +1,4 @@
-// Party Starter stock picker: pure filtering logic, no I/O.
+// Bullish / Bearish stock scan: pure filtering logic, no I/O.
 //
 // Takes a raw list of quote objects (Yahoo Finance screener shape) and applies
 // the rules below in order, cheapest checks first. Any quote with a missing or
@@ -39,6 +39,7 @@ export const PARTY_STARTER_RULES = Object.freeze({
   minAvgVolume: 100_000,        // strictly greater than
   minMarketCap: 300_000_000,    // greater than or equal to
   minRelVolume: 2.0,            // at least 2x average
+  direction: "bullish",         // "bullish": price > open, "bearish": price < open
   maxResults: 20,
 });
 
@@ -92,7 +93,7 @@ function toPick(q) {
  *  1. Common stock (no ETFs, mutual funds, ADRs)
  *  2. Average daily volume > 100,000
  *  3. Market cap >= $300M
- *  4. Price > open
+ *  4. Price > open (bullish) or price < open (bearish)
  *  5. Volume >= 2x average daily volume
  * Then sorted by current volume (descending) and capped at 20.
  *
@@ -103,6 +104,7 @@ function toPick(q) {
 export function filterPartyStarters(quotes, overrides = {}) {
   if (!Array.isArray(quotes)) return [];
   const rules = { ...PARTY_STARTER_RULES, ...overrides };
+  const bearish = rules.direction === "bearish";
   const seen = new Set();
   const picks = [];
 
@@ -112,7 +114,7 @@ export function filterPartyStarters(quotes, overrides = {}) {
     if (!pick || seen.has(pick.symbol)) continue;
     if (!(pick.avgVolume > rules.minAvgVolume)) continue;
     if (!(pick.marketCap >= rules.minMarketCap)) continue;
-    if (!(pick.price > pick.open)) continue;
+    if (!(bearish ? pick.price < pick.open : pick.price > pick.open)) continue;
     if (!(pick.volume >= pick.avgVolume * rules.minRelVolume)) continue;
     seen.add(pick.symbol);
     picks.push(pick);
@@ -123,6 +125,7 @@ export function filterPartyStarters(quotes, overrides = {}) {
 }
 
 const SCREENER_IDS = ["most_actives", "day_gainers", "small_cap_gainers"];
+export const BEARISH_SCREENER_IDS = ["most_actives", "day_losers"];
 const SCREENER_URL = "https://query1.finance.yahoo.com/v1/finance/screener/predefined/saved";
 
 /**

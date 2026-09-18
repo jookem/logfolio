@@ -632,3 +632,17 @@ export const RocketIcon = ({ size = 16 }) => (
     <path d="M9 17l-1.5 4M15 17l1.5 4M12 17v4" />
   </svg>
 );
+
+// Trend up / Bullish scan
+export const TrendUpIcon = ({ size = 16 }) => (
+  <svg viewBox="0 0 24 24" width={size} height={size} fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ display: "block" }}>
+    <path d="M3 17l6-6 4 4 8-8M15 7h6v6" />
+  </svg>
+);
+
+// Trend down / Bearish scan
+export const TrendDownIcon = ({ size = 16 }) => (
+  <svg viewBox="0 0 24 24" width={size} height={size} fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ display: "block" }}>
+    <path d="M3 7l6 6 4-4 8 8M15 17h6v-6" />
+  </svg>
+);

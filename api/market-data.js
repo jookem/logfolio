@@ -1,6 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 import { checkRateLimit } from "./_lib/rateLimit.js";
-import { fetchScreenerQuotes, filterPartyStarters } from "./_lib/partyStarter.js";
+import { fetchScreenerQuotes, filterPartyStarters, BEARISH_SCREENER_IDS } from "./_lib/partyStarter.js";
 import { scanOptionsPartyStarters } from "./_lib/optionsPartyStarter.js";
 
 // Vercel Hobby caps a deployment at 12 serverless functions, so the three
@@ -157,10 +157,11 @@ async function handlePartyStarter(req, res, userId) {
     return res.status(429).json({ error: "Rate limit exceeded. Try again shortly." });
   }
   try {
-    const quotes = await fetchScreenerQuotes(YF_BASE_HEADERS);
+    const direction = req.body?.direction === "bearish" ? "bearish" : "bullish";
+    const quotes = await fetchScreenerQuotes(YF_BASE_HEADERS, direction === "bearish" ? BEARISH_SCREENER_IDS : undefined);
     if (!quotes.length) return res.status(502).json({ error: "Screener data unavailable" });
     res.setHeader("Cache-Control", "s-maxage=120, stale-while-revalidate");
-    return res.status(200).json({ picks: filterPartyStarters(quotes), scanned: quotes.length });
+    return res.status(200).json({ picks: filterPartyStarters(quotes, { direction }), scanned: quotes.length });
   } catch (e) {
     return res.status(500).json({ error: e.message });
   }
@@ -185,9 +186,10 @@ async function handleOptionsPartyStarter(req, res, userId) {
         return null;
       }
     };
-    const quotes = await fetchScreenerQuotes(YF_BASE_HEADERS, ["most_actives", "day_gainers", "day_losers"]);
+    const direction = req.body?.direction === "bearish" ? "bearish" : "bullish";
+    const quotes = await fetchScreenerQuotes(YF_BASE_HEADERS, ["most_actives", direction === "bearish" ? "day_losers" : "day_gainers"]);
     if (!quotes.length) return res.status(502).json({ error: "Screener data unavailable" });
-    const { picks, funnel } = await scanOptionsPartyStarters(yf, quotes);
+    const { picks, funnel } = await scanOptionsPartyStarters(yf, quotes, { direction });
     res.setHeader("Cache-Control", "s-maxage=300, stale-while-revalidate");
     return res.status(200).json({ picks, funnel });
   } catch (e) {

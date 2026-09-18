@@ -514,8 +514,9 @@ const base = {
         {form.type === "stock" && !initial && (
           <PartyStarterPanel
             t={t}
-            onPick={(p) => {
+            onPick={(p, dir) => {
               set("ticker", p.symbol);
+              set("stockDirection", dir === "bearish" ? "short" : "long");
               fetchStockPrice(p.symbol);
             }}
           />

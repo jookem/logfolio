@@ -1,5 +1,6 @@
-// Options Party Starter: scans liquid stocks for early momentum in their
-// options (fresh positioning, urgency, cheap volatility, squeeze breakout).
+// Options Bullish / Bearish scan: finds liquid stocks with early momentum in
+// their options (fresh positioning, urgency, cheap volatility, squeeze breakout).
+// Bullish looks at calls and an upside break, bearish at puts and a downside break.
 //
 // The math helpers are pure. The fetch helpers take a `yf(url)` function that
 // returns parsed Yahoo Finance JSON (or null), so the caller owns cookies,
@@ -23,6 +24,7 @@ export const OPTIONS_PARTY_RULES = Object.freeze({
   dteMax: 45,
   dteTarget: 37,
   maxIvPercentile: 30,
+  direction: "bullish",         // "bullish": calls, break above the 20-day SMA; "bearish": puts, break below
   squeezeLookback: 3,          // squeeze released within this many bars counts as fired
   contractsToCheck: 3,         // flagged contracts per ticker that get a history lookup
   maxTickers: 15,              // tickers whose chains are fetched per scan
@@ -220,6 +222,8 @@ async function pool(items, limit, fn) {
  */
 export async function scanOptionsPartyStarters(yf, quotes, overrides = {}, nowMs = Date.now()) {
   const rules = { ...OPTIONS_PARTY_RULES, ...overrides };
+  const bearish = rules.direction === "bearish";
+  const side = bearish ? "put" : "call";
   const funnel = { universe: 0, liquid: 0, optionable: 0, flow: 0, volatility: 0, final: 0 };
   const seen = new Set();
   const universe = (Array.isArray(quotes) ? quotes : []).filter(q => q?.symbol && !seen.has(q.symbol) && seen.add(q.symbol));
@@ -238,7 +242,7 @@ export async function scanOptionsPartyStarters(yf, quotes, overrides = {}, nowMs
     const exp = pickExpiration(expirations, nowMs, rules);
     if (!exp) return null;
     const chain = await fetchChain(yf, q.symbol, exp);
-    const flagged = [...flagContracts(chain.calls, "call", rules), ...flagContracts(chain.puts, "put", rules)]
+    const flagged = (bearish ? flagContracts(chain.puts, "put", rules) : flagContracts(chain.calls, "call", rules))
       .sort((a, b) => b.volume - a.volume)
       .slice(0, rules.contractsToCheck);
     if (!flagged.length) return null;
@@ -263,14 +267,11 @@ export async function scanOptionsPartyStarters(yf, quotes, overrides = {}, nowMs
     const sq = ttmSqueeze(bars, rules);
     if (!sq || !(sq.on || sq.fired)) return null;
 
-    const callVol = passing.filter(c => c.side === "call").reduce((s, c) => s + c.volume, 0);
-    const putVol = passing.filter(c => c.side === "put").reduce((s, c) => s + c.volume, 0);
-    const side = callVol >= putVol ? "call" : "put";
-    // A fired squeeze must break the same way the flow is leaning.
-    if (sq.fired && (side === "call" ? !(sq.price > sq.sma) : !(sq.price < sq.sma))) return null;
+    // A fired squeeze must break the same way as the scan direction.
+    if (sq.fired && (bearish ? !(sq.price < sq.sma) : !(sq.price > sq.sma))) return null;
     funnel.volatility++;
 
-    const target = passing.filter(c => c.side === side).sort((a, b) => b.volume - a.volume)[0];
+    const target = [...passing].sort((a, b) => b.volume - a.volume)[0];
     return {
       ticker: q.symbol,
       name: q.shortName || q.longName || q.symbol,
@@ -287,7 +288,7 @@ export async function scanOptionsPartyStarters(yf, quotes, overrides = {}, nowMs
       ivPercentile: +ivPercentile.toFixed(1),
       squeeze: sq.fired ? "fired" : "coiled",
       score: momentumScore({ volOi: target.volOi, relVol: target.relVol, ivPercentile }, rules),
-      direction: side === "call" ? "BULLISH" : "BEARISH",
+      direction: bearish ? "BEARISH" : "BULLISH",
     };
   })).filter(Boolean).sort((a, b) => b.score - a.score).slice(0, rules.maxResults);
 
