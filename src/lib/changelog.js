@@ -4,7 +4,7 @@ export const CHANGELOG = [
     version: "1.6.0",
     date: "2026-09-19",
     items: [
-      "Party Starter: scan for stocks trading up on unusual volume from inside Plan a Trade",
+      "Party Starter: scan for stocks trading up on unusual volume with a full-width button at the top of Plan a Trade",
       "Market status on the Today tab: Market Open or Closed with a live countdown to the close or next open, aware of holidays and early closes",
       "Broker auto-sync via SnapTrade for Pro members",
       "Multi-language support: Spanish, French, German, Portuguese and Japanese",

@@ -512,6 +512,16 @@ const base = {
   </button>
 </div>
 
+        {form.type === "stock" && !initial && (
+          <PartyStarterPanel
+            t={t}
+            onPick={(p) => {
+              set("ticker", p.symbol);
+              fetchStockPrice(p.symbol);
+            }}
+          />
+        )}
+
         {/* ── Ticker / Type ── */}
         <div id="tut-plan-strategy" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 12 }}>
 <div>
@@ -548,16 +558,6 @@ const base = {
             </select>
           </div>
         </div>
-
-        {form.type === "stock" && !initial && (
-          <PartyStarterPanel
-            t={t}
-            onPick={(p) => {
-              set("ticker", p.symbol);
-              fetchStockPrice(p.symbol);
-            }}
-          />
-        )}
 
         {/* ── Strategy / Direction ── */}
         <div style={{ display: "grid", gridTemplateColumns: (STOCK_LIKE.includes(form.type) || optConfig?.stockRequired) ? "1fr 1fr" : "1fr", gap: 12, marginBottom: 12 }}>

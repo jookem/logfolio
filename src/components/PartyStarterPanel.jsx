@@ -38,11 +38,12 @@ export default function PartyStarterPanel({ t, onPick }) {
   };
 
   const btn = { background: "none", border: `1px solid ${t.accent}`, color: t.accent, borderRadius: 8, padding: "7px 12px", cursor: "pointer", fontSize: 12, fontWeight: 700, fontFamily: "'Space Mono', monospace", display: "inline-flex", alignItems: "center", gap: 6 };
+  const btnFull = { ...btn, width: "100%", justifyContent: "center", padding: "11px 12px", fontSize: 13 };
 
   return (
     <div style={{ marginBottom: 12 }}>
       {!open ? (
-        <button type="button" onClick={scan} style={btn}><RocketIcon size={14} />Party Starter</button>
+        <button type="button" onClick={scan} style={btnFull}><RocketIcon size={16} />Party Starter</button>
       ) : (
         <div style={{ border: `1px solid ${t.border}`, borderRadius: 10, background: t.card2 || t.card, padding: 12 }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
