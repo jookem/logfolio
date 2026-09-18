@@ -129,10 +129,11 @@ const SCREENER_URL = "https://query1.finance.yahoo.com/v1/finance/screener/prede
  * Fetches raw quotes from Yahoo's predefined screeners and merges them.
  * A failing screener is skipped so one bad list doesn't sink the request.
  * @param {Record<string,string>} headers  Request headers for Yahoo.
+ * @param {string[]} [ids]  Predefined screener ids to merge.
  * @returns {Promise<RawQuote[]>}
  */
-export async function fetchScreenerQuotes(headers) {
-  const lists = await Promise.all(SCREENER_IDS.map(async (id) => {
+export async function fetchScreenerQuotes(headers, ids = SCREENER_IDS) {
+  const lists = await Promise.all(ids.map(async (id) => {
     try {
       const res = await fetch(`${SCREENER_URL}?formatted=false&count=250&scrIds=${id}`, { headers });
       if (!res.ok) return [];

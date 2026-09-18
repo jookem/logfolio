@@ -1,6 +1,7 @@
 import { createClient } from "@supabase/supabase-js";
 import { checkRateLimit } from "./_lib/rateLimit.js";
 import { fetchScreenerQuotes, filterPartyStarters } from "./_lib/partyStarter.js";
+import { scanOptionsPartyStarters } from "./_lib/optionsPartyStarter.js";
 
 // Vercel Hobby caps a deployment at 12 serverless functions, so the three
 // market-data proxies (Polygon, Yahoo Finance, Alpha Vantage) live in one
@@ -20,18 +21,23 @@ const YF_BASE_HEADERS = {
 };
 
 async function getYfCrumb() {
-  // Fetch Yahoo Finance home to get session cookie
-  const pageRes = await fetch("https://finance.yahoo.com/", {
-    headers: YF_BASE_HEADERS,
-    redirect: "follow",
-  });
-  const rawCookie = pageRes.headers.get("set-cookie") || "";
-  // Extract all cookie name=value pairs and join them
-  const cookies = rawCookie
+  // Session cookie: the Yahoo home page, falling back to the much lighter
+  // fc.yahoo.com if the home page can't be fetched.
+  const joinCookies = (raw) => raw
     .split(/,(?=[^ ])/)
     .map(c => c.split(";")[0].trim())
     .filter(Boolean)
     .join("; ");
+  let cookies = "";
+  try {
+    const pageRes = await fetch("https://finance.yahoo.com/", { headers: YF_BASE_HEADERS, redirect: "follow" });
+    cookies = joinCookies(pageRes.headers.get("set-cookie") || "");
+  } catch {
+    const fcRes = await fetch("https://fc.yahoo.com/", { headers: YF_BASE_HEADERS, redirect: "manual" });
+    cookies = typeof fcRes.headers.getSetCookie === "function"
+      ? fcRes.headers.getSetCookie().map(c => c.split(";")[0].trim()).filter(Boolean).join("; ")
+      : joinCookies(fcRes.headers.get("set-cookie") || "");
+  }
 
   // Get crumb using those cookies
   const crumbRes = await fetch("https://query2.finance.yahoo.com/v1/test/getcrumb", {
@@ -160,6 +166,35 @@ async function handlePartyStarter(req, res, userId) {
   }
 }
 
+async function handleOptionsPartyStarter(req, res, userId) {
+  if (userId && await checkRateLimit(userId, "options-party-starter", { limit: 3, windowSecs: 60 })) {
+    return res.status(429).json({ error: "Rate limit exceeded. Try again shortly." });
+  }
+  try {
+    let auth = { crumb: "", cookies: "" };
+    try { auth = await getYfCrumb(); } catch { /* chains may still load without a crumb */ }
+    const headers = auth.cookies ? { ...YF_BASE_HEADERS, Cookie: auth.cookies } : YF_BASE_HEADERS;
+    const yf = async (url) => {
+      try {
+        const isChain = url.includes("/v7/finance/options");
+        const finalUrl = isChain && auth.crumb && !auth.crumb.startsWith("<")
+          ? `${url}${url.includes("?") ? "&" : "?"}crumb=${encodeURIComponent(auth.crumb)}` : url;
+        const r = await fetch(finalUrl, { headers });
+        return r.ok ? await r.json() : null;
+      } catch {
+        return null;
+      }
+    };
+    const quotes = await fetchScreenerQuotes(YF_BASE_HEADERS, ["most_actives", "day_gainers", "day_losers"]);
+    if (!quotes.length) return res.status(502).json({ error: "Screener data unavailable" });
+    const { picks, funnel } = await scanOptionsPartyStarters(yf, quotes);
+    res.setHeader("Cache-Control", "s-maxage=300, stale-while-revalidate");
+    return res.status(200).json({ picks, funnel });
+  } catch (e) {
+    return res.status(500).json({ error: e.message });
+  }
+}
+
 export default async function handler(req, res) {
   if (req.method !== "POST") return res.status(405).end();
 
@@ -180,5 +215,6 @@ export default async function handler(req, res) {
   if (provider === "yf") return handleYf(req, res, userId);
   if (provider === "alphavantage") return handleAlphavantage(req, res, userId);
   if (provider === "party-starter") return handlePartyStarter(req, res, userId);
+  if (provider === "options-party-starter") return handleOptionsPartyStarter(req, res, userId);
   return res.status(400).json({ error: "Unknown provider" });
 }

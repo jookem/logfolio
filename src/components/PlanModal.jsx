@@ -8,6 +8,7 @@ import DateInput from "./DateInput";
 import Tag from "./Tag";
 import VoiceNote from "./VoiceNote";
 import PartyStarterPanel from "./PartyStarterPanel";
+import OptionsPartyStarterPanel from "./OptionsPartyStarterPanel";
 import PositionSizeCalculator from "./PositionSizeCalculator";
 
 // Compress an image to JPEG max 1200px, returns { base64, mediaType }
@@ -516,6 +517,22 @@ const base = {
             onPick={(p) => {
               set("ticker", p.symbol);
               fetchStockPrice(p.symbol);
+            }}
+          />
+        )}
+
+        {form.type === "options" && !initial && (
+          <OptionsPartyStarterPanel
+            t={t}
+            onPick={(p) => {
+              const c = p.contract;
+              setForm((f) => ({
+                ...f,
+                ticker: p.ticker,
+                strategy: c.type === "call" ? "Long Call" : "Long Put",
+                currentPrice: p.price != null ? String(p.price) : f.currentPrice,
+                legs: [{ position: "buy", type: c.type, strike: String(c.strike), expiration: c.expiration, entryPremium: c.ask.toFixed(2), contracts: 1, iv: "" }],
+              }));
             }}
           />
         )}
