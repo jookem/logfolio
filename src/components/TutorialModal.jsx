@@ -6,7 +6,7 @@ import {
   CheckIcon, RecIcon, DirectionIcon, AmountIcon, EntryPriceIcon, ExitIcon,
   WarningIcon, EntryTimeIcon, ExitTimeIcon, ScreenshotIcon, TickerIcon,
   CategoryIcon, StrategyIcon, CurrentPriceIcon, EmotionIcon, TagsIcon,
-  KeyboardIcon, ConnectIcon,
+  KeyboardIcon, ConnectIcon, RocketIcon,
 } from "../lib/icons";
 
 const Pair = ({ a, b }) => (
@@ -29,7 +29,7 @@ const TUTORIAL_STEPS = [
   {
     icon: <Pair a={<TickerIcon size={44} />} b={<ArrowsIcon size={44} />} />,
     title: "Load Sample Trades",
-    desc: "Want to explore Analytics, the Calendar, and all features with real data? Load 15 example trades to see everything in action — you can delete them any time from Settings.",
+    desc: "Want to explore Analytics, the Calendar, and all features with real data? Load 15 example trades, priced with recent market data, to see everything in action. You can delete them any time from Settings.",
     tab: null,
     cta: { label: "Load sample trades", action: "loadSamples" },
   },
@@ -48,6 +48,13 @@ const TUTORIAL_STEPS = [
     cta: { label: "Try creating a plan", action: "openPlan" },
   },
   {
+    icon: <RocketIcon size={44} />,
+    title: "Party Starter",
+    desc: "Not sure what to trade? Open Plan a Trade and tap Party Starter. It scans for common stocks trading up on the day with at least 2x their average volume and a market cap of $300M or more, sorted by volume. Tap a result to fill in the ticker and current price.",
+    tab: "plans",
+    cta: { label: "Try Party Starter", action: "openPlan" },
+  },
+  {
     icon: <ConnectIcon size={44} />,
     title: "Connect Your Broker",
     desc: "Pro members can link a brokerage account and pull in closed trades automatically — no more copy-pasting CSV exports. Find it anytime under Settings → Connect Broker.",
@@ -57,7 +64,7 @@ const TUTORIAL_STEPS = [
   {
     icon: <TodayIcon size={44} />,
     title: "Today",
-    desc: "Your daily dashboard. See every trade taken today, your running P/L, win rate, and a breakdown of the current session.",
+    desc: "Your daily dashboard. See every trade taken today, your running P/L, win rate, and a breakdown of the current session. A market status badge shows whether the market is open or closed, with a live countdown to the close or the next open.",
     tab: "today",
     cta: null,
   },

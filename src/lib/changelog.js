@@ -1,5 +1,17 @@
-export const CURRENT_VERSION = "1.5.0";
+export const CURRENT_VERSION = "1.6.0";
 export const CHANGELOG = [
+  {
+    version: "1.6.0",
+    date: "2026-09-19",
+    items: [
+      "Party Starter: scan for stocks trading up on unusual volume from inside Plan a Trade",
+      "Market status on the Today tab: Market Open or Closed with a live countdown to the close or next open, aware of holidays and early closes",
+      "Broker auto-sync via SnapTrade for Pro members",
+      "Multi-language support: Spanish, French, German, Portuguese and Japanese",
+      "Sample trades now use recent market prices and dates",
+      "Tutorial updated with Party Starter and market status",
+    ]
+  },
   {
     version: "1.5.0",
     date: "2026-03-30",
