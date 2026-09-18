@@ -261,7 +261,7 @@ const PLAN_WALKTHROUGH = [
   {
     icon: <Pair a={<WarningIcon size={44} />} b={<TargetIcon size={44} />} />,
     title: "Risk Plan",
-    desc: "Set your Stop Loss $ and Take Profit $ — Logfolio shows your planned R-ratio in real time. Use the built-in Position Size Calculator to work out how many shares to take based on your account size and risk percentage.",
+    desc: "Set your Stop Loss $ and Take Profit $ — Logfolio shows your planned R-ratio in real time. Use the built-in Position Size Calculator to work out how many shares, units or option contracts to take based on your account size and risk percentage. It uses the defaults from Settings.",
     target: "tut-plan-risk",
     panelPos: "top",
   },

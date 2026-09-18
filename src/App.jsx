@@ -2291,6 +2291,7 @@ const paginated = filtered
           isPro={isPro}
           isProPlus={isProPlus}
           onUpgrade={() => { setEditTrade(null); handleUpgrade("pro_plus"); }}
+          tradeDefaults={tradeDefaults}
         />
       )}
       {editTrade && editTrade.status !== "planned" && (
@@ -2363,6 +2364,7 @@ const paginated = filtered
     isPro={isPro}
     isProPlus={isProPlus}
     onUpgrade={() => { setShowPlan(false); handleUpgrade("pro_plus"); }}
+    tradeDefaults={tradeDefaults}
   />
 )}
       {showReplay && plList.length > 0 && (

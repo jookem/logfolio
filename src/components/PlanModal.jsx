@@ -8,6 +8,7 @@ import DateInput from "./DateInput";
 import Tag from "./Tag";
 import VoiceNote from "./VoiceNote";
 import PartyStarterPanel from "./PartyStarterPanel";
+import PositionSizeCalculator from "./PositionSizeCalculator";
 
 // Compress an image to JPEG max 1200px, returns { base64, mediaType }
 async function compressChartImage(file) {
@@ -33,7 +34,7 @@ async function compressChartImage(file) {
   });
 }
 
-export default function PlanModal({ onClose, onSave, t, isDark, initial, trades = [], spyData = null, isPro = false, isProPlus = false, onUpgrade }) {
+export default function PlanModal({ onClose, onSave, t, isDark, initial, trades = [], spyData = null, isPro = false, isProPlus = false, onUpgrade, tradeDefaults }) {
   const { closing, trigger } = useModalClose();
   const sm = window.innerWidth < 400;
   const OPTION_STRATEGY_NAMES = Object.keys(OPTION_STRATEGIES);
@@ -193,10 +194,7 @@ const checkedCount = checklist.filter((item) => item.checked).length;
 const [tagInput, setTagInput] = useState("");
 const [customEmotions, setCustomEmotions] = useState([]);
 const [emotionInput, setEmotionInput] = useState("");
-const [showSizeCalc, setShowSizeCalc] = useState(false);
 const [showIncompleteModal, setShowIncompleteModal] = useState(false);
-const [calcAccountSize, setCalcAccountSize] = useState("");
-const [calcRiskPct, setCalcRiskPct] = useState("1");
 const [aiAssist, setAiAssist] = useState(initial?.aiAssist || null); // { marketBias, checklist, chartAnalysis? }
 const [aiLoading, setAiLoading] = useState(false);
 const [aiStep, setAiStep] = useState(""); // "price" | "ai"
@@ -654,55 +652,15 @@ const base = {
           </div>
         )}
 
-        {/* Position Size Calculator (stock-like only) */}
-        {STOCK_LIKE.includes(form.type) && (() => {
-          const account = parseFloat(calcAccountSize);
-          const risk = parseFloat(calcRiskPct) / 100;
-          const entry = parseFloat(form.purchasePrice);
-          const stop = parseFloat(form.stopLoss);
-          const calcShares = (account && risk && entry && stop && entry !== stop)
-            ? Math.floor((account * risk) / Math.abs(entry - stop)) : null;
-          const riskAmt = calcShares ? (calcShares * Math.abs(entry - stop)).toFixed(2) : null;
-          return (
-            <div style={{ marginBottom: 14, marginTop: 14 }}>
-              <button
-                onClick={() => setShowSizeCalc(s => !s)}
-                style={{ width: "100%", background: t.card2, border: `1px solid ${t.border}`, color: t.text3, borderRadius: 8, padding: "8px 14px", cursor: "pointer", fontSize: 11, fontFamily: "'Space Mono', monospace", textAlign: "left", display: "flex", justifyContent: "space-between", alignItems: "center" }}
-              >
-                <span>Position Size Calculator</span>
-                <span style={{ color: t.accent }}>{showSizeCalc ? "▲" : "▼"}</span>
-              </button>
-              {showSizeCalc && (
-                <div style={{ background: t.card2, border: `1px solid ${t.border}`, borderRadius: "0 0 8px 8px", borderTop: "none", padding: 14 }}>
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 10 }}>
-                    <div>
-                      <label style={lbl}>Account Size $</label>
-                      <input style={inp} type="number" value={calcAccountSize} onChange={e => setCalcAccountSize(e.target.value)} placeholder="50000" />
-                    </div>
-                    <div>
-                      <label style={lbl}>Risk %</label>
-                      <input style={inp} type="number" value={calcRiskPct} onChange={e => setCalcRiskPct(e.target.value)} placeholder="1" step="0.1" />
-                    </div>
-                  </div>
-                  {calcShares !== null ? (
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", background: t.accent + "10", border: `1px solid ${t.accent}30`, borderRadius: 8, padding: "10px 14px" }}>
-                      <div>
-                        <div style={{ fontSize: 11, color: t.text3, fontFamily: "'Space Mono', monospace" }}>Suggested size</div>
-                        <div style={{ fontSize: 18, fontWeight: 700, color: t.accent, fontFamily: "'Space Mono', monospace" }}>{calcShares} {typeLabels(form.type).units.toLowerCase()}</div>
-                        <div style={{ fontSize: 11, color: t.text3, marginTop: 2 }}>Max risk: ${riskAmt}</div>
-                      </div>
-                      <button onClick={() => set("numShares", String(calcShares))} style={{ background: t.accent, border: "none", color: "#000", borderRadius: 7, padding: "8px 16px", cursor: "pointer", fontSize: 12, fontWeight: 700, fontFamily: "'Space Mono', monospace" }}>Apply</button>
-                    </div>
-                  ) : (
-                    <div style={{ fontSize: 11, color: t.text3, fontFamily: "'Space Mono', monospace", textAlign: "center", padding: "8px 0" }}>
-                      Fill in Entry, Stop Loss, Account Size and Risk % to calculate
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-          );
-        })()}
+        {STOCK_LIKE.includes(form.type) && (
+          <PositionSizeCalculator
+            t={t} lbl={lbl} inp={inp} type={form.type}
+            entry={form.purchasePrice} stop={form.stopLoss}
+            unitsLabel={typeLabels(form.type).units}
+            defaults={tradeDefaults}
+            onApply={(n) => set("numShares", String(n))}
+          />
+        )}
 
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginTop: 12 }}>
           {/* Date */}
@@ -908,6 +866,15 @@ const base = {
               }}>+ Add Leg</button>
             )}
           </>
+        )}
+
+        {form.type === "options" && (
+          <PositionSizeCalculator
+            t={t} lbl={lbl} inp={inp} type="options"
+            legs={form.legs}
+            defaults={tradeDefaults}
+            onApply={(n) => setForm((f) => ({ ...f, legs: f.legs.map((l) => ({ ...l, contracts: n })) }))}
+          />
         )}
 
         {/* ══ OPTIONS P&L GRID (Price × Date) ══ */}
