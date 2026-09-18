@@ -1,24 +1,8 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { supabase } from "../lib/supabase";
+import { isMarketOpen } from "../lib/marketHours";
 
 const POLL_INTERVAL = 60_000; // 60 s — server caches 5 min anyway
-
-function isMarketOpen() {
-  const now = new Date();
-  const fmt = new Intl.DateTimeFormat("en-US", {
-    timeZone: "America/New_York",
-    weekday: "short",
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: false,
-  });
-  const parts = Object.fromEntries(fmt.formatToParts(now).map(p => [p.type, p.value]));
-  if (parts.weekday === "Sun" || parts.weekday === "Sat") return false;
-  const hour = parseInt(parts.hour, 10);
-  const minute = parseInt(parts.minute, 10);
-  const min = hour * 60 + minute;
-  return min >= 9 * 60 + 30 && min < 16 * 60;
-}
 
 export default function useLiveQuotes(tickers) {
   const [quotes, setQuotes] = useState({});   // { AAPL: { price, change, changePct } }
