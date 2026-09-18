@@ -26,7 +26,7 @@ export function optionsMaxLoss(legs) {
 
 // Suggests how many shares/units (or option contracts) fit a fixed risk
 // budget. Options assume the same contract count on every leg.
-export default function PositionSizeCalculator({ t, lbl, inp, type, entry, stop, legs, unitsLabel, defaults, onApply }) {
+export default function PositionSizeCalculator({ t, lbl, inp, type, entry, stop, legs, unitsLabel, defaults, onApply, shares, direction, onApplyStop }) {
   const isOptions = type === "options";
   const [open, setOpen] = useState(false);
   const [account, setAccount] = useState(defaults?.accountSize ? String(defaults.accountSize) : "");
@@ -55,6 +55,15 @@ export default function PositionSizeCalculator({ t, lbl, inp, type, entry, stop,
   if (!parseFloat(riskPct)) missing.push("Risk %");
 
   const size = perUnit && budget ? Math.floor(budget / perUnit) : null;
+
+  // Reverse mode: entry and share count are set but no stop, so suggest the
+  // stop that keeps the loss within the risk budget.
+  let stopSuggestion = null;
+  if (!isOptions && onApplyStop && !parseFloat(stop) && parseFloat(entry) > 0 && parseFloat(shares) > 0 && budget > 0) {
+    const dist = budget / parseFloat(shares);
+    const px = direction === "short" ? parseFloat(entry) + dist : parseFloat(entry) - dist;
+    if (px > 0) stopSuggestion = { price: px.toFixed(type === "forex" ? 5 : 2), dist };
+  }
   const unit = (unitsLabel || "shares").toLowerCase();
 
   const card = { background: t.card2, border: `1px solid ${t.border}` };
@@ -104,9 +113,23 @@ export default function PositionSizeCalculator({ t, lbl, inp, type, entry, stop,
             <div style={{ fontSize: 11, color: t.text3, textAlign: "center", padding: "8px 0", lineHeight: 1.5 }}>
               Your {usd(budget)} risk budget is less than the {usd(perUnit)} max loss of one {isOptions ? "contract" : "share"}. Raise account size or risk %, or tighten the {isOptions ? "structure" : "stop"}.
             </div>
+          ) : stopSuggestion ? (
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", background: t.accent + "10", border: `1px solid ${t.accent}30`, borderRadius: 8, padding: "10px 14px", gap: 10 }}>
+              <div>
+                <div style={{ fontSize: 11, color: t.text3, fontFamily: "'Space Mono', monospace" }}>Suggested stop loss</div>
+                <div style={{ fontSize: 18, fontWeight: 700, color: t.accent, fontFamily: "'Space Mono', monospace" }}>
+                  {type === "forex" ? "" : "$"}{stopSuggestion.price}
+                </div>
+                <div style={{ fontSize: 11, color: t.text3, marginTop: 2 }}>
+                  For {shares} {unit} and a {usd(budget)} max loss ({direction === "short" ? "short" : "long"})
+                </div>
+              </div>
+              <button type="button" onClick={() => onApplyStop(stopSuggestion.price)} style={{ background: t.accent, border: "none", color: "#000", borderRadius: 7, padding: "8px 16px", cursor: "pointer", fontSize: 12, fontWeight: 700, fontFamily: "'Space Mono', monospace" }}>Apply</button>
+            </div>
           ) : (
-            <div style={{ fontSize: 11, color: t.text3, fontFamily: "'Space Mono', monospace", textAlign: "center", padding: "8px 0" }}>
+            <div style={{ fontSize: 11, color: t.text3, fontFamily: "'Space Mono', monospace", textAlign: "center", padding: "8px 0", lineHeight: 1.5 }}>
               Still needed: {missing.join(", ") || "valid inputs"}
+              {!isOptions && !parseFloat(stop) && !parseFloat(shares) ? ". Or enter shares instead of a stop to get a suggested stop." : ""} {missing.join(", ") || "valid inputs"}
             </div>
           )}
           {isOptions && (

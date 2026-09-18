@@ -659,6 +659,8 @@ const base = {
             unitsLabel={typeLabels(form.type).units}
             defaults={tradeDefaults}
             onApply={(n) => set("numShares", String(n))}
+            shares={form.numShares} direction={form.stockDirection}
+            onApplyStop={(px) => set("stopLoss", px)}
           />
         )}
 

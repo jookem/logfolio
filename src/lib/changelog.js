@@ -10,6 +10,7 @@ export const CHANGELOG = [
       "Multi-language support: Spanish, French, German, Portuguese and Japanese",
       "Sample trades now use recent market prices and dates",
       "Position Size Calculator now works for options (sized by worst-case loss, including spreads and condors) as well as stocks, forex and crypto",
+      "Position Size Calculator can suggest a stop loss price from your entry, share count and risk budget",
       "Position Size Calculator pre-fills Account Size and Risk % from Settings and tells you exactly which fields are still needed",
       "Tutorial updated with Party Starter and market status",
     ]
