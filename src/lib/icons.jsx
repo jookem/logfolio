@@ -623,3 +623,12 @@ export const ConnectIcon = ({ size = 24 }) => (
     <line x1="370" y1="400" x2="430" y2="400" />
   </SVG>
 );
+
+// Rocket / Party Starter
+export const RocketIcon = ({ size = 16 }) => (
+  <svg viewBox="0 0 24 24" width={size} height={size} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ display: "block" }}>
+    <path d="M12 2c3.5 2 5.5 5.5 5.5 9.5V15l-2 2h-7l-2-2v-3.5C6.5 7.5 8.5 4 12 2z" />
+    <circle cx="12" cy="10" r="1.8" />
+    <path d="M9 17l-1.5 4M15 17l1.5 4M12 17v4" />
+  </svg>
+);

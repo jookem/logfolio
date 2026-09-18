@@ -1,5 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 import { checkRateLimit } from "./_lib/rateLimit.js";
+import { fetchScreenerQuotes, filterPartyStarters } from "./_lib/partyStarter.js";
 
 // Vercel Hobby caps a deployment at 12 serverless functions, so the three
 // market-data proxies (Polygon, Yahoo Finance, Alpha Vantage) live in one
@@ -145,6 +146,20 @@ async function handleAlphavantage(req, res, userId) {
   }
 }
 
+async function handlePartyStarter(req, res, userId) {
+  if (userId && await checkRateLimit(userId, "party-starter", { limit: 10, windowSecs: 60 })) {
+    return res.status(429).json({ error: "Rate limit exceeded. Try again shortly." });
+  }
+  try {
+    const quotes = await fetchScreenerQuotes(YF_BASE_HEADERS);
+    if (!quotes.length) return res.status(502).json({ error: "Screener data unavailable" });
+    res.setHeader("Cache-Control", "s-maxage=120, stale-while-revalidate");
+    return res.status(200).json({ picks: filterPartyStarters(quotes), scanned: quotes.length });
+  } catch (e) {
+    return res.status(500).json({ error: e.message });
+  }
+}
+
 export default async function handler(req, res) {
   if (req.method !== "POST") return res.status(405).end();
 
@@ -164,5 +179,6 @@ export default async function handler(req, res) {
   if (provider === "polygon") return handlePolygon(req, res, userId);
   if (provider === "yf") return handleYf(req, res, userId);
   if (provider === "alphavantage") return handleAlphavantage(req, res, userId);
+  if (provider === "party-starter") return handlePartyStarter(req, res, userId);
   return res.status(400).json({ error: "Unknown provider" });
 }

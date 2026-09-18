@@ -7,6 +7,7 @@ import { todayStr, typeLabels, normCDF, bsPrice } from "../lib/utils";
 import DateInput from "./DateInput";
 import Tag from "./Tag";
 import VoiceNote from "./VoiceNote";
+import PartyStarterPanel from "./PartyStarterPanel";
 
 // Compress an image to JPEG max 1200px, returns { base64, mediaType }
 async function compressChartImage(file) {
@@ -547,6 +548,16 @@ const base = {
             </select>
           </div>
         </div>
+
+        {form.type === "stock" && !initial && (
+          <PartyStarterPanel
+            t={t}
+            onPick={(p) => {
+              set("ticker", p.symbol);
+              fetchStockPrice(p.symbol);
+            }}
+          />
+        )}
 
         {/* ── Strategy / Direction ── */}
         <div style={{ display: "grid", gridTemplateColumns: (STOCK_LIKE.includes(form.type) || optConfig?.stockRequired) ? "1fr 1fr" : "1fr", gap: 12, marginBottom: 12 }}>
