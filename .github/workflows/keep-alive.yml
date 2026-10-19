@@ -8,6 +8,8 @@ on:
 jobs:
   ping:
     runs-on: ubuntu-latest
+    permissions:
+      actions: write # lets the keepalive step stop GitHub disabling this schedule after 60 days of repo inactivity
     steps:
       - name: Ping Supabase
         env:
@@ -34,3 +36,6 @@ jobs:
             exit 1
           fi
           echo "Supabase is alive"
+
+      - name: Prevent GitHub from disabling this scheduled workflow
+        uses: liskin/gh-workflow-keepalive@v1
